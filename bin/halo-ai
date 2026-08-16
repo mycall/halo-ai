@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+script_path=$(readlink -f -- "${BASH_SOURCE[0]}")
+script_dir=$(cd -- "$(dirname -- "$script_path")" && pwd -P)
+release_root=$(cd -- "$script_dir/.." && pwd -P)
+export PYTHONDONTWRITEBYTECODE=1
+exec python3 "$release_root/lib/halo_ai/cli.py" "$@"

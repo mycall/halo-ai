@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "models": [
+    {
+      "id": "deepseek-v4-flash-ds4-hybrid",
+      "repository": "antirez/deepseek-v4-gguf",
+      "architecture": "deepseek4",
+      "engines": ["ds4"],
+      "files": [
+        {
+          "role": "main",
+          "path": "antirez/deepseek-v4-gguf/DeepSeek-V4-Flash-Layers37-42Q4KExperts-OtherExpertLayersIQ2XXSGateUp-Q2KDown-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-fixed-0731.gguf",
+          "bytes": 97591747456,
+          "sha256": "659e22fbd01c9e13ea37a57c8d9c41e0a8819dffa3473d3c5286ee44b2d3398f"
+        }
+      ]
+    },
+    {
+      "id": "deepseek-v4-flash-0731-iq3xxs",
+      "repository": "unsloth/DeepSeek-V4-Flash-0731-GGUF",
+      "architecture": "deepseek4",
+      "engines": ["llamacpp"],
+      "files": [
+        {"role": "main", "shard": 1, "shards": 4, "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00001-of-00004.gguf", "bytes": 5257696, "sha256": "dec1cee704800267d9d836d5a61aefc33705be939bbb3058fa9006d98191576d"},
+        {"role": "main", "shard": 2, "shards": 4, "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00002-of-00004.gguf", "bytes": 49910532416, "sha256": "3064d3c4c1d6363e9f9ad88e90a3e2c5fb2d6f7ae16ca72135c3ce6a5c984da5"},
+        {"role": "main", "shard": 3, "shards": 4, "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00003-of-00004.gguf", "bytes": 49257859456, "sha256": "2e9b2732eca7da8324f731653624a4f5c9846258926fd9f468cc703afb51a019"},
+        {"role": "main", "shard": 4, "shards": 4, "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00004-of-00004.gguf", "bytes": 5034198464, "sha256": "4ca79d8e5107dd1b9bb57b176a7c09948837425dee49f0f1dfd6547a3769fea7"},
+        {"role": "dspark", "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/dspark-DeepSeek-V4-Flash-0731-Q8_0.gguf", "bytes": 10896057440, "sha256": "2c7ac54b0b64a99df1f139a9f1371a00198265e1d6a614b77597d20a655a4249"}
+      ]
+    },
+    {
+      "id": "qwen3.6-27b-q8xl",
+      "repository": "unsloth/Qwen3.6-27B-MTP-GGUF",
+      "architecture": "qwen35",
+      "engines": ["lemonade", "llamacpp"],
+      "files": [
+        {"role": "main", "path": "unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q8_K_XL.gguf", "bytes": 35776484480, "sha256": "3d6ff16be3258f910eac4dcec7142edc7a7100d8400fe363035c8cfedc151164"},
+        {"role": "mmproj", "path": "unsloth/Qwen3.6-27B-MTP-GGUF/mmproj-F32.gguf", "bytes": 1842940480, "sha256": "fdc443e974cad1f61c45af1cfd5580855855ddce0d6c14cc500a5714c486ac1d"},
+        {"role": "chat_template", "variant": "thinking", "path": "unsloth/qwen3.6-thinking.jinja", "bytes": 4240, "sha256": "2770c8c7b8a1ad536168ea51463f3cf1b813e5b4d31f49ea0bf1f628b4688d05"},
+        {"role": "chat_template", "variant": "nonthinking", "path": "unsloth/qwen3.6-nonthinking.jinja", "bytes": 4333, "sha256": "63f41b4f55a044a0c173b403bf901b0027fca2a717f63833fe24784deeb6f614"}
+      ]
+    },
+    {
+      "id": "qwen3.6-35b-a3b-q8xl",
+      "repository": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
+      "architecture": "qwen35moe",
+      "engines": ["lemonade", "llamacpp"],
+      "files": [
+        {"role": "main", "path": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf", "bytes": 39099447584, "sha256": "6c6b816537abad90b250a0972b345466028d861ddfe316d5f0de31ca6440f781"},
+        {"role": "chat_template", "variant": "thinking", "path": "unsloth/qwen3.6-thinking.jinja", "bytes": 4240, "sha256": "2770c8c7b8a1ad536168ea51463f3cf1b813e5b4d31f49ea0bf1f628b4688d05"},
+        {"role": "chat_template", "variant": "nonthinking", "path": "unsloth/qwen3.6-nonthinking.jinja", "bytes": 4333, "sha256": "63f41b4f55a044a0c173b403bf901b0027fca2a717f63833fe24784deeb6f614"}
+      ]
+    },
+    {
+      "id": "seamless-m4t-v2-large",
+      "repository": "facebook/seamless-m4t-v2-large",
+      "revision": "5f8cc790b19fc3f67a61c105133b20b34e3dcb76",
+      "architecture": "seamless_m4t_v2",
+      "format": "transformers",
+      "engines": ["speech"],
+      "download": {
+        "repository": "facebook/seamless-m4t-v2-large",
+        "revision": "5f8cc790b19fc3f67a61c105133b20b34e3dcb76",
+        "allow_patterns": [
+          "added_tokens.json",
+          "config.json",
+          "generation_config.json",
+          "model-00001-of-00002.safetensors",
+          "model-00002-of-00002.safetensors",
+          "model.safetensors.index.json",
+          "preprocessor_config.json",
+          "sentencepiece.bpe.model",
+          "special_tokens_map.json",
+          "spm_char_lang38_tc.model",
+          "tokenizer.model",
+          "tokenizer_config.json"
+        ]
+      },
+      "files": [
+        {"role": "main", "path": "facebook/seamless-m4t-v2-large/config.json", "bytes": 2716, "sha256": "4b2fa9d863cc3033adaf261e6c3e32ad90347ee2f199a349ba1c77d5e26a605f"},
+        {"role": "weights", "path": "facebook/seamless-m4t-v2-large/model-00001-of-00002.safetensors", "bytes": 4999163080, "sha256": "85cab984fbc111f8713827c440499453b9e66f262862866eeed8725c302ba2ac"},
+        {"role": "weights", "path": "facebook/seamless-m4t-v2-large/model-00002-of-00002.safetensors", "bytes": 4238114628, "sha256": "9536dc05892a6ca8410bcfea763dde422e2430c3cc1f3acd26c55182c8989017"},
+        {"role": "processor", "path": "facebook/seamless-m4t-v2-large/added_tokens.json", "bytes": 2066, "sha256": "9ac8a85d4e97d27fad026a813d52a069680e4e0cae701ef145b204bd533251b2"},
+        {"role": "processor", "path": "facebook/seamless-m4t-v2-large/generation_config.json", "bytes": 9906948, "sha256": "febbbbac4f0b122473a0125165c9291add850956315e35a025e16474cc0da5f4"},
+        {"role": "processor", "path": "facebook/seamless-m4t-v2-large/model.safetensors.index.json", "bytes": 210713, "sha256": "79d33aa045308d1a93b11952f2a3e6a647c107b688e5fdf1124c4601626dcdb2"},
+        {"role": "processor", "path": "facebook/seamless-m4t-v2-large/preprocessor_config.json", "bytes": 1776, "sha256": "59294da7ee216cf80f8083180cdb0ace7efabbe35a8b9009c5cab341af2bd1c7"},
+        {"role": "processor", "path": "facebook/seamless-m4t-v2-large/sentencepiece.bpe.model", "bytes": 5165809, "sha256": "026a76827537db9f1348e4d5aaa127bb10a2f2ff633243f3a52d16be82d73f9d"},
+        {"role": "processor", "path": "facebook/seamless-m4t-v2-large/special_tokens_map.json", "bytes": 2337, "sha256": "36ba9ab56ea9a4d0182ae18aed1ff16a15bf91b8aa544722c686744d5972b522"},
+        {"role": "processor", "path": "facebook/seamless-m4t-v2-large/spm_char_lang38_tc.model", "bytes": 368901, "sha256": "9e7f2075dbc38dbe11d2414bfa4fb8e900022e87bbff4f74c97817e32a7ab493"},
+        {"role": "processor", "path": "facebook/seamless-m4t-v2-large/tokenizer.model", "bytes": 5165809, "sha256": "026a76827537db9f1348e4d5aaa127bb10a2f2ff633243f3a52d16be82d73f9d"},
+        {"role": "processor", "path": "facebook/seamless-m4t-v2-large/tokenizer_config.json", "bytes": 19667, "sha256": "0a184dd2f5b9ee02ddfa7fc2110b7e919c471f29e2e771d8c18b22b7758827c8"}
+      ]
+    }
+  ],
+  "profiles": [
+    {"id": "qwen3.6-35b-a3b-q8xl-lemonade", "model": "qwen3.6-35b-a3b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 32768, "risk": "baseline", "features": [], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
+    {"id": "qwen3.6-27b-q8xl-lemonade", "model": "qwen3.6-27b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 32768, "risk": "baseline", "features": [], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
+    {"id": "qwen3.6-35b-a3b-q8xl-mtp-lemonade", "model": "qwen3.6-35b-a3b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 32768, "risk": "experimental", "features": ["mtp"], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none", "spec_draft_n_max": 2}},
+    {"id": "qwen3.6-27b-q8xl-mtp-lemonade", "model": "qwen3.6-27b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 32768, "risk": "experimental", "features": ["mtp"], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none", "spec_draft_n_max": 2}},
+    {"id": "qwen3.6-27b-q8xl-vision-lemonade", "model": "qwen3.6-27b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 32768, "risk": "experimental", "features": ["vision"], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
+    {"id": "qwen3.6-35b-a3b-q8xl-65k-lemonade", "model": "qwen3.6-35b-a3b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 65536, "risk": "experimental", "features": [], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
+    {"id": "qwen3.6-35b-a3b-q8xl-128k-lemonade", "model": "qwen3.6-35b-a3b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 131072, "risk": "experimental-lockup", "features": [], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
+    {"id": "qwen3.6-35b-a3b-q8xl-128k-mtp-lemonade", "model": "qwen3.6-35b-a3b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 131072, "risk": "experimental-lockup", "features": ["mtp"], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none", "spec_draft_n_max": 2}},
+    {"id": "qwen3.6-27b-q8xl-128k-lemonade", "model": "qwen3.6-27b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 131072, "risk": "experimental-lockup", "features": [], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
+    {"id": "qwen3.6-27b-q8xl-128k-vision-lemonade", "model": "qwen3.6-27b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 131072, "risk": "experimental-lockup", "features": ["vision"], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
+    {"id": "qwen3.6-27b-q8xl-vision-llamacpp", "model": "qwen3.6-27b-q8xl", "engine": "llamacpp", "chat_template": "nonthinking", "context": 32768, "risk": "experimental", "features": ["vision"], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
+    {"id": "qwen3.6-27b-q8xl-mtp-llamacpp", "model": "qwen3.6-27b-q8xl", "engine": "llamacpp", "chat_template": "nonthinking", "context": 32768, "risk": "experimental", "features": ["mtp"], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none", "spec_draft_n_max": 2}},
+    {"id": "qwen3.6-35b-a3b-q8xl-mtp-llamacpp", "model": "qwen3.6-35b-a3b-q8xl", "engine": "llamacpp", "chat_template": "nonthinking", "context": 32768, "risk": "experimental", "features": ["mtp"], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none", "spec_draft_n_max": 2}},
+    {"id": "deepseek-v4-flash-0731-iq3xxs-llamacpp", "model": "deepseek-v4-flash-0731-iq3xxs", "engine": "llamacpp", "context": 32768, "risk": "high", "features": [], "settings": {"batch": 1024, "ubatch": 256, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
+    {"id": "deepseek-v4-flash-0731-iq3xxs-dspark-llamacpp", "model": "deepseek-v4-flash-0731-iq3xxs", "engine": "llamacpp", "context": 32768, "risk": "experimental-lockup", "features": ["dspark"], "settings": {"batch": 512, "ubatch": 128, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
+    {"id": "ds4-deepseek-v4-flash-hybrid", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 32768, "risk": "high", "features": [], "settings": {"prefill_chunk": 2048}},
+    {"id": "ds4-deepseek-v4-flash-hybrid-kv", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 32768, "risk": "high", "features": ["kv-cache"], "settings": {"prefill_chunk": 2048, "kv_cache_mb": 8192}},
+    {"id": "seamless-m4t-v2-large-speech", "model": "seamless-m4t-v2-large", "engine": "speech", "context": 0, "risk": "baseline", "features": [], "settings": {}}
+  ]
+}

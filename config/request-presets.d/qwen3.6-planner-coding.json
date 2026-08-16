@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "qwen3.6-planner-coding",
+  "description": "Qwen coding planner with thinking enabled",
+  "request": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 0.0,
+    "repeat_penalty": 1.0,
+    "chat_template_kwargs": {
+      "enable_thinking": true
+    }
+  },
+  "requires": ["chat_template_kwargs.enable_thinking"]
+}
