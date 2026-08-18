@@ -1,0 +1,56 @@
+FROM docker.io/library/python:3.12-slim-bookworm
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONUNBUFFERED=1 \
+    HF_HUB_OFFLINE=1 \
+    TRANSFORMERS_OFFLINE=1 \
+    HOME=/tmp/halo-speech
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates ffmpeg libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Versions follow AMD's current gfx1151 speech-to-speech playbook. Keep the
+# ROCm wheel installation separate from PyPI because the AMD index is not a
+# general Python package mirror.
+RUN python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ \
+      "torch[device-gfx1151]==2.12.0+rocm7.14.0" \
+      "torchvision[device-gfx1151]==0.27.0+rocm7.14.0" \
+      "torchaudio==2.11.0+rocm7.14.0"
+
+# The AMD wheel dynamically loads libatomic; slim Python images do not include
+# that system runtime by default. This is separate so the large ROCm layer stays
+# reusable if other small OS dependencies change.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libatomic1 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python -m pip install \
+      transformers==4.57.1 \
+      safetensors==0.6.2 \
+      tiktoken==0.9.0 \
+      accelerate \
+      soundfile==0.13.1 \
+      sentencepiece \
+      protobuf \
+      scipy==1.15.3 \
+      gradio==6.16.0 \
+      fastapi==0.141.1 \
+      uvicorn==0.52.1 \
+      python-multipart==0.0.32
+
+# rocSHMEM probes libnuma.so while PyTorch initializes. The runtime library is
+# already present through ffmpeg; the development package supplies the generic
+# loader name and avoids a harmless but confusing startup warning.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libnuma-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/halo-speech
+COPY speech_languages.py /opt/halo-speech/speech_languages.py
+COPY speech_server.py /opt/halo-speech/speech_server.py
+
+EXPOSE 7860
+ENTRYPOINT ["python", "/opt/halo-speech/speech_server.py"]

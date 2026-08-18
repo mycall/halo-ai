@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "recorded_local_date": "2026-08-16",
+  "profile": "qwen38-27b-rocmfp4-mtp",
+  "status": "experimental-generation-optimization",
+  "model_download_bytes": 0,
+  "reused_model": {
+    "file": "Qwen3.8-27B-ROCmFP4-FAST.gguf",
+    "sha256": "fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9"
+  },
+  "settings": {
+    "device": "Vulkan0",
+    "spec_type": "draft-mtp",
+    "strict_qwen_verification": true,
+    "spec_draft_n_max": 6,
+    "spec_draft_p_min": 0.6,
+    "parallel": 1,
+    "temperature": 0,
+    "seed": 1,
+    "cache_type_k": "q8_0",
+    "cache_type_v": "turbo4"
+  },
+  "lifecycle": {
+    "start": "pass",
+    "readiness": "pass",
+    "deterministic_smoke": "pass",
+    "smoke_drafted_tokens": 6,
+    "smoke_accepted_tokens": 6,
+    "stop": "pass",
+    "oom_or_device_reset": false
+  },
+  "conformance": {
+    "corpus_cases": 5,
+    "stable_exact_token_matches": 4,
+    "semantic_matches": 5,
+    "optimized_run_drafted_tokens": 83,
+    "optimized_run_accepted_tokens": 79,
+    "optimized_run_acceptance_percent": 95.18,
+    "aggregate_accepted_run_position_rates": [1.0, 0.889, 0.778, 0.667, 0.556, 0.5],
+    "aggregate_mean_accepted_run_length": 5.39,
+    "strict_token_identity": "not-proven",
+    "caveat": "The unassisted Vulkan baseline also selected different compact, pretty-printed, and fenced outputs across fresh processes despite temperature 0 and fixed request/server seeds. The one differing optimized case was semantically equivalent Python (x*x versus x**2)."
+  },
+  "benchmark_method": {
+    "baseline_record": "qwen38-rocmfp4-baseline-2026-08-16.json",
+    "same_prompts": true,
+    "streaming": true,
+    "thinking": false,
+    "prompt_cache": false,
+    "max_completion_tokens": 64
+  },
+  "benchmarks": [
+    {
+      "prompt_tokens": 64,
+      "completion_tokens": 20,
+      "ttft_seconds": 0.532238,
+      "prompt_tokens_per_second": 136.6633639687041,
+      "decode_tokens_per_second": 16.610785216733372,
+      "baseline_decode_tokens_per_second": 12.825873377847666,
+      "decode_improvement_percent": 29.51,
+      "drafted_tokens": 19,
+      "accepted_tokens": 15,
+      "acceptance_percent": 78.95,
+      "mean_accepted_run_length": 3.14,
+      "accepted_position_rates": [1.0, 0.857, 0.143, 0.143, 0.0, 0.0],
+      "peak_gtt_bytes": 18473451520,
+      "peak_vram_bytes": 2039541760
+    },
+    {
+      "prompt_tokens": 4095,
+      "completion_tokens": 64,
+      "ttft_seconds": 23.583293,
+      "prompt_tokens_per_second": 174.11911354619915,
+      "decode_tokens_per_second": 18.928448689411958,
+      "baseline_decode_tokens_per_second": 11.898440858056063,
+      "decode_improvement_percent": 59.08,
+      "drafted_tokens": 49,
+      "accepted_tokens": 42,
+      "acceptance_percent": 85.71,
+      "mean_accepted_run_length": 3.1,
+      "accepted_position_rates": [1.0, 1.0, 0.1, 0.0, 0.0, 0.0],
+      "peak_gtt_bytes": 20442021888,
+      "peak_vram_bytes": 2039549952
+    },
+    {
+      "prompt_tokens": 31998,
+      "completion_tokens": 64,
+      "ttft_seconds": 301.774322,
+      "prompt_tokens_per_second": 106.0665382728315,
+      "decode_tokens_per_second": 15.672296204439226,
+      "baseline_decode_tokens_per_second": 10.740246304054693,
+      "decode_improvement_percent": 45.92,
+      "drafted_tokens": 43,
+      "accepted_tokens": 43,
+      "acceptance_percent": 100.0,
+      "mean_accepted_run_length": 3.26,
+      "accepted_position_rates": [1.0, 0.947, 0.316, 0.0, 0.0, 0.0],
+      "peak_gtt_bytes": 20468817920,
+      "peak_vram_bytes": 2040643584
+    }
+  ],
+  "tradeoff": {
+    "short_ttft_change_percent": 24.22,
+    "4k_ttft_change_percent": 6.05,
+    "32k_ttft_change_percent": 15.85,
+    "32k_prompt_speed_change_percent": -13.68,
+    "32k_peak_gtt_increase_bytes": 5255413760,
+    "recommendation": "Keep selectable and experimental for generation-heavy work; prefer the unassisted baseline for cold long prompts with short answers until prefill and conformance are improved."
+  }
+}

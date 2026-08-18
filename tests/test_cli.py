@@ -83,8 +83,8 @@ class CatalogTests(unittest.TestCase):
             self.catalog = cli.load_catalog(self.config)
 
     def test_checked_in_catalog_validates(self) -> None:
-        self.assertEqual(len(self.catalog.models), 5)
-        self.assertEqual(len(self.catalog.profiles), 18)
+        self.assertEqual(len(self.catalog.models), 6)
+        self.assertEqual(len(self.catalog.profiles), 20)
 
     def test_mtp_cannot_combine_with_vision(self) -> None:
         models = {key: dict(value) for key, value in self.catalog.models.items()}
@@ -102,7 +102,7 @@ class CatalogTests(unittest.TestCase):
     def test_catalog_matches_documented_expected_manifest(self) -> None:
         documented = {}
         for digest, size, relative in __import__("re").findall(
-            r"^([0-9a-f]{64}) ([0-9]+) ((?:antirez|unsloth|facebook)/[^\n]+\.(?:gguf|jinja|json|safetensors|model))$",
+            r"^([0-9a-f]{64}) ([0-9]+) ((?:antirez|unsloth|facebook|julianmb)/[^\n]+\.(?:gguf|jinja|json|safetensors|model))$",
             (ROOT / "docs/halo-ai.md").read_text(encoding="utf-8"),
             __import__("re").MULTILINE,
         ):
@@ -203,8 +203,101 @@ class CatalogTests(unittest.TestCase):
         self.assertIn("--model-draft /models/dspark-DeepSeek-V4-Flash-0731-Q8_0.gguf", rendered)
         self.assertIn("--load-mode none", rendered)
 
+    def test_rocmfpx_baseline_is_distinct_unassisted_vulkan_engine(self) -> None:
+        profile = self.catalog.profiles["qwen38-27b-rocmfp4-baseline"]
+        model = self.catalog.models[profile["model"]]
+        command = cli.render_container(self.config, self.catalog, profile)
+        rendered = __import__("shlex").join(command)
+        self.assertEqual(model["modalities"], ["text"])
+        self.assertEqual(model["engines"], ["rocmfpx"])
+        self.assertIn("--name halo-rocmfpx", rendered)
+        self.assertIn("--device=/dev/dri", command)
+        self.assertNotIn("--device=/dev/kfd", command)
+        self.assertIn("--device Vulkan0", rendered)
+        self.assertIn("--cache-type-k q8_0 --cache-type-v turbo4", rendered)
+        self.assertIn("--seed 1 --temp 0", rendered)
+        self.assertIn("--spec-type none", rendered)
+        self.assertNotIn("draft-mtp", rendered)
+        self.assertNotIn("--mmproj", command)
+        self.assertIn("localhost/halo-ai-rocmfpx:v1.0.0", command)
+        self.assertIn("ROCmFP4-FAST.gguf,ro", rendered)
+
+    def test_rocmfpx_profile_acquisition_excludes_every_optional_class(self) -> None:
+        profile = self.catalog.profiles["qwen38-27b-rocmfp4-baseline"]
+        with mock.patch.object(cli, "rocmfpx_image_valid", return_value=True):
+            plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
+        self.assertEqual(plan["selected_artifact_classes"], ["fp4", "rocmfpx-runtime"])
+        self.assertEqual(
+            plan["excluded_artifact_classes"],
+            ["fp8", "npu", "vision", "bf16", "reference"],
+        )
+        self.assertEqual(len(plan["model"]["files"]), 1)
+        selected = plan["model"]["files"][0]
+        self.assertTrue(selected["destination"].endswith("Qwen3.8-27B-ROCmFP4-FAST.gguf"))
+        self.assertEqual(selected["bytes"], 14_562_236_384)
+        serialized = json.dumps(plan).lower()
+        for forbidden in ("rocmfp8.gguf", "q4nx", "mmproj", "safetensors", "reference.gguf"):
+            self.assertNotIn(forbidden, serialized)
+
+    def test_rocmfpx_mtp_uses_strict_qwen_verification_and_no_new_model(self) -> None:
+        profile = self.catalog.profiles["qwen38-27b-rocmfp4-mtp"]
+        rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, profile)
+        )
+        self.assertIn("--spec-type draft-mtp", rendered)
+        self.assertIn("--spec-mtp-strict-qwen", rendered)
+        self.assertIn("--spec-draft-n-max 6", rendered)
+        self.assertIn("--spec-draft-p-min 0.6", rendered)
+        self.assertNotIn("--spec-type none", rendered)
+        with mock.patch.object(cli, "rocmfpx_image_valid", return_value=True):
+            plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
+        self.assertEqual(len(plan["model"]["files"]), 1)
+        self.assertEqual(plan["model"]["additional_download_bytes"], 14_562_236_384)
+        self.assertIn("in-gguf-mtp", plan["selected_artifact_classes"])
+        self.assertNotIn("q4nx", json.dumps(plan).lower())
+
+    def test_rocmfpx_recipe_pins_archive_and_bases(self) -> None:
+        recipe = (ROOT / "lib/halo_ai/rocmfpx/Containerfile").read_text(encoding="utf-8")
+        self.assertIn(cli.ROCMFPX_ENGINE_SHA256, recipe)
+        self.assertIn(cli.ROCMFPX_VULKAN_BASE, recipe)
+        self.assertIn(cli.ROCMFPX_ROCM_BASE, recipe)
+        self.assertIn(cli.ROCMFPX_Q38ROCM_COMMIT, recipe)
+        self.assertNotIn("git checkout", recipe)
+
+    def test_rocmfpx_image_requires_every_provenance_label(self) -> None:
+        labels = {
+            "local.halo-ai.engine": "rocmfpx",
+            "local.halo-ai.engine-archive-sha256": cli.ROCMFPX_ENGINE_SHA256,
+            "org.opencontainers.image.revision": cli.ROCMFPX_Q38ROCM_COMMIT,
+            "local.halo-ai.vulkan-base": cli.ROCMFPX_VULKAN_BASE,
+            "local.halo-ai.rocm-base": cli.ROCMFPX_ROCM_BASE,
+        }
+        with mock.patch.object(cli, "image_labels", return_value=labels):
+            self.assertTrue(cli.rocmfpx_image_valid("fixture"))
+        labels.pop("local.halo-ai.rocm-base")
+        with mock.patch.object(cli, "image_labels", return_value=labels):
+            self.assertFalse(cli.rocmfpx_image_valid("fixture"))
+
 
 class ModelTests(unittest.TestCase):
+    class Response:
+        def __init__(self, payload: bytes, status: int = 200) -> None:
+            self.payload = payload
+            self.status = status
+
+        def read(self, _size: int = -1) -> bytes:
+            payload, self.payload = self.payload, b""
+            return payload
+
+        def getcode(self) -> int:
+            return self.status
+
+        def __enter__(self) -> object:
+            return self
+
+        def __exit__(self, *_args: object) -> None:
+            return None
+
     def test_scanner_ignores_appledouble_and_classifies_companions(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -266,8 +359,173 @@ class ModelTests(unittest.TestCase):
             model = {"id": "fixture", "format": "transformers", "files": entries}
             self.assertTrue(cli.verify_model(config, model, full=True)["valid"])
 
+    def test_pinned_download_resumes_then_atomically_completes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            config = make_config(Path(temporary))
+            payload = b"verified fixture"
+            entry = {
+                "role": "main", "path": "owner/repo/model.gguf", "bytes": len(payload),
+                "sha256": __import__("hashlib").sha256(payload).hexdigest(),
+            }
+            destination = config.path("HALO_AI_MODELS_ROOT") / entry["path"]
+            destination.parent.mkdir(parents=True)
+            partial = destination.with_name(f".{destination.name}.partial")
+            partial.write_bytes(payload[:8])
+            requests = []
+
+            def open_fixture(request: object, timeout: int) -> object:
+                requests.append((request, timeout))
+                return self.Response(payload[8:], 206)
+
+            with mock.patch.object(cli.urllib.request, "urlopen", side_effect=open_fixture):
+                cli.download_huggingface_file(
+                    config, "owner/repo", "a" * 40, entry, destination,
+                )
+            self.assertEqual(destination.read_bytes(), payload)
+            self.assertFalse(partial.exists())
+            self.assertEqual(requests[0][0].get_header("Range"), "bytes=8-")
+            self.assertEqual(requests[0][1], 120)
+
+    def test_pinned_download_refuses_symlink_lock(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            config = make_config(Path(temporary))
+            payload = b"fixture"
+            entry = {
+                "role": "main", "path": "owner/repo/model.gguf", "bytes": len(payload),
+                "sha256": __import__("hashlib").sha256(payload).hexdigest(),
+            }
+            destination = config.path("HALO_AI_MODELS_ROOT") / entry["path"]
+            destination.parent.mkdir(parents=True)
+            outside = Path(temporary) / "outside"
+            outside.write_bytes(b"unchanged")
+            destination.with_name(f".{destination.name}.lock").symlink_to(outside)
+            with self.assertRaises(cli.HaloError):
+                cli.download_huggingface_file(
+                    config, "owner/repo", "a" * 40, entry, destination,
+                )
+            self.assertEqual(outside.read_bytes(), b"unchanged")
+
+    def test_gguf_semantic_inventory_is_fail_closed(self) -> None:
+        observed = {
+            "version": 3, "tensor_count": 866, "metadata_count": 51,
+            "metadata": {
+                "general.architecture": "qwen35",
+                "tokenizer.ggml.tokens": {"subtype": 8, "length": 248320},
+            },
+            "tensor_type_counts": {"101": 505},
+            "tensor_names": ["token_embd.weight", "blk.64.nextn.eh_proj.weight"],
+        }
+        expected = {
+            "version": 3, "tensor_count": 866, "metadata_count": 51,
+            "metadata": {"general.architecture": "qwen35"},
+            "array_lengths": {"tokenizer.ggml.tokens": 248320},
+            "tensor_type_counts": {"101": 505},
+            "required_tensors": ["token_embd.weight", "blk.64.nextn.eh_proj.weight"],
+            "forbidden_tensor_terms": ["vision"],
+        }
+        with mock.patch.object(cli, "gguf_inventory", return_value=observed):
+            self.assertTrue(cli.verify_gguf_expectations(Path("fixture"), expected)["valid"])
+            observed["tensor_names"].append("vision.patch.weight")
+            result = cli.verify_gguf_expectations(Path("fixture"), expected)
+        self.assertFalse(result["valid"])
+        self.assertEqual(result["forbidden_tensor_terms_found"], ["vision"])
+
+    def test_full_verification_inventory_preserves_other_models(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            config = make_config(Path(temporary))
+            first = {"model": "first", "valid": True, "full": True, "files": []}
+            second = {"model": "second", "valid": True, "full": True, "files": []}
+            replacement = {"model": "first", "valid": False, "full": True, "files": []}
+            cli.record_full_verifications(config, [first, second])
+            cli.record_full_verifications(config, [replacement])
+            inventory = json.loads(
+                config.path("HALO_AI_INVENTORY_FILE").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                [item["model"] for item in inventory["results"]],
+                ["first", "second"],
+            )
+            self.assertFalse(inventory["results"][0]["valid"])
+
 
 class TrialTests(unittest.TestCase):
+    def test_rocmfpx_smoke_forces_deterministic_nonthinking_request(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            config = make_config(Path(temporary))
+            catalog = cli.load_catalog(config)
+            models = {"data": [{"id": "Qwen3.8-27B-ROCmFP4-FAST.gguf"}]}
+            completion = {
+                "choices": [{"message": {"content": "halo-ai smoke test passed"}}],
+                "system_fingerprint": "b213-e87d53e",
+            }
+            with (
+                mock.patch.object(cli, "hardware_snapshot", return_value={}),
+                mock.patch.object(cli, "http_json", side_effect=[models, completion]) as request,
+            ):
+                result = cli.command_test(
+                    config, catalog,
+                    __import__("argparse").Namespace(
+                        profile_id="qwen38-27b-rocmfp4-baseline", preset=None,
+                    ),
+                )
+            self.assertEqual(result, 0)
+            payload = request.call_args_list[1].kwargs["payload"]
+            self.assertEqual(payload["reasoning_effort"], "none")
+            self.assertEqual(payload["chat_template_kwargs"], {"enable_thinking": False})
+            self.assertEqual(payload["temperature"], 0)
+            self.assertEqual(payload["seed"], 1)
+
+    def test_rocmfpx_backend_provenance_requires_unassisted_vulkan_process(self) -> None:
+        version = mock.MagicMock(stdout="version: 213 (e87d53e)\n", stderr="")
+        process = mock.MagicMock(
+            stdout="COMMAND\n/opt/rocmfpx/bin/llama-server --device Vulkan0 --spec-type none\n"
+        )
+        labels = {
+            "org.opencontainers.image.revision": cli.ROCMFPX_Q38ROCM_COMMIT,
+            "local.halo-ai.engine-archive-sha256": cli.ROCMFPX_ENGINE_SHA256,
+            "local.halo-ai.vulkan-base": cli.ROCMFPX_VULKAN_BASE,
+            "local.halo-ai.rocm-base": cli.ROCMFPX_ROCM_BASE,
+        }
+        with (
+            mock.patch.object(cli, "podman", side_effect=[version, process]),
+            mock.patch.object(cli, "image_labels", return_value=labels),
+            mock.patch.object(cli, "rocmfpx_image_valid", return_value=True),
+        ):
+            info = cli.rocmfpx_backend_info(
+                "halo-rocmfpx", "fixture-image", {"features": []},
+            )
+        self.assertEqual(info["device"], "Vulkan0")
+        self.assertEqual(info["speculation"], "none")
+        self.assertEqual(info["reported_source_revision"], "e87d53e-unresolved")
+
+    def test_container_http_json_streams_payload_on_stdin(self) -> None:
+        completed = mock.MagicMock(stdout='{"tokens":[1,2]}')
+        with mock.patch.object(cli, "podman", return_value=completed) as podman:
+            response = cli.container_http_json(
+                "fixture", "http://127.0.0.1:8000/completion",
+                {"prompt": [10, 20]},
+            )
+        self.assertEqual(response["tokens"], [1, 2])
+        arguments = podman.call_args.args[0]
+        self.assertIn("-i", arguments)
+        self.assertIn("@-", arguments)
+        self.assertNotIn("10", arguments)
+        self.assertIn("10", podman.call_args.kwargs["input_text"])
+
+    def test_lemonade_config_accepts_completed_hot_swap_disconnect(self) -> None:
+        failed = mock.MagicMock(returncode=1, stdout="", stderr="connection closed")
+        passed = mock.MagicMock(returncode=0, stdout="updated", stderr="")
+        with (
+            tempfile.TemporaryDirectory() as temporary,
+            mock.patch.object(cli, "podman", side_effect=[failed, passed]) as podman,
+            mock.patch.object(cli, "wait_http") as wait_http,
+        ):
+            cli.configure_lemonade_runtime(
+                make_config(Path(temporary)), "halo-lemonade", "http://127.0.0.1/live",
+            )
+        self.assertEqual(podman.call_count, 2)
+        wait_http.assert_called_once_with("http://127.0.0.1/live", 180)
+
     def test_lemonade_resolver_accepts_exact_multimodal_folder_identity(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             config = make_config(Path(temporary))
@@ -394,6 +652,124 @@ class LongBenchTests(unittest.TestCase):
         self.assertIn("--load-mode none", payload["llamacpp_args"])
         self.assertIn("--spec-type none", payload["llamacpp_args"])
         self.assertEqual(payload["ctx_size"], 32768)
+
+
+class RocmFpxTuningTests(unittest.TestCase):
+    def test_stage3_corpus_can_bound_one_promising_mode_and_context(self) -> None:
+        cases = cli.stage3_corpus(
+            "canary", mode_filter="nonthinking", context_filter="4k",
+        )
+        self.assertEqual(len(cases), 5)
+        self.assertEqual({item["mode"] for item in cases}, {"nonthinking"})
+        self.assertEqual({item["context_bucket"] for item in cases}, {"4k"})
+        self.assertEqual(
+            {item["domain"] for item in cases},
+            cli.rocmfpx_tune.REQUIRED_STAGE3_DOMAINS,
+        )
+
+    def test_recorded_mtp_result_is_faster_but_held_experimental(self) -> None:
+        baseline = json.loads((
+            ROOT / "docs/results/qwen38-rocmfp4-baseline-2026-08-16.json"
+        ).read_text(encoding="utf-8"))
+        candidate = json.loads((
+            ROOT / "docs/results/qwen38-rocmfp4-mtp-2026-08-16.json"
+        ).read_text(encoding="utf-8"))
+        result = cli.rocmfpx_tune.compare_mtp_records(baseline, candidate)
+        self.assertEqual(result["decision"], "hold-experimental")
+        self.assertTrue(result["evidence"]["same_model_sha256"])
+        self.assertTrue(result["evidence"]["decode_at_least_10_percent_faster_every_context"])
+        self.assertFalse(result["evidence"]["strict_token_identity_proven"])
+        self.assertEqual(
+            [row["decode_speed_change_percent"] for row in result["contexts"]],
+            [29.51, 59.08, 45.92],
+        )
+
+    def test_mtp_comparison_rejects_different_prompt_sets(self) -> None:
+        baseline = {
+            "server_benchmarks": [{"prompt_tokens": 64}],
+        }
+        candidate = {"benchmarks": [{"prompt_tokens": 4096}]}
+        with self.assertRaises(cli.rocmfpx_tune.TuneError):
+            cli.rocmfpx_tune.compare_mtp_records(baseline, candidate)
+
+    @staticmethod
+    def stage3_record() -> dict[str, object]:
+        proposals = []
+        domains = sorted(cli.rocmfpx_tune.REQUIRED_STAGE3_DOMAINS)
+        modes = sorted(cli.rocmfpx_tune.REQUIRED_STAGE3_MODES)
+        buckets = ["short", "4k", "32k"]
+        for index, domain in enumerate(domains):
+            for mode in modes:
+                prefix = cli.rocmfpx_tune.token_sha256([1, 2, index])
+                proposals.append({
+                    "case_id": f"{domain}-{mode}",
+                    "domain": domain,
+                    "mode": mode,
+                    "context_bucket": buckets[index % len(buckets)],
+                    "target_prefix_sha256": prefix,
+                    "draft_prefix_sha256": prefix,
+                    "target_tokens": [10, 11, 12, 13, 14, 15],
+                    "draft_tokens": [10, 11, 99, 13, 14, 15],
+                })
+        return {
+            "schema_version": 1,
+            "kind": "halo-ai-stage3-version-mix",
+            "target_model_family": "Qwen3.8",
+            "draft_model_family": "Qwen3.6",
+            "target_tokenizer_owner": "Qwen3.8",
+            "target_model": "target",
+            "draft_model": "proxy",
+            "proposals": proposals,
+        }
+
+    def test_stage3_score_reports_each_required_proposal_length(self) -> None:
+        result = cli.rocmfpx_tune.score_stage3_records(self.stage3_record())
+        self.assertTrue(result["prefix_identity_verified"])
+        self.assertTrue(result["corpus_complete"])
+        self.assertEqual(result["decision"], "measure-latency")
+        aggregate = result["metrics"]["aggregate"]["all"]
+        self.assertEqual(sorted(aggregate), ["1", "2", "4", "6"])
+        self.assertEqual(aggregate["6"]["mean_accepted_tokens"], 2.0)
+        self.assertEqual(aggregate["1"]["full_proposal_acceptance_percent"], 100.0)
+
+    def test_stage3_score_rejects_independently_rendered_prefix(self) -> None:
+        document = self.stage3_record()
+        document["proposals"][0]["draft_prefix_sha256"] = "0" * 64
+        with self.assertRaises(cli.rocmfpx_tune.TuneError):
+            cli.rocmfpx_tune.score_stage3_records(document)
+
+    def test_stage3_screen_stops_expansion_when_one_mode_mostly_misses(self) -> None:
+        document = self.stage3_record()
+        for proposal in document["proposals"]:
+            if proposal["mode"] == "thinking":
+                proposal["draft_tokens"][0] = 999
+        result = cli.rocmfpx_tune.score_stage3_records(document)
+        self.assertEqual(result["decision"], "do-not-expand-general-proxy")
+        self.assertEqual(result["screen_gate"]["failing_modes"], ["thinking"])
+        self.assertIn("chat/thinking", result["metrics"]["domain_mode"])
+
+    def test_stage3_preflight_never_calls_a_downloader(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            config = make_config(Path(temporary))
+            catalog = cli.load_catalog(config)
+            states = [
+                {"model": "target", "present": True, "full_sha256_verified": True},
+                {"model": "proxy", "present": True, "full_sha256_verified": True},
+            ]
+            with (
+                mock.patch.object(cli, "stage3_model_state", side_effect=states),
+                mock.patch.object(cli, "download_catalog_model") as downloader,
+                mock.patch("builtins.print") as output,
+            ):
+                result = cli.command_tune_stage3_preflight(
+                    config, catalog, __import__("argparse").Namespace(full=False),
+                )
+            self.assertEqual(result, 0)
+            downloader.assert_not_called()
+            document = json.loads(output.call_args.args[0])
+            self.assertEqual(document["decision"], "ready-for-version-mix-capture")
+            self.assertEqual(document["artifact_policy"]["additional_model_download_bytes"], 0)
+            self.assertFalse(document["artifact_policy"]["q4nx_authorized"])
 
     def test_mtp_payload_replaces_baseline_speculation_mode(self) -> None:
         profile = {

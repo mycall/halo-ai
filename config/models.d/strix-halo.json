@@ -52,6 +52,56 @@
       ]
     },
     {
+      "id": "qwen3.8-27b-rocmfp4",
+      "repository": "julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF",
+      "revision": "e439c125804f73ccb1d9e6aebb5ea50f112833fa",
+      "architecture": "qwen35",
+      "quantization": "ROCmFP4_FAST",
+      "modalities": ["text"],
+      "engines": ["rocmfpx"],
+      "download": {
+        "provider": "huggingface",
+        "repository": "julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF",
+        "revision": "e439c125804f73ccb1d9e6aebb5ea50f112833fa",
+        "allow_patterns": ["Qwen3.8-27B-ROCmFP4-FAST.gguf"]
+      },
+      "gguf_expectations": {
+        "version": 3,
+        "tensor_count": 866,
+        "metadata_count": 51,
+        "metadata": {
+          "general.architecture": "qwen35",
+          "general.file_type": 103,
+          "qwen35.block_count": 65,
+          "qwen35.context_length": 262144,
+          "qwen35.embedding_length": 5120,
+          "qwen35.feed_forward_length": 17408,
+          "qwen35.attention.head_count": 24,
+          "qwen35.attention.head_count_kv": 4,
+          "qwen35.nextn_predict_layers": 1
+        },
+        "array_lengths": {"tokenizer.ggml.tokens": 248320},
+        "tensor_type_counts": {"0": 360, "8": 1, "101": 505},
+        "required_tensors": [
+          "token_embd.weight",
+          "output.weight",
+          "blk.64.nextn.eh_proj.weight",
+          "blk.64.nextn.enorm.weight",
+          "blk.64.nextn.hnorm.weight",
+          "blk.64.nextn.shared_head_norm.weight"
+        ],
+        "forbidden_tensor_terms": ["vision", "visual", "image", "video", "patch", "merger"]
+      },
+      "files": [
+        {
+          "role": "main",
+          "path": "julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP4-FAST.gguf",
+          "bytes": 14562236384,
+          "sha256": "fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9"
+        }
+      ]
+    },
+    {
       "id": "seamless-m4t-v2-large",
       "repository": "facebook/seamless-m4t-v2-large",
       "revision": "5f8cc790b19fc3f67a61c105133b20b34e3dcb76",
@@ -59,6 +109,7 @@
       "format": "transformers",
       "engines": ["speech"],
       "download": {
+        "provider": "huggingface",
         "repository": "facebook/seamless-m4t-v2-large",
         "revision": "5f8cc790b19fc3f67a61c105133b20b34e3dcb76",
         "allow_patterns": [
@@ -93,6 +144,60 @@
     }
   ],
   "profiles": [
+    {
+      "id": "qwen38-27b-rocmfp4-baseline",
+      "model": "qwen3.8-27b-rocmfp4",
+      "engine": "rocmfpx",
+      "context": 32768,
+      "risk": "baseline",
+      "features": [],
+      "thinking": false,
+      "settings": {
+        "device": "Vulkan0",
+        "gpu_layers": 99,
+        "parallel": 1,
+        "batch": 2048,
+        "ubatch": 1024,
+        "flash_attention": true,
+        "cache_type_k": "q8_0",
+        "cache_type_v": "turbo4",
+        "threads": 16,
+        "poll": 100,
+        "seed": 1,
+        "temperature": 0,
+        "ctx_checkpoints": 0,
+        "cache_ram_mb": 16384
+      }
+    },
+    {
+      "id": "qwen38-27b-rocmfp4-mtp",
+      "model": "qwen3.8-27b-rocmfp4",
+      "engine": "rocmfpx",
+      "context": 32768,
+      "risk": "experimental",
+      "features": ["mtp"],
+      "thinking": false,
+      "proposal_policy": "probabilistic-draft-strict-target-verification",
+      "settings": {
+        "device": "Vulkan0",
+        "gpu_layers": 99,
+        "parallel": 1,
+        "batch": 2048,
+        "ubatch": 1024,
+        "flash_attention": true,
+        "cache_type_k": "q8_0",
+        "cache_type_v": "turbo4",
+        "threads": 16,
+        "poll": 100,
+        "seed": 1,
+        "temperature": 0,
+        "ctx_checkpoints": 0,
+        "cache_ram_mb": 16384,
+        "spec_mtp_strict_qwen": true,
+        "spec_draft_n_max": 6,
+        "spec_draft_p_min": 0.60
+      }
+    },
     {"id": "qwen3.6-35b-a3b-q8xl-lemonade", "model": "qwen3.6-35b-a3b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 32768, "risk": "baseline", "features": [], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
     {"id": "qwen3.6-27b-q8xl-lemonade", "model": "qwen3.6-27b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 32768, "risk": "baseline", "features": [], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
     {"id": "qwen3.6-35b-a3b-q8xl-mtp-lemonade", "model": "qwen3.6-35b-a3b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 32768, "risk": "experimental", "features": ["mtp"], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none", "spec_draft_n_max": 2}},

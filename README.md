@@ -11,11 +11,17 @@ The detailed design and operations runbook is in
 ## Validate the checkout
 
 ```bash
-./tests/smoke.sh
+./tests/container.sh
 ./bin/halo-ai doctor
 ./bin/halo-ai models verify
 ./bin/halo-ai profiles list
 ```
+
+`tests/container.sh` runs the source/unit/shell suite in a network-disabled,
+read-only rootless Podman container with the checkout mounted read-only and
+only an ephemeral `/tmp` writable. It installs no host Python packages. The
+host CLI checks below remain read-only except when an explicit lifecycle verb
+such as `install`, `start`, or `stop` is requested.
 
 These commands do not load a model. `models verify --full` additionally hashes
 about 278 GiB of cataloged model files and writes an inventory record, so it is
@@ -72,6 +78,93 @@ stops only containers labeled as managed by this project. External models,
 container images, named cache/config volumes, and downloaded runtime components
 are preserved so the next start does not reinstall them. Use `uninstall.sh`
 when the installed solution itself should be removed.
+
+## Qwen3.8 ROCmFP4 baseline
+
+The Stage 1 Qwen3.8 profile is text-only and uses a dedicated q38rocm ROCmFPX
+ABI over `Vulkan0`; it is intentionally separate from the ordinary llama.cpp
+engine. Preview the exact acquisition closure before making any download:
+
+```bash
+halo-ai profiles acquire qwen38-27b-rocmfp4-baseline --dry-run
+halo-ai profiles acquire qwen38-27b-rocmfp4-baseline
+halo-ai models verify qwen3.8-27b-rocmfp4 --full
+halo-ai start qwen38-27b-rocmfp4-baseline --switch
+halo-ai test qwen38-27b-rocmfp4-baseline
+halo-ai stop qwen38-27b-rocmfp4-baseline
+```
+
+The only model artifact selected by that profile is the pinned
+`Qwen3.8-27B-ROCmFP4-FAST.gguf`: 14,562,236,384 bytes (13.56 GiB) under
+`/srv/halo-ai/models/julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF`. The dry-run
+explicitly records FP8, NPU, vision, BF16, and reference artifacts as excluded.
+The runtime image is built from immutable base-image digests and the q38rocm
+v1.0.0 archive after exact SHA-256 verification. The qualified image has an
+apparent size of 3,877,844,308 bytes (3.61 GiB), although its base layers may
+already exist in rootless Podman storage. The archive binary reports
+short source revision `e87d53e`; upstream has not published a resolvable full
+commit for that claim, so Halo records it as unresolved rather than presenting
+the q38rocm release-tag commit as the engine source revision.
+
+Rollback is non-destructive: `halo-ai stop qwen38-27b-rocmfp4-baseline` stops
+the service while preserving the verified GGUF and image. Start the previous
+profile with `--switch`; remove the local ROCmFPX image separately only when
+its cached runtime is no longer wanted.
+
+The same-host Stage 1 qualification, including short/4K/32K cold-prompt
+measurements and the direct `llama-bench` control, is recorded in
+[`docs/results/qwen38-rocmfp4-baseline-2026-08-16.json`](docs/results/qwen38-rocmfp4-baseline-2026-08-16.json).
+Performance claims collected on other q38rocm setups are not used as pass/fail
+evidence for this host; these measurements are the baseline for subsequent
+optimization.
+
+The separate `qwen38-27b-rocmfp4-mtp` profile reuses the same GGUF and downloads
+no model weights. It enables the backend's strict Qwen verifier with the
+experimental `n_max=6`, `p_min=0.60` proposal settings. On the same prompts it
+improved decode throughput by 29.5% at short context, 59.1% at 4K, and 45.9% at
+32K, while increasing TTFT and memory use. Keep it for generation-heavy
+experiments; use the baseline for cold long prompts with short answers. The
+full results and current conformance caveat are in
+[`docs/results/qwen38-rocmfp4-mtp-2026-08-16.json`](docs/results/qwen38-rocmfp4-mtp-2026-08-16.json).
+
+Turn those records into a repeatable gate, and inspect the next no-download
+experiment, with:
+
+```bash
+halo-ai tune mtp-compare \
+  docs/results/qwen38-rocmfp4-baseline-2026-08-16.json \
+  docs/results/qwen38-rocmfp4-mtp-2026-08-16.json
+halo-ai tune stage3-preflight
+halo-ai tune stage3-preflight --full
+```
+
+The MTP comparison accepts only matching prompt-token sets and the same model
+SHA-256, calculates TTFT/prefill/decode/GTT deltas, and keeps the current
+candidate experimental while strict token identity is unresolved. Stage 3
+preflight is local-only: it reuses the cached Qwen3.6-35B-A3B model if present,
+otherwise says to skip the proxy. It never downloads Q4NX, NPU, vision, or any
+other model artifact. `--full` hashes cached files and merges their evidence
+into the inventory without deleting earlier model records.
+
+The guarded Stage 3 screen is split around the model switch so both large
+models are never resident together:
+
+```bash
+halo-ai start qwen38-27b-rocmfp4-baseline --switch
+halo-ai tune stage3-capture-target /var/opt/halo-ai/state/stage3-target.json
+halo-ai start qwen3.6-35b-a3b-q8xl-lemonade --switch
+halo-ai tune stage3-capture-draft \
+  /var/opt/halo-ai/state/stage3-target.json \
+  /var/opt/halo-ai/state/stage3-proxy.json
+halo-ai tune stage3-score /var/opt/halo-ai/state/stage3-proxy.json
+halo-ai stop
+```
+
+The first short canary found a sharp mode boundary: non-thinking prefixes had
+94.29% first-token agreement and a 4.771/6 mean accepted run, while thinking
+prefixes had 28.57% and 1.143/6. The general cross-version proxy therefore hit
+the early stop gate; no NPU or Q4NX artifact is authorized. See
+[`docs/results/qwen38-qwen36-version-mix-canary-2026-08-16.json`](docs/results/qwen38-qwen36-version-mix-canary-2026-08-16.json).
 
 The first Lemonade ROCm start downloads a llama.cpp backend and TheRock runtime.
 They are cached in the persistent `halo-lemonade-config` volume, while Hugging
@@ -228,7 +321,7 @@ fixed-VRAM use.
 | Standalone llama.cpp | build `b10335-74ce15741` | `rocm-7.14` image, digest `sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b` |
 | ds4 image | `sha256:2ea5b3b28334f08d53307baf79838591e510628d41dacec357de32ffafbac31f` | `kyuz0/strix-halo-ds4-toolbox:rocm-7.14` |
 | Speech image | manifest `sha256:0a21384bf020782d8c75df78338bbc8a23f260c3604e5b023eee7a3381d9361b` | Local image ID `532f5f3d…23633`, 7.1 GB; PyTorch 2.12.0 + ROCm 7.14, Transformers 4.57.1, Gradio 6.16.0 |
-| Automated source tests | 57 passed | Python unit tests plus shell smoke/install assertions |
+| Automated source tests | 76 passed | Python unit tests inside the read-only, network-disabled Podman test container, plus shell smoke/install assertions |
 | Runtime cleanup | Passed | `halo-ai stop` returned GTT use from about 38 GiB to about 0.1 GiB |
 
 ### End-to-end model/profile matrix

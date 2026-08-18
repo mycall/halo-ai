@@ -34,30 +34,37 @@ dependency.
 - File: `Qwen3.8-27B-ROCmFP4-FAST.gguf`
 - Size: `14562236384` bytes
 - SHA-256: `fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9`
+- Local filepath: `/srv/halo-ai/models/julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF`
+- Preinstalled model; any approved sibling files from
+  `julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF` should reside in that same directory.
 
 ### Tasks
 
 - [ ] Pin the exact ROCmFPX/llama.cpp source commit required by q38rocm and
       build a reproducible, digest-pinned runtime image.
-- [ ] Add a distinct `rocmfpx` engine to Halo; do not disguise the custom
+  The v1.0.0 archive, q38rocm release commit, and both base images are pinned,
+  and the built image has a recorded digest. The binary reports `e87d53e`, but
+  upstream does not expose a resolvable full source commit for that claim, so
+  the source-provenance part of this item remains open.
+- [x] Add a distinct `rocmfpx` engine to Halo; do not disguise the custom
       ROCmFPX ABI as ordinary `llamacpp`.
-- [ ] Add the FP4 artifact and a `qwen38-27b-rocmfp4-baseline` profile to the
+- [x] Add the FP4 artifact and a `qwen38-27b-rocmfp4-baseline` profile to the
       catalog with speculation and vision disabled.
-- [ ] Add profile-scoped acquisition with dry-run, resume, exact size/SHA
+- [x] Add profile-scoped acquisition with dry-run, resume, exact size/SHA
       verification, and atomic completion.
-- [ ] Make the acquisition dry-run prove that the baseline downloads no FP8,
+- [x] Make the acquisition dry-run prove that the baseline downloads no FP8,
       NPU model, visual projector, BF16 model, or reference quant.
-- [ ] Validate the GGUF header and tensor inventory. Trust the verified GGUF,
+- [x] Validate the GGUF header and tensor inventory. Trust the verified GGUF,
       not the repository's inconsistent companion `config.json`.
-- [ ] Add render, lifecycle, readiness, and deterministic smoke tests.
-- [ ] Benchmark unassisted greedy generation at short, 4K, and 32K contexts;
+- [x] Add render, lifecycle, readiness, and deterministic smoke tests.
+- [x] Benchmark unassisted greedy generation at short, 4K, and 32K contexts;
       record TTFT, prompt speed, decode speed, memory, and software revisions.
-- [ ] Document the baseline command, expected storage, supported text-only
+- [x] Document the baseline command, expected storage, supported text-only
       modality, and rollback procedure.
 
 ### Gate
 
-- [ ] **Pass:** Halo can acquire, start, test, stop, and reproduce the direct
+- [x] **Pass:** Halo can acquire, start, test, stop, and reproduce the direct
       q38rocm FP4 result without downloading any optional model artifact.
 - [ ] **Fail:** fix or stop here; do not begin MTP, NPU, FP8, or vision work.
 
@@ -67,16 +74,22 @@ dependency.
 
 ### Tasks
 
-- [ ] Add `qwen38-27b-rocmfp4-mtp` using the MTP tensors already stored in the
+- [x] Add `qwen38-27b-rocmfp4-mtp` using the MTP tensors already stored in the
       FP4 GGUF.
 - [ ] Implement strict greedy MTP first and verify token-for-token equivalence
       with the unassisted FP4 profile.
-- [ ] Benchmark unassisted FP4 versus strict greedy MTP on the same fixed
+  The backend's strict Qwen verifier is active and 4/5 stable corpus cases
+  matched exactly. Full cross-process identity is not yet proven because the
+  Vulkan baseline itself changes among semantically equivalent outputs across
+  fresh processes despite fixed request and server seeds.
+- [x] Benchmark unassisted FP4 versus strict greedy MTP on the same fixed
       prompts and contexts.
 - [ ] Only after strict mode passes, evaluate q38rocm's suggested proposal
       settings such as `n_max=6`, `p_min=0.60`; label probabilistic modes
       clearly.
-- [ ] Record drafted/accepted tokens, accepted-run distribution, latency,
+  The `n_max=6`, `p_min=0.60` settings were evaluated under the operator's
+  explicit experimental-optimization goal, not promoted as a strict-mode pass.
+- [x] Record drafted/accepted tokens, accepted-run distribution, latency,
       throughput, memory, and stability.
 
 ### Gate
@@ -93,15 +106,30 @@ No NPU model is downloaded at the start of this stage.
 
 ### Tasks
 
-- [ ] If a verified Qwen3.6-35B-A3B model is already present, reuse it for a
+- [x] If a verified Qwen3.6-35B-A3B model is already present, reuse it for a
       no-new-download Qwen3.6-to-Qwen3.8 acceptance screen. If it is absent,
       skip this proxy rather than downloading another copy solely for it.
-- [ ] Feed both models the exact Qwen3.8-rendered token prefix under greedy
+  The cached 39,099,447,584-byte GGUF and both templates passed full SHA-256
+  verification. The short canary used them in place and downloaded zero model
+  bytes; only the explicitly allowed Lemonade support runtime was refreshed.
+- [x] Feed both models the exact Qwen3.8-rendered token prefix under greedy
       decoding; do not compare independently rendered chat prompts.
+  Halo captured Qwen3.8 template/tokenizer output as token-ID arrays, extended
+  each with the authoritative target suffix, and sent those arrays directly to
+  Qwen3.6's private llama.cpp completion endpoint. All 70 prefix hashes matched.
 - [ ] Test code, reasoning, JSON/tool output, multilingual text, ordinary chat,
       and thinking/non-thinking prompts at several context lengths.
+  The short-context early screen covers every listed domain and both modes.
+  Longer buckets remain unrun because thinking mode already crossed the
+  permissive early-stop threshold; a bounded non-thinking-only context check
+  remains optional.
 - [ ] Measure first-token agreement, zero-acceptance rate, mean accepted tokens,
       accepted-run p50/p95, and results for proposal lengths 1, 2, 4, and 6.
+  The short canary records every metric for all four proposal lengths, grouped
+  by domain and mode. Non-thinking achieved 94.29% first-token agreement,
+  5.71% zero acceptance, and 4.771/6 mean accepted tokens. Thinking achieved
+  28.57%, 71.43%, and 1.143/6 respectively, so the general proxy is not being
+  expanded. Several-context coverage remains open.
 - [ ] Model expected end-to-end speed using measured FP4 verification time and
       realistic NPU proposal latency. Compare against FP4 GPU MTP, not merely
       unassisted FP4.

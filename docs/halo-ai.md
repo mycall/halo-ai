@@ -175,6 +175,7 @@ project and will not be modified.
 ├── lib/halo_ai/
 │   ├── cli.py                    # lifecycle/catalog/runtime implementation
 │   ├── longbench.py              # pinned, resumable LongBench-v2 adapter
+│   ├── rocmfpx_tune.py           # MTP and exact-prefix Stage 3 scoring gates
 │   ├── host_profile.py           # guarded Limine profile implementation
 │   └── speech/
 │       ├── Containerfile         # pinned gfx1151 ROCm speech image
@@ -186,6 +187,7 @@ project and will not be modified.
 │   └── request-presets.d/        # planner/implementer sampling presets
 │   │   └── *.json
 └── tests/
+    ├── container.sh              # read-only, network-disabled Podman test entry
     ├── test_cli.py               # synthetic safety and catalog tests
     └── smoke.sh                  # non-mutating checkout smoke suite
 ```
@@ -360,6 +362,7 @@ The lifecycle tooling must preserve that distinction per model.
 | `deepseek-v4-flash-0731-iq3xxs` | Unsloth IQ3_XXS shards 1–4; optional DSpark companion | 97.05 GiB main; 107.20 GiB with companion | `deepseek4` + `dflash` | standalone llama.cpp; Lemonade base only | 32,768 |
 | `qwen3.6-27b-q8xl` | Q8_K_XL main; installed F32 vision projector | 35.04 GiB total | `qwen35` + `clip` | Lemonade or standalone llama.cpp | 32,768 |
 | `qwen3.6-35b-a3b-q8xl` | Q8_K_XL main; no local vision projector | 36.41 GiB | `qwen35moe` | Lemonade or standalone llama.cpp | 32,768 |
+| `qwen3.8-27b-rocmfp4` | ROCmFP4-FAST language/MTP GGUF; text only | 13.56 GiB | `qwen35` | dedicated q38rocm ROCmFPX/Vulkan | 32,768 |
 | `seamless-m4t-v2-large` | Two safetensors shards plus processor/tokenizer files | 8.62 GiB | `seamless_m4t_v2` | dedicated ROCm speech service | N/A |
 
 The sharded DeepSeek first file is intentionally only 5,257,696 bytes: it holds
@@ -386,6 +389,7 @@ fdc443e974cad1f61c45af1cfd5580855855ddce0d6c14cc500a5714c486ac1d 1842940480 unsl
 2770c8c7b8a1ad536168ea51463f3cf1b813e5b4d31f49ea0bf1f628b4688d05 4240 unsloth/qwen3.6-thinking.jinja
 63f41b4f55a044a0c173b403bf901b0027fca2a717f63833fe24784deeb6f614 4333 unsloth/qwen3.6-nonthinking.jinja
 6c6b816537abad90b250a0972b345466028d861ddfe316d5f0de31ca6440f781 39099447584 unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf
+fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9 14562236384 julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP4-FAST.gguf
 9ac8a85d4e97d27fad026a813d52a069680e4e0cae701ef145b204bd533251b2 2066 facebook/seamless-m4t-v2-large/added_tokens.json
 4b2fa9d863cc3033adaf261e6c3e32ad90347ee2f199a349ba1c77d5e26a605f 2716 facebook/seamless-m4t-v2-large/config.json
 febbbbac4f0b122473a0125165c9291add850956315e35a025e16474cc0da5f4 9906948 facebook/seamless-m4t-v2-large/generation_config.json
@@ -431,6 +435,126 @@ verification time and result in `/var/opt/halo-ai/state/model-inventory.json`,
 and does not load the model into RAM. The scanner should warn about the six
 AppleDouble sidecars and the current `0755` file modes; cleanup and permission
 changes remain explicit operator actions.
+
+### Qwen3.8 ROCmFP4 Stage 1 qualification
+
+The `qwen38-27b-rocmfp4-baseline` profile was qualified on this gfx1151 host on
+2026-08-16. It uses only `Vulkan0`, mounts the single verified FP4 GGUF
+read-only, forces `--spec-type none`, and disables template thinking in the
+deterministic smoke request. Acquisition reported zero additional bytes on the
+preinstalled setup and named FP8, NPU, vision, BF16, and reference artifacts as
+excluded. No optional model artifact was downloaded.
+
+| Prompt tokens | TTFT | Prompt tok/s | Decode tok/s | Peak GTT | Peak fixed VRAM |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 64 | 0.43 s | 162.12 | 12.83 | 14.04 GiB | 1.84 GiB |
+| 4,095 | 22.24 s | 184.45 | 11.90 | 14.03 GiB | 1.84 GiB |
+| 31,998 | 260.48 s | 122.87 | 10.74 | 14.17 GiB | 1.89 GiB |
+
+These are single cold-prompt, cache-disabled baseline measurements with
+temperature 0, seed 1, no speculation, and up to 64 completion tokens. The
+direct archive `llama-bench` control measured 12.15 ± 0.04 raw decode tok/s
+over three 128-token repetitions. Values reported from other q38rocm setups are
+not acceptance evidence for this host; optimization work should compare
+against this same-host record. The complete machine-readable inputs, software
+revisions, timings, and memory values are in
+[`results/qwen38-rocmfp4-baseline-2026-08-16.json`](results/qwen38-rocmfp4-baseline-2026-08-16.json).
+
+The runtime distribution is immutable at the archive and image-input level,
+but one upstream provenance item remains open: the v1.0.0 binary reports build
+213 and short revision `e87d53e`, for which q38rocm does not publish a
+resolvable full source commit. Halo records both the q38rocm release commit and
+this unresolved engine claim without conflating them.
+
+### Qwen3.8 GPU-MTP experiment
+
+`qwen38-27b-rocmfp4-mtp` reuses the MTP tensors in the same FP4 GGUF, so its
+profile-scoped acquisition adds zero model bytes. It enables the fork's
+boundary-safe strict-Qwen verifier with one slot and currently uses
+`n_max=6`, `p_min=0.60`. The profile remains explicitly experimental.
+
+| Prompt tokens | Baseline decode | MTP decode | Change | MTP TTFT | Acceptance | Peak GTT |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 64 | 12.83 tok/s | 16.61 tok/s | +29.5% | 0.53 s | 15/19 | 17.20 GiB |
+| 4,095 | 11.90 tok/s | 18.93 tok/s | +59.1% | 23.58 s | 42/49 | 19.04 GiB |
+| 31,998 | 10.74 tok/s | 15.67 tok/s | +45.9% | 301.77 s | 43/43 | 19.06 GiB |
+
+The gain is generation-side. At 32K, MTP reduced prompt throughput by 13.7%,
+increased TTFT by 15.9%, and used about 4.90 GiB more peak GTT than baseline.
+It is therefore useful for generation-heavy work but not the default for a
+cold long prompt with a short answer.
+
+The five-case conformance probe produced four stable exact token matches and
+five semantically equivalent answers. Full cross-process identity is not yet
+proven: even the unassisted Vulkan profile selected different compact,
+pretty-printed, or fenced forms across clean processes despite temperature 0
+and fixed request/server seeds. This keeps the Stage 2 correctness gate open.
+Detailed timings, draft acceptance/run-position statistics, memory, and the
+conformance note are recorded in
+[`results/qwen38-rocmfp4-mtp-2026-08-16.json`](results/qwen38-rocmfp4-mtp-2026-08-16.json).
+
+The tuning helpers make these conclusions reproducible rather than relying on
+hand comparison:
+
+```bash
+halo-ai tune mtp-compare \
+  docs/results/qwen38-rocmfp4-baseline-2026-08-16.json \
+  docs/results/qwen38-rocmfp4-mtp-2026-08-16.json \
+  --output /var/opt/halo-ai/state/qwen38-mtp-comparison.json
+halo-ai tune stage3-preflight
+halo-ai tune stage3-preflight --full
+halo-ai tune stage3-capture-target /var/opt/halo-ai/state/stage3-target.json
+halo-ai tune stage3-capture-draft \
+  /var/opt/halo-ai/state/stage3-target.json \
+  /var/opt/halo-ai/state/stage3-proxy.json
+halo-ai tune stage3-score VERSION_MIX_CAPTURE.json \
+  --output /var/opt/halo-ai/state/stage3-version-mix-score.json
+```
+
+`mtp-compare` requires identical prompt-token sets and a matching target-model
+SHA-256. It calculates same-host TTFT, prompt-speed, decode-speed, GTT, and
+acceptance changes, then enforces the correctness and material-speed gates. It
+does not consume performance claims from other hosts. The current records are
+classified `hold-experimental`: decode is at least 10% faster at every measured
+context, but strict cross-process token identity is not proven.
+
+`stage3-preflight` performs no network operation. It looks only for the exact
+cataloged Qwen3.8 verifier and the already-cached Qwen3.6-35B-A3B test proxy.
+If the proxy is absent, its decision is `skip-proxy`; it never turns absence
+into a download. With `--full`, it streams SHA-256 over cached artifacts and
+merges the results into the model inventory while preserving earlier evidence.
+Its capture contract fixes proposal lengths 1/2/4/6, the task domains,
+thinking modes, context buckets, Qwen3.8-owned prompt tokenization, identical
+prefix hashes, and forbidden multimodal inputs.
+
+`stage3-score` accepts only a schema-version-1
+`halo-ai-stage3-version-mix` JSON capture whose target is Qwen3.8, whose proxy
+is Qwen3.6, and whose target/draft prefix hashes match for every proposal. It
+reports first-token agreement, zero-acceptance rate, mean accepted tokens,
+accepted-run p50/p95, and full-proposal acceptance for lengths 1/2/4/6,
+separately by domain, context bucket, and thinking mode. Scoring never
+authorizes an NPU/model download; measured proposal and verifier latency remain
+required before the Stage 3 throughput gate can pass.
+
+The capture phases require the exact profile to be active and its full-SHA
+evidence to be reusable. `stage3-capture-target` calls `/apply-template`,
+`/tokenize`, and `/completion` using `curl` inside the Qwen3.8 runtime
+container. `stage3-capture-draft` requires the Qwen3.6 baseline, sends the
+captured token arrays to the private llama.cpp endpoint using container stdin,
+and never invokes the Qwen3.6 template or tokenizer. The phases are separate so
+Halo never keeps both large models resident concurrently. The default canary
+uses ten short cases; `--suite full` also constructs 4K and 32K buckets, but it
+should run only when the cheap screen warrants the extra time.
+`--mode nonthinking --context-bucket 4k` (or `32k`) bounds a follow-up to the
+one mode/context slice justified by earlier evidence.
+
+On this host the 70-proposal short canary found 94.29% first-token agreement,
+5.71% zero acceptance, and 4.771/6 mean accepted tokens for non-thinking
+prefixes. Thinking prefixes fell to 28.57%, 71.43%, and 1.143/6. The scorer
+therefore returns `do-not-expand-general-proxy`: a bounded non-thinking-only
+latency/context experiment is still defensible, but a general cross-version
+drafter is not. The summary and limitations are in
+[`results/qwen38-qwen36-version-mix-canary-2026-08-16.json`](results/qwen38-qwen36-version-mix-canary-2026-08-16.json).
 
 ### CachyOS Btrfs and Snapper policy
 

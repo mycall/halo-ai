@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "recorded_local_date": "2026-08-16",
+  "profile": "qwen38-27b-rocmfp4-baseline",
+  "qualification": "functional-pass-with-open-source-provenance-item",
+  "host": {
+    "cpu": "AMD Ryzen AI Max+ 395",
+    "gpu": "AMD Radeon 8060S (gfx1151)",
+    "kernel": "7.1.8-1-cachyos-deckify",
+    "host_mesa": "26.1.6-1",
+    "podman": "6.0.2",
+    "gtt_aperture_bytes": 126701535232,
+    "fixed_vram_bytes": 2147483648
+  },
+  "runtime": {
+    "image": "localhost/halo-ai-rocmfpx:v1.0.0",
+    "image_id": "92302f2546e70af458c76900eabf53bed412602122475e21d2088f7ef58fa454",
+    "image_digest": "sha256:09e700ee3b87bb6cc5ccf0fba08d791e5411df825d30f423f55bb4fdb2c54d78",
+    "image_size_bytes": 3877844308,
+    "container_mesa": "25.3.6",
+    "vulkan_device": "AMD Radeon 8060S Graphics (RADV GFX1151)",
+    "vulkan_api": "1.4.328",
+    "engine_version": 213,
+    "engine_reported_revision": "e87d53e-unresolved",
+    "q38rocm_release_commit": "66de2f3bc625249eabff5bd919fd6dbdd3d7ccaa",
+    "engine_archive_sha256": "bbc7845db0c012b97f1c9b8a2733a7083c6f9a749a453866fbe1994151d3364f",
+    "vulkan_base_digest": "sha256:8cdde6d42ab621b3d0f1e02618f4234c58b7036bec984a2a64fa205d38f99922",
+    "rocm_base_digest": "sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b"
+  },
+  "model": {
+    "repository": "julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF",
+    "revision": "e439c125804f73ccb1d9e6aebb5ea50f112833fa",
+    "file": "Qwen3.8-27B-ROCmFP4-FAST.gguf",
+    "bytes": 14562236384,
+    "sha256": "fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9",
+    "gguf_semantic_verification": "pass"
+  },
+  "policy": {
+    "device": "Vulkan0",
+    "context": 32768,
+    "speculation": "none",
+    "thinking": false,
+    "cache_type_k": "q8_0",
+    "cache_type_v": "turbo4",
+    "optional_artifact_download_bytes": 0
+  },
+  "lifecycle": {
+    "start": "pass",
+    "readiness": "pass",
+    "deterministic_smoke": "pass",
+    "stop": "pass",
+    "container_exit_code": 0,
+    "post_stop_gtt_bytes": 144257024,
+    "post_stop_vram_bytes": 801603584
+  },
+  "smoke": {
+    "prompt_tokens": 22,
+    "completion_tokens": 8,
+    "prompt_tokens_per_second": 83.67564278107409,
+    "decode_tokens_per_second": 13.663792146393869,
+    "response": "halo-ai smoke test passed",
+    "reasoning_content_present": false,
+    "fingerprint": "b213-e87d53e"
+  },
+  "server_benchmark_method": {
+    "location": "inside halo-rocmfpx container",
+    "streaming": true,
+    "temperature": 0,
+    "seed": 1,
+    "thinking": false,
+    "speculation": "none",
+    "prompt_cache": false,
+    "max_completion_tokens": 64,
+    "memory_sample_interval_seconds": 0.05
+  },
+  "server_benchmarks": [
+    {
+      "prompt_tokens": 64,
+      "completion_tokens": 20,
+      "ttft_seconds": 0.428465,
+      "prompt_tokens_per_second": 162.1242327597344,
+      "decode_tokens_per_second": 12.825873377847666,
+      "peak_gtt_bytes": 15069659136,
+      "peak_vram_bytes": 1971105792,
+      "minimum_cpu_mem_available_bytes": 111689699328,
+      "cache_tokens": 0
+    },
+    {
+      "prompt_tokens": 4095,
+      "completion_tokens": 64,
+      "ttft_seconds": 22.237724,
+      "prompt_tokens_per_second": 184.44777776686755,
+      "decode_tokens_per_second": 11.898440858056063,
+      "peak_gtt_bytes": 15067561984,
+      "peak_vram_bytes": 1971109888,
+      "minimum_cpu_mem_available_bytes": 111507005440,
+      "cache_tokens": 0
+    },
+    {
+      "prompt_tokens": 31998,
+      "completion_tokens": 64,
+      "ttft_seconds": 260.47883,
+      "prompt_tokens_per_second": 122.86761823959694,
+      "decode_tokens_per_second": 10.740246304054693,
+      "peak_gtt_bytes": 15213404160,
+      "peak_vram_bytes": 2031382528,
+      "minimum_cpu_mem_available_bytes": 110825336832,
+      "cache_tokens": 0
+    }
+  ],
+  "direct_llama_bench_control": {
+    "prompt_tokens": 512,
+    "generation_tokens": 128,
+    "repetitions": 3,
+    "prompt_tokens_per_second_mean": 204.446884,
+    "prompt_tokens_per_second_stddev": 1.966852,
+    "decode_tokens_per_second_mean": 12.148675,
+    "decode_tokens_per_second_stddev": 0.042692,
+    "decode_samples": [12.1248, 12.1232, 12.198],
+    "radv_perftest_control": {
+      "value": "gpl,sam,nggc",
+      "prompt_tokens_per_second_mean": 208.412058,
+      "decode_tokens_per_second_mean": 12.131875,
+      "conclusion": "no decode improvement; omitted from the baseline"
+    }
+  },
+  "interpretation": "Only same-host results are qualification evidence. Performance claims from other q38rocm setups are not used as pass/fail evidence and remain future optimization context."
+}

@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "kind": "halo-ai-stage3-version-mix-canary-summary",
+  "recorded_local_date": "2026-08-16",
+  "status": "short-context-early-screen",
+  "target": {
+    "profile": "qwen38-27b-rocmfp4-baseline",
+    "model": "qwen3.8-27b-rocmfp4",
+    "sha256": "fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9",
+    "engine": "q38rocm ROCmFPX build 213",
+    "device": "Vulkan0 gfx1151"
+  },
+  "proxy": {
+    "profile": "qwen3.6-35b-a3b-q8xl-lemonade",
+    "model": "qwen3.6-35b-a3b-q8xl",
+    "sha256": "6c6b816537abad90b250a0972b345466028d861ddfe316d5f0de31ca6440f781",
+    "role": "test-only cross-version GPU proxy",
+    "lemonade_version": "11.5.2",
+    "llamacpp_package_version": "b10454",
+    "llamacpp_binary_version": "b10453"
+  },
+  "artifact_policy": {
+    "model_download_bytes": 0,
+    "q4nx_download_bytes": 0,
+    "npu_artifact_download_bytes": 0,
+    "vision_artifact_download_bytes": 0,
+    "allowed_support_runtime_download": "approximately 220.2 MB as reported by Lemonade",
+    "support_runtime_note": "Lemonade updated its cached ROCm llama.cpp support package to b10454 inside the rootless Podman volume; no model weights were fetched."
+  },
+  "method": {
+    "cases": 10,
+    "domains": ["chat", "code", "json-tool", "multilingual", "reasoning"],
+    "modes": ["nonthinking", "thinking"],
+    "context_buckets": ["short"],
+    "target_tokens_per_case": 12,
+    "proposal_positions_per_case": 7,
+    "proposal_count": 70,
+    "proposal_lengths_scored": [1, 2, 4, 6],
+    "prompt_contract": "Qwen3.8 applied its own chat template and tokenizer. The exact resulting token arrays plus each authoritative target suffix were supplied directly to the Qwen3.6 /completion endpoint. Qwen3.6 never independently rendered or tokenized the prompts.",
+    "sampling": "temperature=0, top_k=1, top_p=1, min_p=0, seed=1",
+    "prefix_identity": "pass"
+  },
+  "aggregate": {
+    "first_token_agreement_percent": 61.43,
+    "zero_acceptance_percent": 38.57,
+    "mean_accepted_tokens_at_6": 2.957,
+    "accepted_run_p50_at_6": 2.0,
+    "accepted_run_p95_at_6": 6.0,
+    "full_6_token_acceptance_percent": 40.0
+  },
+  "by_mode": {
+    "nonthinking": {
+      "proposals": 35,
+      "first_token_agreement_percent": 94.29,
+      "zero_acceptance_percent": 5.71,
+      "mean_accepted_tokens_at_6": 4.771,
+      "accepted_run_p50_at_6": 6.0,
+      "accepted_run_p95_at_6": 6.0,
+      "full_6_token_acceptance_percent": 62.86
+    },
+    "thinking": {
+      "proposals": 35,
+      "first_token_agreement_percent": 28.57,
+      "zero_acceptance_percent": 71.43,
+      "mean_accepted_tokens_at_6": 1.143,
+      "accepted_run_p50_at_6": 0.0,
+      "accepted_run_p95_at_6": 6.0,
+      "full_6_token_acceptance_percent": 17.14
+    }
+  },
+  "by_domain_and_mode": {
+    "chat/nonthinking": {"first_token_agreement_percent": 85.71, "zero_acceptance_percent": 14.29, "mean_accepted_tokens_at_6": 3.0},
+    "chat/thinking": {"first_token_agreement_percent": 42.86, "zero_acceptance_percent": 57.14, "mean_accepted_tokens_at_6": 2.571},
+    "code/nonthinking": {"first_token_agreement_percent": 100.0, "zero_acceptance_percent": 0.0, "mean_accepted_tokens_at_6": 5.857},
+    "code/thinking": {"first_token_agreement_percent": 42.86, "zero_acceptance_percent": 57.14, "mean_accepted_tokens_at_6": 1.857},
+    "json-tool/nonthinking": {"first_token_agreement_percent": 100.0, "zero_acceptance_percent": 0.0, "mean_accepted_tokens_at_6": 6.0},
+    "json-tool/thinking": {"first_token_agreement_percent": 14.29, "zero_acceptance_percent": 85.71, "mean_accepted_tokens_at_6": 0.143},
+    "multilingual/nonthinking": {"first_token_agreement_percent": 85.71, "zero_acceptance_percent": 14.29, "mean_accepted_tokens_at_6": 3.0},
+    "multilingual/thinking": {"first_token_agreement_percent": 28.57, "zero_acceptance_percent": 71.43, "mean_accepted_tokens_at_6": 1.0},
+    "reasoning/nonthinking": {"first_token_agreement_percent": 100.0, "zero_acceptance_percent": 0.0, "mean_accepted_tokens_at_6": 6.0},
+    "reasoning/thinking": {"first_token_agreement_percent": 14.29, "zero_acceptance_percent": 85.71, "mean_accepted_tokens_at_6": 0.143}
+  },
+  "screen_gate": {
+    "minimum_first_token_agreement_percent_per_mode": 50,
+    "maximum_zero_acceptance_percent_per_mode": 50,
+    "failing_modes": ["thinking"],
+    "promising_modes": ["nonthinking"],
+    "decision": "do-not-expand-general-proxy"
+  },
+  "interpretation": "The cross-version proxy is not suitable as a general thinking/non-thinking drafter. Non-thinking agreement is promising enough for an optional bounded latency/context check, but this canary does not authorize Q4NX, NPU, or other model downloads.",
+  "limitations": [
+    "Only short contexts were measured; the full context-bucket corpus is intentionally not claimed complete.",
+    "The GPU proxy request timings include llama.cpp service overhead and are not evidence of NPU proposal latency.",
+    "Overlapping positions from each fixed 12-token target continuation are correlated, so proposal count is not equivalent to 70 independent prompts."
+  ],
+  "raw_state_records": [
+    "/var/opt/halo-ai/state/benchmarks/stage3/qwen38-target-canary-2026-08-16.json",
+    "/var/opt/halo-ai/state/benchmarks/stage3/qwen36-proxy-canary-2026-08-16.json",
+    "/var/opt/halo-ai/state/benchmarks/stage3/qwen36-proxy-canary-2026-08-16.score.json"
+  ]
+}

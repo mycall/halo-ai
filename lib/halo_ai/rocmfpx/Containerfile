@@ -1,0 +1,41 @@
+ARG ROCM_BASE=docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b
+ARG VULKAN_BASE=docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:8cdde6d42ab621b3d0f1e02618f4234c58b7036bec984a2a64fa205d38f99922
+
+FROM ${ROCM_BASE} AS rocm
+FROM ${VULKAN_BASE}
+
+USER root
+
+# The upstream v1.0.0 engine links both its HIP and Vulkan plugins into
+# libggml.so. Copy the ROCm runtime from its immutable image while retaining
+# the immutable RADV image as the final userspace and Vulkan provider.
+COPY --from=rocm /opt/rocm /opt/rocm
+
+RUN set -eu; \
+    archive=/tmp/strix-halo-rocmfpx-engine.tar.gz; \
+    curl --fail --location --silent --show-error \
+      https://github.com/julianmb/q38rocm/releases/download/v1.0.0/strix-halo-rocmfpx-engine-v1.0.0-linux-x86_64.tar.gz \
+      --output "$archive"; \
+    echo 'bbc7845db0c012b97f1c9b8a2733a7083c6f9a749a453866fbe1994151d3364f  /tmp/strix-halo-rocmfpx-engine.tar.gz' | sha256sum --check --strict; \
+    mkdir -p /opt/rocmfpx; \
+    tar --extract --gzip --file "$archive" --directory /opt/rocmfpx --strip-components=1; \
+    test -x /opt/rocmfpx/bin/llama-server; \
+    rm -f "$archive"
+
+ENV PATH=/opt/rocmfpx/bin:/opt/rocm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV LD_LIBRARY_PATH=/opt/rocmfpx/bin:/opt/rocm/lib:/opt/rocm/core/lib
+ENV AMD_VULKAN_ICD=RADV
+ENV VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/radeon_icd.x86_64.json
+
+LABEL org.opencontainers.image.title="Halo AI ROCmFPX runtime"
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.source="https://github.com/julianmb/q38rocm"
+LABEL org.opencontainers.image.revision="66de2f3bc625249eabff5bd919fd6dbdd3d7ccaa"
+LABEL local.halo-ai.engine="rocmfpx"
+LABEL local.halo-ai.engine-archive-sha256="bbc7845db0c012b97f1c9b8a2733a7083c6f9a749a453866fbe1994151d3364f"
+LABEL local.halo-ai.rocmfpx-source-claim="e87d53e-unresolved"
+LABEL local.halo-ai.rocm-base="sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b"
+LABEL local.halo-ai.vulkan-base="sha256:8cdde6d42ab621b3d0f1e02618f4234c58b7036bec984a2a64fa205d38f99922"
+
+ENTRYPOINT []
+CMD ["/opt/rocmfpx/bin/llama-server", "--help"]

@@ -34,6 +34,9 @@ python3 -m json.tool "$project_root/config/models.d/strix-halo.json" >/dev/null
 for preset in "$project_root"/config/request-presets.d/*.json; do
     python3 -m json.tool "$preset" >/dev/null
 done
+for result in "$project_root"/docs/results/*.json; do
+    python3 -m json.tool "$result" >/dev/null
+done
 
 python3 -m unittest discover -s "$project_root/tests" -p 'test_*.py'
 source_config="$project_root/config/halo-ai.env.example"
