@@ -83,8 +83,8 @@ class CatalogTests(unittest.TestCase):
             self.catalog = cli.load_catalog(self.config)
 
     def test_checked_in_catalog_validates(self) -> None:
-        self.assertEqual(len(self.catalog.models), 6)
-        self.assertEqual(len(self.catalog.profiles), 20)
+        self.assertEqual(len(self.catalog.models), 7)
+        self.assertEqual(len(self.catalog.profiles), 22)
 
     def test_mtp_cannot_combine_with_vision(self) -> None:
         models = {key: dict(value) for key, value in self.catalog.models.items()}
@@ -255,6 +255,53 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(plan["model"]["additional_download_bytes"], 14_562_236_384)
         self.assertIn("in-gguf-mtp", plan["selected_artifact_classes"])
         self.assertNotIn("q4nx", json.dumps(plan).lower())
+
+    def test_rocmfpx_strict_mtp_rejects_incompatible_ngram_composition(self) -> None:
+        profile = json.loads(json.dumps(
+            self.catalog.profiles["qwen38-27b-rocmfp4-mtp"]
+        ))
+        profile["features"].append("ngram")
+        with self.assertRaises(cli.HaloError):
+            cli.validate_catalog(self.catalog.models, {profile["id"]: profile})
+
+    def test_rocmfpx_fp8_profiles_are_explicit_gpu_only_artifacts(self) -> None:
+        model = self.catalog.models["qwen3.8-27b-rocmfp8"]
+        self.assertEqual(model["quantization"], "Q8_0_ROCMFPX")
+        self.assertEqual(model["engines"], ["rocmfpx"])
+        self.assertEqual(model["modalities"], ["text"])
+        self.assertEqual(model["files"][0]["bytes"], 28_193_396_704)
+        self.assertEqual(
+            model["files"][0]["sha256"],
+            "0bf5bfc9f946090af2d41b388ccb4d627e916c7250517c36a0de37d6eaccfd8e",
+        )
+        self.assertEqual(model["gguf_expectations"]["metadata"]["general.file_type"], 111)
+        self.assertEqual(
+            model["gguf_expectations"]["tensor_type_counts"], {"0": 360, "103": 506},
+        )
+
+        baseline = self.catalog.profiles["qwen38-27b-rocmfp8-baseline"]
+        rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, baseline)
+        )
+        self.assertIn("Qwen3.8-27B-ROCmFP8.gguf,ro", rendered)
+        self.assertIn("--spec-type none", rendered)
+        self.assertNotIn("draft-mtp", rendered)
+        with mock.patch.object(cli, "rocmfpx_image_valid", return_value=True):
+            plan = cli.profile_acquisition_plan(self.config, self.catalog, baseline)
+        self.assertEqual(plan["selected_artifact_classes"], ["fp8", "rocmfpx-runtime"])
+        self.assertEqual(
+            plan["excluded_artifact_classes"],
+            ["fp4", "npu", "vision", "bf16", "reference"],
+        )
+        self.assertEqual(plan["model"]["files"][0]["bytes"], 28_193_396_704)
+
+        mtp = self.catalog.profiles["qwen38-27b-rocmfp8-mtp"]
+        mtp_rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, mtp)
+        )
+        self.assertIn("--spec-type draft-mtp", mtp_rendered)
+        self.assertIn("--spec-mtp-strict-qwen", mtp_rendered)
+        self.assertNotIn("--device=/dev/kfd", mtp_rendered)
 
     def test_rocmfpx_recipe_pins_archive_and_bases(self) -> None:
         recipe = (ROOT / "lib/halo_ai/rocmfpx/Containerfile").read_text(encoding="utf-8")
@@ -449,6 +496,27 @@ class ModelTests(unittest.TestCase):
 
 
 class TrialTests(unittest.TestCase):
+    def test_exited_container_has_no_live_cgroup_oom_counter(self) -> None:
+        result = mock.MagicMock(returncode=0, stdout="0\n")
+        with mock.patch.object(cli, "podman", return_value=result):
+            self.assertIsNone(cli.container_oom_kill_count("fixture"))
+
+    def test_start_failure_preserves_backend_error_for_diagnostics(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            config = make_config(Path(temporary))
+            logs = mock.MagicMock(
+                stdout="0.03 E srv load_model: strict rollback is unavailable\n",
+                stderr="",
+            )
+            trial: dict[str, object] = {}
+            with (
+                mock.patch.object(cli, "podman", return_value=logs),
+                mock.patch.object(cli, "container_oom_kill_count", return_value=None),
+            ):
+                cli.record_start_failure(config, trial, "fixture", "readiness failed")
+            self.assertIn("strict rollback is unavailable", trial["backend_error"])
+            self.assertIn("load_model", trial["log_excerpt"])
+
     def test_rocmfpx_smoke_forces_deterministic_nonthinking_request(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             config = make_config(Path(temporary))
@@ -655,17 +723,70 @@ class LongBenchTests(unittest.TestCase):
 
 
 class RocmFpxTuningTests(unittest.TestCase):
-    def test_stage3_corpus_can_bound_one_promising_mode_and_context(self) -> None:
-        cases = cli.stage3_corpus(
-            "canary", mode_filter="nonthinking", context_filter="4k",
+    def test_unique_context_text_is_deterministic_and_line_variant(self) -> None:
+        first = cli.rocmfpx_unique_benchmark_text(3)
+        self.assertEqual(first, cli.rocmfpx_unique_benchmark_text(3))
+        self.assertIn("Record 000000", first)
+        self.assertIn("Record 000002", first)
+        self.assertEqual(first.count("\n"), 3)
+
+    def test_context_benchmark_summary_uses_medians_and_peak_memory(self) -> None:
+        runs = [
+            {
+                "prompt_tokens": 4095,
+                "ttft_seconds": 10.0,
+                "prompt_tokens_per_second": 100.0,
+                "decode_tokens_per_second": 10.0,
+                "peak_gtt_bytes": 20,
+                "peak_vram_bytes": 4,
+                "drafted_tokens": 10,
+                "accepted_tokens": 8,
+            },
+            {
+                "prompt_tokens": 4095,
+                "ttft_seconds": 12.0,
+                "prompt_tokens_per_second": 120.0,
+                "decode_tokens_per_second": 12.0,
+                "peak_gtt_bytes": 30,
+                "peak_vram_bytes": 5,
+                "drafted_tokens": 10,
+                "accepted_tokens": 10,
+            },
+        ]
+        result = cli.rocmfpx_tune.summarize_context_runs(runs)
+        self.assertEqual(result[0]["ttft_seconds_median"], 11.0)
+        self.assertEqual(result[0]["prompt_tokens_per_second_median"], 110.0)
+        self.assertEqual(result[0]["decode_tokens_per_second_median"], 11.0)
+        self.assertEqual(result[0]["peak_gtt_bytes_max"], 30)
+        self.assertEqual(result[0]["acceptance_percent"], 90.0)
+
+    def test_context_comparison_reports_end_to_end_crossover(self) -> None:
+        def record(profile: str, ttft: float, pp: float, tps: float) -> dict[str, object]:
+            return {
+                "kind": "halo-ai-rocmfpx-context-benchmark",
+                "profile": profile,
+                "runs": [{
+                    "prompt_tokens": 4095, "completion_tokens": 64,
+                    "repetition": 1, "prompt_sha256": "same",
+                }],
+                "summary": [{
+                    "prompt_tokens": 4095,
+                    "ttft_seconds_median": ttft,
+                    "prompt_tokens_per_second_median": pp,
+                    "decode_tokens_per_second_median": tps,
+                    "peak_gtt_bytes_max": 100,
+                    "acceptance_percent": 90.0,
+                }],
+            }
+
+        result = cli.rocmfpx_tune.compare_context_records(
+            record("baseline", 20.0, 200.0, 10.0),
+            record("candidate", 22.0, 180.0, 20.0),
         )
-        self.assertEqual(len(cases), 5)
-        self.assertEqual({item["mode"] for item in cases}, {"nonthinking"})
-        self.assertEqual({item["context_bucket"] for item in cases}, {"4k"})
-        self.assertEqual(
-            {item["domain"] for item in cases},
-            cli.rocmfpx_tune.REQUIRED_STAGE3_DOMAINS,
-        )
+        context = result["contexts"][0]
+        self.assertEqual(context["candidate_faster_after_generated_tokens"], 40)
+        self.assertEqual(context["decode_speed_change_percent"], 100.0)
+        self.assertTrue(result["identical_prompt_tokens"])
 
     def test_recorded_mtp_result_is_faster_but_held_experimental(self) -> None:
         baseline = json.loads((
@@ -691,85 +812,6 @@ class RocmFpxTuningTests(unittest.TestCase):
         candidate = {"benchmarks": [{"prompt_tokens": 4096}]}
         with self.assertRaises(cli.rocmfpx_tune.TuneError):
             cli.rocmfpx_tune.compare_mtp_records(baseline, candidate)
-
-    @staticmethod
-    def stage3_record() -> dict[str, object]:
-        proposals = []
-        domains = sorted(cli.rocmfpx_tune.REQUIRED_STAGE3_DOMAINS)
-        modes = sorted(cli.rocmfpx_tune.REQUIRED_STAGE3_MODES)
-        buckets = ["short", "4k", "32k"]
-        for index, domain in enumerate(domains):
-            for mode in modes:
-                prefix = cli.rocmfpx_tune.token_sha256([1, 2, index])
-                proposals.append({
-                    "case_id": f"{domain}-{mode}",
-                    "domain": domain,
-                    "mode": mode,
-                    "context_bucket": buckets[index % len(buckets)],
-                    "target_prefix_sha256": prefix,
-                    "draft_prefix_sha256": prefix,
-                    "target_tokens": [10, 11, 12, 13, 14, 15],
-                    "draft_tokens": [10, 11, 99, 13, 14, 15],
-                })
-        return {
-            "schema_version": 1,
-            "kind": "halo-ai-stage3-version-mix",
-            "target_model_family": "Qwen3.8",
-            "draft_model_family": "Qwen3.6",
-            "target_tokenizer_owner": "Qwen3.8",
-            "target_model": "target",
-            "draft_model": "proxy",
-            "proposals": proposals,
-        }
-
-    def test_stage3_score_reports_each_required_proposal_length(self) -> None:
-        result = cli.rocmfpx_tune.score_stage3_records(self.stage3_record())
-        self.assertTrue(result["prefix_identity_verified"])
-        self.assertTrue(result["corpus_complete"])
-        self.assertEqual(result["decision"], "measure-latency")
-        aggregate = result["metrics"]["aggregate"]["all"]
-        self.assertEqual(sorted(aggregate), ["1", "2", "4", "6"])
-        self.assertEqual(aggregate["6"]["mean_accepted_tokens"], 2.0)
-        self.assertEqual(aggregate["1"]["full_proposal_acceptance_percent"], 100.0)
-
-    def test_stage3_score_rejects_independently_rendered_prefix(self) -> None:
-        document = self.stage3_record()
-        document["proposals"][0]["draft_prefix_sha256"] = "0" * 64
-        with self.assertRaises(cli.rocmfpx_tune.TuneError):
-            cli.rocmfpx_tune.score_stage3_records(document)
-
-    def test_stage3_screen_stops_expansion_when_one_mode_mostly_misses(self) -> None:
-        document = self.stage3_record()
-        for proposal in document["proposals"]:
-            if proposal["mode"] == "thinking":
-                proposal["draft_tokens"][0] = 999
-        result = cli.rocmfpx_tune.score_stage3_records(document)
-        self.assertEqual(result["decision"], "do-not-expand-general-proxy")
-        self.assertEqual(result["screen_gate"]["failing_modes"], ["thinking"])
-        self.assertIn("chat/thinking", result["metrics"]["domain_mode"])
-
-    def test_stage3_preflight_never_calls_a_downloader(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            config = make_config(Path(temporary))
-            catalog = cli.load_catalog(config)
-            states = [
-                {"model": "target", "present": True, "full_sha256_verified": True},
-                {"model": "proxy", "present": True, "full_sha256_verified": True},
-            ]
-            with (
-                mock.patch.object(cli, "stage3_model_state", side_effect=states),
-                mock.patch.object(cli, "download_catalog_model") as downloader,
-                mock.patch("builtins.print") as output,
-            ):
-                result = cli.command_tune_stage3_preflight(
-                    config, catalog, __import__("argparse").Namespace(full=False),
-                )
-            self.assertEqual(result, 0)
-            downloader.assert_not_called()
-            document = json.loads(output.call_args.args[0])
-            self.assertEqual(document["decision"], "ready-for-version-mix-capture")
-            self.assertEqual(document["artifact_policy"]["additional_model_download_bytes"], 0)
-            self.assertFalse(document["artifact_policy"]["q4nx_authorized"])
 
     def test_mtp_payload_replaces_baseline_speculation_mode(self) -> None:
         profile = {

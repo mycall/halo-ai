@@ -1,25 +1,16 @@
-"""Pure scoring helpers for ROCmFPX and speculative-draft experiments."""
+"""Pure same-host ROCmFPX tuning record helpers."""
 
 from __future__ import annotations
 
-import hashlib
 import json
 import math
-import re
 import statistics
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 
 class TuneError(ValueError):
     """A malformed or incomparable tuning record."""
-
-
-PROPOSAL_LENGTHS = (1, 2, 4, 6)
-REQUIRED_STAGE3_DOMAINS = {
-    "chat", "code", "json-tool", "multilingual", "reasoning",
-}
-REQUIRED_STAGE3_MODES = {"thinking", "nonthinking"}
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -132,160 +123,146 @@ def compare_mtp_records(
     }
 
 
-def token_sha256(tokens: Iterable[int]) -> str:
-    canonical = json.dumps(list(tokens), separators=(",", ":"))
-    return hashlib.sha256(canonical.encode("ascii")).hexdigest()
-
-
-def _percentile(values: list[int], percentile: float) -> float:
-    if not values:
-        return 0.0
-    ordered = sorted(values)
-    rank = max(0, math.ceil(percentile * len(ordered)) - 1)
-    return float(ordered[rank])
-
-
-def _score_group(records: list[dict[str, Any]], proposal_length: int) -> dict[str, Any]:
-    accepted_runs: list[int] = []
-    first_token_matches = 0
-    for record in records:
-        target = record["target_tokens"]
-        draft = record["draft_tokens"][:proposal_length]
-        accepted = 0
-        for expected, proposed in zip(target, draft):
-            if expected != proposed:
-                break
-            accepted += 1
-        accepted_runs.append(accepted)
-        first_token_matches += int(bool(draft) and bool(target) and draft[0] == target[0])
-    count = len(accepted_runs)
-    return {
-        "proposals": count,
-        "proposal_length": proposal_length,
-        "first_token_agreement_percent": round(first_token_matches * 100 / count, 2),
-        "zero_acceptance_percent": round(sum(value == 0 for value in accepted_runs) * 100 / count, 2),
-        "mean_accepted_tokens": round(statistics.fmean(accepted_runs), 3),
-        "accepted_run_p50": _percentile(accepted_runs, 0.50),
-        "accepted_run_p95": _percentile(accepted_runs, 0.95),
-        "full_proposal_acceptance_percent": round(
-            sum(value == proposal_length for value in accepted_runs) * 100 / count, 2,
-        ),
-    }
-
-
-def score_stage3_records(document: dict[str, Any]) -> dict[str, Any]:
-    """Score token proposals captured from exact target-rendered prefixes."""
-    if document.get("schema_version") != 1:
-        raise TuneError("Stage 3 record schema_version must be 1")
-    if document.get("kind") != "halo-ai-stage3-version-mix":
-        raise TuneError("not a halo-ai Stage 3 version-mix record")
-    if document.get("target_model_family") != "Qwen3.8":
-        raise TuneError("the sole Stage 3 verifier must be Qwen3.8")
-    if document.get("draft_model_family") != "Qwen3.6":
-        raise TuneError("this no-download proxy scorer is restricted to Qwen3.6")
-    if document.get("target_tokenizer_owner") != "Qwen3.8":
-        raise TuneError("prompts must be rendered and tokenized by Qwen3.8")
-    records = document.get("proposals")
-    if not isinstance(records, list) or not records:
-        raise TuneError("Stage 3 record contains no proposals")
-
-    normalized: list[dict[str, Any]] = []
-    for index, record in enumerate(records):
-        if not isinstance(record, dict):
-            raise TuneError(f"proposal {index} is not an object")
-        target = record.get("target_tokens")
-        draft = record.get("draft_tokens")
-        if (
-            not isinstance(target, list) or not target
-            or not isinstance(draft, list) or len(draft) < max(PROPOSAL_LENGTHS)
-            or any(not isinstance(token, int) or token < 0 for token in target + draft)
+def summarize_context_runs(runs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Summarize repeated cold-cache ROCmFPX context runs by prompt length."""
+    if not runs:
+        raise TuneError("ROCmFPX benchmark has no runs")
+    grouped: dict[int, list[dict[str, Any]]] = {}
+    required = (
+        "prompt_tokens", "ttft_seconds", "prompt_tokens_per_second",
+        "decode_tokens_per_second", "peak_gtt_bytes", "peak_vram_bytes",
+    )
+    for index, run in enumerate(runs):
+        if not isinstance(run, dict) or any(
+            not isinstance(run.get(key), (int, float)) for key in required
         ):
-            raise TuneError(f"proposal {index} has invalid target/draft token IDs")
-        target_hash = record.get("target_prefix_sha256")
-        draft_hash = record.get("draft_prefix_sha256")
-        if (
-            not isinstance(target_hash, str)
-            or re.fullmatch(r"[0-9a-f]{64}", target_hash) is None
-            or target_hash != draft_hash
-        ):
-            raise TuneError(f"proposal {index} was not produced from an identical token prefix")
-        domain = record.get("domain")
-        mode = record.get("mode")
-        bucket = record.get("context_bucket")
-        if domain not in REQUIRED_STAGE3_DOMAINS:
-            raise TuneError(f"proposal {index} has unsupported domain {domain!r}")
-        if mode not in REQUIRED_STAGE3_MODES:
-            raise TuneError(f"proposal {index} has unsupported mode {mode!r}")
-        if bucket not in {"short", "4k", "32k"}:
-            raise TuneError(f"proposal {index} has unsupported context bucket {bucket!r}")
-        normalized.append(record)
+            raise TuneError(f"ROCmFPX benchmark run {index} is missing numeric metrics")
+        prompt_tokens = run["prompt_tokens"]
+        if not isinstance(prompt_tokens, int) or prompt_tokens < 1:
+            raise TuneError(f"ROCmFPX benchmark run {index} has invalid prompt tokens")
+        grouped.setdefault(prompt_tokens, []).append(run)
 
-    domains = {record["domain"] for record in normalized}
-    modes = {record["mode"] for record in normalized}
-    missing_domains = sorted(REQUIRED_STAGE3_DOMAINS - domains)
-    missing_modes = sorted(REQUIRED_STAGE3_MODES - modes)
-    grouped: dict[str, Any] = {}
-    dimensions = {
-        "aggregate": {"all": normalized},
-        "domain": {value: [item for item in normalized if item["domain"] == value] for value in sorted(domains)},
-        "domain_mode": {
-            f"{domain}/{mode}": [
-                item for item in normalized
-                if item["domain"] == domain and item["mode"] == mode
-            ]
-            for domain in sorted(domains)
-            for mode in sorted(modes)
-        },
-        "context_bucket": {value: [item for item in normalized if item["context_bucket"] == value] for value in sorted({item["context_bucket"] for item in normalized})},
-        "mode": {value: [item for item in normalized if item["mode"] == value] for value in sorted(modes)},
+    summaries = []
+    for prompt_tokens, items in sorted(grouped.items()):
+        drafted = sum(
+            item["drafted_tokens"] for item in items
+            if isinstance(item.get("drafted_tokens"), int)
+        )
+        accepted = sum(
+            item["accepted_tokens"] for item in items
+            if isinstance(item.get("accepted_tokens"), int)
+        )
+        summaries.append({
+            "prompt_tokens": prompt_tokens,
+            "repetitions": len(items),
+            "ttft_seconds_median": round(statistics.median(
+                item["ttft_seconds"] for item in items
+            ), 6),
+            "prompt_tokens_per_second_median": round(statistics.median(
+                item["prompt_tokens_per_second"] for item in items
+            ), 6),
+            "decode_tokens_per_second_median": round(statistics.median(
+                item["decode_tokens_per_second"] for item in items
+            ), 6),
+            "peak_gtt_bytes_max": max(item["peak_gtt_bytes"] for item in items),
+            "peak_vram_bytes_max": max(item["peak_vram_bytes"] for item in items),
+            "drafted_tokens": drafted or None,
+            "accepted_tokens": accepted or None,
+            "acceptance_percent": (
+                round(accepted * 100 / drafted, 2) if drafted else None
+            ),
+        })
+    return summaries
+
+
+def compare_context_records(
+    baseline: dict[str, Any], candidate: dict[str, Any],
+) -> dict[str, Any]:
+    """Compare exact-token ROCmFPX context records, including E2E crossover."""
+    expected_kind = "halo-ai-rocmfpx-context-benchmark"
+    if baseline.get("kind") != expected_kind or candidate.get("kind") != expected_kind:
+        raise TuneError("context comparison requires ROCmFPX context benchmark records")
+    baseline_runs = baseline.get("runs")
+    candidate_runs = candidate.get("runs")
+    if not isinstance(baseline_runs, list) or not isinstance(candidate_runs, list):
+        raise TuneError("context comparison record has no runs")
+    before_keys = {
+        (item.get("prompt_tokens"), item.get("repetition")): item.get("prompt_sha256")
+        for item in baseline_runs if isinstance(item, dict)
     }
-    for dimension, groups in dimensions.items():
-        grouped[dimension] = {
-            name: {str(length): _score_group(items, length) for length in PROPOSAL_LENGTHS}
-            for name, items in groups.items()
-        }
-    corpus_complete = not missing_domains and not missing_modes and {
-        "short", "4k", "32k",
-    } <= {record["context_bucket"] for record in normalized}
-    mode_one = {
-        mode: grouped["mode"][mode]["1"]
-        for mode in sorted(modes)
+    after_keys = {
+        (item.get("prompt_tokens"), item.get("repetition")): item.get("prompt_sha256")
+        for item in candidate_runs if isinstance(item, dict)
     }
-    failing_modes = [
-        mode for mode, metrics in mode_one.items()
-        if metrics["first_token_agreement_percent"] < 50
-        or metrics["zero_acceptance_percent"] > 50
-    ]
-    promising_modes = [
-        mode for mode in sorted(modes)
-        if grouped["mode"][mode]["1"]["first_token_agreement_percent"] >= 80
-        and grouped["mode"][mode]["6"]["mean_accepted_tokens"] >= 3
-    ]
-    if failing_modes:
-        decision = "do-not-expand-general-proxy"
-    elif corpus_complete:
-        decision = "measure-latency"
-    else:
-        decision = "incomplete-corpus"
+    if not before_keys or before_keys != after_keys:
+        raise TuneError("context records do not contain identical prompt-token runs")
+    baseline_summary = {
+        item.get("prompt_tokens"): item for item in baseline.get("summary", [])
+        if isinstance(item, dict)
+    }
+    candidate_summary = {
+        item.get("prompt_tokens"): item for item in candidate.get("summary", [])
+        if isinstance(item, dict)
+    }
+    if not baseline_summary or baseline_summary.keys() != candidate_summary.keys():
+        raise TuneError("context record summaries differ")
+    completion_counts = {
+        item.get("completion_tokens") for item in baseline_runs + candidate_runs
+        if isinstance(item, dict)
+    }
+    if len(completion_counts) != 1 or not isinstance(next(iter(completion_counts)), int):
+        raise TuneError("context records use different completion-token counts")
+    completion_tokens = next(iter(completion_counts))
+
+    rows = []
+    for prompt_tokens in sorted(baseline_summary):
+        before = baseline_summary[prompt_tokens]
+        after = candidate_summary[prompt_tokens]
+        required = (
+            "ttft_seconds_median", "prompt_tokens_per_second_median",
+            "decode_tokens_per_second_median", "peak_gtt_bytes_max",
+        )
+        if any(
+            not isinstance(item.get(key), (int, float))
+            for item in (before, after) for key in required
+        ):
+            raise TuneError(f"context {prompt_tokens} has incomplete summary metrics")
+        baseline_tps = before["decode_tokens_per_second_median"]
+        candidate_tps = after["decode_tokens_per_second_median"]
+        prefill_delta = after["ttft_seconds_median"] - before["ttft_seconds_median"]
+        decode_savings = 1 / baseline_tps - 1 / candidate_tps
+        if prefill_delta <= 0 and decode_savings >= 0:
+            crossover = 0
+        elif prefill_delta > 0 and decode_savings > 0:
+            crossover = math.ceil(prefill_delta / decode_savings)
+        else:
+            crossover = None
+        baseline_e2e = before["ttft_seconds_median"] + completion_tokens / baseline_tps
+        candidate_e2e = after["ttft_seconds_median"] + completion_tokens / candidate_tps
+        rows.append({
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "ttft_change_percent": _percent(
+                after["ttft_seconds_median"], before["ttft_seconds_median"],
+            ),
+            "prompt_speed_change_percent": _percent(
+                after["prompt_tokens_per_second_median"],
+                before["prompt_tokens_per_second_median"],
+            ),
+            "decode_speed_change_percent": _percent(candidate_tps, baseline_tps),
+            "peak_gtt_change_bytes": after["peak_gtt_bytes_max"] - before["peak_gtt_bytes_max"],
+            "end_to_end_seconds_at_measured_completion": round(candidate_e2e, 6),
+            "end_to_end_change_percent_at_measured_completion": _percent(
+                candidate_e2e, baseline_e2e,
+            ),
+            "candidate_faster_after_generated_tokens": crossover,
+            "candidate_acceptance_percent": after.get("acceptance_percent"),
+        })
     return {
         "schema_version": 1,
-        "kind": "halo-ai-stage3-version-mix-score",
-        "target_model": document.get("target_model"),
-        "draft_model": document.get("draft_model"),
-        "proposal_count": len(normalized),
-        "prefix_identity_verified": True,
-        "corpus_complete": corpus_complete,
-        "missing_domains": missing_domains,
-        "missing_modes": missing_modes,
-        "metrics": grouped,
-        "screen_gate": {
-            "minimum_first_token_agreement_percent_per_mode": 50,
-            "maximum_zero_acceptance_percent_per_mode": 50,
-            "promising_mode_first_token_agreement_percent": 80,
-            "promising_mode_mean_accepted_tokens_at_6": 3,
-            "failing_modes": failing_modes,
-            "promising_modes": promising_modes,
-        },
-        "download_authorized": False,
-        "decision": decision,
+        "kind": "halo-ai-rocmfpx-context-comparison",
+        "baseline_profile": baseline.get("profile"),
+        "candidate_profile": candidate.get("profile"),
+        "identical_prompt_tokens": True,
+        "contexts": rows,
     }

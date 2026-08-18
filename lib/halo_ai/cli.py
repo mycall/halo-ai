@@ -22,6 +22,7 @@ import struct
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -402,6 +403,8 @@ def validate_catalog(models: dict[str, dict[str, Any]], profiles: dict[str, dict
             fail(f"profile {identifier} has invalid load mode")
         if "mtp" in features and ("vision" in features or settings.get("parallel") != 1):
             fail(f"profile {identifier} violates MTP vision/parallel constraints")
+        if "ngram" in features:
+            fail(f"profile {identifier} cannot combine ngram with strict Qwen MTP in ROCmFPX build 213")
         if "vision" in features and not any(item["role"] == "mmproj" for item in models[model_id]["files"]):
             fail(f"profile {identifier} lacks a cataloged projector")
         if "dspark" in features and not any(item["role"] == "dspark" for item in models[model_id]["files"]):
@@ -1216,13 +1219,17 @@ def container_oom_kill_count(container: str) -> int | None:
     if result.returncode != 0 or not result.stdout.strip().isdigit():
         return None
     pid = result.stdout.strip()
+    if pid == "0":
+        return None
     try:
         cgroup = next(
             line.split(":", 2)[2]
-            for line in read_text(Path(f"/proc/{pid}/cgroup")).splitlines()
+            for line in Path(f"/proc/{pid}/cgroup").read_text(encoding="utf-8").splitlines()
             if line.startswith("0::")
         )
-        events = read_text(Path("/sys/fs/cgroup") / cgroup.lstrip("/") / "memory.events")
+        events = (
+            Path("/sys/fs/cgroup") / cgroup.lstrip("/") / "memory.events"
+        ).read_text(encoding="utf-8")
         values = dict(line.split() for line in events.splitlines())
         return int(values.get("oom_kill", "0"))
     except (OSError, StopIteration, ValueError):
@@ -1386,6 +1393,14 @@ def refuse_same_boot_retry(config: Config, profile: dict[str, Any], model: dict[
 def record_start_failure(config: Config, trial: dict[str, Any], container: str, error: str) -> None:
     result = podman(["logs", "--tail", "200", container], check=False, capture=True)
     excerpt = ((result.stdout or "") + (result.stderr or ""))[-12000:]
+    if excerpt:
+        trial["log_excerpt"] = excerpt
+        error_lines = [
+            line.strip() for line in excerpt.splitlines()
+            if re.search(r"(?:^|\s)E\s", line) or "error" in line.lower()
+        ]
+        if error_lines:
+            trial["backend_error"] = error_lines[-1][-1000:]
     combined = f"{error}\n{excerpt}".lower()
     patterns = ("out of memory", "outofmemory", "hiperroroutofmemory", "memory allocation", "cannot allocate memory")
     before = trial.get("cgroup_oom_kill_before")
@@ -1779,17 +1794,24 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
             "source_provenance": "upstream binary reports build 213 (e87d53e); full source SHA unresolved",
             "additional_download_bytes": 0 if installed else ROCMFPX_ENGINE_BYTES,
         })
+    rocmfpx_artifact_class = (
+        "fp8" if model.get("quantization") == "Q8_0_ROCMFPX" else "fp4"
+    )
+    excluded_quantization = "fp4" if rocmfpx_artifact_class == "fp8" else "fp8"
     return {
         "schema_version": 1,
         "profile": profile["id"],
         "runtime": runtime,
         "model": model_plan,
         "selected_artifact_classes": (
-            ["fp4", "rocmfpx-runtime"]
+            [rocmfpx_artifact_class, "rocmfpx-runtime"]
             + (["in-gguf-mtp"] if "mtp" in profile.get("features", []) else [])
             if engine == "rocmfpx" else ["model", "runtime"]
         ),
-        "excluded_artifact_classes": ["fp8", "npu", "vision", "bf16", "reference"],
+        "excluded_artifact_classes": (
+            [excluded_quantization, "npu", "vision", "bf16", "reference"]
+            if engine == "rocmfpx" else ["fp8", "npu", "vision", "bf16", "reference"]
+        ),
         "total_additional_download_bytes": (
             model_plan["additional_download_bytes"] + runtime["additional_download_bytes"]
         ),
@@ -2214,7 +2236,12 @@ def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) ->
             eprint("Start canceled by halo-ai stop.")
             return 130
         record_start_failure(config, trial, target_name, str(exc))
-        finish_trial(config, trial, "failed", str(exc))
+        detail = str(exc)
+        if trial.get("backend_error"):
+            detail = f"{detail}; backend: {trial['backend_error']}"
+        finish_trial(config, trial, "failed", detail)
+        if isinstance(exc, HaloError) and detail != str(exc):
+            raise HaloError(detail) from exc
         raise
 
 
@@ -2974,7 +3001,251 @@ def command_bench_score(args: argparse.Namespace) -> int:
     return 0
 
 
+ROCMFPX_BENCHMARK_SEED_TEXT = (
+    "Halo AI measures reproducible prompt processing and token generation on "
+    "the same local accelerator. This fixed text varies punctuation, words, "
+    "and numbers 0123456789 so the token stream is not a single repeated ID. "
+)
+
+ROCMFPX_BENCHMARK_WORDS = (
+    "amber", "anchor", "apricot", "atlas", "birch", "brisk", "canyon", "cedar",
+    "cobalt", "comet", "coral", "delta", "ember", "falcon", "fern", "fjord",
+    "garnet", "glade", "harbor", "hazel", "indigo", "iris", "jade", "juniper",
+    "lagoon", "lilac", "maple", "marble", "meadow", "meteor", "navy", "nectar",
+    "onyx", "opal", "orchid", "pebble", "pine", "plum", "quartz", "raven",
+    "river", "saffron", "sage", "silver", "spruce", "stone", "tango", "teal",
+    "thistle", "topaz", "umber", "valley", "velvet", "violet", "willow", "xenon",
+    "yarrow", "zephyr", "acorn", "basil", "cinder", "dune", "elm", "frost",
+)
+
+
+def rocmfpx_unique_benchmark_text(line_count: int) -> str:
+    """Build deterministic text whose 24-token spans do not intentionally repeat."""
+    state = 0x5EED1234
+    lines = []
+    for line in range(line_count):
+        words = []
+        for _ in range(32):
+            state = (1664525 * state + 1013904223) & 0xFFFFFFFF
+            words.append(ROCMFPX_BENCHMARK_WORDS[state % len(ROCMFPX_BENCHMARK_WORDS)])
+        lines.append(
+            f"Record {line:06d} checksum {state:08x}: {' '.join(words)}.\n"
+        )
+    return "".join(lines)
+
+
+def rocmfpx_memory_device() -> Path:
+    for candidate in sorted(Path("/sys/class/drm").glob("card*/device")):
+        if (
+            (candidate / "mem_info_vram_used").is_file()
+            and (candidate / "mem_info_gtt_used").is_file()
+        ):
+            return candidate
+    fail("no amdgpu DRM device exposes ROCmFPX benchmark memory counters")
+
+
+def command_bench_rocmfpx_context(
+    config: Config, catalog: Catalog, args: argparse.Namespace,
+) -> int:
+    profile = catalog.profiles.get(args.profile_id)
+    if not profile:
+        fail(f"unknown profile: {args.profile_id}")
+    if profile["engine"] != "rocmfpx":
+        fail("ROCmFPX context benchmark requires a rocmfpx profile")
+    try:
+        contexts = [int(value) for value in args.prompt_tokens.split(",")]
+    except ValueError:
+        fail("--prompt-tokens must be comma-separated integers")
+    if (
+        not contexts or contexts != sorted(set(contexts))
+        or any(value < 1 for value in contexts)
+    ):
+        fail("--prompt-tokens must be unique, increasing, positive integers")
+    if not 1 <= args.completion_tokens <= 4096:
+        fail("--completion-tokens must be in [1, 4096]")
+    if not 1 <= args.repetitions <= 10:
+        fail("--repetitions must be in [1, 10]")
+    if any(value + args.completion_tokens > profile["context"] for value in contexts):
+        fail("prompt plus completion tokens exceed the profile context")
+
+    active_path = state_path(config, "active-profile.json")
+    if not active_path.exists():
+        fail(f"start {profile['id']} before running the ROCmFPX context benchmark")
+    try:
+        active = json.loads(read_text(active_path))
+    except json.JSONDecodeError:
+        fail(f"active profile record is corrupt: {active_path}")
+    if active.get("profile") != profile["id"]:
+        fail(f"active profile is {active.get('profile')}; start {profile['id']} first")
+    container = container_name("rocmfpx")
+    running = podman([
+        "inspect", container, "--format", "{{.State.Running}}",
+    ], capture=True, check=False)
+    if running.returncode != 0 or running.stdout.strip() != "true":
+        fail(f"ROCmFPX container is not running: {container}")
+
+    port = port_for(config, "rocmfpx")
+    base_url = f"http://127.0.0.1:{port}"
+    if args.prompt_pattern == "repeated":
+        benchmark_text = ROCMFPX_BENCHMARK_SEED_TEXT
+        prompt_description = "repeated fixed varied token sequence, exact token count"
+    else:
+        line_count = max(256, max(contexts) // 20)
+        benchmark_text = rocmfpx_unique_benchmark_text(line_count)
+        prompt_description = "deterministic pseudo-random word records, exact token count"
+    tokenized = container_http_json(
+        container, f"{base_url}/tokenize", {"content": benchmark_text}, timeout=args.timeout,
+    )
+    seed_tokens = tokenized.get("tokens") if isinstance(tokenized, dict) else None
+    if (
+        not isinstance(seed_tokens, list) or not seed_tokens
+        or any(not isinstance(token, int) or token < 0 for token in seed_tokens)
+    ):
+        fail("ROCmFPX tokenizer returned an invalid benchmark token stream")
+    if args.prompt_pattern == "unique" and len(seed_tokens) < max(contexts):
+        fail("generated unique ROCmFPX benchmark text did not cover the requested context")
+
+    model = catalog.models[profile["model"]]
+    device = rocmfpx_memory_device()
+    runs: list[dict[str, Any]] = []
+    for prompt_tokens in contexts:
+        prompt = (
+            (seed_tokens * ((prompt_tokens + len(seed_tokens) - 1) // len(seed_tokens)))[:prompt_tokens]
+            if args.prompt_pattern == "repeated" else seed_tokens[:prompt_tokens]
+        )
+        prompt_sha256 = hashlib.sha256(
+            json.dumps(prompt, separators=(",", ":")).encode("ascii")
+        ).hexdigest()
+        for repetition in range(1, args.repetitions + 1):
+            peak_gtt = read_int(device / "mem_info_gtt_used")
+            peak_vram = read_int(device / "mem_info_vram_used")
+            minimum_available = meminfo_bytes("MemAvailable")
+            stop_sampling = threading.Event()
+            sampling_errors: list[str] = []
+
+            def sample_memory() -> None:
+                nonlocal peak_gtt, peak_vram, minimum_available
+                while not stop_sampling.wait(0.05):
+                    try:
+                        peak_gtt = max(peak_gtt, read_int(device / "mem_info_gtt_used"))
+                        peak_vram = max(peak_vram, read_int(device / "mem_info_vram_used"))
+                        minimum_available = min(minimum_available, meminfo_bytes("MemAvailable"))
+                    except OSError as exc:
+                        sampling_errors.append(str(exc))
+                        return
+
+            sampler = threading.Thread(target=sample_memory, daemon=True)
+            sampler.start()
+            started = time.monotonic()
+            try:
+                response = container_http_json(
+                    container, f"{base_url}/completion", {
+                        "prompt": prompt,
+                        "n_predict": args.completion_tokens,
+                        "temperature": 0,
+                        "seed": 1,
+                        "cache_prompt": False,
+                        "ignore_eos": True,
+                        "stream": False,
+                    }, timeout=args.timeout,
+                )
+            finally:
+                elapsed = time.monotonic() - started
+                stop_sampling.set()
+                sampler.join(timeout=2)
+                peak_gtt = max(peak_gtt, read_int(device / "mem_info_gtt_used"))
+                peak_vram = max(peak_vram, read_int(device / "mem_info_vram_used"))
+                minimum_available = min(minimum_available, meminfo_bytes("MemAvailable"))
+            if sampling_errors:
+                fail(f"ROCmFPX memory sampling failed: {sampling_errors[0]}")
+            timings = response.get("timings") if isinstance(response, dict) else None
+            if not isinstance(timings, dict):
+                fail("ROCmFPX benchmark response has no timings")
+            numeric = ("prompt_ms", "prompt_per_second", "predicted_per_second")
+            if any(not isinstance(timings.get(key), (int, float)) for key in numeric):
+                fail("ROCmFPX benchmark response has incomplete timing metrics")
+            if timings.get("prompt_n") != prompt_tokens or timings.get("cache_n") != 0:
+                fail("ROCmFPX benchmark did not process the exact cold prompt")
+            predicted = timings.get("predicted_n")
+            if not isinstance(predicted, int) or predicted != args.completion_tokens:
+                fail("ROCmFPX benchmark did not generate the requested token count")
+            drafted = timings.get("draft_n")
+            accepted = timings.get("draft_n_accepted")
+            if "mtp" in profile.get("features", []) and (
+                not isinstance(drafted, int) or drafted < 1
+                or not isinstance(accepted, int) or not 0 <= accepted <= drafted
+            ):
+                fail("ROCmFPX MTP benchmark returned invalid acceptance metrics")
+            run_record = {
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": predicted,
+                "repetition": repetition,
+                "prompt_sha256": prompt_sha256,
+                "ttft_seconds": round(timings["prompt_ms"] / 1000, 6),
+                "prompt_tokens_per_second": timings["prompt_per_second"],
+                "decode_tokens_per_second": timings["predicted_per_second"],
+                "wall_seconds": round(elapsed, 6),
+                "cache_tokens": timings["cache_n"],
+                "drafted_tokens": drafted,
+                "accepted_tokens": accepted,
+                "acceptance_percent": (
+                    round(accepted * 100 / drafted, 2)
+                    if isinstance(drafted, int) and drafted > 0 and isinstance(accepted, int)
+                    else None
+                ),
+                "peak_gtt_bytes": peak_gtt,
+                "peak_vram_bytes": peak_vram,
+                "minimum_cpu_mem_available_bytes": minimum_available,
+            }
+            runs.append(run_record)
+            print(
+                f"{profile['id']} prompt={prompt_tokens} repetition={repetition}/"
+                f"{args.repetitions}: PP={timings['prompt_per_second']:.3f} "
+                f"TPS={timings['predicted_per_second']:.3f} GTT={peak_gtt / 1024**3:.2f} GiB",
+                file=sys.stderr, flush=True,
+            )
+
+    try:
+        summary = rocmfpx_tune.summarize_context_runs(runs)
+    except rocmfpx_tune.TuneError as exc:
+        fail(str(exc))
+    document = {
+        "schema_version": 1,
+        "kind": "halo-ai-rocmfpx-context-benchmark",
+        "recorded_at": utc_now(),
+        "profile": profile["id"],
+        "model": {
+            "id": model["id"],
+            "quantization": model.get("quantization"),
+            "sha256": next(item["sha256"] for item in model["files"] if item["role"] == "main"),
+        },
+        "settings": copy.deepcopy(profile["settings"]),
+        "benchmark_method": {
+            "request_location": f"inside {container}",
+            "endpoint": "/completion",
+            "prompt_pattern": args.prompt_pattern,
+            "prompt_construction": prompt_description,
+            "seed_text_sha256": hashlib.sha256(
+                benchmark_text.encode("utf-8")
+            ).hexdigest(),
+            "temperature": 0,
+            "seed": 1,
+            "prompt_cache": False,
+            "ignore_eos": True,
+            "memory_sample_interval_seconds": 0.05,
+        },
+        "runs": runs,
+        "summary": summary,
+    }
+    if args.output:
+        atomic_json(Path(args.output).expanduser().resolve(), document, mode=0o644)
+    print(json.dumps(document, indent=2))
+    return 0
+
+
 def command_bench(config: Config, catalog: Catalog, args: argparse.Namespace) -> int:
+    if args.bench_name == "rocmfpx-context":
+        return command_bench_rocmfpx_context(config, catalog, args)
     if args.bench_action == "download":
         return command_bench_download(config, args)
     if args.bench_action == "run":
@@ -3049,16 +3320,11 @@ def command_tune(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
         write_optional_json(args.output, result)
         print(json.dumps(result, indent=2))
         return 0
-    if args.tune_action == "stage3-preflight":
-        return command_tune_stage3_preflight(config, catalog, args)
-    if args.tune_action == "stage3-capture-target":
-        return command_tune_stage3_capture_target(config, catalog, args)
-    if args.tune_action == "stage3-capture-draft":
-        return command_tune_stage3_capture_draft(config, catalog, args)
-    if args.tune_action == "stage3-score":
+    if args.tune_action == "context-compare":
         try:
-            result = rocmfpx_tune.score_stage3_records(
-                rocmfpx_tune.load_json(Path(args.results).expanduser().resolve()),
+            result = rocmfpx_tune.compare_context_records(
+                rocmfpx_tune.load_json(Path(args.baseline).expanduser().resolve()),
+                rocmfpx_tune.load_json(Path(args.candidate).expanduser().resolve()),
             )
         except rocmfpx_tune.TuneError as exc:
             fail(str(exc))
@@ -3172,6 +3438,18 @@ def build_parser() -> argparse.ArgumentParser:
     bench_run.add_argument("--output", help="resumable JSONL output path")
     bench_score = longbench_actions.add_parser("score", help="score an existing halo-ai JSONL run")
     bench_score.add_argument("results")
+    rocmfpx_context = bench.add_parser(
+        "rocmfpx-context", help="measure exact-token cold-cache PP/TPS on an active ROCmFPX profile",
+    )
+    rocmfpx_context.add_argument("profile_id")
+    rocmfpx_context.add_argument("--prompt-tokens", default="4095,31998")
+    rocmfpx_context.add_argument("--completion-tokens", type=int, default=64)
+    rocmfpx_context.add_argument("--repetitions", type=int, default=1)
+    rocmfpx_context.add_argument(
+        "--prompt-pattern", choices=["unique", "repeated"], default="unique",
+    )
+    rocmfpx_context.add_argument("--timeout", type=int, default=900)
+    rocmfpx_context.add_argument("--output", help="optional atomic JSON report path")
     update = sub.add_parser("update"); update.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "ds4", "speech", "vllm", "all"])
     tune = sub.add_parser("tune", help="inspect guarded trials and score optimization evidence").add_subparsers(dest="tune_action", required=True)
     tune.add_parser("status")
@@ -3182,37 +3460,12 @@ def build_parser() -> argparse.ArgumentParser:
     mtp_compare.add_argument("baseline")
     mtp_compare.add_argument("candidate")
     mtp_compare.add_argument("--output", help="optional atomic JSON report path")
-    stage3_preflight = tune.add_parser(
-        "stage3-preflight", help="no-download inventory gate for the Qwen3.6 proxy screen",
+    context_compare = tune.add_parser(
+        "context-compare", help="compare exact-token ROCmFPX context benchmark records",
     )
-    stage3_preflight.add_argument(
-        "--full", action="store_true",
-        help="SHA-256 verify cached target/proxy artifacts that lack reusable full evidence",
-    )
-    stage3_target = tune.add_parser(
-        "stage3-capture-target",
-        help="capture greedy target tokens from Qwen3.8-owned rendered prefixes",
-    )
-    stage3_target.add_argument("output")
-    stage3_target.add_argument("--suite", choices=["canary", "full"], default="canary")
-    stage3_target.add_argument(
-        "--mode", choices=["all", "nonthinking", "thinking"], default="all",
-    )
-    stage3_target.add_argument(
-        "--context-bucket", choices=["all", "short", "4k", "32k"], default="all",
-    )
-    stage3_target.add_argument("--target-tokens", type=int, default=12)
-    stage3_draft = tune.add_parser(
-        "stage3-capture-draft",
-        help="feed exact captured target prefixes to the cached Qwen3.6 proxy",
-    )
-    stage3_draft.add_argument("target_capture")
-    stage3_draft.add_argument("output")
-    stage3_score = tune.add_parser(
-        "stage3-score", help="score exact-prefix token proposal captures",
-    )
-    stage3_score.add_argument("results")
-    stage3_score.add_argument("--output", help="optional atomic JSON report path")
+    context_compare.add_argument("baseline")
+    context_compare.add_argument("candidate")
+    context_compare.add_argument("--output", help="optional atomic JSON report path")
     host = sub.add_parser("host-profile").add_subparsers(dest="host_action", required=True)
     host.add_parser("status")
     host_init = host.add_parser("init")
@@ -3234,9 +3487,6 @@ def main(argv: list[str] | None = None) -> int:
         args.command == "models" and args.models_action == "download"
     ) or (
         args.command == "profiles" and args.profiles_action == "acquire"
-    ) or (
-        args.command == "tune"
-        and args.tune_action in {"stage3-capture-target", "stage3-capture-draft"}
     ):
         assert_operator(config)
     if args.command == "doctor": return command_doctor(config, catalog, args)

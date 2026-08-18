@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "recorded_local_date": "2026-08-17",
+  "kind": "halo-ai-qwen38-fp4-fp8-exact-context-summary",
+  "host": {
+    "cpu": "AMD Ryzen AI Max+ 395",
+    "gpu": "AMD Radeon 8060S (gfx1151)",
+    "gtt_aperture_bytes": 126701535232
+  },
+  "runtime": {
+    "image": "localhost/halo-ai-rocmfpx:v1.0.0",
+    "engine_version": 213,
+    "engine_reported_revision": "e87d53e-unresolved"
+  },
+  "models": {
+    "fp4": {
+      "file": "Qwen3.8-27B-ROCmFP4-FAST.gguf",
+      "bytes": 14562236384,
+      "sha256": "fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9"
+    },
+    "fp8": {
+      "file": "Qwen3.8-27B-ROCmFP8.gguf",
+      "bytes": 28193396704,
+      "sha256": "0bf5bfc9f946090af2d41b388ccb4d627e916c7250517c36a0de37d6eaccfd8e",
+      "gguf_semantic_verification": "pass"
+    }
+  },
+  "benchmark_method": {
+    "request_location": "inside halo-rocmfpx container",
+    "endpoint": "/completion",
+    "prompt_tokens": [4095, 31998],
+    "completion_tokens": 64,
+    "repetitions": 1,
+    "prompt_pattern": "repeated fixed varied token sequence",
+    "identical_prompt_token_hashes_across_profiles": true,
+    "temperature": 0,
+    "seed": 1,
+    "prompt_cache": false,
+    "ignore_eos": true,
+    "memory_sample_interval_seconds": 0.05,
+    "qualification_note": "Single-run screen; repeat finalists with the non-repeating prompt pattern before changing defaults."
+  },
+  "profiles": {
+    "qwen38-27b-rocmfp4-baseline": [
+      {"prompt_tokens": 4095, "ttft_seconds": 21.847567, "prompt_tokens_per_second": 187.435059, "decode_tokens_per_second": 11.750603, "peak_gtt_bytes": 14928019456},
+      {"prompt_tokens": 31998, "ttft_seconds": 260.967161, "prompt_tokens_per_second": 122.613128, "decode_tokens_per_second": 10.695863, "peak_gtt_bytes": 15055659008}
+    ],
+    "qwen38-27b-rocmfp4-mtp": [
+      {"prompt_tokens": 4095, "ttft_seconds": 23.529327, "prompt_tokens_per_second": 174.038127, "decode_tokens_per_second": 22.296140, "drafted_tokens": 55, "accepted_tokens": 52, "acceptance_percent": 94.55, "peak_gtt_bytes": 20647280640},
+      {"prompt_tokens": 31998, "ttft_seconds": 295.434426, "prompt_tokens_per_second": 108.308299, "decode_tokens_per_second": 17.438588, "drafted_tokens": 53, "accepted_tokens": 53, "acceptance_percent": 100.0, "peak_gtt_bytes": 20666548224}
+    ],
+    "qwen38-27b-rocmfp8-baseline": [
+      {"prompt_tokens": 4095, "ttft_seconds": 21.677746, "prompt_tokens_per_second": 188.903404, "decode_tokens_per_second": 7.601342, "peak_gtt_bytes": 27915911168},
+      {"prompt_tokens": 31998, "ttft_seconds": 267.586614, "prompt_tokens_per_second": 119.579973, "decode_tokens_per_second": 6.865889, "peak_gtt_bytes": 27922202624}
+    ],
+    "qwen38-27b-rocmfp8-mtp": [
+      {"prompt_tokens": 4095, "ttft_seconds": 23.479159, "prompt_tokens_per_second": 174.409995, "decode_tokens_per_second": 22.502567, "drafted_tokens": 53, "accepted_tokens": 53, "acceptance_percent": 100.0, "peak_gtt_bytes": 33290526720},
+      {"prompt_tokens": 31998, "ttft_seconds": 301.550088, "prompt_tokens_per_second": 106.111725, "decode_tokens_per_second": 15.848127, "drafted_tokens": 53, "accepted_tokens": 53, "acceptance_percent": 100.0, "peak_gtt_bytes": 33624133632}
+    ]
+  },
+  "comparisons": {
+    "fp4_mtp_vs_fp4_baseline": [
+      {"prompt_tokens": 4095, "prompt_speed_change_percent": -7.15, "decode_speed_change_percent": 89.74, "peak_gtt_change_bytes": 5719261184, "candidate_faster_after_generated_tokens": 42},
+      {"prompt_tokens": 31998, "prompt_speed_change_percent": -11.67, "decode_speed_change_percent": 63.04, "peak_gtt_change_bytes": 5610889216, "candidate_faster_after_generated_tokens": 954}
+    ],
+    "fp8_baseline_vs_fp4_baseline": [
+      {"prompt_tokens": 4095, "prompt_speed_change_percent": 0.78, "decode_speed_change_percent": -35.31, "peak_gtt_change_bytes": 12987891712},
+      {"prompt_tokens": 31998, "prompt_speed_change_percent": -2.47, "decode_speed_change_percent": -35.81, "peak_gtt_change_bytes": 12866543616}
+    ],
+    "fp8_mtp_vs_fp4_mtp": [
+      {"prompt_tokens": 4095, "prompt_speed_change_percent": 0.21, "decode_speed_change_percent": 0.93, "peak_gtt_change_bytes": 12643246080},
+      {"prompt_tokens": 31998, "prompt_speed_change_percent": -2.03, "decode_speed_change_percent": -9.12, "peak_gtt_change_bytes": 12957585408}
+    ]
+  },
+  "ngram_mtp_screen": {
+    "requested_spec_type": "ngram-mod,draft-mtp",
+    "spec_ngram_mod_n_match": 24,
+    "spec_ngram_mod_n_min": 48,
+    "spec_ngram_mod_n_max": 64,
+    "strict_qwen_mtp": true,
+    "result": "rejected-during-model-load",
+    "oom_or_device_reset": false,
+    "backend_reason": "ngram-mod disables recurrent state rollback; strict Qwen MTP requires bounded recurrent rollback covering the full draft",
+    "profile_exposed": false
+  },
+  "decision": {
+    "performance_default": "qwen38-27b-rocmfp4-baseline",
+    "generation_heavy_experiment": "qwen38-27b-rocmfp4-mtp",
+    "fp8_status": "quality-only experiment pending fixed quality evaluation",
+    "ngram_mtp_status": "incompatible with strict Qwen MTP in engine build 213"
+  },
+  "same_host_evidence_only": true
+}

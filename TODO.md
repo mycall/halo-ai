@@ -9,13 +9,10 @@ most value for the least downloading and engineering work.
   `Qwen3.8-27B-ROCmFP4-FAST.gguf` running on the iGPU without NPU drafting.
 - Built-in GPU MTP is the first acceleration to try because it uses the same
   model file and requires no draft-model download.
-- External NPU drafting is an experiment for the FP4 target only. It proceeds
-  only after a cheap acceptance and throughput screen.
-- A production drafter must have Qwen3.8 lineage and the target tokenizer and
-  semantics. Qwen3.6 may be used to test version mixing, never as the final
-  drafter.
-- ROCmFP8 is optional and GPU-only. There will be no FP8+NPU profile and no
-  attempt to place the 27B FP8 model on the NPU.
+- External NPU and cross-version drafting are deferred; their research notes
+  remain in `docs/TODO backup.md`.
+- The already-present ROCmFP8 artifact is optional and GPU-only. There will be
+  no FP8+NPU profile.
 - Vision is optional and separately downloaded. External NPU drafting remains
   disabled for image and video requests.
 - Selecting one profile must never download artifacts belonging only to
@@ -97,152 +94,79 @@ dependency.
 - [ ] **Pass:** keep GPU MTP if it is correct, stable, and materially faster.
 - [ ] **Fail:** retain the unassisted FP4 baseline and stop tuning MTP.
 
-## Stage 3: Decide whether NPU drafting is worth building
+## Stage 3: Optimize same-host long-context PP/TPS
 
-**Value:** prevents a large download and substantial integration effort when
-cross-version acceptance or NPU speed cannot beat GPU MTP.
+**Value:** improve the working Qwen3.8 GPU profiles before adding another
+runtime architecture or model family.
 
-No NPU model is downloaded at the start of this stage.
+### Current measured state
 
-### Tasks
+The aligned cold-cache benchmark uses exact 4,095- and 31,998-token arrays,
+64 generated tokens, container-local requests, and 50 ms memory sampling.
+These first-pass rows are single measurements; repeat finalists before changing
+defaults.
 
-- [x] If a verified Qwen3.6-35B-A3B model is already present, reuse it for a
-      no-new-download Qwen3.6-to-Qwen3.8 acceptance screen. If it is absent,
-      skip this proxy rather than downloading another copy solely for it.
-  The cached 39,099,447,584-byte GGUF and both templates passed full SHA-256
-  verification. The short canary used them in place and downloaded zero model
-  bytes; only the explicitly allowed Lemonade support runtime was refreshed.
-- [x] Feed both models the exact Qwen3.8-rendered token prefix under greedy
-      decoding; do not compare independently rendered chat prompts.
-  Halo captured Qwen3.8 template/tokenizer output as token-ID arrays, extended
-  each with the authoritative target suffix, and sent those arrays directly to
-  Qwen3.6's private llama.cpp completion endpoint. All 70 prefix hashes matched.
-- [ ] Test code, reasoning, JSON/tool output, multilingual text, ordinary chat,
-      and thinking/non-thinking prompts at several context lengths.
-  The short-context early screen covers every listed domain and both modes.
-  Longer buckets remain unrun because thinking mode already crossed the
-  permissive early-stop threshold; a bounded non-thinking-only context check
-  remains optional.
-- [ ] Measure first-token agreement, zero-acceptance rate, mean accepted tokens,
-      accepted-run p50/p95, and results for proposal lengths 1, 2, 4, and 6.
-  The short canary records every metric for all four proposal lengths, grouped
-  by domain and mode. Non-thinking achieved 94.29% first-token agreement,
-  5.71% zero acceptance, and 4.771/6 mean accepted tokens. Thinking achieved
-  28.57%, 71.43%, and 1.143/6 respectively, so the general proxy is not being
-  expanded. Several-context coverage remains open.
-- [ ] Model expected end-to-end speed using measured FP4 verification time and
-      realistic NPU proposal latency. Compare against FP4 GPU MTP, not merely
-      unassisted FP4.
-- [ ] Identify a genuinely trained small Qwen3.8-family draft model. Treat
-      `inference-optimization/Qwen3.8-1.0B-A0.6B` only as a converter/kernel
-      fixture because its card describes toy-data training.
-- [ ] Confirm the candidate has exact tokenizer IDs, prompt/thinking semantics,
-      credible training provenance, and useful quality before converting it.
-- [ ] Only if the acceptance and candidate checks are promising, confirm that
-      Vulkan and XDNA2 can coexist on the target Strix Halo host without resets
-      or unacceptable contention.
+| Profile | 4K PP / TPS | 32K PP / TPS | Peak GTT at 32K |
+| --- | ---: | ---: | ---: |
+| FP4 baseline | 187.44 / 11.75 | 122.61 / 10.70 | 14.02 GiB |
+| FP4 MTP | 174.04 / 22.30 | 108.31 / 17.44 | 19.25 GiB |
+| FP8 baseline | 188.90 / 7.60 | 119.58 / 6.87 | 26.00 GiB |
+| FP8 MTP | 174.41 / 22.50 | 106.11 / 15.85 | 31.31 GiB |
 
-### Gate
-
-- [ ] **Proceed:** a credible small Qwen3.8 drafter exists, version/family
-      acceptance is promising, coexistence is stable, and the throughput model
-      predicts at least 10% over FP4 GPU MTP.
-- [ ] **Stop:** ship Stages 1–2. Do not download Q4NX weights or build the
-      speculative bridge.
-
-## Stage 4: Build the minimum NPU prototype
-
-This stage exists only if Stage 3 passes.
+FP4 MTP becomes faster end-to-end than FP4 baseline after about 42 generated
+tokens at 4K and 954 tokens at 32K on this synthetic repeated-context workload.
+FP8 is effectively tied with FP4 MTP at 4K, loses 9.12% decode throughput at
+32K, and uses about 12 GiB more GTT. Keep FP8 as a quality experiment, not a
+performance default.
 
 ### Tasks
 
-- [ ] Pin FastFlowLM, XRT, amdxdna, the draft model, converter, and matching
-      XDNA `xclbin` kernels.
-- [ ] Produce or acquire a Q4NX artifact from pinned SafeTensors. FastFlowLM
-      does not directly load Unsloth iMatrix/IQ GGUF files.
-- [ ] Download only the selected text drafter and required kernels; exclude
-      FP8 and vision weights.
-- [ ] Add the smallest useful token-level draft interface: session open,
-      token-ID prefill, greedy propose, commit/rollback, reset/close, and health.
-- [ ] Connect the FP4 verifier directly over a private Unix socket. Do not put
-      Lemonade or per-proposal HTTP calls in the hot path.
-- [ ] Keep all sampling and token emission authoritative in the FP4 verifier.
-- [ ] Prove real XDNA execution with device counters and prohibit silent CPU or
-      GPU drafting.
-- [ ] Test full, partial, and zero proposal acceptance plus timeout, crash, and
-      KV rollback behavior.
-- [ ] Benchmark the complete system against FP4 GPU MTP on the Stage 2 corpus.
-- [ ] Keep Qwen3.6 test-only even if it helps exercise the protocol; it cannot
-      satisfy the production same-family requirement.
+- [x] Add a container-only exact-token ROCmFPX context benchmark with cold-cache
+      enforcement, PP/TPS/TTFT, MTP acceptance, and peak-memory reporting.
+- [x] Add a comparison gate that verifies identical prompt-token hashes and
+      reports performance deltas and end-to-end crossover lengths.
+- [x] Catalog and semantically verify the already-present FP8 artifact; its
+      size and full SHA-256 match the pinned metadata and acquisition requires
+      zero additional bytes.
+- [x] Add explicit GPU-only FP8 baseline and MTP profiles.
+- [x] Compare FP4 baseline/MTP and FP8 baseline/MTP on identical 4K/32K token
+      arrays without using performance claims from another host.
+- [x] Test `ngram-mod,draft-mtp` with match/min/max `24/48/64`. Build 213 parses
+      the settings but refuses startup because ngram-mod disables recurrent
+      rollback while strict Qwen MTP requires rollback covering the full draft.
+      Do not expose this non-starting combination as a profile.
+- [ ] Repeat the FP4 baseline and FP4 MTP finalists at least three times using
+      the non-repeating prompt pattern; report median and variability.
+- [ ] Audit and tune only locally supported batch, micro-batch, thread-batch,
+      KV-cache, and execution options, one axis at a time.
+- [ ] Tune FP4 MTP proposal settings after the best underlying PP configuration
+      is selected; retain acceptance and end-to-end crossover evidence.
+- [ ] Run a fixed FP4-versus-FP8 task-quality suite before making any quality
+      claim for FP8.
 
 ### Gate
 
-- [ ] **Promote experimentally:** strict greedy output matches unassisted FP4,
-      the soak test is clean, and median throughput is at least 10% above FP4
-      GPU MTP without unacceptable p95 latency or power.
-- [ ] **Reject:** retain the research code if useful, but do not expose an NPU
-      profile in normal Halo operation.
+- [ ] Keep only profiles on the measured PP/TPS/memory Pareto frontier.
+- [ ] Promote no default from a single run; require stable repeated evidence and
+      a clean lifecycle with no OOM or device reset.
 
-## Stage 5: Optional capabilities
+## Deferred research
 
-These tracks are independent, explicitly selected, and never prerequisites for
-Stages 1–4.
+External NPU drafting, cross-version Qwen3.6 drafting, generalized multi-service
+runtime plumbing, and vision/video qualification are outside the active PP/TPS
+loop. Preserve their constraints and possible future work in
+[`docs/TODO backup.md`](docs/TODO%20backup.md). Do not download another language
+model or install host packages for these tracks without an explicit new gate.
 
-### 5A: ROCmFP8 on the GPU
+## Active constraints and artifact policy
 
-- [ ] Add the FP8 artifact as disabled, on-demand catalog metadata:
-  - File: `Qwen3.8-27B-ROCmFP8.gguf`
-  - Size: `28193396704` bytes
-  - SHA-256: `0bf5bfc9f946090af2d41b388ccb4d627e916c7250517c36a0de37d6eaccfd8e`
-- [ ] Require an explicit FP8 acquisition request and show its full byte cost
-      before downloading.
-- [ ] Add unassisted and built-in-MTP GPU profiles only; reject FP8+NPU catalog
-      combinations.
-- [ ] Compare FP8 with FP4 on a fixed task-quality and performance suite before
-      describing it as effectively lossless or better quality.
-
-### 5B: Vision with the FP4 target
-
-- [ ] Keep the normal FP4 baseline text-only.
-- [ ] On explicit vision acquisition, select one verified compatible visual
-      companion rather than downloading every candidate.
-- [ ] Validate projector provenance, preprocessing, special tokens, image
-      handling, output quality, memory, and TTFT against the FP4 target.
-- [ ] Use target-native execution/MTP for multimodal requests; keep external NPU
-      drafting disabled for images and video.
-
-## Known constraints
-
-- The official
-  [`Qwen/Qwen3.8-27B`](https://huggingface.co/Qwen/Qwen3.8-27B/tree/1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0)
-  is multimodal, but the q38rocm FP4/FP8 GGUFs contain the language decoder and
-  MTP tensors only. They do not contain the vision encoder.
-- q38rocm's
-  [`npu_sidecar_drafter.py`](https://github.com/julianmb/q38rocm/blob/ae3d4640041c92f4b0a012d6bed004e0ad9e66b9/scripts/npu_sidecar_drafter.py)
-  detects the NPU but launches GPU MTP; it is not an NPU inference provider.
-- FastFlowLM uses `model.q4nx` plus model-specific XDNA kernels, not arbitrary
-  GGUF/iMatrix quantizations.
-- FastFlowLM's Qwen3.6 support proves useful MoE NPU primitives exist, including
-  prefill, forward, checkpoint, and restore. It does not prove that a differently
-  sized Qwen3.8 model can reuse the same binary kernels.
-- Qwen3.6 shares much of the tokenizer with Qwen3.8 but is a different model
-  generation. Its proposal acceptance must be measured rather than inferred.
-- FastFlowLM's public HTTP API does not currently provide the efficient,
-  stateful token protocol required for speculative decoding.
-- Lemonade can help with NPU detection and FastFlowLM installation/validation,
-  but it does not currently supply the required draft protocol.
-
-## Download budget
-
-| Stage | Model download policy |
-| --- | --- |
-| 1 | FP4 GGUF only: 14,562,236,384 bytes |
-| 2 | No additional model download |
-| 3 | No additional model download by default; reuse verified cached artifacts |
-| 4 | One selected Q4NX drafter plus required kernels, only after the Stage 3 gate |
-| 5A | Optional FP8 GGUF: 28,193,396,704 bytes |
-| 5B | One optional verified visual companion |
-
-Do not download the full Unsloth quantization ladder, both visual companions,
-BF16 reference weights, or the 23 GB Qwen3.6 Q4NX model unless a specific,
-approved experiment requires that exact artifact.
+- The q38rocm FP4/FP8 GGUFs are text-only language/MTP artifacts; vision needs
+  a separately qualified companion.
+- Performance claims from other hosts are context only, never pass/fail evidence.
+- Build 213 cannot compose `ngram-mod` with strict-Qwen MTP because their
+  recurrent rollback requirements conflict.
+- FP4 and FP8 are already present and verified. Selecting either profile must
+  not download the other artifact.
+- Do not download another language model. Container runtime updates and bounded
+  support artifacts such as Ninja, templates, video fixtures, and a selected
+  compatible mmproj remain allowed.

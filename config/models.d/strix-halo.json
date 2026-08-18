@@ -102,6 +102,56 @@
       ]
     },
     {
+      "id": "qwen3.8-27b-rocmfp8",
+      "repository": "julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF",
+      "revision": "e439c125804f73ccb1d9e6aebb5ea50f112833fa",
+      "architecture": "qwen35",
+      "quantization": "Q8_0_ROCMFPX",
+      "modalities": ["text"],
+      "engines": ["rocmfpx"],
+      "download": {
+        "provider": "huggingface",
+        "repository": "julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF",
+        "revision": "e439c125804f73ccb1d9e6aebb5ea50f112833fa",
+        "allow_patterns": ["Qwen3.8-27B-ROCmFP8.gguf"]
+      },
+      "gguf_expectations": {
+        "version": 3,
+        "tensor_count": 866,
+        "metadata_count": 51,
+        "metadata": {
+          "general.architecture": "qwen35",
+          "general.file_type": 111,
+          "qwen35.block_count": 65,
+          "qwen35.context_length": 262144,
+          "qwen35.embedding_length": 5120,
+          "qwen35.feed_forward_length": 17408,
+          "qwen35.attention.head_count": 24,
+          "qwen35.attention.head_count_kv": 4,
+          "qwen35.nextn_predict_layers": 1
+        },
+        "array_lengths": {"tokenizer.ggml.tokens": 248320},
+        "tensor_type_counts": {"0": 360, "103": 506},
+        "required_tensors": [
+          "token_embd.weight",
+          "output.weight",
+          "blk.64.nextn.eh_proj.weight",
+          "blk.64.nextn.enorm.weight",
+          "blk.64.nextn.hnorm.weight",
+          "blk.64.nextn.shared_head_norm.weight"
+        ],
+        "forbidden_tensor_terms": ["vision", "visual", "image", "video", "patch", "merger"]
+      },
+      "files": [
+        {
+          "role": "main",
+          "path": "julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP8.gguf",
+          "bytes": 28193396704,
+          "sha256": "0bf5bfc9f946090af2d41b388ccb4d627e916c7250517c36a0de37d6eaccfd8e"
+        }
+      ]
+    },
+    {
       "id": "seamless-m4t-v2-large",
       "repository": "facebook/seamless-m4t-v2-large",
       "revision": "5f8cc790b19fc3f67a61c105133b20b34e3dcb76",
@@ -172,6 +222,60 @@
     {
       "id": "qwen38-27b-rocmfp4-mtp",
       "model": "qwen3.8-27b-rocmfp4",
+      "engine": "rocmfpx",
+      "context": 32768,
+      "risk": "experimental",
+      "features": ["mtp"],
+      "thinking": false,
+      "proposal_policy": "probabilistic-draft-strict-target-verification",
+      "settings": {
+        "device": "Vulkan0",
+        "gpu_layers": 99,
+        "parallel": 1,
+        "batch": 2048,
+        "ubatch": 1024,
+        "flash_attention": true,
+        "cache_type_k": "q8_0",
+        "cache_type_v": "turbo4",
+        "threads": 16,
+        "poll": 100,
+        "seed": 1,
+        "temperature": 0,
+        "ctx_checkpoints": 0,
+        "cache_ram_mb": 16384,
+        "spec_mtp_strict_qwen": true,
+        "spec_draft_n_max": 6,
+        "spec_draft_p_min": 0.60
+      }
+    },
+    {
+      "id": "qwen38-27b-rocmfp8-baseline",
+      "model": "qwen3.8-27b-rocmfp8",
+      "engine": "rocmfpx",
+      "context": 32768,
+      "risk": "experimental",
+      "features": [],
+      "thinking": false,
+      "settings": {
+        "device": "Vulkan0",
+        "gpu_layers": 99,
+        "parallel": 1,
+        "batch": 2048,
+        "ubatch": 1024,
+        "flash_attention": true,
+        "cache_type_k": "q8_0",
+        "cache_type_v": "turbo4",
+        "threads": 16,
+        "poll": 100,
+        "seed": 1,
+        "temperature": 0,
+        "ctx_checkpoints": 0,
+        "cache_ram_mb": 16384
+      }
+    },
+    {
+      "id": "qwen38-27b-rocmfp8-mtp",
+      "model": "qwen3.8-27b-rocmfp8",
       "engine": "rocmfpx",
       "context": 32768,
       "risk": "experimental",

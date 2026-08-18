@@ -363,6 +363,7 @@ The lifecycle tooling must preserve that distinction per model.
 | `qwen3.6-27b-q8xl` | Q8_K_XL main; installed F32 vision projector | 35.04 GiB total | `qwen35` + `clip` | Lemonade or standalone llama.cpp | 32,768 |
 | `qwen3.6-35b-a3b-q8xl` | Q8_K_XL main; no local vision projector | 36.41 GiB | `qwen35moe` | Lemonade or standalone llama.cpp | 32,768 |
 | `qwen3.8-27b-rocmfp4` | ROCmFP4-FAST language/MTP GGUF; text only | 13.56 GiB | `qwen35` | dedicated q38rocm ROCmFPX/Vulkan | 32,768 |
+| `qwen3.8-27b-rocmfp8` | Q8_0_ROCMFPX language/MTP GGUF; text only | 26.26 GiB | `qwen35` | dedicated q38rocm ROCmFPX/Vulkan | 32,768 |
 | `seamless-m4t-v2-large` | Two safetensors shards plus processor/tokenizer files | 8.62 GiB | `seamless_m4t_v2` | dedicated ROCm speech service | N/A |
 
 The sharded DeepSeek first file is intentionally only 5,257,696 bytes: it holds
@@ -390,6 +391,7 @@ fdc443e974cad1f61c45af1cfd5580855855ddce0d6c14cc500a5714c486ac1d 1842940480 unsl
 63f41b4f55a044a0c173b403bf901b0027fca2a717f63833fe24784deeb6f614 4333 unsloth/qwen3.6-nonthinking.jinja
 6c6b816537abad90b250a0972b345466028d861ddfe316d5f0de31ca6440f781 39099447584 unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf
 fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9 14562236384 julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP4-FAST.gguf
+0bf5bfc9f946090af2d41b388ccb4d627e916c7250517c36a0de37d6eaccfd8e 28193396704 julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP8.gguf
 9ac8a85d4e97d27fad026a813d52a069680e4e0cae701ef145b204bd533251b2 2066 facebook/seamless-m4t-v2-large/added_tokens.json
 4b2fa9d863cc3033adaf261e6c3e32ad90347ee2f199a349ba1c77d5e26a605f 2716 facebook/seamless-m4t-v2-large/config.json
 febbbbac4f0b122473a0125165c9291add850956315e35a025e16474cc0da5f4 9906948 facebook/seamless-m4t-v2-large/generation_config.json
@@ -493,6 +495,33 @@ Detailed timings, draft acceptance/run-position statistics, memory, and the
 conformance note are recorded in
 [`results/qwen38-rocmfp4-mtp-2026-08-16.json`](results/qwen38-rocmfp4-mtp-2026-08-16.json).
 
+### Aligned FP4/FP8 context screen
+
+The already-present `Qwen3.8-27B-ROCmFP8.gguf` matches its exact
+28,193,396,704-byte size and SHA-256 and passes the cataloged 866-tensor GGUF
+inventory. It is selectable only through the explicit GPU-only
+`qwen38-27b-rocmfp8-baseline` and `qwen38-27b-rocmfp8-mtp` profiles; their
+acquisition plans report zero additional bytes on this host.
+
+The first exact-token screen used identical cold 4,095- and 31,998-token arrays
+and 64 forced completion tokens for all four profiles:
+
+| Profile | 4K PP / TPS | 32K PP / TPS | 32K peak GTT |
+| --- | ---: | ---: | ---: |
+| FP4 baseline | 187.44 / 11.75 | 122.61 / 10.70 | 14.02 GiB |
+| FP4 MTP | 174.04 / 22.30 | 108.31 / 17.44 | 19.25 GiB |
+| FP8 baseline | 188.90 / 7.60 | 119.58 / 6.87 | 26.00 GiB |
+| FP8 MTP | 174.41 / 22.50 | 106.11 / 15.85 | 31.31 GiB |
+
+FP8 baseline decode was about 35% slower than FP4. FP8 MTP was effectively tied
+with FP4 MTP at 4K, lost 9.1% decode throughput at 32K, and used about 12 GiB
+more GTT. FP8 therefore remains a quality-only experiment pending a fixed task
+suite. FP4 MTP crossed FP4 baseline end-to-end time after about 42 generated
+tokens at 4K and 954 at 32K on this repeated-context workload. These are
+single-run screens; repeat finalists with the non-repeating pattern before
+changing defaults. The machine summary is
+[`results/qwen38-fp4-fp8-exact-context-2026-08-17.json`](results/qwen38-fp4-fp8-exact-context-2026-08-17.json).
+
 The tuning helpers make these conclusions reproducible rather than relying on
 hand comparison:
 
@@ -501,14 +530,11 @@ halo-ai tune mtp-compare \
   docs/results/qwen38-rocmfp4-baseline-2026-08-16.json \
   docs/results/qwen38-rocmfp4-mtp-2026-08-16.json \
   --output /var/opt/halo-ai/state/qwen38-mtp-comparison.json
-halo-ai tune stage3-preflight
-halo-ai tune stage3-preflight --full
-halo-ai tune stage3-capture-target /var/opt/halo-ai/state/stage3-target.json
-halo-ai tune stage3-capture-draft \
-  /var/opt/halo-ai/state/stage3-target.json \
-  /var/opt/halo-ai/state/stage3-proxy.json
-halo-ai tune stage3-score VERSION_MIX_CAPTURE.json \
-  --output /var/opt/halo-ai/state/stage3-version-mix-score.json
+
+halo-ai bench rocmfpx-context qwen38-27b-rocmfp4-mtp \
+  --prompt-tokens 4095,31998 --completion-tokens 64 \
+  --prompt-pattern unique --repetitions 3 --output RESULT.json
+halo-ai tune context-compare BASELINE.json CANDIDATE.json
 ```
 
 `mtp-compare` requires identical prompt-token sets and a matching target-model
@@ -518,43 +544,15 @@ does not consume performance claims from other hosts. The current records are
 classified `hold-experimental`: decode is at least 10% faster at every measured
 context, but strict cross-process token identity is not proven.
 
-`stage3-preflight` performs no network operation. It looks only for the exact
-cataloged Qwen3.8 verifier and the already-cached Qwen3.6-35B-A3B test proxy.
-If the proxy is absent, its decision is `skip-proxy`; it never turns absence
-into a download. With `--full`, it streams SHA-256 over cached artifacts and
-merges the results into the model inventory while preserving earlier evidence.
-Its capture contract fixes proposal lengths 1/2/4/6, the task domains,
-thinking modes, context buckets, Qwen3.8-owned prompt tokenization, identical
-prefix hashes, and forbidden multimodal inputs.
+The pinned build advertises `ngram-mod,draft-mtp` and the suggested ngram
+`24/48/64` settings, but the exact combination cannot start with
+`--spec-mtp-strict-qwen`: ngram-mod disables recurrent rollback and strict-Qwen
+MTP requires rollback covering the full draft. This was a clean model-load
+rejection, not an OOM or device reset, and Halo does not expose the incompatible
+combination as a profile.
 
-`stage3-score` accepts only a schema-version-1
-`halo-ai-stage3-version-mix` JSON capture whose target is Qwen3.8, whose proxy
-is Qwen3.6, and whose target/draft prefix hashes match for every proposal. It
-reports first-token agreement, zero-acceptance rate, mean accepted tokens,
-accepted-run p50/p95, and full-proposal acceptance for lengths 1/2/4/6,
-separately by domain, context bucket, and thinking mode. Scoring never
-authorizes an NPU/model download; measured proposal and verifier latency remain
-required before the Stage 3 throughput gate can pass.
-
-The capture phases require the exact profile to be active and its full-SHA
-evidence to be reusable. `stage3-capture-target` calls `/apply-template`,
-`/tokenize`, and `/completion` using `curl` inside the Qwen3.8 runtime
-container. `stage3-capture-draft` requires the Qwen3.6 baseline, sends the
-captured token arrays to the private llama.cpp endpoint using container stdin,
-and never invokes the Qwen3.6 template or tokenizer. The phases are separate so
-Halo never keeps both large models resident concurrently. The default canary
-uses ten short cases; `--suite full` also constructs 4K and 32K buckets, but it
-should run only when the cheap screen warrants the extra time.
-`--mode nonthinking --context-bucket 4k` (or `32k`) bounds a follow-up to the
-one mode/context slice justified by earlier evidence.
-
-On this host the 70-proposal short canary found 94.29% first-token agreement,
-5.71% zero acceptance, and 4.771/6 mean accepted tokens for non-thinking
-prefixes. Thinking prefixes fell to 28.57%, 71.43%, and 1.143/6. The scorer
-therefore returns `do-not-expand-general-proxy`: a bounded non-thinking-only
-latency/context experiment is still defensible, but a general cross-version
-drafter is not. The summary and limitations are in
-[`results/qwen38-qwen36-version-mix-canary-2026-08-16.json`](results/qwen38-qwen36-version-mix-canary-2026-08-16.json).
+External NPU and cross-version drafting remain deferred research. They are not
+part of the active same-host FP4/FP8 GPU tuning loop.
 
 ### CachyOS Btrfs and Snapper policy
 
