@@ -4,14 +4,30 @@
     {
       "id": "deepseek-v4-flash-ds4-hybrid",
       "repository": "antirez/deepseek-v4-gguf",
+      "revision": "86bb38ce2ba7a98ab0e550359fec5f48859dc723",
       "architecture": "deepseek4",
       "engines": ["ds4"],
+      "download": {
+        "provider": "huggingface",
+        "repository": "antirez/deepseek-v4-gguf",
+        "revision": "86bb38ce2ba7a98ab0e550359fec5f48859dc723",
+        "allow_patterns": [
+          "DeepSeek-V4-Flash-Layers37-42Q4KExperts-OtherExpertLayersIQ2XXSGateUp-Q2KDown-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-fixed-0731.gguf",
+          "DeepSeek-V4-Flash-DSpark-support-0731.gguf"
+        ]
+      },
       "files": [
         {
           "role": "main",
           "path": "antirez/deepseek-v4-gguf/DeepSeek-V4-Flash-Layers37-42Q4KExperts-OtherExpertLayersIQ2XXSGateUp-Q2KDown-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-fixed-0731.gguf",
           "bytes": 97591747456,
           "sha256": "659e22fbd01c9e13ea37a57c8d9c41e0a8819dffa3473d3c5286ee44b2d3398f"
+        },
+        {
+          "role": "dspark",
+          "path": "antirez/deepseek-v4-gguf/DeepSeek-V4-Flash-DSpark-support-0731.gguf",
+          "bytes": 5989114272,
+          "sha256": "7e319924541db3f7a163ed7e11d7532a70d48228ab59d36cb81e1d4511885360"
         }
       ]
     },
@@ -249,6 +265,68 @@
       }
     },
     {
+      "id": "qwen38-27b-rocmfp4-mtp-q5-draft",
+      "model": "qwen3.8-27b-rocmfp4",
+      "engine": "rocmfpx",
+      "context": 32768,
+      "risk": "experimental",
+      "features": ["mtp"],
+      "thinking": false,
+      "proposal_policy": "probabilistic-draft-strict-target-verification",
+      "settings": {
+        "device": "Vulkan0",
+        "gpu_layers": 99,
+        "parallel": 1,
+        "batch": 2048,
+        "ubatch": 1024,
+        "flash_attention": true,
+        "cache_type_k": "q8_0",
+        "cache_type_v": "turbo4",
+        "threads": 16,
+        "poll": 100,
+        "seed": 1,
+        "temperature": 0,
+        "ctx_checkpoints": 0,
+        "cache_ram_mb": 16384,
+        "spec_mtp_strict_qwen": true,
+        "spec_draft_n_max": 6,
+        "spec_draft_p_min": 0.60,
+        "spec_draft_type_k": "q5_1",
+        "spec_draft_type_v": "q5_1"
+      }
+    },
+    {
+      "id": "qwen38-27b-rocmfp4-mtp-conservative-q5-draft",
+      "model": "qwen3.8-27b-rocmfp4",
+      "engine": "rocmfpx",
+      "context": 32768,
+      "risk": "experimental",
+      "features": ["mtp"],
+      "thinking": false,
+      "proposal_policy": "probabilistic-draft-strict-target-verification",
+      "settings": {
+        "device": "Vulkan0",
+        "gpu_layers": 99,
+        "parallel": 1,
+        "batch": 2048,
+        "ubatch": 1024,
+        "flash_attention": true,
+        "cache_type_k": "q8_0",
+        "cache_type_v": "turbo4",
+        "threads": 16,
+        "poll": 100,
+        "seed": 1,
+        "temperature": 0,
+        "ctx_checkpoints": 0,
+        "cache_ram_mb": 16384,
+        "spec_mtp_strict_qwen": true,
+        "spec_draft_n_max": 2,
+        "spec_draft_p_min": 0.85,
+        "spec_draft_type_k": "q5_1",
+        "spec_draft_type_v": "q5_1"
+      }
+    },
+    {
       "id": "qwen38-27b-rocmfp8-baseline",
       "model": "qwen3.8-27b-rocmfp8",
       "engine": "rocmfpx",
@@ -319,6 +397,7 @@
     {"id": "deepseek-v4-flash-0731-iq3xxs-dspark-llamacpp", "model": "deepseek-v4-flash-0731-iq3xxs", "engine": "llamacpp", "context": 32768, "risk": "experimental-lockup", "features": ["dspark"], "settings": {"batch": 512, "ubatch": 128, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
     {"id": "ds4-deepseek-v4-flash-hybrid", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 32768, "risk": "high", "features": [], "settings": {"prefill_chunk": 2048}},
     {"id": "ds4-deepseek-v4-flash-hybrid-kv", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 32768, "risk": "high", "features": ["kv-cache"], "settings": {"prefill_chunk": 2048, "kv_cache_mb": 8192}},
+    {"id": "ds4-deepseek-v4-flash-hybrid-dspark-16k", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 16384, "risk": "experimental-lockup", "features": ["dspark"], "settings": {"prefill_chunk": 1024, "dspark_confidence": 0.7}},
     {"id": "seamless-m4t-v2-large-speech", "model": "seamless-m4t-v2-large", "engine": "speech", "context": 0, "risk": "baseline", "features": [], "settings": {}}
   ]
 }

@@ -430,6 +430,7 @@ def validate_catalog(models: dict[str, dict[str, Any]], profiles: dict[str, dict
                 fail(f"profile {identifier} must default to deterministic ROCmFPX sampling")
             speculation_settings = {
                 "spec_draft_n_max", "spec_draft_p_min", "spec_mtp_strict_qwen",
+                "spec_draft_type_k", "spec_draft_type_v",
             }
             if "mtp" in features:
                 if (
@@ -441,6 +442,15 @@ def validate_catalog(models: dict[str, dict[str, Any]], profiles: dict[str, dict
                     or settings.get("spec_mtp_strict_qwen") is not True
                 ):
                     fail(f"profile {identifier} must use bounded strict Qwen ROCmFPX MTP")
+                draft_types = {
+                    settings.get("spec_draft_type_k"), settings.get("spec_draft_type_v"),
+                }
+                if None not in draft_types and not draft_types <= {"q5_1"}:
+                    fail(f"profile {identifier} has unaudited ROCmFPX draft KV types")
+                if (settings.get("spec_draft_type_k") is None) != (
+                    settings.get("spec_draft_type_v") is None
+                ):
+                    fail(f"profile {identifier} must set both ROCmFPX draft KV types")
             elif set(settings).intersection(speculation_settings):
                 fail(f"baseline profile {identifier} cannot contain ROCmFPX speculation settings")
             if set(settings) - (
@@ -449,6 +459,14 @@ def validate_catalog(models: dict[str, dict[str, Any]], profiles: dict[str, dict
                 | speculation_settings
             ):
                 fail(f"profile {identifier} contains an unsupported ROCmFPX setting")
+        if engine == "ds4" and "dspark" in features:
+            confidence = settings.get("dspark_confidence")
+            if (
+                isinstance(confidence, bool)
+                or not isinstance(confidence, (int, float))
+                or not 0 <= confidence <= 1
+            ):
+                fail(f"profile {identifier} has an invalid DS4 DSpark confidence")
         template_variant = profile.get("chat_template")
         if template_variant is not None:
             matches = [
@@ -618,10 +636,13 @@ def verify_gguf_expectations(path: Path, expected: dict[str, Any]) -> dict[str, 
     }
 
 
-def verify_model(config: Config, model: dict[str, Any], full: bool = False) -> dict[str, Any]:
+def verify_model(
+    config: Config, model: dict[str, Any], full: bool = False,
+    roles: set[str] | None = None,
+) -> dict[str, Any]:
     files = []
     valid = True
-    for entry, path in model_paths(config, model):
+    for entry, path in model_paths(config, model, roles):
         record: dict[str, Any] = {"path": str(path), "role": entry["role"], "expected_bytes": entry["bytes"]}
         try:
             info = path.stat(follow_symlinks=False)
@@ -978,6 +999,11 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
         command.extend(["--group-add", "video", "--group-add", "render", "--ipc=host", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"])
         main = next(path for entry, path in selected if entry["role"] == "main")
         command.extend(["--mount", f"type=bind,src={main},dst=/models/model.gguf,ro"])
+        if "dspark" in profile.get("features", []):
+            companion = next(path for entry, path in selected if entry["role"] == "dspark")
+            command.extend([
+                "--mount", f"type=bind,src={companion},dst=/models/{companion.name},ro",
+            ])
         use_kv_cache = "kv-cache" in profile.get("features", []) or config.boolean("DS4_KV_CACHE_ENABLED")
         if use_kv_cache:
             command.extend(["--mount", f"type=bind,src={config.path('DS4_KV_CACHE_DIR')},dst=/var/cache/ds4-kv"])
@@ -989,6 +1015,12 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
         chunk = profile["settings"].get("prefill_chunk")
         if chunk:
             command.extend(["--prefill-chunk", str(chunk)])
+        if "dspark" in profile.get("features", []):
+            companion = next(path for entry, path in selected if entry["role"] == "dspark")
+            command.extend([
+                "--mtp", f"/models/{companion.name}", "--dspark",
+                "--dspark-confidence", str(profile["settings"]["dspark_confidence"]),
+            ])
         if use_kv_cache:
             cache_mb = str(profile["settings"].get("kv_cache_mb", config.get("DS4_KV_CACHE_MB")))
             command.extend([
@@ -1046,6 +1078,11 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
                     "--spec-draft-n-max", str(settings["spec_draft_n_max"]),
                     "--spec-draft-p-min", str(settings["spec_draft_p_min"]),
                 ])
+                if settings.get("spec_draft_type_k"):
+                    command.extend([
+                        "--spec-draft-type-k", settings["spec_draft_type_k"],
+                        "--spec-draft-type-v", settings["spec_draft_type_v"],
+                    ])
             else:
                 command.extend(["--spec-draft-n-max", str(settings["spec_draft_n_max"])])
         if "dspark" in profile.get("features", []):
@@ -1712,7 +1749,7 @@ def download_catalog_model(
         download_huggingface_file(
             config, download["repository"], download["revision"], entry, destination,
         )
-    result = verify_model(config, model, True)
+    result = verify_model(config, model, True, roles)
     print(json.dumps(result, indent=2))
     return 0 if result["valid"] else 1
 
@@ -1725,7 +1762,9 @@ def profile_availability(config: Config, catalog: Catalog, profile: dict[str, An
         return False, f"unsupported engine: {profile['engine']}"
     if not config.get(key):
         return False, f"{key} is empty"
-    result = verify_model(config, catalog.models[profile["model"]], False)
+    result = verify_model(
+        config, catalog.models[profile["model"]], False, required_roles(profile),
+    )
     if not result["valid"]:
         return False, "model verification failed"
     if profile["engine"] == "rocmfpx" and not rocmfpx_image_valid(config.get(key)):

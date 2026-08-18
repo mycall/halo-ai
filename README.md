@@ -160,6 +160,28 @@ syntactically, but refuses model load with strict-Qwen MTP: ngram-mod disables
 recurrent rollback, while strict MTP requires rollback covering the full draft.
 Halo therefore does not expose that non-starting combination as a profile.
 
+For a long run under controlled office power, use the profile matrix. It runs
+the source suite in its read-only, network-disabled Podman test container, then
+starts, tests, benchmarks, and stops each ready profile sequentially. The first
+run uses the checked-in same-host wall-time seeds; every later run sorts fastest
+to slowest using successful elapsed times in `profile-history.tsv`:
+
+```bash
+# After installing the current checkout, run every ready profile.
+tests/office-profile-matrix.sh --scope all
+
+# Restrict a run to the active Qwen3.8 and DS4 optimization profiles.
+tests/office-profile-matrix.sh --scope optimize
+```
+
+ROCmFPX profiles receive the exact-token, non-repeating 4K/32K benchmark with
+three repetitions. Other LLM engines receive the fixed LongBench-v2 systems
+sample; speech receives its modality smoke test. Results, environment snapshots,
+per-profile logs, and ordering history are stored under
+`/var/opt/halo-ai/state/benchmarks/office-profile-matrix`. Use `--smoke-only`
+for a quick orchestration rehearsal. A cleanup trap stops managed inference
+containers after normal completion, failure, or interruption.
+
 The first Lemonade ROCm start downloads a llama.cpp backend and TheRock runtime.
 They are cached in the persistent `halo-lemonade-config` volume, while Hugging
 Face downloads use `halo-lemonade-huggingface`. The default
@@ -315,7 +337,7 @@ fixed-VRAM use.
 | Standalone llama.cpp | build `b10335-74ce15741` | `rocm-7.14` image, digest `sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b` |
 | ds4 image | `sha256:2ea5b3b28334f08d53307baf79838591e510628d41dacec357de32ffafbac31f` | `kyuz0/strix-halo-ds4-toolbox:rocm-7.14` |
 | Speech image | manifest `sha256:0a21384bf020782d8c75df78338bbc8a23f260c3604e5b023eee7a3381d9361b` | Local image ID `532f5f3d…23633`, 7.1 GB; PyTorch 2.12.0 + ROCm 7.14, Transformers 4.57.1, Gradio 6.16.0 |
-| Automated source tests | 79 passed | Python unit tests inside the read-only, network-disabled Podman test container, plus shell smoke/install assertions |
+| Automated source tests | 82 passed | Python unit tests inside the read-only, network-disabled Podman test container, plus shell smoke/install assertions |
 | Runtime cleanup | Passed | `halo-ai stop` returned GTT use from about 38 GiB to about 0.1 GiB |
 
 ### End-to-end model/profile matrix

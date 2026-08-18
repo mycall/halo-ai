@@ -358,7 +358,7 @@ The lifecycle tooling must preserve that distinction per model.
 
 | Model ID | Installed components | Real size | GGUF architecture | Baseline runtime | Initial context |
 | --- | --- | ---: | --- | --- | ---: |
-| `deepseek-v4-flash-ds4-hybrid` | Antirez hybrid `fixed-0731` | 90.89 GiB | `deepseek4` | ds4 | 32,768 |
+| `deepseek-v4-flash-ds4-hybrid` | Antirez hybrid `fixed-0731`; optional exact 0731 DSpark support | 90.89 GiB main; 96.47 GiB with companion | `deepseek4` | ds4 | 32,768 control; 16,384 first DSpark screen |
 | `deepseek-v4-flash-0731-iq3xxs` | Unsloth IQ3_XXS shards 1–4; optional DSpark companion | 97.05 GiB main; 107.20 GiB with companion | `deepseek4` + `dflash` | standalone llama.cpp; Lemonade base only | 32,768 |
 | `qwen3.6-27b-q8xl` | Q8_K_XL main; installed F32 vision projector | 35.04 GiB total | `qwen35` + `clip` | Lemonade or standalone llama.cpp | 32,768 |
 | `qwen3.6-35b-a3b-q8xl` | Q8_K_XL main; no local vision projector | 36.41 GiB | `qwen35moe` | Lemonade or standalone llama.cpp | 32,768 |
@@ -380,6 +380,7 @@ Each manifest entry is `sha256 bytes relative-path`:
 
 ```text
 659e22fbd01c9e13ea37a57c8d9c41e0a8819dffa3473d3c5286ee44b2d3398f 97591747456 antirez/deepseek-v4-gguf/DeepSeek-V4-Flash-Layers37-42Q4KExperts-OtherExpertLayersIQ2XXSGateUp-Q2KDown-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-fixed-0731.gguf
+7e319924541db3f7a163ed7e11d7532a70d48228ab59d36cb81e1d4511885360 5989114272 antirez/deepseek-v4-gguf/DeepSeek-V4-Flash-DSpark-support-0731.gguf
 dec1cee704800267d9d836d5a61aefc33705be939bbb3058fa9006d98191576d 5257696 unsloth/DeepSeek-V4-Flash-0731-GGUF/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00001-of-00004.gguf
 3064d3c4c1d6363e9f9ad88e90a3e2c5fb2d6f7ae16ca72135c3ce6a5c984da5 49910532416 unsloth/DeepSeek-V4-Flash-0731-GGUF/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00002-of-00004.gguf
 2e9b2732eca7da8324f731653624a4f5c9846258926fd9f468cc703afb51a019 49257859456 unsloth/DeepSeek-V4-Flash-0731-GGUF/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00003-of-00004.gguf

@@ -137,10 +137,26 @@ performance default.
       Do not expose this non-starting combination as a profile.
 - [ ] Repeat the FP4 baseline and FP4 MTP finalists at least three times using
       the non-repeating prompt pattern; report median and variability.
+- [x] Add a single long-run office matrix that executes the source tests and
+      every selected runtime sequentially, captures power/environment state,
+      preserves per-profile logs, stops containers between profiles, and uses
+      measured elapsed history to order the next run fastest-to-slowest.
+- [ ] Run that matrix with USB power and the office workload held stable. The
+      first q5/conservative screens are exploratory only because USB power was
+      being connected and disconnected during collection.
 - [ ] Audit and tune only locally supported batch, micro-batch, thread-batch,
       KV-cache, and execution options, one axis at a time.
-- [ ] Tune FP4 MTP proposal settings after the best underlying PP configuration
-      is selected; retain acceptance and end-to-end crossover evidence.
+- [ ] Measure an otherwise-identical FP4 MTP candidate with the draft K/V cache
+      compressed from its current implicit F16 default to `q5_1`. Record whether
+      this recovers a useful portion of MTP's roughly 5.2 GiB GTT overhead
+      without hurting acceptance or end-to-end throughput.
+- [ ] Compare the current aggressive `n_max=6`, `p_min=0.60` proposal policy
+      with the conservative `n_max=2`, `p_min=0.85` field-report policy after
+      draft-cache compression is held constant. Treat the other-host report as
+      a hypothesis only and retain same-host acceptance/crossover evidence.
+- [ ] After the MTP proposal/cache pair is selected, isolate batch
+      `2048/1024` versus `1024/512`, `threads-batch=32`, and `fit=off`; do not
+      combine these axes in the first screen.
 - [ ] Run a fixed FP4-versus-FP8 task-quality suite before making any quality
       claim for FP8.
 
@@ -149,6 +165,45 @@ performance default.
 - [ ] Keep only profiles on the measured PP/TPS/memory Pareto frontier.
 - [ ] Promote no default from a single run; require stable repeated evidence and
       a clean lifecycle with no OOM or device reset.
+
+## Stage 4: Extend the existing DwarfStar lane
+
+**Value:** compare the specialized DeepSeek V4 runtime and its exact 0731
+speculator without introducing another language-model download or host runtime.
+
+The DS4 base path is already containerized and qualified on this gfx1151 host.
+At 32K the hybrid control measured 97.73 PP tok/s, 12.56 decode tok/s, and
+107.6 GiB peak GTT. Persistent disk KV reduced the repeated-prefix sample from
+107.7 seconds cold to 3.7 seconds restored. Claims from Metal or CUDA systems
+remain context only.
+
+### Tasks
+
+- [ ] Pin the exact `DeepSeek-V4-Flash-DSpark-support-0731.gguf` support GGUF
+      beside the installed Antirez hybrid. Do not reuse the Unsloth
+      `dspark-DeepSeek-V4-Flash-0731-Q8_0.gguf`, which belongs to the standalone
+      IQ3_XXS llama.cpp profile.
+- [x] Add an opt-in `ds4-deepseek-v4-flash-hybrid-dspark-16k` profile using the
+      existing DS4 Podman image, `--dspark-confidence 0.7`, context 16K, and
+      `--prefill-chunk 1024` for its first memory-safe screen.
+- [x] Add render/acquisition tests proving that the DS4 control selects only the
+      main GGUF while the DSpark profile selects exactly the main plus its
+      bounded support artifact.
+- [ ] Record the DS4 image digest and run a target-only control before the
+      speculative candidate. Keep all execution and benchmarking in disposable
+      or managed Podman containers.
+- [ ] Measure load stability, minimum host MemAvailable, peak GTT, PP, decode
+      TPS, DSpark acceptance, and end-to-end latency at 16K. Stop if the
+      configured 4 GiB host reserve is crossed.
+- [ ] Attempt 32K only if the 16K screen remains above the reserve and improves
+      end-to-end latency. Keep the existing target-only and disk-KV profiles as
+      rollback controls.
+
+### Gate
+
+- [ ] Keep DSpark only if it improves generation-heavy wall time on this host
+      without OOM, reset, or reserve violation; never promote it from a decode
+      TPS-only result.
 
 ## Deferred research
 

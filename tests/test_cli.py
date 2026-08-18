@@ -84,7 +84,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_checked_in_catalog_validates(self) -> None:
         self.assertEqual(len(self.catalog.models), 7)
-        self.assertEqual(len(self.catalog.profiles), 22)
+        self.assertEqual(len(self.catalog.profiles), 25)
 
     def test_mtp_cannot_combine_with_vision(self) -> None:
         models = {key: dict(value) for key, value in self.catalog.models.items()}
@@ -255,6 +255,70 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(plan["model"]["additional_download_bytes"], 14_562_236_384)
         self.assertIn("in-gguf-mtp", plan["selected_artifact_classes"])
         self.assertNotIn("q4nx", json.dumps(plan).lower())
+
+    def test_rocmfpx_q5_draft_candidates_isolate_cache_and_policy(self) -> None:
+        compressed = self.catalog.profiles["qwen38-27b-rocmfp4-mtp-q5-draft"]
+        conservative = self.catalog.profiles[
+            "qwen38-27b-rocmfp4-mtp-conservative-q5-draft"
+        ]
+        compressed_rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, compressed)
+        )
+        conservative_rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, conservative)
+        )
+        for rendered in (compressed_rendered, conservative_rendered):
+            self.assertIn("--spec-draft-type-k q5_1", rendered)
+            self.assertIn("--spec-draft-type-v q5_1", rendered)
+            self.assertIn("--spec-mtp-strict-qwen", rendered)
+        self.assertIn("--spec-draft-n-max 6 --spec-draft-p-min 0.6", compressed_rendered)
+        self.assertIn("--spec-draft-n-max 2 --spec-draft-p-min 0.85", conservative_rendered)
+
+    def test_ds4_dspark_profile_selects_only_exact_antirez_support(self) -> None:
+        control = self.catalog.profiles["ds4-deepseek-v4-flash-hybrid"]
+        candidate = self.catalog.profiles[
+            "ds4-deepseek-v4-flash-hybrid-dspark-16k"
+        ]
+        control_rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, control)
+        )
+        candidate_rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, candidate)
+        )
+        self.assertNotIn("DSpark-support", control_rendered)
+        self.assertNotIn("--dspark", control_rendered)
+        self.assertIn("DeepSeek-V4-Flash-DSpark-support-0731.gguf", candidate_rendered)
+        self.assertIn("--dspark --dspark-confidence 0.7", candidate_rendered)
+        self.assertIn("--ctx 16384 --prefill-chunk 1024", candidate_rendered)
+        with mock.patch.object(cli, "image_identity", return_value="sha256:fixture"):
+            control_plan = cli.profile_acquisition_plan(self.config, self.catalog, control)
+            candidate_plan = cli.profile_acquisition_plan(self.config, self.catalog, candidate)
+        self.assertEqual([item["role"] for item in control_plan["model"]["files"]], ["main"])
+        self.assertEqual(
+            [item["role"] for item in candidate_plan["model"]["files"]],
+            ["main", "dspark"],
+        )
+        self.assertNotIn("unsloth", json.dumps(candidate_plan).lower())
+
+    def test_optional_dspark_does_not_disable_ds4_control(self) -> None:
+        model = self.catalog.models["deepseek-v4-flash-ds4-hybrid"]
+        control = self.catalog.profiles["ds4-deepseek-v4-flash-hybrid"]
+        candidate = self.catalog.profiles[
+            "ds4-deepseek-v4-flash-hybrid-dspark-16k"
+        ]
+        with mock.patch.object(cli, "verify_model") as verify:
+            verify.return_value = {"valid": True}
+            with mock.patch.object(cli, "image_identity", return_value="sha256:fixture"):
+                ready, _reason = cli.profile_availability(
+                    self.config, self.catalog, control,
+                )
+                self.assertTrue(ready)
+                self.assertEqual(verify.call_args.args[3], {"main"})
+                cli.profile_availability(self.config, self.catalog, candidate)
+                self.assertEqual(verify.call_args.args[3], {"main", "dspark"})
+        self.assertEqual(
+            {item["role"] for item in model["files"]}, {"main", "dspark"},
+        )
 
     def test_rocmfpx_strict_mtp_rejects_incompatible_ngram_composition(self) -> None:
         profile = json.loads(json.dumps(

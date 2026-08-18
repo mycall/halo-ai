@@ -11,6 +11,7 @@ export PYTHONPYCACHEPREFIX="$test_tmp/pycache"
 bash -n "$project_root/install.sh"
 bash -n "$project_root/uninstall.sh"
 bash -n "$project_root/bin/halo-ai"
+bash -n "$project_root/tests/office-profile-matrix.sh"
 grep -Fq 'cd -- "$run_home"' "$project_root/uninstall.sh" || {
     printf 'uninstaller does not enter the rootless operator home before Podman commands\n' >&2
     exit 1
