@@ -226,7 +226,7 @@ without downloading an entire quant ladder.
       it retained the older Dynamic 2 methodology there. Describe Q6 as the
       current Dynamic 3 release artifact with a retained large-quant recipe,
       not as an all-new Dynamic 3 layer layout.
-- [x] Reject Q5 and Q8 downloads for the qualified trial. The reported Q5
+- [x] Reject Q5 and Q8 *target-model* downloads for the qualified trial. The reported Q5
       DFlash2 result—31.4 tok/s at 80 W and 30.2 tok/s at 70 W—remains a useful
       speed hypothesis, but it does not outweigh the observed Q6 trajectory
       gap. Q8 is larger again, while fidelity measurements above roughly 25 GB
@@ -252,6 +252,11 @@ without downloading an entire quant ladder.
   `6cb5872e2cee6b4e780a8414922350be8e42d65c`, file
   `Qwen3.8-27B-DFlash2-Q4_K_M.gguf`, 1,143,006,752 bytes, SHA-256
   `18a380efc9b7ed8d88677fc895f5c11ae170653434ee378f7348f715c14d0594`.
+- Diagnostic drafters from the same revision: `Qwen3.8-27B-DFlash2-Q8_0.gguf`,
+  2,056,414,752 bytes, SHA-256
+  `7f1c9a31a6ed40044c69f6508b50fd63b87abd8e1fb7fe4290303df549153751`;
+  and `Qwen3.8-27B-DFlash2-BF16.gguf`, 3,860,293,152 bytes, SHA-256
+  `26af33a15b21475d668e4ee55639beea49932e7360b1144c6282721bcd127c14`.
 - Text reproduction control: Nathan's `dev-20260819-0b0f35d` image at
   `sha256:041e6491a241e48a75bd900644783eb20b2d0da5104f4c4d55f7ed1932b8b4a8`.
   DFlash2 support is still carried outside upstream llama.cpp's merged release
@@ -276,20 +281,23 @@ without downloading an entire quant ladder.
       canary with the pinned BF16 projector. A controlled vision+DFlash2 trial
       on build 10577 proved that drafting executes (40/42 proposals accepted
       on a 46-token structured response) and raised decode from 8.44 to 28.00
-      tok/s, but it did not match the target-only greedy output under identical
-      request history. The operator explicitly accepted that bounded divergence
-      for continued experimentation, so the combined profile is now exposed as
-      experimental while the target-only vision control remains available.
-- [ ] Prove target-only versus DFlash2 greedy token identity across fresh
+      tok/s at `n-max=7`, but it did not match the target-only greedy output.
+      Reducing the verification block to `n-max=5` matched the target-only
+      structured response in all three fresh processes and still averaged
+      24.53 tok/s versus 8.43 target-only. The combined profile therefore uses
+      5; target-only vision remains the rollback.
+- [x] Prove target-only versus DFlash2 greedy token identity across fresh
       processes and after request-history perturbation. The drafter's
       distribution-preserving design claim does not substitute for this test.
       The first fresh-process matrix matched 12/13 output-token sequences; the
       code-trace case diverged (`-1` baseline, `1` DFlash2), so this gate has
-      not passed even though both profiles scored 10/13. A controlled retry
+      not passed at `n-max=7` even though both profiles scored 10/13. A controlled retry
       with both engines freshly started and no preceding smoke request matched
       exactly (`-1`, tokens `[12,16]`) and accepted one of seven DFlash drafts.
-      This identifies request history as the confounder but does not replace a
-      full equal-history suite rerun.
+      The completed equal-history rerun at `n-max=5` used the same vision smoke
+      request before every suite and matched 13/13 output-token streams in both
+      fresh-process repetitions. Both arms were independently stable 13/13 and
+      scored 10/13; DFlash accepted 57/110 proposals in each repetition.
 - [x] Run the fixed task-quality suite and same-host 4K/32K performance matrix.
       Retain Q6 only if its quality is competitive with the current FP4
       baseline and its end-to-end latency materially improves.
@@ -298,16 +306,48 @@ without downloading an entire quant ladder.
       6.9%; at 32K+64 it improved decode from 7.77 to 14.14 tok/s but increased
       wall time 8.7% because prefill fell from 175.64 to 158.03 tok/s. Peak GTT
       was 72.91--73.06 GiB versus 60.80--60.84 GiB target-only.
-- [ ] Keep Q8 out of scope unless Q6 first demonstrates a task failure that a
-      higher-fidelity control is likely to resolve.
+- [x] Test the official Q8_0 and BF16 DFlash2 drafters as higher-fidelity
+      controls after the combined vision path diverged at `n-max=7`. Across
+      three fresh processes per arm, Q8_0 and BF16 produced the same alternate
+      structured output, accepted 38/49 drafts, and averaged 23.24 and 22.76
+      tok/s. Q4_K_M accepted 40/42 and averaged 27.54 tok/s at the same setting.
+      This single canary does not establish a drafter-quality ordering: the
+      later Q4_K_M `n-max` sweep proved verification-batch shape can select a
+      different near-tie trajectory. Retain the larger profiles as diagnostics;
+      keep the smaller, faster Q4_K_M behind `qwen38df2` at qualified `n-max=5`.
+- [ ] **Deferred; do not pursue yet:** maintain a local experimental branch of
+      Nathan's `strix-halo-vulkan` llama.cpp fork only if configuration-level
+      qualification still shows consequential target divergence. Start from
+      source commit `f25eefea`, retain its M-RoPE draft-cache fix `64e2b680`,
+      and build a separately tagged image so the pinned runtime remains an
+      untouched rollback. First add target-logit/top-two-margin instrumentation;
+      only then consider an alternate vision-position patch or guarded
+      sequential re-verification near ties. Trigger this work only after a
+      broader equal-history or real-image suites fail consequentially at the
+      selected smaller `n-max`; do not
+      create or publish forks merely for the synthetic red-image canary.
+      When revisiting, re-audit the then-current llama.cpp/DFlash2 options and
+      expose diagnostic profiles for any still-relevant knobs that Halo does
+      not currently model: `--spec-draft-p-min`,
+      `--[no-]spec-draft-backend-sampling`, draft K/V precision through
+      `--spec-draft-type-k` / `--spec-draft-type-v`, and, if relevant to the
+      updated implementation, `--spec-draft-n-min` or
+      `--spec-draft-p-split`. Keep target `--backend-sampling` disabled during
+      exact-output comparisons. Record proposal acceptance and speed separately
+      from target parity: these controls can change the proposed tokens and
+      verification batch shape, but none is an exactness guarantee. Also check
+      whether upstream has restored configurable DFlash draft sampling, which
+      was removed during the current PR's review.
 
 ### Gate
 
 - [x] Keep `qwen38fp4` on the ROCmFP4 baseline. Map the operator-selected
-      `qwen38df2` alias to the experimental Q6 vision+DFlash2 profile after the
-      operator accepted the measured multimodal divergence. Preserve both
-      target-only controls because the speed advantage depends on the
-      input/output ratio and history-invariant identity has not passed.
+      `qwen38df2` alias to the experimental Q6 vision+DFlash2 Q4_K_M profile at
+      `n-max=5`. Its paired vision canary matched target-only in three fresh
+      processes and its equal-history suite matched 13/13 token streams in two
+      fresh-process repetitions. Preserve both target-only controls because the
+      speed advantage still depends on the input/output ratio and the backend
+      remains a prerelease fork.
 
 ## Stage 4: Extend the existing DwarfStar lane
 
@@ -423,6 +463,6 @@ the exact DFlash2 and vision support artifacts listed there.
 - FP4 and FP8 are already present and verified. Selecting either profile must
   not download the other artifact.
 - Do not download another language model beyond the single Stage 3B Q6 target.
-  Its exact DFlash2 sidecar and BF16 projector are approved bounded companions;
-  Q5, Q8, alternate Qwen3.8 targets, and the redundant F16 projector remain
-  excluded.
+  Its exact Q4_K_M, Q8_0, and BF16 DFlash2 diagnostic sidecars and BF16
+  projector are approved bounded companions; Q5, Q8, alternate Qwen3.8
+  *targets*, and the redundant F16 projector remain excluded.

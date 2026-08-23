@@ -140,8 +140,8 @@ class CatalogTests(unittest.TestCase):
             self.catalog = cli.load_catalog(self.config)
 
     def test_checked_in_catalog_validates(self) -> None:
-        self.assertEqual(len(self.catalog.models), 9)
-        self.assertEqual(len(self.catalog.profiles), 32)
+        self.assertEqual(len(self.catalog.models), 11)
+        self.assertEqual(len(self.catalog.profiles), 34)
         self.assertEqual(
             self.catalog.profile_aliases,
             {
@@ -417,16 +417,36 @@ class CatalogTests(unittest.TestCase):
         ):
             self.assertFalse(cli.strixvulkan_image_valid("fixture"))
 
-    def test_vision_dflash_profile_records_accepted_divergence_policy(self) -> None:
+    def test_vision_dflash_profile_records_nmax5_qualification_policy(self) -> None:
         profile = self.catalog.profiles["qwen38-27b-q6xl-strix-vision-dflash2"]
         self.assertEqual(profile["risk"], "experimental")
-        self.assertIn("accepted-multimodal-divergence", profile["proposal_policy"])
+        self.assertIn("nmax5-equal-history", profile["proposal_policy"])
+        self.assertEqual(profile["settings"]["spec_draft_n_max"], 5)
         with mock.patch.object(cli, "strixvulkan_image_valid", return_value=True):
             plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
         self.assertEqual(
             plan["selected_artifact_classes"],
             ["q6-xl", "vision", "dflash2", "strixvulkan-runtime"],
         )
+
+    def test_vision_dflash_diagnostic_profiles_select_exact_drafters(self) -> None:
+        expected = {
+            "qwen38-27b-q6xl-strix-vision-dflash2-bf16":
+                "Qwen3.8-27B-DFlash2-BF16.gguf",
+            "qwen38-27b-q6xl-strix-vision-dflash2-q8":
+                "Qwen3.8-27B-DFlash2-Q8_0.gguf",
+        }
+        for profile_id, filename in expected.items():
+            with self.subTest(profile=profile_id):
+                profile = self.catalog.profiles[profile_id]
+                rendered = __import__("shlex").join(
+                    cli.render_container(self.config, self.catalog, profile)
+                )
+                self.assertIn("--mmproj /models/mmproj-BF16.gguf", rendered)
+                self.assertIn("--spec-type draft-dflash", rendered)
+                self.assertIn("dst=/models/draft.gguf,ro", rendered)
+                draft = self.catalog.models[profile["draft_model"]]
+                self.assertTrue(draft["files"][0]["path"].endswith(filename))
 
     def test_rocmfpx_profile_acquisition_excludes_every_optional_class(self) -> None:
         profile = self.catalog.profiles["qwen38-27b-rocmfp4-baseline"]

@@ -244,11 +244,18 @@ halo-ai start qwen38fp8 --switch
 ```
 
 `qwen38df2` uses the separately pinned Strix Vulkan llama.cpp fork, not
-ROCmFPX. It aliases the experimental vision+DFlash2 profile. A paired image
-trial accepted 40/42 drafts and decoded at 28.00 tok/s versus 8.44 target-only,
-but its greedy JSON differed semantically from the control. This divergence was
-explicitly accepted for continued experimentation; use
-`qwen38-27b-q6xl-strix-vision` for the target-only rollback.
+ROCmFPX. It aliases the experimental vision+DFlash2 profile with the Q4_K_M
+drafter at `n-max=5`. A paired structured-image canary matched target-only in
+three fresh processes while decoding at 24.53 tok/s versus 8.43 target-only.
+The equal-history fixed suite also matched all 13 output-token streams in two
+fresh-process repetitions. Use `qwen38-27b-q6xl-strix-vision` for the
+target-only rollback.
+Three fresh-process repetitions also tested the official Q8_0 and BF16
+DFlash2 drafters at `n-max=7`. They did not resolve the observed divergence and
+were slower than Q4_K_M in that canary, but this does not establish that Q4 is
+generally more faithful: the later block-size sweep identified verification
+batch shape as the important variable. The vision projector remains the
+official BF16 file in every profile.
 
 The checked-in OpenCode configuration exposes this alias as
 `halo-qwen38/qwen38df2` on the Strix Vulkan loopback endpoint (port 8003), with

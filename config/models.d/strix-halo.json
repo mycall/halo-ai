@@ -246,6 +246,29 @@
       ]
     },
     {
+      "id": "qwen3.8-27b-dflash2-q8-0",
+      "repository": "incoai/Qwen3.8-27B-DFlash2-GGUF",
+      "revision": "6cb5872e2cee6b4e780a8414922350be8e42d65c",
+      "architecture": "dflash",
+      "quantization": "Q8_0",
+      "modalities": ["text"],
+      "engines": ["strixvulkan"],
+      "download": {
+        "provider": "huggingface",
+        "repository": "incoai/Qwen3.8-27B-DFlash2-GGUF",
+        "revision": "6cb5872e2cee6b4e780a8414922350be8e42d65c",
+        "allow_patterns": ["Qwen3.8-27B-DFlash2-Q8_0.gguf"]
+      },
+      "files": [
+        {
+          "role": "main",
+          "path": "incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-Q8_0.gguf",
+          "bytes": 2056414752,
+          "sha256": "7f1c9a31a6ed40044c69f6508b50fd63b87abd8e1fb7fe4290303df549153751"
+        }
+      ]
+    },
+    {
       "id": "seamless-m4t-v2-large",
       "repository": "facebook/seamless-m4t-v2-large",
       "revision": "5f8cc790b19fc3f67a61c105133b20b34e3dcb76",
@@ -536,7 +559,31 @@
       "risk": "experimental",
       "features": ["vision", "dflash"],
       "thinking": false,
-      "proposal_policy": "distribution-preserving-target-verification-with-accepted-multimodal-divergence",
+      "proposal_policy": "nmax5-equal-history-and-vision-canary-qualified-on-prerelease-backend",
+      "settings": {
+        "device": "Vulkan0",
+        "gpu_layers": "all",
+        "fit": false,
+        "parallel": 1,
+        "batch": 4096,
+        "ubatch": 4096,
+        "flash_attention": true,
+        "kv": "f16",
+        "threads": 16,
+        "threads_batch": 32,
+        "spec_draft_n_max": 5
+      }
+    },
+    {
+      "id": "qwen38-27b-q6xl-strix-vision-dflash2-bf16",
+      "model": "qwen3.8-27b-ud-q6-k-xl",
+      "draft_model": "qwen3.8-27b-dflash2-bf16",
+      "engine": "strixvulkan",
+      "context": 262144,
+      "risk": "experimental",
+      "features": ["vision", "dflash"],
+      "thinking": false,
+      "proposal_policy": "bf16-draft-diagnostic-with-accepted-multimodal-divergence",
       "settings": {
         "device": "Vulkan0",
         "gpu_layers": "all",
@@ -552,15 +599,15 @@
       }
     },
     {
-      "id": "qwen38-27b-q6xl-strix-vision-dflash2-bf16",
+      "id": "qwen38-27b-q6xl-strix-vision-dflash2-q8",
       "model": "qwen3.8-27b-ud-q6-k-xl",
-      "draft_model": "qwen3.8-27b-dflash2-bf16",
+      "draft_model": "qwen3.8-27b-dflash2-q8-0",
       "engine": "strixvulkan",
       "context": 262144,
       "risk": "experimental",
       "features": ["vision", "dflash"],
       "thinking": false,
-      "proposal_policy": "bf16-draft-diagnostic-with-accepted-multimodal-divergence",
+      "proposal_policy": "q8-draft-diagnostic-with-accepted-multimodal-divergence",
       "settings": {
         "device": "Vulkan0",
         "gpu_layers": "all",

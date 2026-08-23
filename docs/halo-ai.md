@@ -403,6 +403,8 @@ fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9 14562236384 jul
 701d8fa9ed214ab21bfc130cd2a7df19ca89bbef7713e2dfb19f3c63696aa917 25299061664 unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q6_K_XL.gguf
 83ee4f4f205fa514161778c41df1ea14144faa0f713510893b63c2395f5c2d53 931146432 unsloth/Qwen3.8-27B-GGUF/mmproj-BF16.gguf
 18a380efc9b7ed8d88677fc895f5c11ae170653434ee378f7348f715c14d0594 1143006752 incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-Q4_K_M.gguf
+7f1c9a31a6ed40044c69f6508b50fd63b87abd8e1fb7fe4290303df549153751 2056414752 incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-Q8_0.gguf
+26af33a15b21475d668e4ee55639beea49932e7360b1144c6282721bcd127c14 3860293152 incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-BF16.gguf
 9ac8a85d4e97d27fad026a813d52a069680e4e0cae701ef145b204bd533251b2 2066 facebook/seamless-m4t-v2-large/added_tokens.json
 4b2fa9d863cc3033adaf261e6c3e32ad90347ee2f199a349ba1c77d5e26a605f 2716 facebook/seamless-m4t-v2-large/config.json
 febbbbac4f0b122473a0125165c9291add850956315e35a025e16474cc0da5f4 9906948 facebook/seamless-m4t-v2-large/generation_config.json
@@ -1521,7 +1523,7 @@ history, and benchmarks remain unambiguous.
 The Q6 lane uses a separate `strixvulkan` engine pinned to Nathan's image
 digest `sha256:a4a3dfe5813df1f0687e526bcba639bfd8b7cdb1d5e4c1c855abc240fb574d3a`
 and llama.cpp source revision `f25eefeaf0386c18499f23f4fc4f400397638d51`.
-It does not replace the ordinary llama.cpp or ROCmFPX engines. All three Q6
+It does not replace the ordinary llama.cpp or ROCmFPX engines. All Q6
 profiles use the model's native 262,144-token context and F16 K/V cache:
 
 | Profile | Composition | Status |
@@ -1529,23 +1531,45 @@ profiles use the model's native 262,144-token context and F16 K/V cache:
 | `qwen38-27b-q6xl-strix-baseline` | Q6 XL target only | Experimental control |
 | `qwen38-27b-q6xl-strix-dflash2` | Q6 XL + exact Q4_K_M DFlash2 sidecar | Experimental; history-invariant identity pending |
 | `qwen38-27b-q6xl-strix-vision` | Q6 XL + BF16 projector, no speculation | Experimental target-only rollback; red-image canary passed |
-| `qwen38-27b-q6xl-strix-vision-dflash2` / `qwen38df2` | Q6 XL + BF16 projector + exact Q4_K_M DFlash2 sidecar | Experimental; operator accepted measured multimodal divergence |
+| `qwen38-27b-q6xl-strix-vision-dflash2` / `qwen38df2` | Q6 XL + BF16 projector + exact Q4_K_M DFlash2 sidecar, `n-max=5` | Experimental; paired canary and equal-history suite matched target-only |
+| `qwen38-27b-q6xl-strix-vision-dflash2-q8` | Same target/projector + exact Q8_0 DFlash2 sidecar, `n-max=7` | Diagnostic quant control; not selected by alias |
+| `qwen38-27b-q6xl-strix-vision-dflash2-bf16` | Same target/projector + exact BF16 DFlash2 sidecar, `n-max=7` | Diagnostic quant control; not selected by alias |
 
-Vision+DFlash2 was tested on the pinned build 10577. The combined runtime returned the correct red-image canary and
-reported real drafting. On a longer structured image response it accepted
-40/42 draft tokens and decoded at 28.00 tok/s versus 8.44 tok/s target-only.
-Despite identical fresh-process request history, its greedy JSON differed from
-the target-only output (`"red"`/`true` versus `"#ff0000"`/`1.0`). That fails
-Halo's exact-output gate. The operator explicitly accepted this divergence for
-continued experimentation, so it is exposed only as an experimental profile;
-the target-only vision profile remains the rollback.
+Vision+DFlash2 was tested on pinned build 10577. At `n-max=7` the combined
+runtime returned the correct red-image canary and reported real drafting. On a
+longer structured image response it accepted 40/42 draft tokens and decoded at
+28.00 tok/s versus 8.44 tok/s target-only, but its greedy JSON differed from the
+target-only output (`"red"`/`true` versus `"#ff0000"`/`1.0`).
+
+A three-repetition, fresh-process follow-up held the image, request order,
+temperature, and seed fixed. Every arm was internally repeatable. Target-only
+returned `"#ff0000"`, `512`, and `1.0` at 8.43 tok/s on average. At
+`n-max=7`, Q4_K_M returned `"red"`, `512`, and `true`, accepted 40/42
+proposals, and averaged 27.54 tok/s. Q8_0 and BF16 both returned `"red"`,
+`128`, and `true`, accepted 38/49, and averaged 23.24 and 22.76 tok/s. This
+small synthetic canary measures target parity, not general vision or drafter
+quality. In particular, it cannot support the claim that Q4 is inherently more
+faithful: verification batch shape was still confounded with the generated
+trajectory. All arms used the same official `mmproj-BF16.gguf`; BF16 is the
+highest-precision Qwen3.8 projector published in the selected repository.
+
+A Q4_K_M block-size sweep isolated that confounder. `n-max=4` and 5 both
+matched the target-only structured JSON in three of three fresh processes;
+5 was faster (24.53 versus 21.17 tok/s). `n-max=6` returned the alternate
+`128`-dimension trajectory in all three repetitions. The selected profile now
+uses 5: it retains a 2.9x decode rate on this short structured response while
+avoiding the observed near-tie flip. This is consistent with llama.cpp's open
+report that batched speculative verification can change greedy results through
+backend numerical ordering; it is not evidence that lower-bit draft weights
+improve reasoning.
 
 The first same-host fixed suite scored both target-only and DFlash2 10/13,
-compared with 9/13 for the recorded ROCmFP4 baseline. An asymmetric-history run
-differed on one of 13 output-token streams. A controlled retry with freshly
-started processes and identical empty history matched that case exactly, but a
-full equal-history rerun remains required before claiming history-invariant
-greedy reproduction. At 4K+64 DFlash2 improved decode from 8.27 to 15.46 tok/s and
+compared with 9/13 for the recorded ROCmFP4 baseline. An earlier `n-max=7`,
+asymmetric-history run differed on one of 13 output-token streams. The completed
+`n-max=5` equal-history matrix sent the same vision smoke request first and then
+matched all 13 output-token streams in both fresh-process repetitions; each arm
+was also 13/13 self-consistent and scored 10/13. DFlash accepted 57/110 proposals
+per repetition. At 4K+64 the earlier `n-max=7` screen improved decode from 8.27 to 15.46 tok/s and
 reduced wall time 6.9%. At 32K+64 it improved decode from 7.77 to 14.14 tok/s,
 but its slower prefill increased wall time 8.7%; the approximate 32K break-even
 is 350 generated tokens. Native-262K allocation used about 60.8 GiB peak GTT
@@ -1564,6 +1588,15 @@ The repo's `config/opencode.json` exposes the vision alias as
 `halo-qwen38/qwen38df2` through `http://127.0.0.1:8003/v1`, including text/image
 modalities and the 262,144-token context limit. OpenCode 1.18.21 discovered the
 model and completed a live request against the managed endpoint.
+
+The fixed quality suite deliberately disables Qwen thinking. Its CRT case
+returned `17` under both target-only and DFlash, so that failure belongs to the
+non-thinking target behavior rather than speculation. With request-level
+`chat_template_kwargs.enable_thinking=true`, both profiles returned the correct
+`38` with identical 162-token reasoning traces. On that request DFlash accepted
+131/155 proposals and decoded at 23.64 tok/s versus 8.39 target-only. For this
+llama.cpp/Qwen template, use the explicit `enable_thinking` template argument;
+do not assume a non-`none` `reasoning_effort` value alone changes the mode.
 
 Normal stop/restart preserves models and cache:
 
