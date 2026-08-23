@@ -9,6 +9,7 @@ trap 'rm -rf -- "$test_tmp"' EXIT
 export PYTHONPYCACHEPREFIX="$test_tmp/pycache"
 
 bash -n "$project_root/install.sh"
+bash -n "$project_root/reload.sh"
 bash -n "$project_root/uninstall.sh"
 bash -n "$project_root/bin/halo-ai"
 bash -n "$project_root/tests/office-profile-matrix.sh"
@@ -48,6 +49,7 @@ source_config="$project_root/config/halo-ai.env.example"
 ln -s "$project_root/bin/halo-ai" "$test_tmp/halo-ai-symlink"
 "$test_tmp/halo-ai-symlink" --config "$source_config" --version >/dev/null
 "$project_root/install.sh" --run-user "$(id -un)" --dry-run >/dev/null
+"$project_root/reload.sh" --dry-run >/dev/null
 "$project_root/uninstall.sh" --run-user "$(id -un)" --dry-run --keep-podman >/dev/null
 
 printf 'halo-ai smoke tests passed\n'

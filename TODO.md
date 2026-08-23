@@ -241,6 +241,32 @@ remain context only.
 - [x] Remove the obsolete local image after the fixed runtime passed. Retain
       target-only and disk-KV profiles as operational controls; speed is not a
       promotion requirement for this explicitly experimental DSpark profile.
+- [x] Verify the installed hybrid GGUF itself advertises
+      `deepseek4.context_length=1048576` with YaRN scaling from an original 65K
+      context. Treat the model's architectural 1M limit as distinct from this
+      host's safe runtime allocation.
+- [x] Add persistent-KV DSpark work profiles at 128K and 256K while retaining
+      16K as the minimal rollback. Both use the existing exact target/support
+      pair, `--prefill-chunk 1024`, confidence 0.7, and the guarded 8 GiB disk
+      KV policy; neither downloads another model.
+- [x] Qualify both allocations on gfx1151. At 128K, post-probe GTT was 104.38
+      GiB with 12.28 GiB `MemAvailable`; DS4 planned 1.78 GiB KV plus 0.25 GiB
+      buffers. At 256K, GTT was 106.30 GiB with 10.36 GiB available; DS4 planned
+      3.46 GiB KV plus 0.50 GiB buffers. Both returned exact smoke output and
+      accepted the same 246/324 drafts with zero errors.
+- [x] Add a separate 393,216-token `384k-think-max` profile because the pinned
+      DS4 binary explicitly downgrades `reasoning_effort=max` below that exact
+      threshold. Keep DSpark and persistent KV, plus add a request preset using
+      DeepSeek's official `temperature=1.0`, `top_p=1.0` sampling defaults.
+- [x] Qualify the 384K allocation and mode. Post-probe GTT was 108.23 GiB with
+      8.40 GiB `MemAvailable`; DS4 planned 5.14 GiB KV plus 0.75 GiB buffers.
+      A `reasoning_effort=max` request returned nonempty reasoning and answer
+      content. Across both probes DSpark accepted 353/436 drafts (80.96%) with
+      zero verifier or runtime errors.
+- [x] Add first-class catalog profile aliases and map the `ds4` shortcut to the
+      qualified 384K Think Max profile. Resolve aliases across lifecycle,
+      inspection, smoke-test, and benchmark commands while retaining canonical
+      profile IDs in runtime and trial state.
 
 ### Gate
 
@@ -248,6 +274,14 @@ remain context only.
       backend both proposed and accepted drafts with valid output. Keep it
       experimental because its 8.62 tok/s probe was slower than the target-only
       control; this lane optimizes for working DSpark behavior, not peak speed.
+- [x] **Pass for practical long context:** enable 128K as the conservative work
+      profile and 256K as the high-context profile. Both remain experimental
+      until a long-prompt workload—not merely allocation plus a short probe—has
+      exercised its intended frontier. Do not infer that 384K or 1M is safe from
+      the model metadata alone.
+- [x] **Pass for opt-in Think Max:** enable 384K because it retains twice the
+      configured 4 GiB host reserve and exercised the max-effort response path.
+      Prefer 256K for ordinary work; 384K is tighter and remains experimental.
 
 ## Deferred research
 

@@ -248,6 +248,7 @@ assert_performance_power post-container-tests
 
 declare -A ready engine seed_seconds last_seconds
 while IFS=$'\t' read -r profile profile_engine availability _reason; do
+    [[ "$_reason" == alias\ for\ * ]] && continue
     engine["$profile"]=$profile_engine
     if [[ "$availability" == ready ]]; then ready["$profile"]=1; fi
 done < <("${halo_cmd[@]}" profiles list)

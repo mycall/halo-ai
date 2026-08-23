@@ -402,6 +402,12 @@
     {"id": "ds4-deepseek-v4-flash-hybrid", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 32768, "risk": "high", "features": [], "settings": {"prefill_chunk": 2048}},
     {"id": "ds4-deepseek-v4-flash-hybrid-kv", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 32768, "risk": "high", "features": ["kv-cache"], "settings": {"prefill_chunk": 2048, "kv_cache_mb": 8192}},
     {"id": "ds4-deepseek-v4-flash-hybrid-dspark-16k", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 16384, "risk": "experimental", "features": ["dspark"], "settings": {"prefill_chunk": 1024, "dspark_confidence": 0.7}},
+    {"id": "ds4-deepseek-v4-flash-hybrid-dspark-128k", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 131072, "risk": "experimental", "features": ["dspark", "kv-cache"], "settings": {"prefill_chunk": 1024, "dspark_confidence": 0.7, "kv_cache_mb": 8192}},
+    {"id": "ds4-deepseek-v4-flash-hybrid-dspark-256k", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 262144, "risk": "experimental", "features": ["dspark", "kv-cache"], "settings": {"prefill_chunk": 1024, "dspark_confidence": 0.7, "kv_cache_mb": 8192}},
+    {"id": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 393216, "risk": "experimental", "features": ["dspark", "kv-cache"], "settings": {"prefill_chunk": 1024, "dspark_confidence": 0.7, "kv_cache_mb": 8192}},
     {"id": "seamless-m4t-v2-large-speech", "model": "seamless-m4t-v2-large", "engine": "speech", "context": 0, "risk": "baseline", "features": [], "settings": {}}
-  ]
+  ],
+  "profile_aliases": {
+    "ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max"
+  }
 }

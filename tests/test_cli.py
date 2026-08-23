@@ -49,6 +49,16 @@ def gguf_fixture(payload: bytes = b"") -> bytes:
 
 
 class ConfigurationTests(unittest.TestCase):
+    def test_start_help_describes_switch(self) -> None:
+        parser = cli.build_parser()
+        commands = next(
+            action for action in parser._actions
+            if isinstance(action, __import__("argparse")._SubParsersAction)
+        )
+        help_text = commands.choices["start"].format_help()
+        self.assertIn("--switch", help_text)
+        self.assertIn("stop a conflicting managed inference runtime", help_text)
+
     def test_configuration_is_data_not_shell(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             marker = Path(temporary) / "must-not-exist"
@@ -75,6 +85,15 @@ class ConfigurationTests(unittest.TestCase):
             with self.assertRaises(cli.HaloError):
                 cli.validate_config(config)
 
+    def test_deepseek_think_max_preset_uses_official_sampling_policy(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            config = make_config(Path(temporary))
+            preset = cli.load_presets(config)["deepseek-v4-think-max"]
+        self.assertEqual(preset["request"]["reasoning_effort"], "max")
+        self.assertEqual(preset["request"]["temperature"], 1.0)
+        self.assertEqual(preset["request"]["top_p"], 1.0)
+        self.assertIn("context.393216", preset["requires"])
+
 
 class CatalogTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -84,7 +103,53 @@ class CatalogTests(unittest.TestCase):
 
     def test_checked_in_catalog_validates(self) -> None:
         self.assertEqual(len(self.catalog.models), 7)
-        self.assertEqual(len(self.catalog.profiles), 25)
+        self.assertEqual(len(self.catalog.profiles), 28)
+        self.assertEqual(
+            self.catalog.profile_aliases,
+            {"ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max"},
+        )
+
+    def test_ds4_alias_resolves_to_canonical_think_max_profile(self) -> None:
+        canonical = self.catalog.profiles[
+            "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max"
+        ]
+        self.assertIs(cli.resolve_profile(self.catalog, "ds4"), canonical)
+        self.assertIs(cli.resolve_profile(self.catalog, canonical["id"]), canonical)
+
+    def test_showing_ds4_alias_preserves_alias_and_canonical_identity(self) -> None:
+        arguments = __import__("argparse").Namespace(
+            profiles_action="show", profile_id="ds4",
+        )
+        output = __import__("io").StringIO()
+        with (
+            mock.patch.object(cli, "profile_availability", return_value=(True, "ready")),
+            __import__("contextlib").redirect_stdout(output),
+        ):
+            self.assertEqual(
+                cli.command_profiles(self.config, self.catalog, arguments), 0,
+            )
+        document = json.loads(output.getvalue())
+        self.assertEqual(document["id"], "ds4")
+        self.assertEqual(
+            document["alias_for"],
+            "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max",
+        )
+        self.assertEqual(document["context"], 393_216)
+
+    def test_profile_alias_must_target_a_canonical_profile(self) -> None:
+        with self.assertRaises(cli.HaloError):
+            cli.validate_catalog(
+                self.catalog.models, self.catalog.profiles,
+                {"broken": "missing-profile"},
+            )
+
+    def test_profile_alias_cannot_shadow_a_canonical_profile(self) -> None:
+        canonical = "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max"
+        with self.assertRaises(cli.HaloError):
+            cli.validate_catalog(
+                self.catalog.models, self.catalog.profiles,
+                {canonical: canonical},
+            )
 
     def test_mtp_cannot_combine_with_vision(self) -> None:
         models = {key: dict(value) for key, value in self.catalog.models.items()}
@@ -342,6 +407,53 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(
             {item["role"] for item in model["files"]}, {"main", "dspark"},
         )
+
+    def test_ds4_dspark_128k_is_separate_from_qualified_16k_rollback(self) -> None:
+        rollback = self.catalog.profiles[
+            "ds4-deepseek-v4-flash-hybrid-dspark-16k"
+        ]
+        candidate = self.catalog.profiles[
+            "ds4-deepseek-v4-flash-hybrid-dspark-128k"
+        ]
+        self.assertEqual(rollback["context"], 16_384)
+        self.assertEqual(candidate["context"], 131_072)
+        self.assertEqual(candidate["risk"], "experimental")
+        self.assertEqual(candidate["features"], ["dspark", "kv-cache"])
+        rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, candidate)
+        )
+        self.assertIn("--ctx 131072 --prefill-chunk 1024", rendered)
+        self.assertIn("--dspark --dspark-confidence 0.7", rendered)
+        self.assertIn("--kv-disk-dir /var/cache/ds4-kv", rendered)
+        self.assertIn("--kv-disk-space-mb 8192", rendered)
+
+    def test_ds4_dspark_256k_is_a_separate_high_context_candidate(self) -> None:
+        candidate = self.catalog.profiles[
+            "ds4-deepseek-v4-flash-hybrid-dspark-256k"
+        ]
+        self.assertEqual(candidate["context"], 262_144)
+        self.assertEqual(candidate["risk"], "experimental")
+        self.assertEqual(candidate["features"], ["dspark", "kv-cache"])
+        rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, candidate)
+        )
+        self.assertIn("--ctx 262144 --prefill-chunk 1024", rendered)
+        self.assertIn("--dspark --dspark-confidence 0.7", rendered)
+        self.assertIn("--kv-disk-dir /var/cache/ds4-kv", rendered)
+
+    def test_ds4_think_max_profile_clears_exact_runtime_threshold(self) -> None:
+        profile = self.catalog.profiles[
+            "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max"
+        ]
+        self.assertEqual(profile["context"], 393_216)
+        self.assertEqual(profile["risk"], "experimental")
+        self.assertEqual(profile["features"], ["dspark", "kv-cache"])
+        rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, profile)
+        )
+        self.assertIn("--ctx 393216 --prefill-chunk 1024", rendered)
+        self.assertIn("--dspark --dspark-confidence 0.7", rendered)
+        self.assertIn("--kv-disk-dir /var/cache/ds4-kv", rendered)
 
     def test_ds4_recipe_pins_archive_base_and_fixed_source(self) -> None:
         recipe = (ROOT / "lib/halo_ai/ds4/Containerfile").read_text(encoding="utf-8")

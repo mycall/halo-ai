@@ -22,9 +22,11 @@ checkout now contains a tested lifecycle manager, JSON catalog and presets,
 LongBench-v2 adapter, resumable installer, guarded uninstaller, and Limine host
 profile manager. Real Qwen, vision, MTP, DeepSeek, ds4, and DSpark loads have
 completed their documented capability canaries. The Antirez/ds4 DSpark path is
-enabled at 16K after the pinned upstream ROCm fix produced and accepted drafts
-on gfx1151; it remains experimental because working speculation was slower than
-target-only decode on the bounded probe. The manual phase
+enabled at 16K, 128K, 256K, and an opt-in 384K Think Max tier after the pinned
+upstream ROCm fix produced and accepted drafts on gfx1151; it remains
+experimental because working speculation was slower than target-only decode and
+the longer contexts have allocation/smoke evidence rather than frontier-length
+prompt evidence. The manual phase
 procedures remain the acceptance reference for future runtime, model, and
 context changes.
 
@@ -172,6 +174,7 @@ project and will not be modified.
 ├── docs/
 │   └── halo-ai.md
 ├── install.sh                    # resumable guarded system installer
+├── reload.sh                     # redeploy this checkout with a fresh journal
 ├── uninstall.sh                  # guarded installed-solution removal
 ├── bin/
 │   └── halo-ai                   # Bash entry point
@@ -236,7 +239,7 @@ Current boundary and deliberate deferrals:
 | 3 standalone Qwen profiles | Enabled and tested | Current llama.cpp image; build and digest recorded per trial |
 | Standalone DeepSeek baseline and DSpark | Enabled and tested | High-memory profiles; one runtime at a time |
 | ds4 hybrid and disk-KV variant | Enabled and tested | 32K remains conservative; cache restore passed across container recreation |
-| ds4 hybrid + DSpark support | Enabled, experimental | Fixed ROCm runtime accepted 246/324 proposed draft tokens at 16K; slower than target-only on the bounded probe |
+| ds4 hybrid + DSpark support | Enabled, experimental | 16K rollback, 128K/256K work profiles, and opt-in 384K Think Max; all use persistent KV above 16K |
 | ds4 IQ2_XXS / 126K | External prerequisite | Recommended smaller model is not installed |
 | vLLM | Deliberately deferred | Installed inventory is GGUF; vLLM GGUF support remains experimental |
 | NPU runtime | External prerequisite | `amdxdna` is not bound and `/dev/accel/accel0` is absent |
@@ -362,7 +365,7 @@ The lifecycle tooling must preserve that distinction per model.
 
 | Model ID | Installed components | Real size | GGUF architecture | Baseline runtime | Initial context |
 | --- | --- | ---: | --- | --- | ---: |
-| `deepseek-v4-flash-ds4-hybrid` | Antirez hybrid `fixed-0731`; optional exact 0731 DSpark support | 90.89 GiB main; 96.47 GiB with companion | `deepseek4` | ds4 | 32,768 control; 16,384 first DSpark screen |
+| `deepseek-v4-flash-ds4-hybrid` | Antirez hybrid `fixed-0731`; optional exact 0731 DSpark support | 90.89 GiB main; 96.47 GiB with companion | `deepseek4`; GGUF limit 1,048,576 | ds4 | 32K control; DSpark at 16K, 128K, 256K, and 384K |
 | `deepseek-v4-flash-0731-iq3xxs` | Unsloth IQ3_XXS shards 1–4; optional DSpark companion | 97.05 GiB main; 107.20 GiB with companion | `deepseek4` + `dflash` | standalone llama.cpp; Lemonade base only | 32,768 |
 | `qwen3.6-27b-q8xl` | Q8_K_XL main; installed F32 vision projector | 35.04 GiB total | `qwen35` + `clip` | Lemonade or standalone llama.cpp | 32,768 |
 | `qwen3.6-35b-a3b-q8xl` | Q8_K_XL main; no local vision projector | 36.41 GiB | `qwen35moe` | Lemonade or standalone llama.cpp | 32,768 |
@@ -686,6 +689,17 @@ only of mutable state/cache leaves. Preview it before the first run:
 cd ~/Projects/source/ai/halo-ai
 sudo ./install.sh --run-user "$USER" --dry-run
 sudo ./install.sh --run-user "$USER"
+```
+
+For routine source-checkout updates, the convenience wrapper below derives the
+calling operator with `id -un`, requests sudo itself, and supplies
+`--restart-journal --yes` to the installer. It can be invoked directly from
+Fish or Bash:
+
+```bash
+./reload.sh
+# Preview without elevation or changes:
+./reload.sh --dry-run
 ```
 
 The installer is a resumable state machine rather than one indivisible copy
@@ -1433,6 +1447,53 @@ runtime errors. The profile is therefore enabled, but remains experimental: the
 runtime attributed about 31.5 seconds to proposal/verification and calculated a
 net loss of about 18.9 seconds on this output-heavy probe. Working DSpark is the
 qualification requirement here; it is not claimed to be the fastest profile.
+
+The official DeepSeek model card identifies a one-million-token architectural
+context and attributes its efficiency to hybrid CSA/HCA attention. The installed
+GGUF independently declares `deepseek4.context_length=1048576`, YaRN factor 16,
+and an original context of 65,536. That establishes model compatibility, not
+host capacity. DS4's own guidance estimates about 26 GiB for a full 1M context
+and recommends roughly 100K--300K on 128 GB machines using its smaller 81 GB q2
+model. Halo's target plus support is 96.47 GiB, so 256K is the normal upper work
+profile. A separate 393,216-token profile exists only to clear DS4's exact Think
+Max threshold; 1M is not exposed.
+
+The 128K allocation and deterministic probe used 104.38 GiB GTT and retained
+12.28 GiB `MemAvailable`. DS4 planned 1.78 GiB KV plus 0.25 GiB buffers and
+generated at 8.72 tok/s. The 256K equivalent used 106.30 GiB GTT, retained 10.36
+GiB available, planned 3.46 GiB KV plus 0.50 GiB buffers, and generated at 8.81
+tok/s. Both accepted exactly 246 of 324 proposed drafts with zero verifier or
+runtime errors. Both enable the existing 8 GiB disk-KV policy for useful session
+resume; 16K remains the low-memory diagnostic rollback. These are allocation
+and short-probe qualifications, not claims that a 128K/256K prompt has completed.
+
+The opt-in 384K tier used 108.23 GiB GTT and retained 8.40 GiB available. DS4
+planned 5.14 GiB KV plus 0.75 GiB buffers. A 192-token
+`reasoning_effort=max` canary returned both a nonempty reasoning trace and answer
+content. Across the normal and Think Max probes, DSpark accepted 353 of 436
+proposals (80.96%) with no errors. Use the `deepseek-v4-think-max` preset, which
+sets the official temperature 1.0/top-p 1.0 policy. The profile merely enables
+Think Max capacity; clients still have to request max reasoning.
+
+For practical work, start 256K unless another large host workload needs the
+extra two GiB of headroom; use 128K in that case:
+
+```bash
+halo-ai start ds4-deepseek-v4-flash-hybrid-dspark-256k --switch
+# Conservative rollback:
+halo-ai start ds4-deepseek-v4-flash-hybrid-dspark-128k --switch
+# Opt-in Think Max capacity:
+halo-ai start ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max --switch
+halo-ai test ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max \
+  --preset deepseek-v4-think-max
+# Equivalent shortcut profile:
+halo-ai start ds4 --switch
+halo-ai test ds4 --preset deepseek-v4-think-max
+```
+
+`ds4` is a catalog alias, not a copied profile. Alias targets must be canonical
+profile IDs, and the runtime records the canonical Think Max profile so status,
+trial history, and benchmarks remain unambiguous.
 
 Normal stop/restart preserves models and cache:
 
@@ -2392,6 +2453,7 @@ memory cost; both remain available as comparison and recovery paths.
 - LongBench-v2: [dataset](https://huggingface.co/datasets/zai-org/LongBench-v2)
 - LongBench-v2: [official runner](https://github.com/THUDM/LongBench)
 - ds4 upstream: [antirez/ds4](https://github.com/antirez/ds4)
+- DeepSeek: [DeepSeek V4 Flash model card](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash)
 - DS4 ROCm releases: [lemonade-sdk/ds4-rocm](https://github.com/lemonade-sdk/ds4-rocm/releases)
 - DS4 ROCm speculation fix: [antirez/ds4 commit 84cc882](https://github.com/antirez/ds4/commit/84cc882352757baf628a1776badf7cc54d584e28)
 - Antirez: [DeepSeek V4 GGUF](https://huggingface.co/antirez/deepseek-v4-gguf)

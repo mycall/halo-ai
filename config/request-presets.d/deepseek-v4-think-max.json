@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "id": "deepseek-v4-think-max",
+  "description": "DeepSeek V4 Think Max with the official sampling defaults; requires at least 393216 server context",
+  "request": {
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "reasoning_effort": "max"
+  },
+  "requires": ["reasoning_effort.max", "context.393216"]
+}

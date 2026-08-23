@@ -34,6 +34,16 @@ sudo ./install.sh --run-user "$USER" --dry-run
 sudo ./install.sh --run-user "$USER"
 ```
 
+After editing or updating the source checkout, redeploy it with the Fish- and
+Bash-friendly reload helper. It determines the operator account, invokes sudo,
+archives the prior installer journal, and skips the confirmation prompt:
+
+```bash
+./reload.sh
+# Optional non-mutating preview:
+./reload.sh --dry-run
+```
+
 The host installer is resumable. It journals each verified stage in the
 root-only `/var/lib/halo-ai-installer/install-state.env`. After a failure, fix the reported problem
 and rerun the same command; completed stages are verified and skipped. Use
@@ -216,6 +226,14 @@ halo-ai start ds4-deepseek-v4-flash-hybrid-kv --switch
 halo-ai test ds4-deepseek-v4-flash-hybrid-kv
 ```
 
+For the qualified 384K DSpark/Think Max configuration, `ds4` is a catalog alias
+for the full profile name:
+
+```bash
+halo-ai start ds4 --switch
+halo-ai test ds4 --preset deepseek-v4-think-max
+```
+
 DS4 exposes an OpenAI-compatible API on loopback. Inspect the loaded model and
 send a non-thinking chat request with:
 
@@ -351,7 +369,7 @@ fixed-VRAM use.
 | Standalone llama.cpp | build `b10335-74ce15741` | `rocm-7.14` image, digest `sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b` |
 | ds4 image | manifest `sha256:f9dd84e76c2fbdd3f99b2e0490c40b899586dd047b0bfa0030744cbd58e1df89` | Local ID `52763e9d…493113a`; project-built `b0001`, Antirez `84cc882` ROCm DSpark fix, ROCm `7.15.0a20260728` |
 | Speech image | manifest `sha256:0a21384bf020782d8c75df78338bbc8a23f260c3604e5b023eee7a3381d9361b` | Local image ID `532f5f3d…23633`, 7.1 GB; PyTorch 2.12.0 + ROCm 7.14, Transformers 4.57.1, Gradio 6.16.0 |
-| Automated source tests | 89 passed | Python unit tests inside the read-only, network-disabled Podman test container, plus shell smoke/install assertions |
+| Automated source tests | 98 passed | Python unit tests inside the read-only, network-disabled Podman test container, plus shell smoke/install assertions |
 | Runtime cleanup | Passed | `halo-ai stop` returned GTT use from about 38 GiB to about 0.1 GiB |
 
 ### End-to-end model/profile matrix
@@ -377,6 +395,9 @@ fixed-VRAM use.
 | `ds4-deepseek-v4-flash-hybrid-kv` cold | 32K | ds4 + disk KV | 107.6 GiB | 9.2 GiB | 97.37 | 12.43 | 107.7 s | Pass; stored a 10,240-prefix-token entry (157.35 MiB) |
 | `ds4-deepseek-v4-flash-hybrid-kv` restored | 32K | ds4 + disk KV | 107.6 GiB | 9.8 GiB | 25.01* | 12.83 | 3.7 s | Pass after container recreation; 10,240 tokens restored in 92.7 ms, only 38-token suffix prefetched |
 | `ds4-deepseek-v4-flash-hybrid-dspark-16k` | 16K | ds4 + DSpark | — | — | 29.56* | 8.62 | 46.4 s decode | Pass on fixed ROCm runtime; 246/324 draft tokens accepted (75.93%), zero verifier/runtime errors; enabled but experimental |
+| `ds4-deepseek-v4-flash-hybrid-dspark-128k` | 128K | ds4 + DSpark + disk KV | 104.38 GiB | 12.28 GiB | 29.91* | 8.72 | 45.9 s decode | Allocation/smoke pass; 1.78 GiB KV, 246/324 drafts accepted, zero errors; conservative work profile |
+| `ds4-deepseek-v4-flash-hybrid-dspark-256k` | 256K | ds4 + DSpark + disk KV | 106.30 GiB | 10.36 GiB | 29.59* | 8.81 | 45.4 s decode | Allocation/smoke pass; 3.46 GiB KV, 246/324 drafts accepted, zero errors; high-context work profile |
+| `ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max` | 384K | Think Max + DSpark + disk KV | 108.23 GiB | 8.40 GiB | 29.01* | 8.67 | 46.1 s decode | Think Max response passed; 5.14 GiB KV, 353/436 drafts accepted across both probes, zero errors; opt-in tighter profile |
 
 Notes:
 

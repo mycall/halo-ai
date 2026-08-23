@@ -299,6 +299,7 @@ def assert_operator(config: Config) -> None:
 class Catalog:
     models: dict[str, dict[str, Any]]
     profiles: dict[str, dict[str, Any]]
+    profile_aliases: dict[str, str]
     sources: list[Path]
 
 
@@ -309,6 +310,7 @@ def load_catalog(config: Config) -> Catalog:
         fail(f"no catalog JSON files found in {directory}")
     models: dict[str, dict[str, Any]] = {}
     profiles: dict[str, dict[str, Any]] = {}
+    profile_aliases: dict[str, str] = {}
     for path in files:
         try:
             document = json.loads(read_text(path))
@@ -324,11 +326,29 @@ def load_catalog(config: Config) -> Catalog:
                 if identifier in destination:
                     fail(f"duplicate {kind[:-1]} ID {identifier}")
                 destination[identifier] = item
-    validate_catalog(models, profiles)
-    return Catalog(models, profiles, files)
+        aliases = document.get("profile_aliases", {})
+        if not isinstance(aliases, dict):
+            fail(f"profile_aliases must be an object in {path}")
+        for alias, target in aliases.items():
+            if alias in profile_aliases:
+                fail(f"duplicate profile alias {alias}")
+            profile_aliases[alias] = target
+    validate_catalog(models, profiles, profile_aliases)
+    return Catalog(models, profiles, profile_aliases, files)
 
 
-def validate_catalog(models: dict[str, dict[str, Any]], profiles: dict[str, dict[str, Any]]) -> None:
+def validate_catalog(
+    models: dict[str, dict[str, Any]], profiles: dict[str, dict[str, Any]],
+    profile_aliases: dict[str, str] | None = None,
+) -> None:
+    profile_aliases = profile_aliases or {}
+    for alias, target in profile_aliases.items():
+        if not isinstance(alias, str) or not re.fullmatch(r"[a-z0-9][a-z0-9._-]+", alias):
+            fail(f"invalid profile alias ID: {alias!r}")
+        if alias in profiles:
+            fail(f"profile alias {alias} collides with a profile ID")
+        if not isinstance(target, str) or target not in profiles:
+            fail(f"profile alias {alias} references unknown profile {target!r}")
     roles = {"main", "mmproj", "dspark", "chat_template", "weights", "processor"}
     for identifier, model in models.items():
         engines = model.get("engines")
@@ -487,6 +507,12 @@ def validate_catalog(models: dict[str, dict[str, Any]], profiles: dict[str, dict
             ]
             if len(matches) != 1:
                 fail(f"profile {identifier} requires exactly one {template_variant!r} chat template")
+
+
+def resolve_profile(catalog: Catalog, identifier: str) -> dict[str, Any] | None:
+    """Resolve one user-facing profile ID or one direct alias to its canonical profile."""
+    canonical = catalog.profile_aliases.get(identifier, identifier)
+    return catalog.profiles.get(canonical)
 
 
 def load_presets(config: Config) -> dict[str, dict[str, Any]]:
@@ -1556,7 +1582,10 @@ def command_doctor(config: Config, catalog: Catalog, _args: argparse.Namespace) 
     print(f"halo-ai {VERSION} doctor")
     for name, detail, okay in checks:
         print(f"{'PASS' if okay else 'FAIL':4}  {name}: {detail}")
-    print(f"INFO  catalog: {len(catalog.models)} models, {len(catalog.profiles)} profiles")
+    print(
+        f"INFO  catalog: {len(catalog.models)} models, {len(catalog.profiles)} profiles, "
+        f"{len(catalog.profile_aliases)} aliases"
+    )
     print(f"INFO  cmdline: {read_text(Path('/proc/cmdline')).strip()}")
     print(f"INFO  NPU: {'active' if Path('/dev/accel/accel0').exists() else 'inactive'}")
     executable: set[str] = set()
@@ -1803,11 +1832,20 @@ def profile_availability(config: Config, catalog: Catalog, profile: dict[str, An
 
 def command_profiles(config: Config, catalog: Catalog, args: argparse.Namespace) -> int:
     if args.profiles_action == "list":
+        availability: dict[str, tuple[bool, str]] = {}
         for profile in catalog.profiles.values():
             ready, reason = profile_availability(config, catalog, profile)
+            availability[profile["id"]] = (ready, reason)
             print(f"{profile['id']}\t{profile['engine']}\t{'ready' if ready else 'disabled'}\t{reason}")
+        for alias, target in sorted(catalog.profile_aliases.items()):
+            profile = catalog.profiles[target]
+            ready, reason = availability[target]
+            print(
+                f"{alias}\t{profile['engine']}\t{'ready' if ready else 'disabled'}\t"
+                f"alias for {target}; {reason}"
+            )
         return 0
-    profile = catalog.profiles.get(args.profile_id)
+    profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
     if args.profiles_action == "acquire":
@@ -1815,6 +1853,9 @@ def command_profiles(config: Config, catalog: Catalog, args: argparse.Namespace)
     if args.profiles_action == "show":
         ready, reason = profile_availability(config, catalog, profile)
         output = dict(profile)
+        if args.profile_id in catalog.profile_aliases:
+            output["id"] = args.profile_id
+            output["alias_for"] = profile["id"]
         output["availability"] = {"ready": ready, "reason": reason}
         print(json.dumps(output, indent=2))
     else:
@@ -2276,7 +2317,7 @@ def configure_lemonade_runtime(config: Config, container: str, health_url: str) 
 
 
 def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) -> int:
-    profile = catalog.profiles.get(args.profile_id)
+    profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
     profile, pending_path = apply_pending_trial(config, profile)
@@ -2408,8 +2449,8 @@ def stop_names(names: Iterable[str]) -> None:
 def command_stop(config: Config, catalog: Catalog, args: argparse.Namespace) -> int:
     if not args.target or args.target == "all":
         names = [container_name(engine) for engine in ENGINE_CONTAINERS]
-    elif args.target in catalog.profiles:
-        names = [container_name(catalog.profiles[args.target]["engine"])]
+    elif profile := resolve_profile(catalog, args.target):
+        names = [container_name(profile["engine"])]
     else:
         fail(f"unknown profile or target: {args.target}")
     request_trial_stop(config, names)
@@ -2487,7 +2528,7 @@ def command_status(config: Config, _catalog: Catalog, _args: argparse.Namespace)
 
 def command_logs(catalog: Catalog, args: argparse.Namespace) -> int:
     if args.profile_id:
-        profile = catalog.profiles.get(args.profile_id)
+        profile = resolve_profile(catalog, args.profile_id)
         if not profile:
             fail(f"unknown profile: {args.profile_id}")
         name = container_name(profile["engine"])
@@ -2645,9 +2686,10 @@ def command_test(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
         if not active_path.exists():
             fail("no active profile; specify one")
         profile_id = json.loads(read_text(active_path))["profile"]
-    profile = catalog.profiles.get(profile_id)
+    profile = resolve_profile(catalog, profile_id)
     if not profile:
         fail(f"unknown profile: {profile_id}")
+    profile_id = profile["id"]
     preset = None
     if args.preset:
         preset = load_presets(config).get(args.preset)
@@ -2731,7 +2773,10 @@ def command_test(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
         merge_request_preset(payload, preset["request"])
         thinking = (
             payload.get("reasoning_effort") != "none"
-            and bool(payload.get("chat_template_kwargs", {}).get("enable_thinking", False))
+            and (
+                bool(payload.get("chat_template_kwargs", {}).get("enable_thinking", False))
+                or (profile["engine"] == "ds4" and model.get("architecture") == "deepseek4")
+            )
         )
     if profile["engine"] == "lemonade":
         validate_lemonade_reasoning_template(container_name("lemonade"), payload, thinking)
@@ -2976,7 +3021,7 @@ def command_bench_run(config: Config, catalog: Catalog, args: argparse.Namespace
         fail("--limit must be at least 1")
     if not 1 <= args.max_tokens <= 4096:
         fail("--max-tokens must be in [1, 4096]")
-    profile = catalog.profiles.get(args.profile_id)
+    profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
     if profile["engine"] == "speech":
@@ -3245,7 +3290,7 @@ def rocmfpx_memory_device() -> Path:
 def command_bench_rocmfpx_context(
     config: Config, catalog: Catalog, args: argparse.Namespace,
 ) -> int:
-    profile = catalog.profiles.get(args.profile_id)
+    profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
     if profile["engine"] != "rocmfpx":
@@ -3445,7 +3490,7 @@ def command_bench_rocmfpx_quality(
     config: Config, catalog: Catalog, args: argparse.Namespace,
 ) -> int:
     """Run the fixed quality suite against one active ROCmFPX process."""
-    profile = catalog.profiles.get(args.profile_id)
+    profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
     if profile["engine"] != "rocmfpx":
@@ -3783,7 +3828,12 @@ def build_parser() -> argparse.ArgumentParser:
     show_preset = presets.add_parser("show"); show_preset.add_argument("preset_id")
     render_preset = presets.add_parser("render"); render_preset.add_argument("preset_id")
     install = sub.add_parser("install"); install.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "ds4", "speech", "vllm", "all"], nargs="?", default="all")
-    start = sub.add_parser("start", help="start one catalog profile"); start.add_argument("profile_id"); start.add_argument("--switch", action="store_true")
+    start = sub.add_parser("start", help="start one catalog profile")
+    start.add_argument("profile_id")
+    start.add_argument(
+        "--switch", action="store_true",
+        help="stop a conflicting managed inference runtime before starting",
+    )
     stop = sub.add_parser(
         "stop",
         help="stop all managed runtimes (or the runtime for one profile)",
