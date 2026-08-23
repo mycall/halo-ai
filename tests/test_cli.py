@@ -106,7 +106,11 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(len(self.catalog.profiles), 28)
         self.assertEqual(
             self.catalog.profile_aliases,
-            {"ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max"},
+            {
+                "ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max",
+                "qwen38fp4": "qwen38-27b-rocmfp4-baseline",
+                "qwen38fp8": "qwen38-27b-rocmfp8-baseline",
+            },
         )
 
     def test_ds4_alias_resolves_to_canonical_think_max_profile(self) -> None:
@@ -115,6 +119,15 @@ class CatalogTests(unittest.TestCase):
         ]
         self.assertIs(cli.resolve_profile(self.catalog, "ds4"), canonical)
         self.assertIs(cli.resolve_profile(self.catalog, canonical["id"]), canonical)
+
+    def test_qwen38_aliases_resolve_to_baseline_profiles(self) -> None:
+        for alias, canonical_id in (
+            ("qwen38fp4", "qwen38-27b-rocmfp4-baseline"),
+            ("qwen38fp8", "qwen38-27b-rocmfp8-baseline"),
+        ):
+            with self.subTest(alias=alias):
+                canonical = self.catalog.profiles[canonical_id]
+                self.assertIs(cli.resolve_profile(self.catalog, alias), canonical)
 
     def test_showing_ds4_alias_preserves_alias_and_canonical_identity(self) -> None:
         arguments = __import__("argparse").Namespace(

@@ -1491,9 +1491,11 @@ halo-ai start ds4 --switch
 halo-ai test ds4 --preset deepseek-v4-think-max
 ```
 
-`ds4` is a catalog alias, not a copied profile. Alias targets must be canonical
-profile IDs, and the runtime records the canonical Think Max profile so status,
-trial history, and benchmarks remain unambiguous.
+`ds4`, `qwen38fp4`, and `qwen38fp8` are catalog aliases, not copied profiles.
+The Qwen aliases target `qwen38-27b-rocmfp4-baseline` and
+`qwen38-27b-rocmfp8-baseline`, respectively. Alias targets must be canonical
+profile IDs, and the runtime records the canonical profile so status, trial
+history, and benchmarks remain unambiguous.
 
 Normal stop/restart preserves models and cache:
 

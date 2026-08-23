@@ -408,6 +408,8 @@
     {"id": "seamless-m4t-v2-large-speech", "model": "seamless-m4t-v2-large", "engine": "speech", "context": 0, "risk": "baseline", "features": [], "settings": {}}
   ],
   "profile_aliases": {
-    "ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max"
+    "ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max",
+    "qwen38fp4": "qwen38-27b-rocmfp4-baseline",
+    "qwen38fp8": "qwen38-27b-rocmfp8-baseline"
   }
 }

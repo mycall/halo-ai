@@ -234,6 +234,13 @@ halo-ai start ds4 --switch
 halo-ai test ds4 --preset deepseek-v4-think-max
 ```
 
+The qualified Qwen3.8 ROCmFPX baselines also have short aliases:
+
+```bash
+halo-ai start qwen38fp4 --switch
+halo-ai start qwen38fp8 --switch
+```
+
 DS4 exposes an OpenAI-compatible API on loopback. Inspect the loaded model and
 send a non-thinking chat request with:
 
