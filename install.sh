@@ -260,6 +260,8 @@ verify_config() {
             "$CONFIG_ROOT/config.env" &&
         grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
             "$CONFIG_ROOT/config.env" &&
+        grep -Eq '^[[:space:]]*DS4_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
+            "$CONFIG_ROOT/config.env" &&
         grep -Eq '^[[:space:]]*SPEECH_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
             "$CONFIG_ROOT/config.env" &&
         runuser -u "$run_user" -- test -r "$CONFIG_ROOT/config.env"
@@ -302,6 +304,30 @@ action_config() {
                     "$CONFIG_ROOT/.config.env.tmp"
             else
                 printf '\nLLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14\n' \
+                    >>"$CONFIG_ROOT/.config.env.tmp"
+            fi
+            chmod 0640 "$CONFIG_ROOT/.config.env.tmp"
+            chown root:"$run_gid" "$CONFIG_ROOT/.config.env.tmp"
+            mv -T "$CONFIG_ROOT/.config.env.tmp" "$CONFIG_ROOT/config.env"
+        fi
+    fi
+    if ! grep -Eq '^[[:space:]]*DS4_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
+        "$CONFIG_ROOT/config.env" ||
+        grep -Eq '^[[:space:]]*DS4_IMAGE[[:space:]]*=[[:space:]]*docker.io/kyuz0/strix-halo-ds4-toolbox:rocm-7\.14[[:space:]]*$' \
+            "$CONFIG_ROOT/config.env"; then
+        if "$dry_run"; then
+            printf '  set DS4_IMAGE=localhost/halo-ai-ds4:b0001 in %s\n' \
+                "$CONFIG_ROOT/config.env"
+        else
+            cp -- "$CONFIG_ROOT/config.env" "$CONFIG_ROOT/.config.env.tmp"
+            if grep -Eq '^[[:space:]]*DS4_IMAGE[[:space:]]*=' "$CONFIG_ROOT/.config.env.tmp"; then
+                sed -i \
+                    's|^[[:space:]]*DS4_IMAGE[[:space:]]*=.*$|DS4_IMAGE=localhost/halo-ai-ds4:b0001|' \
+                    "$CONFIG_ROOT/.config.env.tmp"
+            else
+                printf '\n# Project-built gfx1151 DS4 release with the ROCm DSpark fix.\n' \
+                    >>"$CONFIG_ROOT/.config.env.tmp"
+                printf 'DS4_IMAGE=localhost/halo-ai-ds4:b0001\n' \
                     >>"$CONFIG_ROOT/.config.env.tmp"
             fi
             chmod 0640 "$CONFIG_ROOT/.config.env.tmp"

@@ -1,0 +1,29 @@
+ARG BASE=docker.io/library/ubuntu@sha256:1e0a86e57d247923571b75e0aaf48a1449cf8c543d51fb3e07a4a7d7bfa79316
+FROM ${BASE}
+
+ADD https://github.com/lemonade-sdk/ds4-rocm/releases/download/b0001/ds4-b0001-linux-rocm-gfx1151-x64.tar.gz /tmp/ds4-b0001-linux-rocm-gfx1151-x64.tar.gz
+
+RUN set -eu; \
+    archive=/tmp/ds4-b0001-linux-rocm-gfx1151-x64.tar.gz; \
+    test "$(wc -c < "$archive")" -eq 164211638; \
+    echo 'e63b7c9428fd10de75b3f69164eccd564a8e7261c2f9087cd8bec2b4b19a8ad1  /tmp/ds4-b0001-linux-rocm-gfx1151-x64.tar.gz' | sha256sum --check --strict; \
+    mkdir -p /opt/ds4; \
+    tar --extract --gzip --file "$archive" --directory /opt/ds4 --strip-components=1; \
+    test -x /opt/ds4/ds4-server; \
+    test "$(cat /opt/ds4/ds4-commit.txt)" = 84cc882352757baf628a1776badf7cc54d584e28; \
+    rm -f "$archive"
+
+ENV PATH=/opt/ds4:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV LD_LIBRARY_PATH=/opt/ds4
+
+LABEL org.opencontainers.image.title="Halo AI DS4 ROCm gfx1151 runtime"
+LABEL org.opencontainers.image.version="b0001"
+LABEL org.opencontainers.image.source="https://github.com/lemonade-sdk/ds4-rocm"
+LABEL org.opencontainers.image.revision="84cc882352757baf628a1776badf7cc54d584e28"
+LABEL local.halo-ai.engine="ds4"
+LABEL local.halo-ai.engine-archive-sha256="e63b7c9428fd10de75b3f69164eccd564a8e7261c2f9087cd8bec2b4b19a8ad1"
+LABEL local.halo-ai.rocm-version="7.15.0a20260728"
+LABEL local.halo-ai.base="sha256:1e0a86e57d247923571b75e0aaf48a1449cf8c543d51fb3e07a4a7d7bfa79316"
+
+ENTRYPOINT []
+CMD ["/opt/ds4/ds4-server", "--help"]

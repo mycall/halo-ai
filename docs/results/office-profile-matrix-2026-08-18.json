@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "recorded_local_date": "2026-08-18",
+  "kind": "halo-ai-controlled-office-profile-matrix-summary",
+  "host": {
+    "system": "GPD WIN 5",
+    "cpu": "AMD Ryzen AI Max+ 395",
+    "gpu": "AMD Radeon 8060S (gfx1151)",
+    "kernel": "7.1.8-1-cachyos-deckify",
+    "boot_id": "745dc409-82db-4041-a67c-6d770fee6b02"
+  },
+  "execution": {
+    "source_run_dir": "/var/opt/halo-ai/state/benchmarks/office-profile-matrix/20260818T184041Z",
+    "started_utc": "2026-08-18T18:40:41.465460420+00:00",
+    "ended_utc": "2026-08-18T20:38:13.600217887+00:00",
+    "inference_location": "managed rootless Podman containers",
+    "host_activity": "orchestration, sleep inhibition, environment capture, and read-only power sampling",
+    "source_test_location": "pinned network-disabled Podman test container",
+    "source_tests_passed": 82,
+    "power_profile_before_after": "performance",
+    "platform_profile_before_after": "performance",
+    "peak_apu_ppt_watts": 45.049,
+    "suspend_offset_milliseconds_before": 0,
+    "suspend_offset_milliseconds_after": 0,
+    "valid_profile_results": 23,
+    "invalidated_profile_results": 1,
+    "excluded_profiles": [
+      {
+        "profile": "qwen3.6-27b-q8xl-vision-llamacpp",
+        "reason": "excluded from unattended rerun because it was the active starting trial at the preceding reboot; causation is not proven"
+      }
+    ],
+    "invalidation_overlay": [
+      {
+        "profile": "ds4-deepseek-v4-flash-hybrid-dspark-16k",
+        "raw_result": "pass",
+        "valid_result": "invalid-masked-failure",
+        "reason": "a shell control-flow bug allowed a later successful skip command to mask the failed DS4 smoke check; the corrected greedy rerun produced zero proposals"
+      }
+    ]
+  },
+  "rocmfpx_method": {
+    "prompt_tokens": [4095, 31998],
+    "completion_tokens": 64,
+    "repetitions": 3,
+    "prompt_pattern": "unique non-repeating exact-token array",
+    "request_location": "inside halo-rocmfpx container",
+    "temperature": 0,
+    "seed": 1,
+    "prompt_cache": false,
+    "memory_sample_interval_seconds": 0.05
+  },
+  "rocmfpx_profiles": {
+    "qwen38-27b-rocmfp4-baseline": [
+      {"prompt_tokens": 4095, "pp_median": 180.860059, "pp_min": 180.595879, "pp_max": 183.523292, "tps_median": 12.886082, "tps_min": 11.892683, "tps_max": 13.021594, "peak_gtt_bytes_max": 15107358720},
+      {"prompt_tokens": 31998, "pp_median": 123.752539, "pp_min": 123.640587, "pp_max": 124.333051, "tps_median": 10.777844, "tps_min": 10.747517, "tps_max": 10.794428, "peak_gtt_bytes_max": 15154601984}
+    ],
+    "qwen38-27b-rocmfp4-mtp": [
+      {"prompt_tokens": 4095, "pp_median": 169.938011, "pp_min": 166.672494, "pp_max": 170.981382, "tps_median": 21.712580, "tps_min": 21.462200, "tps_max": 23.909949, "acceptance_percent": 90.30, "peak_gtt_bytes_max": 20499599360},
+      {"prompt_tokens": 31998, "pp_median": 120.960046, "pp_min": 112.193778, "pp_max": 121.003342, "tps_median": 17.852311, "tps_min": 15.622269, "tps_max": 17.860023, "acceptance_percent": 96.64, "peak_gtt_bytes_max": 20501696512}
+    ],
+    "qwen38-27b-rocmfp4-mtp-q5-draft": [
+      {"prompt_tokens": 4095, "pp_median": 170.414155, "pp_min": 166.883058, "pp_max": 170.684619, "tps_median": 21.856699, "tps_min": 21.517682, "tps_max": 22.152917, "acceptance_percent": 89.70, "peak_gtt_bytes_max": 20382486528},
+      {"prompt_tokens": 31998, "pp_median": 122.591418, "pp_min": 112.850683, "pp_max": 122.629202, "tps_median": 18.134000, "tps_min": 17.135074, "tps_max": 18.168955, "acceptance_percent": 96.64, "peak_gtt_bytes_max": 20399853568}
+    ],
+    "qwen38-27b-rocmfp4-mtp-conservative-q5-draft": [
+      {"prompt_tokens": 4095, "pp_median": 170.685451, "pp_min": 166.637361, "pp_max": 171.128188, "tps_median": 19.580626, "tps_min": 19.426806, "tps_max": 19.618879, "acceptance_percent": 97.44, "peak_gtt_bytes_max": 19782791168},
+      {"prompt_tokens": 31998, "pp_median": 104.029985, "pp_min": 103.740625, "pp_max": 114.816516, "tps_median": 13.753317, "tps_min": 13.731115, "tps_max": 16.110680, "acceptance_percent": 100.0, "peak_gtt_bytes_max": 19784888320}
+    ],
+    "qwen38-27b-rocmfp8-baseline": [
+      {"prompt_tokens": 4095, "pp_median": 177.170145, "pp_min": 175.101102, "pp_max": 185.585907, "tps_median": 7.636518, "tps_min": 7.498218, "tps_max": 7.650214, "peak_gtt_bytes_max": 28113403904},
+      {"prompt_tokens": 31998, "pp_median": 120.552741, "pp_min": 120.516169, "pp_max": 123.812867, "tps_median": 6.896441, "tps_min": 6.895774, "tps_max": 6.901380, "peak_gtt_bytes_max": 28271407104}
+    ],
+    "qwen38-27b-rocmfp8-mtp": [
+      {"prompt_tokens": 4095, "pp_median": 166.677195, "pp_min": 163.563749, "pp_max": 167.378451, "tps_median": 19.860548, "tps_min": 17.072681, "tps_max": 22.354611, "acceptance_percent": 94.90, "peak_gtt_bytes_max": 33408577536},
+      {"prompt_tokens": 31998, "pp_median": 117.350546, "pp_min": 103.906143, "pp_max": 117.449085, "tps_median": 14.952422, "tps_min": 14.296149, "tps_max": 15.077729, "acceptance_percent": 96.0, "peak_gtt_bytes_max": 33435774976}
+    ]
+  },
+  "comparisons": {
+    "aggressive_q5_mtp_vs_fp4_baseline": [
+      {"prompt_tokens": 4095, "pp_change_percent": -5.78, "tps_change_percent": 69.61, "peak_gtt_change_gib": 4.91, "end_to_end_crossover_generated_tokens": 44},
+      {"prompt_tokens": 31998, "pp_change_percent": -0.94, "tps_change_percent": 68.25, "peak_gtt_change_gib": 4.89, "end_to_end_crossover_generated_tokens": 66}
+    ],
+    "aggressive_q5_mtp_vs_f16_draft_cache": [
+      {"prompt_tokens": 4095, "peak_gtt_change_gib": -0.11, "median_throughput_result": "neutral"},
+      {"prompt_tokens": 31998, "peak_gtt_change_gib": -0.09, "median_throughput_result": "neutral-to-slightly-faster"}
+    ],
+    "conservative_q5_mtp_vs_aggressive_q5_mtp": [
+      {"prompt_tokens": 4095, "tps_change_percent": -10.41, "peak_gtt_change_gib": -0.56},
+      {"prompt_tokens": 31998, "tps_change_percent": -24.16, "peak_gtt_change_gib": -0.57}
+    ]
+  },
+  "ds4": {
+    "image": "docker.io/kyuz0/strix-halo-ds4-toolbox:rocm-7.14",
+    "image_digest": "sha256:2ea5b3b28334f08d53307baf79838591e510628d41dacec357de32ffafbac31f",
+    "support_file": {
+      "path": "/srv/halo-ai/models/antirez/deepseek-v4-gguf/DeepSeek-V4-Flash-DSpark-support-0731.gguf",
+      "bytes": 5989114272,
+      "sha256": "7e319924541db3f7a163ed7e11d7532a70d48228ab59d36cb81e1d4511885360"
+    },
+    "target_only_fixed_sample_seconds": 105.025,
+    "disk_kv_restored_fixed_sample_seconds": 3.556,
+    "dspark_targeted_run_dir": "/var/opt/halo-ai/state/benchmarks/ds4-dspark-target/20260818T204145Z",
+    "dspark_greedy_diagnostic": {
+      "completion_tokens": 400,
+      "decode_tokens_per_second": 13.76,
+      "cycles": 398,
+      "proposed": 0,
+      "accepted_draft": 0,
+      "no_draft": 398,
+      "result": "fail-zero-proposals",
+      "profile_state": "gated",
+      "attempt_32k": false
+    }
+  },
+  "other_checks": {
+    "seamless_m4t_v2_large": {"inference_seconds": 7.321, "output_wav_bytes": 58924},
+    "longbench_fixed_sample_usage": "timing and lifecycle stability only; this one-sample run is not a quality ranking"
+  },
+  "decision": {
+    "performance_default": "qwen38-27b-rocmfp4-baseline",
+    "performance_candidate": "qwen38-27b-rocmfp4-mtp-q5-draft",
+    "promotion_blocker": "strict cross-process output identity and fixed task-quality suite remain open",
+    "fp8_status": "quality-only experiment",
+    "ds4_dspark_status": "gated until a specific runtime fix produces and accepts proposals on gfx1151"
+  },
+  "same_host_evidence_only": true
+}

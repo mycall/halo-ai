@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "recorded_local_date": "2026-08-18",
+  "kind": "halo-ai-qwen38-fixed-quality-and-identity-summary",
+  "host": {
+    "cpu": "AMD Ryzen AI Max+ 395",
+    "gpu": "AMD Radeon 8060S (gfx1151)",
+    "kernel": "7.1.8-1-cachyos-deckify"
+  },
+  "suite": {
+    "id": "halo-ai-rocmfpx-quality-v1",
+    "path": "config/benchmarks/rocmfpx-quality-v1.json",
+    "sha256": "909ef8bc4f88d69c61e49e6816c81e7a1dbb3450babed7a4c70164392aa7bd8e",
+    "cases": 13,
+    "categories": [
+      "code",
+      "reasoning",
+      "instruction_following",
+      "structured_output",
+      "multilingual",
+      "special_token_boundary",
+      "retrieval",
+      "multi_turn",
+      "long_context_retrieval"
+    ],
+    "long_context_prompt_tokens": 16949,
+    "temperature": 0,
+    "seed": 1,
+    "reasoning_effort": "none",
+    "process_repetitions": 2,
+    "fresh_container_process_per_repetition": true,
+    "inference_location": "inside managed rootless Podman containers",
+    "downloads": "none"
+  },
+  "source_runs": [
+    "/var/opt/halo-ai/state/benchmarks/rocmfpx-quality/20260818T205620Z",
+    "/var/opt/halo-ai/state/benchmarks/rocmfpx-quality-controls/20260818T211622Z"
+  ],
+  "comparison_record": "/var/opt/halo-ai/state/benchmarks/rocmfpx-quality/20260818T205620Z/comparison-all.json",
+  "profiles": {
+    "qwen38-27b-rocmfp4-baseline": {
+      "score": "9/13",
+      "score_percent": 69.23,
+      "wilson_95_percent": [42.37, 87.32],
+      "self_consistent_cases": "13/13",
+      "state": "enabled-default"
+    },
+    "qwen38-27b-rocmfp8-baseline": {
+      "score": "9/13",
+      "score_percent": 69.23,
+      "wilson_95_percent": [42.37, 87.32],
+      "self_consistent_cases": "13/13",
+      "quality_difference_vs_fp4_percentage_points": 0.0,
+      "state": "enabled-quality-experiment"
+    },
+    "qwen38-27b-rocmfp4-mtp": {
+      "score": "7/13",
+      "score_percent": 53.85,
+      "self_consistent_cases": "13/13",
+      "strict_identity_vs_fp4_baseline": "7/13",
+      "mtp_acceptance_by_process": ["83/120", "83/120"],
+      "state": "gated"
+    },
+    "qwen38-27b-rocmfp4-mtp-q5-draft": {
+      "score": "7/13",
+      "score_percent": 53.85,
+      "self_consistent_cases": "13/13",
+      "strict_identity_vs_fp4_baseline": "7/13",
+      "mtp_acceptance_by_process": ["83/124", "83/124"],
+      "state": "gated"
+    },
+    "qwen38-27b-rocmfp4-mtp-conservative-q5-draft": {
+      "score": "9/13",
+      "score_percent": 69.23,
+      "self_consistent_cases": "13/13",
+      "strict_identity_vs_fp4_baseline": "11/13",
+      "mtp_acceptance_by_process": ["48/49", "48/49"],
+      "identity_differences": [
+        "code-slice-semantics returned a different incorrect token sequence",
+        "tool-arguments-json was semantically equal but byte/token formatting differed"
+      ],
+      "state": "gated"
+    },
+    "qwen38-27b-rocmfp8-mtp": {
+      "score": "5/13",
+      "score_percent": 38.46,
+      "self_consistent_cases": "12/13",
+      "strict_identity_vs_fp8_baseline": "4/13",
+      "mtp_acceptance_by_process": ["75/114", "89/140"],
+      "instability": "the second 16,949-token case emitted repeated closing think markers and exhausted its 32-token budget",
+      "state": "gated"
+    }
+  },
+  "qualification": {
+    "strict_fp4_mtp_identity": "fail",
+    "fp8_quality_advantage": "not_observed",
+    "fp8_equivalence": "not_proven_by_bounded_suite",
+    "baseline_quality_note": "Both non-MTP baselines missed the same four scored tasks by category count, although three raw outputs differed; this is a comparison suite, not a claim of general 69.23 percent model quality.",
+    "decision": "retain FP4 baseline; keep FP8 baseline quality-only; gate all ROCmFPX MTP profiles"
+  },
+  "same_host_evidence_only": true
+}

@@ -7,8 +7,9 @@ most value for the least downloading and engineering work.
 
 - The first and only required baseline is the text-only
   `Qwen3.8-27B-ROCmFP4-FAST.gguf` running on the iGPU without NPU drafting.
-- Built-in GPU MTP is the first acceleration to try because it uses the same
-  model file and requires no draft-model download.
+- Built-in GPU MTP was the first acceleration tried because it uses the same
+  model file and requires no draft-model download. It is now gated: the fixed
+  quality suite disproved strict output identity for every tested policy.
 - External NPU and cross-version drafting are deferred; their research notes
   remain in `docs/TODO backup.md`.
 - The already-present ROCmFP8 artifact is optional and GPU-only. There will be
@@ -63,7 +64,8 @@ dependency.
 
 - [x] **Pass:** Halo can acquire, start, test, stop, and reproduce the direct
       q38rocm FP4 result without downloading any optional model artifact.
-- [ ] **Fail:** fix or stop here; do not begin MTP, NPU, FP8, or vision work.
+- [x] **Not taken:** the baseline gate passed, so the mutually exclusive failure
+      branch did not apply.
 
 ## Stage 2: Enable built-in GPU MTP
 
@@ -73,15 +75,15 @@ dependency.
 
 - [x] Add `qwen38-27b-rocmfp4-mtp` using the MTP tensors already stored in the
       FP4 GGUF.
-- [ ] Implement strict greedy MTP first and verify token-for-token equivalence
-      with the unassisted FP4 profile.
-  The backend's strict Qwen verifier is active and 4/5 stable corpus cases
-  matched exactly. Full cross-process identity is not yet proven because the
-  Vulkan baseline itself changes among semantically equivalent outputs across
-  fresh processes despite fixed request and server seeds.
+- [x] Run strict greedy MTP against the unassisted FP4 profile and verify
+      token-for-token equivalence across clean processes.
+  **Result: failed.** The FP4 baseline was stable on all 13 cases across two
+  fresh processes. Aggressive MTP matched only 7/13 output-token sequences;
+  conservative MTP matched 11/13. The strict-Qwen backend flag therefore does
+  not establish end-to-end greedy identity on this build.
 - [x] Benchmark unassisted FP4 versus strict greedy MTP on the same fixed
       prompts and contexts.
-- [ ] Only after strict mode passes, evaluate q38rocm's suggested proposal
+- [x] Resolve the conditional evaluation of q38rocm's suggested proposal
       settings such as `n_max=6`, `p_min=0.60`; label probabilistic modes
       clearly.
   The `n_max=6`, `p_min=0.60` settings were evaluated under the operator's
@@ -91,8 +93,10 @@ dependency.
 
 ### Gate
 
-- [ ] **Pass:** keep GPU MTP if it is correct, stable, and materially faster.
-- [ ] **Fail:** retain the unassisted FP4 baseline and stop tuning MTP.
+- [x] **Not taken:** the mutually exclusive GPU MTP pass branch did not apply.
+- [x] **Fail:** retain the unassisted FP4 baseline and stop tuning MTP. All four
+      ROCmFPX MTP profiles remain cataloged but are gated pending a specific
+      backend fix and a complete rerun of the identity suite.
 
 ## Stage 3: Optimize same-host long-context PP/TPS
 
@@ -101,23 +105,30 @@ runtime architecture or model family.
 
 ### Current measured state
 
-The aligned cold-cache benchmark uses exact 4,095- and 31,998-token arrays,
-64 generated tokens, container-local requests, and 50 ms memory sampling.
-These first-pass rows are single measurements; repeat finalists before changing
-defaults.
+The controlled 2026-08-18 office run uses exact 4,095- and 31,998-token
+non-repeating arrays, 64 generated tokens, three repetitions, container-local
+requests, and 50 ms memory sampling. The table reports medians and the maximum
+sampled GTT; the machine-readable record retains each repetition and its
+variability.
 
 | Profile | 4K PP / TPS | 32K PP / TPS | Peak GTT at 32K |
 | --- | ---: | ---: | ---: |
-| FP4 baseline | 187.44 / 11.75 | 122.61 / 10.70 | 14.02 GiB |
-| FP4 MTP | 174.04 / 22.30 | 108.31 / 17.44 | 19.25 GiB |
-| FP8 baseline | 188.90 / 7.60 | 119.58 / 6.87 | 26.00 GiB |
-| FP8 MTP | 174.41 / 22.50 | 106.11 / 15.85 | 31.31 GiB |
+| FP4 baseline | 180.86 / 12.89 | 123.75 / 10.78 | 14.11 GiB |
+| FP4 MTP, F16 draft K/V, 6 / 0.60 | 169.94 / 21.71 | 120.96 / 17.85 | 19.09 GiB |
+| FP4 MTP, q5_1 draft K/V, 6 / 0.60 | 170.41 / 21.86 | 122.59 / 18.13 | 19.00 GiB |
+| FP4 MTP, q5_1 draft K/V, 2 / 0.85 | 170.69 / 19.58 | 104.03 / 13.75 | 18.43 GiB |
+| FP8 baseline | 177.17 / 7.64 | 120.55 / 6.90 | 26.33 GiB |
+| FP8 MTP | 166.68 / 19.86 | 117.35 / 14.95 | 31.14 GiB |
 
-FP4 MTP becomes faster end-to-end than FP4 baseline after about 42 generated
-tokens at 4K and 954 tokens at 32K on this synthetic repeated-context workload.
-FP8 is effectively tied with FP4 MTP at 4K, loses 9.12% decode throughput at
-32K, and uses about 12 GiB more GTT. Keep FP8 as a quality experiment, not a
-performance default.
+The aggressive q5_1 candidate was effectively throughput-neutral versus its F16
+draft-cache control while saving 0.09--0.11 GiB GTT. Against unassisted FP4 it
+improves median decode throughput by 69.61% at 4K and 68.25% at 32K, with an
+end-to-end crossover near 44 and 66 generated tokens respectively, at a
+4.89--4.91 GiB GTT cost. The conservative policy saves another 0.56--0.57 GiB
+but loses 10.41% and 24.16% decode throughput. The subsequent quality gate
+disqualified every MTP profile despite these speed results. FP8 uses
+substantially more GTT and remains a quality experiment, not a performance
+default.
 
 ### Tasks
 
@@ -135,36 +146,48 @@ performance default.
       the settings but refuses startup because ngram-mod disables recurrent
       rollback while strict Qwen MTP requires rollback covering the full draft.
       Do not expose this non-starting combination as a profile.
-- [ ] Repeat the FP4 baseline and FP4 MTP finalists at least three times using
+- [x] Repeat the FP4 baseline and FP4 MTP finalists at least three times using
       the non-repeating prompt pattern; report median and variability.
 - [x] Add a single long-run office matrix that executes the source tests and
       every selected runtime sequentially, captures power/environment state,
       preserves per-profile logs, stops containers between profiles, and uses
       measured elapsed history to order the next run fastest-to-slowest.
-- [ ] Run that matrix with USB power and the office workload held stable. The
-      first q5/conservative screens are exploratory only because USB power was
-      being connected and disconnected during collection.
+- [x] Run that matrix with USB power and the office workload held stable. The
+      clean run held both power profiles at `performance`, observed 45.049 W
+      peak AMDGPU PPT, detected no suspend, passed 82 containerized source tests,
+      and produced 23 valid profile results. One DS4 row was invalidated after a
+      runner bug was found; one standalone vision profile was deliberately
+      excluded because it was the active starting trial at the prior reboot.
 - [ ] Audit and tune only locally supported batch, micro-batch, thread-batch,
       KV-cache, and execution options, one axis at a time.
-- [ ] Measure an otherwise-identical FP4 MTP candidate with the draft K/V cache
+- [x] Measure an otherwise-identical FP4 MTP candidate with the draft K/V cache
       compressed from its current implicit F16 default to `q5_1`. Record whether
       this recovers a useful portion of MTP's roughly 5.2 GiB GTT overhead
-      without hurting acceptance or end-to-end throughput.
-- [ ] Compare the current aggressive `n_max=6`, `p_min=0.60` proposal policy
+      without hurting acceptance or end-to-end throughput. It recovered only
+      0.09--0.11 GiB, but median PP/TPS and acceptance remained effectively
+      neutral or slightly better.
+- [x] Compare the current aggressive `n_max=6`, `p_min=0.60` proposal policy
       with the conservative `n_max=2`, `p_min=0.85` field-report policy after
       draft-cache compression is held constant. Treat the other-host report as
-      a hypothesis only and retain same-host acceptance/crossover evidence.
-- [ ] After the MTP proposal/cache pair is selected, isolate batch
-      `2048/1024` versus `1024/512`, `threads-batch=32`, and `fit=off`; do not
-      combine these axes in the first screen.
-- [ ] Run a fixed FP4-versus-FP8 task-quality suite before making any quality
-      claim for FP8.
+      a hypothesis only and retain same-host acceptance/crossover evidence. The
+      conservative policy saved 0.56--0.57 GiB more GTT but lost 10.41% decode
+      TPS at 4K and 24.16% at 32K. The later correctness gate supersedes this
+      performance-only ranking.
+- [ ] With MTP gated, isolate batch `2048/1024` versus `1024/512`,
+      `threads-batch=32`, and `fit=off` on the FP4 baseline only; do not combine
+      axes in the first screen.
+- [x] Run a fixed FP4-versus-FP8 task-quality suite before making any quality
+      claim for FP8. Both baselines scored 9/13 across two fresh processes, with
+      overlapping 95% Wilson intervals and no observed FP8 advantage. This
+      bounded suite does not prove equivalence.
 
 ### Gate
 
-- [ ] Keep only profiles on the measured PP/TPS/memory Pareto frontier.
-- [ ] Promote no default from a single run; require stable repeated evidence and
-      a clean lifecycle with no OOM or device reset.
+- [x] Keep only correctness-qualified profiles active: retain the FP4 baseline,
+      keep FP8 baseline as a quality-only control, and gate all ROCmFPX MTP
+      profiles despite their performance frontier.
+- [x] Promote no default from a single run. The repeated correctness evidence
+      instead retains the existing FP4 baseline default.
 
 ## Stage 4: Extend the existing DwarfStar lane
 
@@ -179,31 +202,52 @@ remain context only.
 
 ### Tasks
 
-- [ ] Pin the exact `DeepSeek-V4-Flash-DSpark-support-0731.gguf` support GGUF
+- [x] Pin the exact `DeepSeek-V4-Flash-DSpark-support-0731.gguf` support GGUF
       beside the installed Antirez hybrid. Do not reuse the Unsloth
       `dspark-DeepSeek-V4-Flash-0731-Q8_0.gguf`, which belongs to the standalone
-      IQ3_XXS llama.cpp profile.
-- [x] Add an opt-in `ds4-deepseek-v4-flash-hybrid-dspark-16k` profile using the
-      existing DS4 Podman image, `--dspark-confidence 0.7`, context 16K, and
-      `--prefill-chunk 1024` for its first memory-safe screen.
+      IQ3_XXS llama.cpp profile. The installed 5,989,114,272-byte companion
+      matches SHA-256 `7e319924541db3f7a163ed7e11d7532a70d48228ab59d36cb81e1d4511885360`.
+- [x] Add an opt-in `ds4-deepseek-v4-flash-hybrid-dspark-16k` profile using
+      `--dspark-confidence 0.7`, context 16K, and `--prefill-chunk 1024` for its
+      first memory-safe screen.
 - [x] Add render/acquisition tests proving that the DS4 control selects only the
       main GGUF while the DSpark profile selects exactly the main plus its
       bounded support artifact.
-- [ ] Record the DS4 image digest and run a target-only control before the
+- [x] Record the DS4 image digest and run a target-only control before the
       speculative candidate. Keep all execution and benchmarking in disposable
-      or managed Podman containers.
-- [ ] Measure load stability, minimum host MemAvailable, peak GTT, PP, decode
-      TPS, DSpark acceptance, and end-to-end latency at 16K. Stop if the
-      configured 4 GiB host reserve is crossed.
-- [ ] Attempt 32K only if the 16K screen remains above the reserve and improves
-      end-to-end latency. Keep the existing target-only and disk-KV profiles as
-      rollback controls.
+      or managed Podman containers. The resolved image digest is
+      `sha256:2ea5b3b28334f08d53307baf79838591e510628d41dacec357de32ffafbac31f`;
+      the fixed target-only sample completed in 105.025 seconds and its disk-KV
+      restore control in 3.556 seconds.
+- [x] Preserve the original greedy 16K diagnostic as failure evidence. The
+      pre-fix image loaded the support model, but reported `proposed=0` and
+      `accepted_draft=0` across 398 decode cycles.
+- [x] Do not attempt 32K because the 16K proposal-activity prerequisite failed.
+      Keep the existing target-only and disk-KV profiles as rollback controls.
+- [x] Trace the failure to Antirez commit
+      `84cc882352757baf628a1776badf7cc54d584e28`, “rocm: enable DSpark
+      speculative decoding,” which landed after the original DS4 image.
+- [x] Replace that image with a project-built `localhost/halo-ai-ds4:b0001`
+      image. Pin the 164,211,638-byte `lemonade-sdk/ds4-rocm` b0001 archive,
+      SHA-256 `e63b7c9428fd10de75b3f69164eccd564a8e7261c2f9087cd8bec2b4b19a8ad1`,
+      exact source commit, bundled ROCm `7.15.0a20260728`, and immutable Ubuntu
+      base digest. The final local manifest is
+      `sha256:f9dd84e76c2fbdd3f99b2e0490c40b899586dd047b0bfa0030744cbd58e1df89`.
+      Fail availability closed when any provenance label differs.
+- [x] Re-run the deterministic 16K canary on gfx1151. The exact smoke response
+      passed, the 400-token probe ran at 8.62 tok/s, and shutdown reported 324
+      proposals with 246 accepted draft tokens (75.93%), zero verifier errors,
+      and zero runtime errors.
+- [x] Remove the obsolete local image after the fixed runtime passed. Retain
+      target-only and disk-KV profiles as operational controls; speed is not a
+      promotion requirement for this explicitly experimental DSpark profile.
 
 ### Gate
 
-- [ ] Keep DSpark only if it improves generation-heavy wall time on this host
-      without OOM, reset, or reserve violation; never promote it from a decode
-      TPS-only result.
+- [x] **Pass after upstream fix:** enable the 16K profile because the fixed ROCm
+      backend both proposed and accepted drafts with valid output. Keep it
+      experimental because its 8.62 tok/s probe was slower than the target-only
+      control; this lane optimizes for working DSpark behavior, not peak speed.
 
 ## Deferred research
 

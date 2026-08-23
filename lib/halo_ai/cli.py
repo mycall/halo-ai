@@ -31,6 +31,7 @@ from typing import Any, Iterable, NoReturn
 
 import host_profile
 import longbench
+import rocmfpx_quality
 import rocmfpx_tune
 
 
@@ -72,6 +73,17 @@ ROCMFPX_ENGINE_SHA256 = "bbc7845db0c012b97f1c9b8a2733a7083c6f9a749a453866fbe1994
 ROCMFPX_Q38ROCM_COMMIT = "66de2f3bc625249eabff5bd919fd6dbdd3d7ccaa"
 ROCMFPX_VULKAN_BASE = "sha256:8cdde6d42ab621b3d0f1e02618f4234c58b7036bec984a2a64fa205d38f99922"
 ROCMFPX_ROCM_BASE = "sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b"
+ROCMFPX_QUALITY_SUITE = SOURCE_CONFIG / "benchmarks" / "rocmfpx-quality-v1.json"
+
+DS4_RELEASE_URL = (
+    "https://github.com/lemonade-sdk/ds4-rocm/releases/download/b0001/"
+    "ds4-b0001-linux-rocm-gfx1151-x64.tar.gz"
+)
+DS4_RELEASE_BYTES = 164_211_638
+DS4_RELEASE_SHA256 = "e63b7c9428fd10de75b3f69164eccd564a8e7261c2f9087cd8bec2b4b19a8ad1"
+DS4_SOURCE_COMMIT = "84cc882352757baf628a1776badf7cc54d584e28"
+DS4_ROCM_VERSION = "7.15.0a20260728"
+DS4_UBUNTU_BASE = "sha256:1e0a86e57d247923571b75e0aaf48a1449cf8c543d51fb3e07a4a7d7bfa79316"
 
 
 class HaloError(RuntimeError):
@@ -162,7 +174,7 @@ DEFAULTS = {
     "LLAMACPP_PORT": "8080",
     "ROCMFPX_IMAGE": "localhost/halo-ai-rocmfpx:v1.0.0",
     "ROCMFPX_PORT": "8002",
-    "DS4_IMAGE": "docker.io/kyuz0/strix-halo-ds4-toolbox:rocm-7.14",
+    "DS4_IMAGE": "localhost/halo-ai-ds4:b0001",
     "DS4_PORT": "8000",
     "DS4_KV_CACHE_ENABLED": "0",
     "DS4_KV_CACHE_DIR": "/var/cache/halo-ai/ds4-kv",
@@ -996,13 +1008,14 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
             command.extend(["--mount", f"type=bind,src={path},dst={destination},ro"])
         command.append(image_for(config, engine))
     elif engine == "ds4":
-        command.extend(["--group-add", "video", "--group-add", "render", "--ipc=host", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"])
+        command.extend(["--group-add", "keep-groups", "--ipc=host", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"])
         main = next(path for entry, path in selected if entry["role"] == "main")
         command.extend(["--mount", f"type=bind,src={main},dst=/models/model.gguf,ro"])
         if "dspark" in profile.get("features", []):
             companion = next(path for entry, path in selected if entry["role"] == "dspark")
             command.extend([
                 "--mount", f"type=bind,src={companion},dst=/models/{companion.name},ro",
+                "-e", "DS4_DSPARK_STATS=1",
             ])
         use_kv_cache = "kv-cache" in profile.get("features", []) or config.boolean("DS4_KV_CACHE_ENABLED")
         if use_kv_cache:
@@ -1769,6 +1782,8 @@ def profile_availability(config: Config, catalog: Catalog, profile: dict[str, An
         return False, "model verification failed"
     if profile["engine"] == "rocmfpx" and not rocmfpx_image_valid(config.get(key)):
         return False, "pinned ROCmFPX image is not installed or failed provenance checks"
+    if profile["engine"] == "ds4" and not ds4_image_valid(config.get(key)):
+        return False, "pinned DS4 image is not installed or failed provenance checks"
     model = catalog.models[profile["model"]]
     memory_roles = {"weights"} if model.get("format") == "transformers" else {"main"}
     main_bytes = sum(int(entry["bytes"]) for entry in model["files"] if entry["role"] in memory_roles)
@@ -1815,7 +1830,12 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
     model_plan = model_acquisition_plan(config, model, required_roles(profile))
     engine = profile["engine"]
     image = image_for(config, engine)
-    installed = rocmfpx_image_valid(image) if engine == "rocmfpx" else bool(image_identity(image, required=False))
+    if engine == "rocmfpx":
+        installed = rocmfpx_image_valid(image)
+    elif engine == "ds4":
+        installed = ds4_image_valid(image)
+    else:
+        installed = bool(image_identity(image, required=False))
     runtime: dict[str, Any] = {
         "engine": engine,
         "image": image,
@@ -1832,6 +1852,17 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
             "rocm_base_digest": ROCMFPX_ROCM_BASE,
             "source_provenance": "upstream binary reports build 213 (e87d53e); full source SHA unresolved",
             "additional_download_bytes": 0 if installed else ROCMFPX_ENGINE_BYTES,
+        })
+    elif engine == "ds4":
+        runtime.update({
+            "release": "b0001",
+            "ds4_commit": DS4_SOURCE_COMMIT,
+            "engine_archive": DS4_RELEASE_URL,
+            "engine_archive_bytes": DS4_RELEASE_BYTES,
+            "engine_archive_sha256": DS4_RELEASE_SHA256,
+            "rocm_version": DS4_ROCM_VERSION,
+            "base_digest": DS4_UBUNTU_BASE,
+            "additional_download_bytes": 0 if installed else DS4_RELEASE_BYTES,
         })
     rocmfpx_artifact_class = (
         "fp8" if model.get("quantization") == "Q8_0_ROCMFPX" else "fp4"
@@ -1894,6 +1925,8 @@ def command_runtime_install(config: Config, engines: Iterable[str]) -> int:
             ensure_speech_test_audio(config)
         elif engine == "rocmfpx":
             build_rocmfpx_image(image)
+        elif engine == "ds4":
+            build_ds4_image(image)
         else:
             print(f"Pulling {engine}: {image}")
             podman(["pull", image])
@@ -1925,6 +1958,8 @@ def command_update(config: Config, engines: Iterable[str]) -> int:
             ensure_speech_test_audio(config)
         elif engine == "rocmfpx":
             build_rocmfpx_image(image, force=True)
+        elif engine == "ds4":
+            build_ds4_image(image, force=True)
         else:
             podman(["pull", image])
         new = image_identity(image)
@@ -1965,6 +2000,75 @@ def rocmfpx_image_valid(image: str) -> bool:
         "local.halo-ai.rocm-base": ROCMFPX_ROCM_BASE,
     }
     return expected.items() <= labels.items()
+
+
+def ds4_image_valid(image: str) -> bool:
+    labels = image_labels(image)
+    expected = {
+        "local.halo-ai.engine": "ds4",
+        "local.halo-ai.engine-archive-sha256": DS4_RELEASE_SHA256,
+        "org.opencontainers.image.revision": DS4_SOURCE_COMMIT,
+        "local.halo-ai.rocm-version": DS4_ROCM_VERSION,
+        "local.halo-ai.base": DS4_UBUNTU_BASE,
+    }
+    return expected.items() <= labels.items()
+
+
+def build_ds4_image(image: str, *, force: bool = False) -> None:
+    if not force and ds4_image_valid(image):
+        print(f"Reusing verified DS4 image: {image}")
+        return
+    context = PROJECT_ROOT / "lib/halo_ai/ds4"
+    containerfile = context / "Containerfile"
+    if not containerfile.is_file():
+        fail(f"DS4 build recipe is missing: {containerfile}")
+    print(f"Building ds4: {image} from an immutable base and engine archive")
+    podman([
+        "build", "--pull=missing", "--timestamp", "0", "--layers=false",
+        "-t", image, "-f", str(containerfile), str(context),
+    ])
+    if not ds4_image_valid(image):
+        fail("built DS4 image failed its immutable label checks")
+    commit = podman([
+        "run", "--rm", "--entrypoint", "/bin/sh", image,
+        "-c", "cat /opt/ds4/ds4-commit.txt",
+    ], capture=True).stdout.strip()
+    if commit != DS4_SOURCE_COMMIT:
+        fail("built DS4 image did not report the pinned upstream source commit")
+    help_result = podman([
+        "run", "--rm", "--entrypoint", "/opt/ds4/ds4-server",
+        image, "--help", "runtime",
+    ], capture=True)
+    help_text = f"{help_result.stdout}\n{help_result.stderr}"
+    if not all(option in help_text for option in ("--rocm", "--mtp FILE", "--dspark")):
+        fail("built DS4 image does not expose the required ROCm DSpark interface")
+
+
+def ds4_backend_info(
+    container: str, image: str, profile: dict[str, Any],
+) -> dict[str, Any]:
+    if not ds4_image_valid(image):
+        fail("active DS4 image failed its immutable provenance checks")
+    commit = podman([
+        "exec", container, "/bin/sh", "-c", "cat /opt/ds4/ds4-commit.txt",
+    ], capture=True).stdout.strip()
+    if commit != DS4_SOURCE_COMMIT:
+        fail("active DS4 backend does not match the pinned source commit")
+    processes = podman(["top", container, "args"], capture=True).stdout
+    required = ["--rocm"]
+    if "dspark" in profile.get("features", []):
+        required.extend(["--mtp", "--dspark", "--dspark-confidence"])
+    if "ds4-server" not in processes or not all(option in processes for option in required):
+        fail("active DS4 process does not match the selected backend policy")
+    labels = image_labels(image)
+    return {
+        "source_revision": commit,
+        "release": labels.get("org.opencontainers.image.version"),
+        "rocm_version": labels.get("local.halo-ai.rocm-version"),
+        "archive_sha256": labels.get("local.halo-ai.engine-archive-sha256"),
+        "backend": "rocm",
+        "speculation": "dspark" if "dspark" in profile.get("features", []) else "none",
+    }
 
 
 def build_rocmfpx_image(image: str, *, force: bool = False) -> None:
@@ -2253,6 +2357,10 @@ def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) ->
             trial["backend"] = lemonade_backend_versions(target_name)
         elif profile["engine"] == "rocmfpx":
             trial["backend"] = rocmfpx_backend_info(
+                target_name, image_for(config, profile["engine"]), profile,
+            )
+        elif profile["engine"] == "ds4":
+            trial["backend"] = ds4_backend_info(
                 target_name, image_for(config, profile["engine"]), profile,
             )
         trial["container"] = target_name
@@ -2615,7 +2723,9 @@ def command_test(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
         payload["chat_template_kwargs"] = {"enable_thinking": False}
     elif profile.get("chat_template") == "nonthinking" or profile["engine"] == "ds4":
         payload["reasoning_effort"] = "none"
-    if profile["engine"] == "rocmfpx":
+    if profile["engine"] == "rocmfpx" or (
+        profile["engine"] == "ds4" and "dspark" in profile.get("features", [])
+    ):
         payload.update({"temperature": 0, "seed": 1})
     if preset:
         merge_request_preset(payload, preset["request"])
@@ -2627,14 +2737,57 @@ def command_test(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
         validate_lemonade_reasoning_template(container_name("lemonade"), payload, thinking)
     response = http_json(f"http://127.0.0.1:{port}/v1/chat/completions", method="POST", payload=payload, timeout=180)
     validate_smoke_response(response, expected, thinking)
+    ds4_dspark_probe: dict[str, Any] | None = None
+    if profile["engine"] == "ds4" and "dspark" in profile.get("features", []):
+        probe_response = http_json(
+            f"http://127.0.0.1:{port}/v1/chat/completions",
+            method="POST",
+            payload={
+                "model": model_name,
+                "messages": [{
+                    "role": "user",
+                    "content": (
+                        "Write a Python LinkedList class with push, pop, reverse, "
+                        "__len__, and __iter__. Include docstrings and type hints."
+                    ),
+                }],
+                "stream": False,
+                "temperature": 0,
+                "seed": 1,
+                "max_tokens": 400,
+                "reasoning_effort": "none",
+            },
+            timeout=600,
+        )
+        probe_usage = probe_response.get("usage") if isinstance(probe_response, dict) else None
+        probe_tokens = probe_usage.get("completion_tokens") if isinstance(probe_usage, dict) else None
+        if not isinstance(probe_tokens, int) or probe_tokens < 64:
+            fail("DS4 DSpark diagnostic generated fewer than 64 tokens")
+        probe_timings = ds4_recent_timings(container_name("ds4"), probe_usage)
+        if probe_timings is None:
+            fail("DS4 DSpark diagnostic logs did not contain timing metrics")
+        ds4_dspark_probe = {"usage": probe_usage, "timings": probe_timings}
+        response["dspark_probe"] = ds4_dspark_probe
     speculative_feature = next(
         (feature for feature in ("mtp", "dspark") if feature in profile.get("features", [])),
         None,
     )
-    speculative_metrics = (
-        validate_speculative_metrics(response, speculative_feature)
-        if speculative_feature is not None else None
-    )
+    if speculative_feature == "dspark" and profile["engine"] == "ds4":
+        # ds4-server does not expose draft counters in its OpenAI response.
+        # Confirm greedy timing here; DS4_DSPARK_STATS is validated after the
+        # container stops, when the runtime flushes proposal/acceptance totals.
+        if ds4_dspark_probe is None:
+            fail("DS4 DSpark diagnostic was not recorded")
+        timings = ds4_dspark_probe["timings"]
+        speculative_metrics = {
+            "validation": "post-stop DS4_DSPARK_STATS required",
+            "predicted_per_second": timings.get("predicted_per_second"),
+        }
+    else:
+        speculative_metrics = (
+            validate_speculative_metrics(response, speculative_feature)
+            if speculative_feature is not None else None
+        )
     last = state_path(config, "last-trial.json")
     if last.exists():
         trial = json.loads(read_text(last))
@@ -2974,7 +3127,13 @@ def command_bench_run(config: Config, catalog: Catalog, args: argparse.Namespace
             {
                 "model": model_name,
                 "messages": [{"role": "user", "content": prompt}],
-                "temperature": 0.1,
+                # DSpark is a greedy-only path; sampled decoding silently
+                # remains target-only in ds4-server.
+                "temperature": (
+                    0
+                    if profile["engine"] == "ds4" and "dspark" in profile.get("features", [])
+                    else 0.1
+                ),
                 "max_tokens": args.max_tokens,
                 "stream": False,
                 "reasoning_effort": "none",
@@ -3282,9 +3441,182 @@ def command_bench_rocmfpx_context(
     return 0
 
 
+def command_bench_rocmfpx_quality(
+    config: Config, catalog: Catalog, args: argparse.Namespace,
+) -> int:
+    """Run the fixed quality suite against one active ROCmFPX process."""
+    profile = catalog.profiles.get(args.profile_id)
+    if not profile:
+        fail(f"unknown profile: {args.profile_id}")
+    if profile["engine"] != "rocmfpx":
+        fail("ROCmFPX quality benchmark requires a rocmfpx profile")
+    suite_path = (
+        Path(args.suite).expanduser().resolve()
+        if args.suite else ROCMFPX_QUALITY_SUITE
+    )
+    try:
+        suite, suite_sha256 = rocmfpx_quality.load_suite(suite_path)
+    except rocmfpx_quality.QualityError as exc:
+        fail(str(exc))
+
+    active_path = state_path(config, "active-profile.json")
+    if not active_path.exists():
+        fail(f"start {profile['id']} before running the ROCmFPX quality benchmark")
+    try:
+        active = json.loads(read_text(active_path))
+    except json.JSONDecodeError:
+        fail(f"active profile record is corrupt: {active_path}")
+    if active.get("profile") != profile["id"]:
+        fail(f"active profile is {active.get('profile')}; start {profile['id']} first")
+    container = container_name("rocmfpx")
+    running = podman([
+        "inspect", container, "--format", "{{.State.Running}}",
+    ], capture=True, check=False)
+    if running.returncode != 0 or running.stdout.strip() != "true":
+        fail(f"ROCmFPX container is not running: {container}")
+
+    port = port_for(config, "rocmfpx")
+    base_url = f"http://127.0.0.1:{port}"
+    models = http_json(f"{base_url}/v1/models")
+    candidates = models.get("data", models) if isinstance(models, dict) else models
+    if not isinstance(candidates, list) or not candidates:
+        fail("active ROCmFPX service returned no models")
+    first_model = candidates[0]
+    model_name = (
+        first_model.get("id") or first_model.get("name")
+        if isinstance(first_model, dict) else str(first_model)
+    )
+    if not isinstance(model_name, str) or not model_name:
+        fail("active ROCmFPX service returned an invalid model identity")
+
+    results: list[dict[str, Any]] = []
+    drafted_total = 0
+    accepted_total = 0
+    for index, case in enumerate(suite["cases"], 1):
+        try:
+            messages = rocmfpx_quality.case_messages(suite, case)
+        except rocmfpx_quality.QualityError as exc:
+            fail(str(exc))
+        started = time.monotonic()
+        response = container_http_json(
+            container, f"{base_url}/v1/chat/completions", {
+                "model": model_name,
+                "messages": messages,
+                "stream": False,
+                "temperature": 0,
+                "seed": 1,
+                "max_tokens": case["max_tokens"],
+                "reasoning_effort": "none",
+                "chat_template_kwargs": {"enable_thinking": False},
+            }, timeout=args.timeout,
+        )
+        elapsed = time.monotonic() - started
+        try:
+            content = response["choices"][0]["message"]["content"]
+        except (KeyError, IndexError, TypeError):
+            fail(f"quality case {case['id']} returned an invalid chat completion")
+        if not isinstance(content, str):
+            fail(f"quality case {case['id']} returned non-text content")
+        tokenized = container_http_json(
+            container, f"{base_url}/tokenize", {"content": content},
+            timeout=args.timeout,
+        )
+        output_tokens = tokenized.get("tokens") if isinstance(tokenized, dict) else None
+        if (
+            not isinstance(output_tokens, list)
+            or any(not isinstance(token, int) or token < 0 for token in output_tokens)
+        ):
+            fail(f"quality case {case['id']} returned an invalid output token stream")
+        try:
+            passed, normalized = rocmfpx_quality.score_case(case, content)
+        except rocmfpx_quality.QualityError as exc:
+            fail(str(exc))
+        timings = response.get("timings") if isinstance(response, dict) else None
+        drafted = timings.get("draft_n") if isinstance(timings, dict) else None
+        accepted = timings.get("draft_n_accepted") if isinstance(timings, dict) else None
+        if isinstance(drafted, int) and drafted >= 0:
+            drafted_total += drafted
+        if isinstance(accepted, int) and accepted >= 0:
+            accepted_total += accepted
+        usage = response.get("usage") if isinstance(response, dict) else None
+        result = {
+            "case_id": case["id"],
+            "category": case["category"],
+            "passed": passed,
+            "expected": case["validator"]["expected"],
+            "output": content,
+            "normalized_output": normalized,
+            "output_tokens": output_tokens,
+            "output_token_sha256": hashlib.sha256(
+                json.dumps(output_tokens, separators=(",", ":")).encode("ascii")
+            ).hexdigest(),
+            "output_text_sha256": hashlib.sha256(content.encode("utf-8")).hexdigest(),
+            "prompt_tokens": usage.get("prompt_tokens") if isinstance(usage, dict) else None,
+            "completion_tokens": usage.get("completion_tokens") if isinstance(usage, dict) else None,
+            "drafted_tokens": drafted,
+            "accepted_tokens": accepted,
+            "wall_seconds": round(elapsed, 6),
+        }
+        results.append(result)
+        print(
+            f"{profile['id']} case={index}/{len(suite['cases'])} {case['id']}: "
+            f"{'pass' if passed else 'FAIL'}",
+            file=sys.stderr, flush=True,
+        )
+
+    if "mtp" in profile.get("features", []) and (
+        drafted_total < 1 or accepted_total < 1 or accepted_total > drafted_total
+    ):
+        fail("ROCmFPX quality suite observed no valid accepted MTP proposals")
+    try:
+        summary = rocmfpx_quality.summarize_results(results)
+    except rocmfpx_quality.QualityError as exc:
+        fail(str(exc))
+    model = catalog.models[profile["model"]]
+    document = {
+        "schema_version": 1,
+        "kind": "halo-ai-rocmfpx-quality-benchmark",
+        "recorded_at": utc_now(),
+        "profile": profile["id"],
+        "process_repetition": args.process_repetition,
+        "features": copy.deepcopy(profile.get("features", [])),
+        "model": {
+            "id": model["id"],
+            "quantization": model.get("quantization"),
+            "sha256": next(item["sha256"] for item in model["files"] if item["role"] == "main"),
+        },
+        "suite_id": suite["suite_id"],
+        "suite_sha256": suite_sha256,
+        "suite_path": str(suite_path),
+        "benchmark_method": {
+            "request_location": f"inside {container}",
+            "endpoint": "/v1/chat/completions",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "fresh_process_required_by_matrix": True,
+        },
+        "speculative_totals": {
+            "drafted_tokens": drafted_total or None,
+            "accepted_tokens": accepted_total or None,
+            "acceptance_percent": (
+                round(accepted_total * 100 / drafted_total, 2) if drafted_total else None
+            ),
+        },
+        "results": results,
+        "summary": summary,
+    }
+    if args.output:
+        atomic_json(Path(args.output).expanduser().resolve(), document, mode=0o644)
+    print(json.dumps(document, indent=2, ensure_ascii=False))
+    return 0
+
+
 def command_bench(config: Config, catalog: Catalog, args: argparse.Namespace) -> int:
     if args.bench_name == "rocmfpx-context":
         return command_bench_rocmfpx_context(config, catalog, args)
+    if args.bench_name == "rocmfpx-quality":
+        return command_bench_rocmfpx_quality(config, catalog, args)
     if args.bench_action == "download":
         return command_bench_download(config, args)
     if args.bench_action == "run":
@@ -3366,6 +3698,17 @@ def command_tune(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
                 rocmfpx_tune.load_json(Path(args.candidate).expanduser().resolve()),
             )
         except rocmfpx_tune.TuneError as exc:
+            fail(str(exc))
+        write_optional_json(args.output, result)
+        print(json.dumps(result, indent=2))
+        return 0
+    if args.tune_action == "quality-compare":
+        try:
+            result = rocmfpx_quality.compare_records([
+                rocmfpx_tune.load_json(Path(path).expanduser().resolve())
+                for path in args.records
+            ])
+        except (rocmfpx_quality.QualityError, rocmfpx_tune.TuneError) as exc:
             fail(str(exc))
         write_optional_json(args.output, result)
         print(json.dumps(result, indent=2))
@@ -3489,6 +3832,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     rocmfpx_context.add_argument("--timeout", type=int, default=900)
     rocmfpx_context.add_argument("--output", help="optional atomic JSON report path")
+    rocmfpx_quality_parser = bench.add_parser(
+        "rocmfpx-quality", help="run the fixed download-free quality suite on an active ROCmFPX profile",
+    )
+    rocmfpx_quality_parser.add_argument("profile_id")
+    rocmfpx_quality_parser.add_argument("--suite", help="alternate versioned quality suite JSON")
+    rocmfpx_quality_parser.add_argument("--process-repetition", type=int, default=1)
+    rocmfpx_quality_parser.add_argument("--timeout", type=int, default=900)
+    rocmfpx_quality_parser.add_argument("--output", help="optional atomic JSON report path")
     update = sub.add_parser("update"); update.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "ds4", "speech", "vllm", "all"])
     tune = sub.add_parser("tune", help="inspect guarded trials and score optimization evidence").add_subparsers(dest="tune_action", required=True)
     tune.add_parser("status")
@@ -3505,6 +3856,11 @@ def build_parser() -> argparse.ArgumentParser:
     context_compare.add_argument("baseline")
     context_compare.add_argument("candidate")
     context_compare.add_argument("--output", help="optional atomic JSON report path")
+    quality_compare = tune.add_parser(
+        "quality-compare", help="compare fixed-suite quality and cross-process token identity records",
+    )
+    quality_compare.add_argument("records", nargs="+")
+    quality_compare.add_argument("--output", help="optional atomic JSON report path")
     host = sub.add_parser("host-profile").add_subparsers(dest="host_action", required=True)
     host.add_parser("status")
     host_init = host.add_parser("init")

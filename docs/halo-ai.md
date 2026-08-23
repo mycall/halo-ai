@@ -21,9 +21,12 @@ This document is both the implementation record and operations runbook. The
 checkout now contains a tested lifecycle manager, JSON catalog and presets,
 LongBench-v2 adapter, resumable installer, guarded uninstaller, and Limine host
 profile manager. Real Qwen, vision, MTP, DeepSeek, ds4, and DSpark loads have
-completed their documented capability canaries; the measured matrix is kept in
-`README.md`. The manual phase procedures remain the acceptance reference for
-future runtime, model, and context changes.
+completed their documented capability canaries. The Antirez/ds4 DSpark path is
+enabled at 16K after the pinned upstream ROCm fix produced and accepted drafts
+on gfx1151; it remains experimental because working speculation was slower than
+target-only decode on the bounded probe. The manual phase
+procedures remain the acceptance reference for future runtime, model, and
+context changes.
 
 ## Source priority
 
@@ -233,6 +236,7 @@ Current boundary and deliberate deferrals:
 | 3 standalone Qwen profiles | Enabled and tested | Current llama.cpp image; build and digest recorded per trial |
 | Standalone DeepSeek baseline and DSpark | Enabled and tested | High-memory profiles; one runtime at a time |
 | ds4 hybrid and disk-KV variant | Enabled and tested | 32K remains conservative; cache restore passed across container recreation |
+| ds4 hybrid + DSpark support | Enabled, experimental | Fixed ROCm runtime accepted 246/324 proposed draft tokens at 16K; slower than target-only on the bounded probe |
 | ds4 IQ2_XXS / 126K | External prerequisite | Recommended smaller model is not installed |
 | vLLM | Deliberately deferred | Installed inventory is GGUF; vLLM GGUF support remains experimental |
 | NPU runtime | External prerequisite | `amdxdna` is not bound and `/dev/accel/accel0` is absent |
@@ -473,8 +477,9 @@ this unresolved engine claim without conflating them.
 
 `qwen38-27b-rocmfp4-mtp` reuses the MTP tensors in the same FP4 GGUF, so its
 profile-scoped acquisition adds zero model bytes. It enables the fork's
-boundary-safe strict-Qwen verifier with one slot and currently uses
-`n_max=6`, `p_min=0.60`. The profile remains explicitly experimental.
+boundary-safe strict-Qwen verifier with one slot and uses `n_max=6`,
+`p_min=0.60`. It is retained for reproducibility but is now gated after the
+fixed correctness suite disproved end-to-end token identity.
 
 | Prompt tokens | Baseline decode | MTP decode | Change | MTP TTFT | Acceptance | Peak GTT |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -487,13 +492,14 @@ increased TTFT by 15.9%, and used about 4.90 GiB more peak GTT than baseline.
 It is therefore useful for generation-heavy work but not the default for a
 cold long prompt with a short answer.
 
-The five-case conformance probe produced four stable exact token matches and
-five semantically equivalent answers. Full cross-process identity is not yet
-proven: even the unassisted Vulkan profile selected different compact,
-pretty-printed, or fenced forms across clean processes despite temperature 0
-and fixed request/server seeds. This keeps the Stage 2 correctness gate open.
-Detailed timings, draft acceptance/run-position statistics, memory, and the
-conformance note are recorded in
+The earlier five-case conformance probe produced four exact token matches and
+five semantically equivalent answers, which was insufficient to resolve
+cross-process behavior. The later 13-case suite did: the unassisted FP4
+baseline was stable on all 13 cases across two clean processes, while
+aggressive MTP matched only 7/13 output-token sequences and scored 7/13 versus
+the baseline's 9/13. The same result with F16 and q5_1 draft K/V isolates the
+failure from cache compression. Detailed performance and the original
+conformance note remain recorded in
 [`results/qwen38-rocmfp4-mtp-2026-08-16.json`](results/qwen38-rocmfp4-mtp-2026-08-16.json).
 
 ### Aligned FP4/FP8 context screen
@@ -516,7 +522,7 @@ and 64 forced completion tokens for all four profiles:
 
 FP8 baseline decode was about 35% slower than FP4. FP8 MTP was effectively tied
 with FP4 MTP at 4K, lost 9.1% decode throughput at 32K, and used about 12 GiB
-more GTT. FP8 therefore remains a quality-only experiment pending a fixed task
+more GTT. FP8 therefore remained a quality-only experiment pending a fixed task
 suite. FP4 MTP crossed FP4 baseline end-to-end time after about 42 generated
 tokens at 4K and 954 at 32K on this repeated-context workload. These are
 single-run screens; repeat finalists with the non-repeating pattern before
@@ -554,6 +560,37 @@ combination as a profile.
 
 External NPU and cross-version drafting remain deferred research. They are not
 part of the active same-host FP4/FP8 GPU tuning loop.
+
+### Fixed FP4/FP8 quality and MTP identity gate
+
+`config/benchmarks/rocmfpx-quality-v1.json` is a checked-in, download-free
+13-case suite covering code comprehension, reasoning, exact instructions,
+structured JSON/tool arguments, multilingual and special-token boundaries,
+retrieval, multi-turn resynchronization, and a 16,949-token needle case.
+`tests/rocmfpx-quality-matrix.sh` starts a fresh managed Podman process for each
+profile repetition, runs every request from inside that container, stops it,
+and compares output-token hashes. The 2026-08-18 qualification used two clean
+processes per profile with temperature 0, seed 1, and thinking disabled.
+
+| Profile | Quality | Self-consistent | Identity vs same-quant baseline | State |
+| --- | ---: | ---: | ---: | --- |
+| FP4 baseline | 9/13 | 13/13 | Reference | Enabled/default |
+| FP4 MTP, F16 draft K/V, 6 / 0.60 | 7/13 | 13/13 | 7/13 | Gated |
+| FP4 MTP, q5_1 draft K/V, 6 / 0.60 | 7/13 | 13/13 | 7/13 | Gated |
+| FP4 MTP, q5_1 draft K/V, 2 / 0.85 | 9/13 | 13/13 | 11/13 | Gated |
+| FP8 baseline | 9/13 | 13/13 | Reference | Enabled/quality-only |
+| FP8 MTP | 5/13 | 12/13 | 4/13 | Gated |
+
+The conservative FP4 policy preserved the same scored quality but still changed
+two token sequences: one different incorrect code answer and one semantically
+equal JSON object with different serialization. That fails the stated strict
+token-for-token gate. FP8 baseline tied FP4 baseline with overlapping 95%
+Wilson intervals, so no FP8 quality advantage was observed and equivalence is
+not proven by this bounded suite. FP8 MTP also emitted repeated closing think
+markers on one second-process long-context response. All ROCmFPX MTP profiles
+are therefore gated pending a specific backend correction and a complete suite
+rerun. The full machine summary is
+[`results/qwen38-quality-identity-2026-08-18.json`](results/qwen38-quality-identity-2026-08-18.json).
 
 ### CachyOS Btrfs and Snapper policy
 
@@ -1234,7 +1271,7 @@ The initial local profile uses the installed AMD-playbook hybrid model:
 | Setting | Initial value |
 | --- | --- |
 | Profile | `ds4-deepseek-v4-flash-hybrid` |
-| Image | `docker.io/kyuz0/strix-halo-ds4-toolbox:rocm-7.14` |
+| Image | Project-built `localhost/halo-ai-ds4:b0001` |
 | Model | Antirez hybrid Q2/Q4 `fixed-0731`, 97.59 GB (90.89 GiB) |
 | API model ID | `deepseek-v4-flash` |
 | Context | 32,768 tokens |
@@ -1278,10 +1315,10 @@ the adjacent AppleDouble sidecar or any Unsloth model. The lifecycle command
 must never download over, rename, modify, or delete the externally supplied
 file.
 
-### Pull and start ds4
+### Build and start ds4
 
 ```bash
-podman pull docker.io/kyuz0/strix-halo-ds4-toolbox:rocm-7.14
+halo-ai install ds4
 podman stop --time 60 halo-lemonade 2>/dev/null || true
 
 podman run -d \
@@ -1290,14 +1327,13 @@ podman run -d \
   --label local.halo-ai.component=ds4 \
   --device=/dev/kfd \
   --device=/dev/dri \
-  --group-add video \
-  --group-add render \
+  --group-add keep-groups \
   --ipc=host \
   --cap-add=SYS_PTRACE \
   --security-opt seccomp=unconfined \
   -p 127.0.0.1:8000:8000 \
   --mount "type=bind,src=$DS4_MODEL_FILE,dst=/models/model.gguf,ro" \
-  docker.io/kyuz0/strix-halo-ds4-toolbox:rocm-7.14 \
+  localhost/halo-ai-ds4:b0001 \
   ds4-server \
     -m /models/model.gguf \
     --rocm \
@@ -1307,10 +1343,11 @@ podman run -d \
     --prefill-chunk 2048
 ```
 
-These device, IPC, capability, and seccomp options follow the container procedure
-linked by the AMD ds4 playbook. Before first install or update, recheck its image
-tag and arguments and record the resolved digest. Do not broaden the mount or
-publish port 8000 on every interface.
+The project recipe uses an immutable Ubuntu base, checks the release archive's
+exact byte count and SHA-256 before extraction, checks the embedded source
+commit, and records all provenance in image labels. The lifecycle manager also
+checks those labels and the active process before declaring the profile ready.
+Do not broaden the model mount or publish port 8000 on every interface.
 
 ### Observe and test ds4
 
@@ -1374,6 +1411,28 @@ container, ds4 loaded that entry in 92.7 ms, processed only the 38-token suffix
 at 25.01 tok/s, generated at 12.83 tok/s, and completed in 3.7 seconds with the
 same response. The restored suffix PP rate must not be compared to full-prompt
 PP; end-to-end latency and restored-token count are the useful cache measures.
+
+### Qualified DS4 DSpark experiment
+
+The exact 5,989,114,272-byte
+`DeepSeek-V4-Flash-DSpark-support-0731.gguf` companion is installed beside the
+Antirez hybrid and matches SHA-256
+`7e319924541db3f7a163ed7e11d7532a70d48228ab59d36cb81e1d4511885360`.
+The original image predated Antirez commit
+`84cc882352757baf628a1776badf7cc54d584e28`, which implements the missing ROCm
+DSpark kernels. Its apparent 13.76 tok/s result was invalid speculative evidence:
+shutdown reported 398 cycles with zero proposals. Halo now builds b0001 from
+`lemonade-sdk/ds4-rocm`, which embeds that exact commit and ROCm
+`7.15.0a20260728`. The final local image manifest is
+`sha256:f9dd84e76c2fbdd3f99b2e0490c40b899586dd047b0bfa0030744cbd58e1df89`.
+
+The replacement 16K canary returned the exact smoke response, generated a
+400-token deterministic probe at 8.62 tok/s, and reported 324 proposals with
+246 accepted draft tokens (75.93%). It reported zero verifier failures and zero
+runtime errors. The profile is therefore enabled, but remains experimental: the
+runtime attributed about 31.5 seconds to proposal/verification and calculated a
+net loss of about 18.9 seconds on this output-heavy probe. Working DSpark is the
+qualification requirement here; it is not claimed to be the fastest profile.
 
 Normal stop/restart preserves models and cache:
 
@@ -1603,6 +1662,62 @@ Jinja files because they still define formatting and conversation semantics. Tes
 pretend the role changed. Because upstream warns that high presence penalties
 can cause language mixing or reduced quality, retain a separate
 `presence_penalty=0` implementer benchmark before making 1.5 universal.
+
+### Controlled office profile matrix
+
+`tests/office-profile-matrix.sh` is the repeatable whole-profile stability run.
+It runs the source suite in the pinned, network-disabled test container, then
+starts one ready inference profile at a time, exercises it inside its managed
+Podman container, captures the result, and stops it before continuing. A
+successful profile's elapsed time is saved in `profile-history.tsv`; the next
+matrix orders profiles from the fastest recorded time to the slowest.
+
+The runner re-executes itself under a transient systemd sleep inhibitor and
+also compares `CLOCK_BOOTTIME` with the monotonic clock around every profile.
+Any detected suspend is marked invalid rather than allowed to contaminate
+elapsed history. `--exclude-profiles CSV` records deliberate omissions in
+`skipped.tsv`.
+
+Power state is part of the result rather than an operator recollection. The
+runner selects the `performance` power profile and verifies both
+`powerprofilesctl` and `/sys/firmware/acpi/platform_profile` before and after
+every profile. The current CachyOS kernel exposes no numeric AMD DPTCi control
+for this GPD WIN 5, so that profile name alone is not recorded as a particular
+TDP. The runner separately samples AMDGPU's PPT hwmon value once per second and
+requires a non-smoke run to observe more than 45 W. Environment snapshots,
+per-profile `apu-ppt.tsv` files, and `power-summary.txt` make both the selected
+state and the observed loaded power auditable.
+
+The controlled 2026-08-18 run stayed on one boot with no suspend, held both
+profiles at `performance`, and observed a 45.049 W peak. Its containerized
+source suite passed all 82 tests. Of 25 ready profiles, 23 produced valid
+results; `qwen3.6-27b-q8xl-vision-llamacpp` was excluded because it was the
+active `starting` trial at the preceding reboot (correlation only, not proven
+causation), and the DS4 DSpark row was later invalidated when its zero-proposal
+failure exposed a runner control-flow bug. The corrected runner propagates each
+failed stage explicitly and validates DS4's shutdown counters.
+
+The repeated ROCmFPX medians from that run are:
+
+| Profile | 4K PP / TPS | 32K PP / TPS | 32K peak GTT |
+| --- | ---: | ---: | ---: |
+| FP4 baseline | 180.86 / 12.89 | 123.75 / 10.78 | 14.11 GiB |
+| FP4 MTP, F16 draft K/V, 6 / 0.60 | 169.94 / 21.71 | 120.96 / 17.85 | 19.09 GiB |
+| FP4 MTP, q5_1 draft K/V, 6 / 0.60 | 170.41 / 21.86 | 122.59 / 18.13 | 19.00 GiB |
+| FP4 MTP, q5_1 draft K/V, 2 / 0.85 | 170.69 / 19.58 | 104.03 / 13.75 | 18.43 GiB |
+| FP8 baseline | 177.17 / 7.64 | 120.55 / 6.90 | 26.33 GiB |
+| FP8 MTP | 166.68 / 19.86 | 117.35 / 14.95 | 31.14 GiB |
+
+Aggressive q5_1 MTP was the performance candidate: versus uncompressed draft
+K/V it saved 0.09--0.11 GiB without reducing median throughput, and versus the
+FP4 baseline it improved decode TPS by 69.61% at 4K and 68.25% at 32K. The
+conservative policy saved another 0.56--0.57 GiB but lost 10.41% and 24.16%
+decode TPS. The subsequent fixed quality suite failed strict identity for every
+MTP profile, so all four are gated despite those speedups. FP4 baseline remains
+the default; FP8 baseline remains a quality-only experiment with no observed
+suite advantage. Full repetitions and qualification notes are in
+`docs/results/office-profile-matrix-2026-08-18.json` and
+`docs/results/qwen38-quality-identity-2026-08-18.json`.
 
 ### LongBench-v2 at 128K
 
@@ -1908,7 +2023,7 @@ LEMONADE_LLAMACPP_ROCM_BIN=latest
 LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14
 LLAMACPP_PORT=8080
 
-DS4_IMAGE=docker.io/kyuz0/strix-halo-ds4-toolbox:rocm-7.14
+DS4_IMAGE=localhost/halo-ai-ds4:b0001
 DS4_PORT=8000
 DS4_KV_CACHE_ENABLED=0
 DS4_KV_CACHE_DIR=/var/cache/halo-ai/ds4-kv
@@ -2277,7 +2392,8 @@ memory cost; both remain available as comparison and recovery paths.
 - LongBench-v2: [dataset](https://huggingface.co/datasets/zai-org/LongBench-v2)
 - LongBench-v2: [official runner](https://github.com/THUDM/LongBench)
 - ds4 upstream: [antirez/ds4](https://github.com/antirez/ds4)
-- ds4 Strix Halo toolbox: [kyuz0/strix-halo-ds4-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox)
+- DS4 ROCm releases: [lemonade-sdk/ds4-rocm](https://github.com/lemonade-sdk/ds4-rocm/releases)
+- DS4 ROCm speculation fix: [antirez/ds4 commit 84cc882](https://github.com/antirez/ds4/commit/84cc882352757baf628a1776badf7cc54d584e28)
 - Antirez: [DeepSeek V4 GGUF](https://huggingface.co/antirez/deepseek-v4-gguf)
 - Meta: [Seamless M4T v2 Large](https://huggingface.co/facebook/seamless-m4t-v2-large)
 - Unsloth: [DeepSeek V4 Flash 0731 GGUF](https://huggingface.co/unsloth/DeepSeek-V4-Flash-0731-GGUF)

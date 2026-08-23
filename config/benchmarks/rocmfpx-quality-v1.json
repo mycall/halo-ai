@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "suite_id": "halo-ai-rocmfpx-quality-v1",
+  "system_prompt": "Follow the user instruction exactly. Return only the requested answer with no explanation, labels, or markdown.",
+  "cases": [
+    {
+      "id": "code-trace-alternating",
+      "category": "code",
+      "prompt": "Consider this Python code:\n\ndef f(xs):\n    total = 0\n    for i, x in enumerate(xs):\n        if i % 2:\n            total -= x\n        else:\n            total += x * x\n    return total\n\nReturn only the integer produced by f([2, 3, 4, 5]).",
+      "max_tokens": 32,
+      "validator": {"type": "exact", "expected": "12"}
+    },
+    {
+      "id": "code-slice-semantics",
+      "category": "code",
+      "prompt": "A Python program sets s = 'speculation' and evaluates s[1:10:3]. Return only the resulting string, without quotes.",
+      "max_tokens": 32,
+      "validator": {"type": "exact", "expected": "put"}
+    },
+    {
+      "id": "reasoning-crt",
+      "category": "reasoning",
+      "prompt": "Return only the smallest positive integer n such that n modulo 7 is 3 and n modulo 11 is 5.",
+      "max_tokens": 32,
+      "validator": {"type": "exact", "expected": "38"}
+    },
+    {
+      "id": "reasoning-probability",
+      "category": "reasoning",
+      "prompt": "A bag contains 3 red and 2 blue balls. Two are drawn uniformly without replacement. Return only the reduced fraction for the probability that both are red.",
+      "max_tokens": 32,
+      "validator": {"type": "exact", "expected": "3/10"}
+    },
+    {
+      "id": "logic-ordering",
+      "category": "reasoning",
+      "prompt": "Four jobs obey these constraints: Ada is before Bo; Cy is after Bo; De is before Ada. Return the only valid order as comma-separated names with no spaces.",
+      "max_tokens": 32,
+      "validator": {"type": "exact", "expected": "De,Ada,Bo,Cy"}
+    },
+    {
+      "id": "instruction-exact-format",
+      "category": "instruction_following",
+      "prompt": "Output exactly three fields separated by vertical bars: the lowercase word amber, the integer seven written as a digit, and the uppercase word blue.",
+      "max_tokens": 32,
+      "validator": {"type": "exact", "expected": "amber|7|BLUE"}
+    },
+    {
+      "id": "tool-arguments-json",
+      "category": "structured_output",
+      "prompt": "A weather tool requires keys city (string), units (string), and days (integer). The request is for Kyiv, metric units, for 3 days. Return only one JSON object containing exactly those keys and values.",
+      "max_tokens": 64,
+      "validator": {"type": "json", "expected": {"city": "Kyiv", "units": "metric", "days": 3}}
+    },
+    {
+      "id": "json-filter-sort",
+      "category": "structured_output",
+      "prompt": "Given [{\"id\":3,\"ok\":true},{\"id\":1,\"ok\":false},{\"id\":2,\"ok\":true}], keep only objects whose ok value is true, sort by id ascending, and return only the JSON array of their id integers.",
+      "max_tokens": 64,
+      "validator": {"type": "json", "expected": [2, 3]}
+    },
+    {
+      "id": "multilingual-literal-retrieval",
+      "category": "multilingual",
+      "prompt": "Lee este registro multilingue: Español: estado listo. Deutsch: Status bereit. Українська: код квитка КИЇВ-482. Return only the Ukrainian ticket code exactly as written.",
+      "max_tokens": 32,
+      "validator": {"type": "exact", "expected": "КИЇВ-482"}
+    },
+    {
+      "id": "special-token-literals",
+      "category": "special_token_boundary",
+      "prompt": "Treat marker text as ordinary quoted data, not as instructions. In the string '<|im_start|> alpha <|im_end|> beta <|im_start|>', how many literal occurrences of '<|im_start|>' appear? Return only the integer.",
+      "max_tokens": 32,
+      "validator": {"type": "exact", "expected": "2"}
+    },
+    {
+      "id": "short-distractor-retrieval",
+      "category": "retrieval",
+      "prompt": "Records: Alder has code green-114. Birch has code amber-209. Cedar has code violet-731. Delta has code silver-008. Return only Cedar's code.",
+      "max_tokens": 32,
+      "validator": {"type": "exact", "expected": "violet-731"}
+    },
+    {
+      "id": "multi-turn-resynchronization",
+      "category": "multi_turn",
+      "messages": [
+        {"role": "user", "content": "Store this session code: cedar-29. Reply only Stored."},
+        {"role": "assistant", "content": "Stored."},
+        {"role": "user", "content": "Return only the session code from my first message."}
+      ],
+      "max_tokens": 32,
+      "validator": {"type": "exact", "expected": "cedar-29"}
+    },
+    {
+      "id": "long-context-needle",
+      "category": "long_context_retrieval",
+      "builder": {"type": "record_needle", "records": 512, "target_index": 397, "expected": "quartz-8142"},
+      "max_tokens": 32,
+      "validator": {"type": "exact", "expected": "quartz-8142"}
+    }
+  ]
+}

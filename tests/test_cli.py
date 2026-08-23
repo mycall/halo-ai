@@ -162,6 +162,8 @@ class CatalogTests(unittest.TestCase):
         self.assertIn("ds4-server", command)
         self.assertIn("--rocm --host 0.0.0.0 --port 8000", rendered)
         self.assertIn("-p 127.0.0.1:8000:8000", rendered)
+        self.assertIn("--group-add keep-groups", rendered)
+        self.assertNotIn("--group-add video", rendered)
 
     def test_ds4_kv_profile_mounts_private_cache_and_explicit_policy(self) -> None:
         profile = self.catalog.profiles["ds4-deepseek-v4-flash-hybrid-kv"]
@@ -274,6 +276,20 @@ class CatalogTests(unittest.TestCase):
         self.assertIn("--spec-draft-n-max 6 --spec-draft-p-min 0.6", compressed_rendered)
         self.assertIn("--spec-draft-n-max 2 --spec-draft-p-min 0.85", conservative_rendered)
 
+    def test_rocmfpx_mtp_profiles_are_gated_after_quality_failure(self) -> None:
+        expected_matches = {
+            "qwen38-27b-rocmfp4-mtp": "7 of 13",
+            "qwen38-27b-rocmfp4-mtp-q5-draft": "7 of 13",
+            "qwen38-27b-rocmfp4-mtp-conservative-q5-draft": "11 of 13",
+            "qwen38-27b-rocmfp8-mtp": "4 of 13",
+        }
+        for profile_id, expected in expected_matches.items():
+            ready, reason = cli.profile_availability(
+                self.config, self.catalog, self.catalog.profiles[profile_id],
+            )
+            self.assertFalse(ready)
+            self.assertIn(expected, reason)
+
     def test_ds4_dspark_profile_selects_only_exact_antirez_support(self) -> None:
         control = self.catalog.profiles["ds4-deepseek-v4-flash-hybrid"]
         candidate = self.catalog.profiles[
@@ -288,9 +304,10 @@ class CatalogTests(unittest.TestCase):
         self.assertNotIn("DSpark-support", control_rendered)
         self.assertNotIn("--dspark", control_rendered)
         self.assertIn("DeepSeek-V4-Flash-DSpark-support-0731.gguf", candidate_rendered)
+        self.assertIn("-e DS4_DSPARK_STATS=1", candidate_rendered)
         self.assertIn("--dspark --dspark-confidence 0.7", candidate_rendered)
         self.assertIn("--ctx 16384 --prefill-chunk 1024", candidate_rendered)
-        with mock.patch.object(cli, "image_identity", return_value="sha256:fixture"):
+        with mock.patch.object(cli, "ds4_image_valid", return_value=True):
             control_plan = cli.profile_acquisition_plan(self.config, self.catalog, control)
             candidate_plan = cli.profile_acquisition_plan(self.config, self.catalog, candidate)
         self.assertEqual([item["role"] for item in control_plan["model"]["files"]], ["main"])
@@ -299,6 +316,9 @@ class CatalogTests(unittest.TestCase):
             ["main", "dspark"],
         )
         self.assertNotIn("unsloth", json.dumps(candidate_plan).lower())
+        self.assertEqual(candidate_plan["runtime"]["release"], "b0001")
+        self.assertEqual(candidate_plan["runtime"]["ds4_commit"], cli.DS4_SOURCE_COMMIT)
+        self.assertEqual(candidate_plan["runtime"]["engine_archive_sha256"], cli.DS4_RELEASE_SHA256)
 
     def test_optional_dspark_does_not_disable_ds4_control(self) -> None:
         model = self.catalog.models["deepseek-v4-flash-ds4-hybrid"]
@@ -308,17 +328,66 @@ class CatalogTests(unittest.TestCase):
         ]
         with mock.patch.object(cli, "verify_model") as verify:
             verify.return_value = {"valid": True}
-            with mock.patch.object(cli, "image_identity", return_value="sha256:fixture"):
+            with mock.patch.object(cli, "ds4_image_valid", return_value=True):
                 ready, _reason = cli.profile_availability(
                     self.config, self.catalog, control,
                 )
                 self.assertTrue(ready)
                 self.assertEqual(verify.call_args.args[3], {"main"})
-                cli.profile_availability(self.config, self.catalog, candidate)
+                candidate_ready, reason = cli.profile_availability(
+                    self.config, self.catalog, candidate,
+                )
+                self.assertTrue(candidate_ready, reason)
                 self.assertEqual(verify.call_args.args[3], {"main", "dspark"})
         self.assertEqual(
             {item["role"] for item in model["files"]}, {"main", "dspark"},
         )
+
+    def test_ds4_recipe_pins_archive_base_and_fixed_source(self) -> None:
+        recipe = (ROOT / "lib/halo_ai/ds4/Containerfile").read_text(encoding="utf-8")
+        self.assertIn(cli.DS4_RELEASE_SHA256, recipe)
+        self.assertIn(str(cli.DS4_RELEASE_BYTES), recipe.replace("_", ""))
+        self.assertIn(cli.DS4_UBUNTU_BASE, recipe)
+        self.assertIn(cli.DS4_SOURCE_COMMIT, recipe)
+        self.assertNotIn("git checkout", recipe)
+
+    def test_ds4_image_requires_every_provenance_label(self) -> None:
+        labels = {
+            "local.halo-ai.engine": "ds4",
+            "local.halo-ai.engine-archive-sha256": cli.DS4_RELEASE_SHA256,
+            "org.opencontainers.image.revision": cli.DS4_SOURCE_COMMIT,
+            "local.halo-ai.rocm-version": cli.DS4_ROCM_VERSION,
+            "local.halo-ai.base": cli.DS4_UBUNTU_BASE,
+        }
+        with mock.patch.object(cli, "image_labels", return_value=labels):
+            self.assertTrue(cli.ds4_image_valid("fixture"))
+        labels.pop("org.opencontainers.image.revision")
+        with mock.patch.object(cli, "image_labels", return_value=labels):
+            self.assertFalse(cli.ds4_image_valid("fixture"))
+
+    def test_ds4_backend_provenance_requires_active_dspark_process(self) -> None:
+        commit = mock.MagicMock(stdout=cli.DS4_SOURCE_COMMIT + "\n")
+        process = mock.MagicMock(
+            stdout=(
+                "COMMAND\n/opt/ds4/ds4-server --rocm --mtp /models/dspark.gguf "
+                "--dspark --dspark-confidence 0.7\n"
+            )
+        )
+        labels = {
+            "org.opencontainers.image.version": "b0001",
+            "local.halo-ai.rocm-version": cli.DS4_ROCM_VERSION,
+            "local.halo-ai.engine-archive-sha256": cli.DS4_RELEASE_SHA256,
+        }
+        with (
+            mock.patch.object(cli, "ds4_image_valid", return_value=True),
+            mock.patch.object(cli, "podman", side_effect=[commit, process]),
+            mock.patch.object(cli, "image_labels", return_value=labels),
+        ):
+            info = cli.ds4_backend_info(
+                "halo-ds4", "fixture", {"features": ["dspark"]},
+            )
+        self.assertEqual(info["source_revision"], cli.DS4_SOURCE_COMMIT)
+        self.assertEqual(info["speculation"], "dspark")
 
     def test_rocmfpx_strict_mtp_rejects_incompatible_ngram_composition(self) -> None:
         profile = json.loads(json.dumps(
@@ -787,6 +856,58 @@ class LongBenchTests(unittest.TestCase):
 
 
 class RocmFpxTuningTests(unittest.TestCase):
+    def test_fixed_quality_suite_is_valid_and_long_case_is_deterministic(self) -> None:
+        suite_path = ROOT / "config/benchmarks/rocmfpx-quality-v1.json"
+        suite, digest = cli.rocmfpx_quality.load_suite(suite_path)
+        self.assertEqual(suite["suite_id"], "halo-ai-rocmfpx-quality-v1")
+        self.assertEqual(len(digest), 64)
+        self.assertEqual(len(suite["cases"]), 13)
+        long_case = next(case for case in suite["cases"] if case["id"] == "long-context-needle")
+        first = cli.rocmfpx_quality.case_messages(suite, long_case)
+        second = cli.rocmfpx_quality.case_messages(suite, long_case)
+        self.assertEqual(first, second)
+        self.assertIn("Archive record 000397", first[-1]["content"])
+        self.assertEqual(first[-1]["content"].count("quartz-8142"), 1)
+
+    def test_quality_scoring_handles_exact_and_semantic_json(self) -> None:
+        exact = {"id": "exact", "validator": {"type": "exact", "expected": "42"}}
+        structured = {
+            "id": "json", "validator": {
+                "type": "json", "expected": {"city": "Kyiv", "days": 3},
+            },
+        }
+        self.assertTrue(cli.rocmfpx_quality.score_case(exact, " 42\n")[0])
+        self.assertTrue(cli.rocmfpx_quality.score_case(
+            structured, '```json\n{"days":3,"city":"Kyiv"}\n```',
+        )[0])
+
+    def test_quality_comparison_proves_only_cross_process_same_model_identity(self) -> None:
+        def record(profile: str, features: list[str], model_sha: str, token: str) -> dict[str, object]:
+            return {
+                "kind": "halo-ai-rocmfpx-quality-benchmark",
+                "profile": profile,
+                "features": features,
+                "suite_sha256": "suite",
+                "model": {"sha256": model_sha, "quantization": "fixture"},
+                "results": [
+                    {"case_id": "one", "category": "code", "passed": True, "output_token_sha256": token},
+                    {"case_id": "two", "category": "reasoning", "passed": True, "output_token_sha256": token + "2"},
+                ],
+            }
+
+        records = [
+            record("fp4-baseline", [], "fp4", "same"),
+            record("fp4-baseline", [], "fp4", "same"),
+            record("fp4-mtp", ["mtp"], "fp4", "same"),
+            record("fp4-mtp", ["mtp"], "fp4", "same"),
+            record("fp8-baseline", [], "fp8", "different"),
+            record("fp8-baseline", [], "fp8", "different"),
+        ]
+        result = cli.rocmfpx_quality.compare_records(records)
+        self.assertTrue(result["profiles"]["fp4-baseline"]["self_consistent"])
+        self.assertEqual(result["strict_identity"]["fp4-mtp"]["status"], "proven")
+        self.assertNotIn("fp8-baseline", result["strict_identity"])
+
     def test_unique_context_text_is_deterministic_and_line_variant(self) -> None:
         first = cli.rocmfpx_unique_benchmark_text(3)
         self.assertEqual(first, cli.rocmfpx_unique_benchmark_text(3))

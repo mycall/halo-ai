@@ -182,6 +182,20 @@ per-profile logs, and ordering history are stored under
 for a quick orchestration rehearsal. A cleanup trap stops managed inference
 containers after normal completion, failure, or interruption.
 
+The runner holds a transient systemd sleep inhibitor for the complete matrix
+and independently detects any suspend interval from the boottime/monotonic
+clock offset. Use `--exclude-profiles CSV` to preserve an explicit audit trail
+when a suspected profile should not be retried unattended.
+
+The runner selects `performance` with `powerprofilesctl` and requires both the
+power-profiles daemon and ACPI platform profile to remain in that state before
+and after every profile. Because the installed kernel does not expose a numeric
+GPD WIN 5 DPTC limit, the runner does not equate the profile name with a watt
+cap. Instead it samples the kernel's AMDGPU PPT sensor once per second and, for
+a non-smoke run, requires the observed run peak to exceed 45 W. Override only
+the observation threshold with `--minimum-ppt-watts N`; raw samples and the run
+peak are retained with the results.
+
 The first Lemonade ROCm start downloads a llama.cpp backend and TheRock runtime.
 They are cached in the persistent `halo-lemonade-config` volume, while Hugging
 Face downloads use `halo-lemonade-huggingface`. The default
@@ -335,9 +349,9 @@ fixed-VRAM use.
 | Qwen server | Lemonade + ROCm | Package `b10334`, active llama.cpp `b10333`, fingerprint `b10333-08659901c` |
 | Lemonade image | `sha256:d0d9cc9ead310578d1797bd58b7c583dc007a87bdb04162dde58e0e05ce51794` | Full digest is retained in trial and benchmark manifests |
 | Standalone llama.cpp | build `b10335-74ce15741` | `rocm-7.14` image, digest `sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b` |
-| ds4 image | `sha256:2ea5b3b28334f08d53307baf79838591e510628d41dacec357de32ffafbac31f` | `kyuz0/strix-halo-ds4-toolbox:rocm-7.14` |
+| ds4 image | manifest `sha256:f9dd84e76c2fbdd3f99b2e0490c40b899586dd047b0bfa0030744cbd58e1df89` | Local ID `52763e9d…493113a`; project-built `b0001`, Antirez `84cc882` ROCm DSpark fix, ROCm `7.15.0a20260728` |
 | Speech image | manifest `sha256:0a21384bf020782d8c75df78338bbc8a23f260c3604e5b023eee7a3381d9361b` | Local image ID `532f5f3d…23633`, 7.1 GB; PyTorch 2.12.0 + ROCm 7.14, Transformers 4.57.1, Gradio 6.16.0 |
-| Automated source tests | 82 passed | Python unit tests inside the read-only, network-disabled Podman test container, plus shell smoke/install assertions |
+| Automated source tests | 89 passed | Python unit tests inside the read-only, network-disabled Podman test container, plus shell smoke/install assertions |
 | Runtime cleanup | Passed | `halo-ai stop` returned GTT use from about 38 GiB to about 0.1 GiB |
 
 ### End-to-end model/profile matrix
@@ -362,6 +376,7 @@ fixed-VRAM use.
 | `ds4-deepseek-v4-flash-hybrid` | 32K | ds4/ROCm | 107.6 GiB | 8.9 GiB | 97.73 | 12.56 | 107.2 s | Pass, but tight; PP/TPS parsed from ds4 server log |
 | `ds4-deepseek-v4-flash-hybrid-kv` cold | 32K | ds4 + disk KV | 107.6 GiB | 9.2 GiB | 97.37 | 12.43 | 107.7 s | Pass; stored a 10,240-prefix-token entry (157.35 MiB) |
 | `ds4-deepseek-v4-flash-hybrid-kv` restored | 32K | ds4 + disk KV | 107.6 GiB | 9.8 GiB | 25.01* | 12.83 | 3.7 s | Pass after container recreation; 10,240 tokens restored in 92.7 ms, only 38-token suffix prefetched |
+| `ds4-deepseek-v4-flash-hybrid-dspark-16k` | 16K | ds4 + DSpark | — | — | 29.56* | 8.62 | 46.4 s decode | Pass on fixed ROCm runtime; 246/324 draft tokens accepted (75.93%), zero verifier/runtime errors; enabled but experimental |
 
 Notes:
 
