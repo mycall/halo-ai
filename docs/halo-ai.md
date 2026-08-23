@@ -331,8 +331,8 @@ expected model mount is absent, stop; otherwise a downloader could silently fill
 the underlying root disk. Mounting the collection is an explicit host operation,
 never something `start` performs automatically.
 
-Rootless Podman currently stores its images, containers, and named volumes in
-`/home/michael/.local/share/containers/storage`; this was confirmed with
+Rootless Podman commonly stores its images, containers, and named volumes in
+`$HOME/.local/share/containers/storage`; confirm the effective location with
 `podman info`. That is outside the source tree and is a functional initial
 default, but it does not satisfy a strict requirement to keep runtime data out
 of `/home`.
@@ -381,7 +381,7 @@ accept an incomplete shard set.
 ### Expected-file manifest
 
 The following SHA-256 values are the **published expected hashes** observed from
-the upstream repositories on 2026-08-09. They become locally verified only after
+the upstream repositories through 2026-08-23. They become locally verified only after
 `halo-ai models verify --full` hashes the installed bytes and records the result.
 Each manifest entry is `sha256 bytes relative-path`:
 
@@ -400,6 +400,9 @@ fdc443e974cad1f61c45af1cfd5580855855ddce0d6c14cc500a5714c486ac1d 1842940480 unsl
 6c6b816537abad90b250a0972b345466028d861ddfe316d5f0de31ca6440f781 39099447584 unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf
 fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9 14562236384 julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP4-FAST.gguf
 0bf5bfc9f946090af2d41b388ccb4d627e916c7250517c36a0de37d6eaccfd8e 28193396704 julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP8.gguf
+701d8fa9ed214ab21bfc130cd2a7df19ca89bbef7713e2dfb19f3c63696aa917 25299061664 unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q6_K_XL.gguf
+83ee4f4f205fa514161778c41df1ea14144faa0f713510893b63c2395f5c2d53 931146432 unsloth/Qwen3.8-27B-GGUF/mmproj-BF16.gguf
+18a380efc9b7ed8d88677fc895f5c11ae170653434ee378f7348f715c14d0594 1143006752 incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-Q4_K_M.gguf
 9ac8a85d4e97d27fad026a813d52a069680e4e0cae701ef145b204bd533251b2 2066 facebook/seamless-m4t-v2-large/added_tokens.json
 4b2fa9d863cc3033adaf261e6c3e32ad90347ee2f199a349ba1c77d5e26a605f 2716 facebook/seamless-m4t-v2-large/config.json
 febbbbac4f0b122473a0125165c9291add850956315e35a025e16474cc0da5f4 9906948 facebook/seamless-m4t-v2-large/generation_config.json
@@ -483,6 +486,12 @@ profile-scoped acquisition adds zero model bytes. It enables the fork's
 boundary-safe strict-Qwen verifier with one slot and uses `n_max=6`,
 `p_min=0.60`. It is retained for reproducibility but is now gated after the
 fixed correctness suite disproved end-to-end token identity.
+
+`qwen38-27b-rocmfp4-mtp-conservative-q5-draft` uses `n_max=2`, `p_min=0.85`,
+and q5_1 draft K/V. It retained the FP4 baseline's 9/13 bounded quality score
+but did not prove strict token identity. It is therefore available only as an
+operator-approved experimental profile; `qwen38fp4` remains mapped to
+`qwen38-27b-rocmfp4-baseline`.
 
 | Prompt tokens | Baseline decode | MTP decode | Change | MTP TTFT | Acceptance | Peak GTT |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -580,7 +589,7 @@ processes per profile with temperature 0, seed 1, and thinking disabled.
 | FP4 baseline | 9/13 | 13/13 | Reference | Enabled/default |
 | FP4 MTP, F16 draft K/V, 6 / 0.60 | 7/13 | 13/13 | 7/13 | Gated |
 | FP4 MTP, q5_1 draft K/V, 6 / 0.60 | 7/13 | 13/13 | 7/13 | Gated |
-| FP4 MTP, q5_1 draft K/V, 2 / 0.85 | 9/13 | 13/13 | 11/13 | Gated |
+| FP4 MTP, q5_1 draft K/V, 2 / 0.85 | 9/13 | 13/13 | 11/13 | Enabled/experimental |
 | FP8 baseline | 9/13 | 13/13 | Reference | Enabled/quality-only |
 | FP8 MTP | 5/13 | 12/13 | 4/13 | Gated |
 
@@ -590,10 +599,21 @@ equal JSON object with different serialization. That fails the stated strict
 token-for-token gate. FP8 baseline tied FP4 baseline with overlapping 95%
 Wilson intervals, so no FP8 quality advantage was observed and equivalence is
 not proven by this bounded suite. FP8 MTP also emitted repeated closing think
-markers on one second-process long-context response. All ROCmFPX MTP profiles
-are therefore gated pending a specific backend correction and a complete suite
-rerun. The full machine summary is
+markers on one second-process long-context response. The two aggressive FP4
+profiles and FP8 MTP are therefore gated pending a specific backend correction
+and a complete suite rerun. Conservative FP4 MTP is exposed only under the
+explicitly accepted experimental policy above, not as a lossless candidate.
+The full machine summary is
 [`results/qwen38-quality-identity-2026-08-18.json`](results/qwen38-quality-identity-2026-08-18.json).
+
+A 2026-08-23 cache-isolation follow-up disabled RAM, prompt, idle-slot, and
+slot-similarity reuse. Conservative MTP matched 13/13 only when the suite was
+the first workload in each process. Under Halo's normal smoke-then-suite
+lifecycle it still differed on the code-slicing case (12/13), so the apparent
+fresh-slot pass was not production-history invariant and did not restore strict
+qualification. Build 244 at q38rocm's newer `0fc9568` source pin could not
+produce sane baseline output from the existing ROCmFP4 GGUF, so it was also
+rejected as a drop-in runtime update.
 
 ### CachyOS Btrfs and Snapper policy
 
@@ -1491,11 +1511,59 @@ halo-ai start ds4 --switch
 halo-ai test ds4 --preset deepseek-v4-think-max
 ```
 
-`ds4`, `qwen38fp4`, and `qwen38fp8` are catalog aliases, not copied profiles.
-The Qwen aliases target `qwen38-27b-rocmfp4-baseline` and
-`qwen38-27b-rocmfp8-baseline`, respectively. Alias targets must be canonical
+`ds4`, `qwen38df2`, `qwen38fp4`, and `qwen38fp8` are catalog aliases, not copied
+profiles. At the operator's request, `qwen38df2` targets the native-262K,
+experimental Q6 XL vision+DFlash2 profile.
+`qwen38fp4` and `qwen38fp8` remain specific to the ROCmFPX artifacts. Alias targets must be canonical
 profile IDs, and the runtime records the canonical profile so status, trial
 history, and benchmarks remain unambiguous.
+
+The Q6 lane uses a separate `strixvulkan` engine pinned to Nathan's image
+digest `sha256:a4a3dfe5813df1f0687e526bcba639bfd8b7cdb1d5e4c1c855abc240fb574d3a`
+and llama.cpp source revision `f25eefeaf0386c18499f23f4fc4f400397638d51`.
+It does not replace the ordinary llama.cpp or ROCmFPX engines. All three Q6
+profiles use the model's native 262,144-token context and F16 K/V cache:
+
+| Profile | Composition | Status |
+| --- | --- | --- |
+| `qwen38-27b-q6xl-strix-baseline` | Q6 XL target only | Experimental control |
+| `qwen38-27b-q6xl-strix-dflash2` | Q6 XL + exact Q4_K_M DFlash2 sidecar | Experimental; history-invariant identity pending |
+| `qwen38-27b-q6xl-strix-vision` | Q6 XL + BF16 projector, no speculation | Experimental target-only rollback; red-image canary passed |
+| `qwen38-27b-q6xl-strix-vision-dflash2` / `qwen38df2` | Q6 XL + BF16 projector + exact Q4_K_M DFlash2 sidecar | Experimental; operator accepted measured multimodal divergence |
+
+Vision+DFlash2 was tested on the pinned build 10577. The combined runtime returned the correct red-image canary and
+reported real drafting. On a longer structured image response it accepted
+40/42 draft tokens and decoded at 28.00 tok/s versus 8.44 tok/s target-only.
+Despite identical fresh-process request history, its greedy JSON differed from
+the target-only output (`"red"`/`true` versus `"#ff0000"`/`1.0`). That fails
+Halo's exact-output gate. The operator explicitly accepted this divergence for
+continued experimentation, so it is exposed only as an experimental profile;
+the target-only vision profile remains the rollback.
+
+The first same-host fixed suite scored both target-only and DFlash2 10/13,
+compared with 9/13 for the recorded ROCmFP4 baseline. An asymmetric-history run
+differed on one of 13 output-token streams. A controlled retry with freshly
+started processes and identical empty history matched that case exactly, but a
+full equal-history rerun remains required before claiming history-invariant
+greedy reproduction. At 4K+64 DFlash2 improved decode from 8.27 to 15.46 tok/s and
+reduced wall time 6.9%. At 32K+64 it improved decode from 7.77 to 14.14 tok/s,
+but its slower prefill increased wall time 8.7%; the approximate 32K break-even
+is 350 generated tokens. Native-262K allocation used about 60.8 GiB peak GTT
+target-only and 73.1 GiB with DFlash2.
+
+```bash
+halo-ai install strixvulkan
+halo-ai start qwen38df2 --switch  # Experimental Q6 vision+DFlash2 profile
+halo-ai test qwen38df2
+# Controls:
+halo-ai start qwen38-27b-q6xl-strix-baseline --switch
+halo-ai start qwen38-27b-q6xl-strix-vision --switch
+```
+
+The repo's `config/opencode.json` exposes the vision alias as
+`halo-qwen38/qwen38df2` through `http://127.0.0.1:8003/v1`, including text/image
+modalities and the 262,144-token context limit. OpenCode 1.18.21 discovered the
+model and completed a live request against the managed endpoint.
 
 Normal stop/restart preserves models and cache:
 
@@ -1618,9 +1686,9 @@ fallback path.
 
 ### Findings from the existing Qwen launcher
 
-`/home/michael/Projects/source/llama_llm/Serve-Llm.ps1` and its two Qwen 3.6
-templates were reviewed read-only on 2026-08-09. They are useful design input,
-not an installed dependency. The saved `llamacpp-help.txt` describes Windows
+An external `Serve-Llm.ps1` launcher and its two Qwen 3.6 templates were
+reviewed read-only on 2026-08-09. They are useful design input, not an installed
+dependency. The saved `llamacpp-help.txt` describes Windows
 llama.cpp build `b9305`; it is a compatibility fixture, not evidence of the
 flags in Lemonade's current container backend.
 
@@ -1776,9 +1844,11 @@ K/V it saved 0.09--0.11 GiB without reducing median throughput, and versus the
 FP4 baseline it improved decode TPS by 69.61% at 4K and 68.25% at 32K. The
 conservative policy saved another 0.56--0.57 GiB but lost 10.41% and 24.16%
 decode TPS. The subsequent fixed quality suite failed strict identity for every
-MTP profile, so all four are gated despite those speedups. FP4 baseline remains
-the default; FP8 baseline remains a quality-only experiment with no observed
-suite advantage. Full repetitions and qualification notes are in
+MTP policy, preventing default promotion. Conservative FP4 MTP is nevertheless
+available as an explicitly accepted experiment; the other three MTP profiles
+remain gated. FP4 baseline remains the default; FP8 baseline remains a
+quality-only experiment with no observed suite advantage. Full repetitions and
+qualification notes are in
 `docs/results/office-profile-matrix-2026-08-18.json` and
 `docs/results/qwen38-quality-identity-2026-08-18.json`.
 
@@ -2045,7 +2115,7 @@ halo-ai doctor
 halo-ai models <scan|list|show|verify> [model-id] [--full]
 halo-ai profiles <list|show|render> [profile-id]
 halo-ai presets <list|show|render> [preset-id]
-halo-ai install [lemonade|llamacpp|ds4|vllm|all]
+halo-ai install [lemonade|llamacpp|rocmfpx|strixvulkan|ds4|speech|vllm|all]
 halo-ai start <profile-id> [--switch]
 halo-ai stop [profile-id|all]
 halo-ai restart <profile-id>
@@ -2053,7 +2123,7 @@ halo-ai status
 halo-ai env
 halo-ai logs [profile-id] [-f]
 halo-ai test [profile-id] [--preset preset-id]
-halo-ai update <lemonade|llamacpp|ds4|vllm|all>
+halo-ai update <lemonade|llamacpp|rocmfpx|strixvulkan|ds4|speech|vllm|all>
 halo-ai tune <status|discard>
 halo-ai host-profile <status|init|set|rollback> [gpu|npu|backup-id]
 ```
@@ -2063,10 +2133,14 @@ halo-ai host-profile <status|init|set|rollback> [gpu|npu|backup-id]
 The system-installed script reads `/etc/opt/halo-ai/config.env`, followed by
 an optional operator override at
 `${XDG_CONFIG_HOME:-$HOME/.config}/halo-ai/config.env`. An explicit
-`--config PATH` overrides both. The example configuration will define:
+`--config PATH` overrides both. In an explicit config, relative catalog and
+preset lookup paths are resolved from that config file's directory; all other
+filesystem settings must remain absolute. The installer replaces `your-user`
+with the selected operator account. When configuring manually, replace it
+yourself. The example configuration will define:
 
 ```bash
-HALO_AI_RUN_USER=michael
+HALO_AI_RUN_USER=your-user
 HALO_AI_STATE_DIR=/var/opt/halo-ai/state
 HALO_AI_CACHE_DIR=/var/cache/halo-ai
 HALO_AI_MODELS_ROOT=/srv/halo-ai/models
@@ -2085,6 +2159,12 @@ LEMONADE_LLAMACPP_ROCM_BIN=latest
 # Stable gfx1151 tag; each pull and trial records its resolved digest/build.
 LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14
 LLAMACPP_PORT=8080
+
+ROCMFPX_IMAGE=localhost/halo-ai-rocmfpx:v1.0.0
+ROCMFPX_PORT=8002
+
+STRIXVULKAN_IMAGE=ghcr.io/nathanw1014/strix-halo-llamacpp@sha256:a4a3dfe5813df1f0687e526bcba639bfd8b7cdb1d5e4c1c855abc240fb574d3a
+STRIXVULKAN_PORT=8003
 
 DS4_IMAGE=localhost/halo-ai-ds4:b0001
 DS4_PORT=8000

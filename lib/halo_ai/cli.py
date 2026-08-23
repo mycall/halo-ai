@@ -43,6 +43,7 @@ ENGINE_IMAGE_KEYS = {
     "lemonade": "LEMONADE_IMAGE",
     "llamacpp": "LLAMACPP_IMAGE",
     "rocmfpx": "ROCMFPX_IMAGE",
+    "strixvulkan": "STRIXVULKAN_IMAGE",
     "ds4": "DS4_IMAGE",
     "speech": "SPEECH_IMAGE",
     "vllm": "VLLM_IMAGE",
@@ -51,6 +52,7 @@ ENGINE_PORT_KEYS = {
     "lemonade": "LEMONADE_PORT",
     "llamacpp": "LLAMACPP_PORT",
     "rocmfpx": "ROCMFPX_PORT",
+    "strixvulkan": "STRIXVULKAN_PORT",
     "ds4": "DS4_PORT",
     "speech": "SPEECH_PORT",
     "vllm": "VLLM_PORT",
@@ -59,6 +61,7 @@ ENGINE_CONTAINERS = {
     "lemonade": "halo-lemonade",
     "llamacpp": "halo-llamacpp",
     "rocmfpx": "halo-rocmfpx",
+    "strixvulkan": "halo-strixvulkan",
     "ds4": "halo-ds4",
     "speech": "halo-speech",
     "vllm": "halo-vllm",
@@ -74,6 +77,10 @@ ROCMFPX_Q38ROCM_COMMIT = "66de2f3bc625249eabff5bd919fd6dbdd3d7ccaa"
 ROCMFPX_VULKAN_BASE = "sha256:8cdde6d42ab621b3d0f1e02618f4234c58b7036bec984a2a64fa205d38f99922"
 ROCMFPX_ROCM_BASE = "sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b"
 ROCMFPX_QUALITY_SUITE = SOURCE_CONFIG / "benchmarks" / "rocmfpx-quality-v1.json"
+
+STRIXVULKAN_IMAGE_DIGEST = "sha256:a4a3dfe5813df1f0687e526bcba639bfd8b7cdb1d5e4c1c855abc240fb574d3a"
+STRIXVULKAN_SOURCE_COMMIT = "f25eefeaf0386c18499f23f4fc4f400397638d51"
+STRIXVULKAN_IMAGE = f"ghcr.io/nathanw1014/strix-halo-llamacpp@{STRIXVULKAN_IMAGE_DIGEST}"
 
 DS4_RELEASE_URL = (
     "https://github.com/lemonade-sdk/ds4-rocm/releases/download/b0001/"
@@ -174,6 +181,8 @@ DEFAULTS = {
     "LLAMACPP_PORT": "8080",
     "ROCMFPX_IMAGE": "localhost/halo-ai-rocmfpx:v1.0.0",
     "ROCMFPX_PORT": "8002",
+    "STRIXVULKAN_IMAGE": STRIXVULKAN_IMAGE,
+    "STRIXVULKAN_PORT": "8003",
     "DS4_IMAGE": "localhost/halo-ai-ds4:b0001",
     "DS4_PORT": "8000",
     "DS4_KV_CACHE_ENABLED": "0",
@@ -239,6 +248,12 @@ def load_config(explicit: str | None) -> Config:
         if path.exists():
             values.update(parse_env_file(path))
             loaded.append(path)
+    if explicit and loaded:
+        config_root = loaded[0].parent
+        for key in ("HALO_AI_CATALOG_DIR", "HALO_AI_PRESET_DIR"):
+            lookup = Path(values[key])
+            if not lookup.is_absolute():
+                values[key] = str((config_root / lookup).resolve())
     if not Path(values["HALO_AI_CATALOG_DIR"]).exists():
         values["HALO_AI_CATALOG_DIR"] = str(SOURCE_CONFIG / "models.d")
     if not Path(values["HALO_AI_PRESET_DIR"]).exists():
@@ -255,7 +270,7 @@ def validate_config(config: Config) -> None:
         "DS4_KV_CACHE_DIR", "SPEECH_TEST_AUDIO_PATH",
     ):
         config.path(key)
-    for key in ("LEMONADE_PORT", "LLAMACPP_PORT", "ROCMFPX_PORT", "DS4_PORT", "SPEECH_PORT", "VLLM_PORT"):
+    for key in ("LEMONADE_PORT", "LLAMACPP_PORT", "ROCMFPX_PORT", "STRIXVULKAN_PORT", "DS4_PORT", "SPEECH_PORT", "VLLM_PORT"):
         config.integer(key, 1, 65535)
     config.integer("DS4_KV_CACHE_MB", 1024, 1024 * 1024)
     for key in ("HALO_AI_MODELS_REQUIRE_MOUNT", "DS4_KV_CACHE_ENABLED", "VLLM_GGUF_EXPERIMENTAL"):
@@ -284,6 +299,8 @@ def validate_config(config: Config) -> None:
 def assert_operator(config: Config) -> None:
     configured = config.get("HALO_AI_RUN_USER")
     if not configured:
+        if os.geteuid() == 0:
+            fail("lifecycle commands require a non-root operator")
         return
     try:
         account = pwd.getpwnam(configured)
@@ -441,6 +458,48 @@ def validate_catalog(
             fail(f"profile {identifier} lacks a cataloged projector")
         if "dspark" in features and not any(item["role"] == "dspark" for item in models[model_id]["files"]):
             fail(f"profile {identifier} lacks a cataloged DSpark companion")
+        if "dflash" in features:
+            draft_id = profile.get("draft_model")
+            draft = models.get(draft_id) if isinstance(draft_id, str) else None
+            if (
+                engine != "strixvulkan"
+                or settings.get("parallel") != 1
+                or draft is None
+                or draft.get("architecture") != "dflash"
+                or engine not in draft.get("engines", [])
+                or len([item for item in draft["files"] if item["role"] == "main"]) != 1
+            ):
+                fail(f"profile {identifier} has an invalid DFlash companion or composition")
+        elif "draft_model" in profile:
+            fail(f"profile {identifier} names a draft model without DFlash")
+        if engine == "strixvulkan":
+            integer_settings = {
+                "parallel": (1, 1), "batch": (1, 8192), "ubatch": (1, 8192),
+                "threads": (1, 256), "threads_batch": (1, 256),
+            }
+            for key, (minimum, maximum) in integer_settings.items():
+                value = settings.get(key)
+                if not isinstance(value, int) or not minimum <= value <= maximum:
+                    fail(f"profile {identifier} has invalid Strix Vulkan setting {key}")
+            if (
+                settings.get("device") != "Vulkan0"
+                or settings.get("gpu_layers") != "all"
+                or settings.get("fit") is not False
+                or settings.get("flash_attention") is not True
+                or settings.get("kv") != "f16"
+            ):
+                fail(f"profile {identifier} violates the pinned Strix Vulkan policy")
+            allowed = set(integer_settings) | {
+                "device", "gpu_layers", "fit", "flash_attention", "kv", "spec_draft_n_max",
+            }
+            if set(settings) - allowed:
+                fail(f"profile {identifier} contains an unsupported Strix Vulkan setting")
+            if "dflash" in features:
+                value = settings.get("spec_draft_n_max")
+                if not isinstance(value, int) or not 1 <= value <= 16:
+                    fail(f"profile {identifier} has invalid DFlash draft length")
+            elif "spec_draft_n_max" in settings:
+                fail(f"baseline profile {identifier} cannot contain DFlash settings")
         if engine == "rocmfpx":
             integer_settings = {
                 "gpu_layers": (1, 999), "parallel": (1, 1), "batch": (1, 8192),
@@ -1015,7 +1074,7 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
         "--label", f"local.halo-ai.profile={profile['id']}",
         "-p", f"127.0.0.1:{port}:{port}",
     ]
-    if engine == "rocmfpx":
+    if engine in {"rocmfpx", "strixvulkan"}:
         command.extend(["--device=/dev/dri", "--group-add", "keep-groups"])
     else:
         command.extend(["--device=/dev/kfd", "--device=/dev/dri"])
@@ -1082,7 +1141,7 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
             "-e", "GRADIO_ANALYTICS_ENABLED=False",
             image_for(config, engine),
         ])
-    elif engine in {"llamacpp", "rocmfpx"}:
+    elif engine in {"llamacpp", "rocmfpx", "strixvulkan"}:
         for index, (entry, path) in enumerate(selected):
             directory = "templates" if entry["role"] == "chat_template" else ""
             destination = f"/models/{directory + '/' if directory else ''}{path.name}"
@@ -1090,6 +1149,16 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
         main = next(path for entry, path in selected if entry["role"] == "main")
         settings = profile["settings"]
         executable = "/opt/rocmfpx/bin/llama-server" if engine == "rocmfpx" else "llama-server"
+        draft_path: Path | None = None
+        if "dflash" in profile.get("features", []):
+            draft_model = catalog.models[profile["draft_model"]]
+            draft_path = next(
+                path for entry, path in model_paths(config, draft_model, {"main"})
+                if entry["role"] == "main"
+            )
+            command.extend([
+                "--mount", f"type=bind,src={draft_path},dst=/models/draft.gguf,ro",
+            ])
         command.append(image_for(config, engine))
         command.extend(llama_server_common_arguments(executable, profile, f"/models/{main.name}", port))
         if engine == "rocmfpx":
@@ -1101,6 +1170,13 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
                 "--seed", str(settings["seed"]), "--temp", str(settings["temperature"]),
                 "--cache-type-k", settings["cache_type_k"],
                 "--cache-type-v", settings["cache_type_v"],
+            ])
+        elif engine == "strixvulkan":
+            command.extend([
+                "--device", settings["device"], "--gpu-layers", settings["gpu_layers"],
+                "--fit", "off", "--threads", str(settings["threads"]),
+                "--threads-batch", str(settings["threads_batch"]),
+                "--cache-type-k", settings["kv"], "--cache-type-v", settings["kv"],
             ])
         else:
             command.extend(["--cache-type-k", settings["kv"], "--cache-type-v", settings["kv"]])
@@ -1127,10 +1203,18 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
         if "dspark" in profile.get("features", []):
             companion = next(path for entry, path in selected if entry["role"] == "dspark")
             command.extend(["--spec-type", "draft-dspark", "--model-draft", f"/models/{companion.name}"])
+        if "dflash" in profile.get("features", []):
+            command.extend([
+                "--spec-type", "draft-dflash", "--spec-draft-model", "/models/draft.gguf",
+                "--spec-draft-n-max", str(settings["spec_draft_n_max"]),
+                "--spec-draft-ngl", "all",
+            ])
         template_path = container_template_path(model, profile)
         if template_path:
             command.extend(["--chat-template-file", template_path])
         if engine == "rocmfpx" and "mtp" not in profile.get("features", []):
+            command.extend(["--spec-type", "none"])
+        if engine == "strixvulkan" and "dflash" not in profile.get("features", []):
             command.extend(["--spec-type", "none"])
     else:
         fail("vLLM profiles are deferred and cannot be rendered implicitly")
@@ -1809,13 +1893,24 @@ def profile_availability(config: Config, catalog: Catalog, profile: dict[str, An
     )
     if not result["valid"]:
         return False, "model verification failed"
+    draft_model = None
+    if "dflash" in profile.get("features", []):
+        draft_model = catalog.models[profile["draft_model"]]
+        if not verify_model(config, draft_model, False, {"main"})["valid"]:
+            return False, "DFlash companion verification failed"
     if profile["engine"] == "rocmfpx" and not rocmfpx_image_valid(config.get(key)):
         return False, "pinned ROCmFPX image is not installed or failed provenance checks"
+    if profile["engine"] == "strixvulkan" and not strixvulkan_image_valid(config.get(key)):
+        return False, "pinned Strix Vulkan image is not installed or failed provenance checks"
     if profile["engine"] == "ds4" and not ds4_image_valid(config.get(key)):
         return False, "pinned DS4 image is not installed or failed provenance checks"
     model = catalog.models[profile["model"]]
     memory_roles = {"weights"} if model.get("format") == "transformers" else {"main"}
     main_bytes = sum(int(entry["bytes"]) for entry in model["files"] if entry["role"] in memory_roles)
+    if draft_model is not None:
+        main_bytes += sum(
+            int(entry["bytes"]) for entry in draft_model["files"] if entry["role"] == "main"
+        )
     reserve = config.integer("HALO_AI_OS_RESERVE_GIB", 4, 64) * 1024**3
     cpu_total = meminfo_bytes("MemTotal")
     if main_bytes + reserve > cpu_total:
@@ -1873,6 +1968,8 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
     image = image_for(config, engine)
     if engine == "rocmfpx":
         installed = rocmfpx_image_valid(image)
+    elif engine == "strixvulkan":
+        installed = strixvulkan_image_valid(image)
     elif engine == "ds4":
         installed = ds4_image_valid(image)
     else:
@@ -1894,6 +1991,13 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
             "source_provenance": "upstream binary reports build 213 (e87d53e); full source SHA unresolved",
             "additional_download_bytes": 0 if installed else ROCMFPX_ENGINE_BYTES,
         })
+    elif engine == "strixvulkan":
+        runtime.update({
+            "source_repository": "https://github.com/Nathanw1014/strix-halo-llamacpp",
+            "source_commit": STRIXVULKAN_SOURCE_COMMIT,
+            "image_digest": STRIXVULKAN_IMAGE_DIGEST,
+            "upstream_dflash_pr": "https://github.com/ggml-org/llama.cpp/pull/27342",
+        })
     elif engine == "ds4":
         runtime.update({
             "release": "b0001",
@@ -1909,15 +2013,30 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
         "fp8" if model.get("quantization") == "Q8_0_ROCMFPX" else "fp4"
     )
     excluded_quantization = "fp4" if rocmfpx_artifact_class == "fp8" else "fp8"
+    draft_plan = None
+    if "dflash" in profile.get("features", []):
+        draft_plan = model_acquisition_plan(
+            config, catalog.models[profile["draft_model"]], {"main"},
+        )
     return {
         "schema_version": 1,
         "profile": profile["id"],
         "runtime": runtime,
         "model": model_plan,
+        "draft_model": draft_plan,
         "selected_artifact_classes": (
             [rocmfpx_artifact_class, "rocmfpx-runtime"]
             + (["in-gguf-mtp"] if "mtp" in profile.get("features", []) else [])
-            if engine == "rocmfpx" else ["model", "runtime"]
+            if engine == "rocmfpx" else (
+                ["q6-xl"]
+                + (["vision"] if "vision" in profile.get("features", []) else [])
+                + ["dflash2", "strixvulkan-runtime"]
+                if engine == "strixvulkan" and draft_plan else
+                ["q6-xl", "vision", "strixvulkan-runtime"]
+                if engine == "strixvulkan" and "vision" in profile.get("features", []) else
+                ["q6-xl", "strixvulkan-runtime"]
+                if engine == "strixvulkan" else ["model", "runtime"]
+            )
         ),
         "excluded_artifact_classes": (
             [excluded_quantization, "npu", "vision", "bf16", "reference"]
@@ -1925,6 +2044,7 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
         ),
         "total_additional_download_bytes": (
             model_plan["additional_download_bytes"] + runtime["additional_download_bytes"]
+            + (draft_plan["additional_download_bytes"] if draft_plan else 0)
         ),
     }
 
@@ -1940,6 +2060,12 @@ def command_profile_acquire(
     result = download_catalog_model(config, model, roles=required_roles(profile))
     if result != 0:
         return result
+    if "dflash" in profile.get("features", []):
+        result = download_catalog_model(
+            config, catalog.models[profile["draft_model"]], roles={"main"},
+        )
+        if result != 0:
+            return result
     return command_runtime_install(config, [profile["engine"]])
 
 
@@ -2041,6 +2167,48 @@ def rocmfpx_image_valid(image: str) -> bool:
         "local.halo-ai.rocm-base": ROCMFPX_ROCM_BASE,
     }
     return expected.items() <= labels.items()
+
+
+def strixvulkan_image_valid(image: str) -> bool:
+    if image_identity(image, required=False) != STRIXVULKAN_IMAGE_DIGEST:
+        return False
+    labels = image_labels(image)
+    return (
+        labels.get("org.opencontainers.image.source")
+        == "https://github.com/Nathanw1014/strix-halo-llamacpp"
+        and labels.get("org.opencontainers.image.title") == "strix-halo-llamacpp-vulkan"
+    )
+
+
+def strixvulkan_backend_info(
+    container: str, image: str, profile: dict[str, Any],
+) -> dict[str, Any]:
+    if not strixvulkan_image_valid(image):
+        fail("active Strix Vulkan image failed immutable digest checks")
+    version = podman(["exec", container, "llama-server", "--version"], capture=True)
+    combined = f"{version.stdout}\n{version.stderr}"
+    if "commit f25eefea" not in combined or "build 10577" not in combined:
+        fail("active Strix Vulkan binary does not match the pinned source build")
+    processes = podman(["top", container, "args"], capture=True).stdout
+    dflash = "dflash" in profile.get("features", [])
+    required = ["--device Vulkan0", "--gpu-layers all", "--fit off"]
+    if dflash:
+        required.extend([
+            "--spec-type draft-dflash", "--spec-draft-model /models/draft.gguf",
+            "--spec-draft-ngl all",
+        ])
+    else:
+        required.append("--spec-type none")
+    if "llama-server" not in processes or any(item not in processes for item in required):
+        fail("active Strix Vulkan process does not match the selected profile policy")
+    return {
+        "engine_build": 10577,
+        "source_revision": STRIXVULKAN_SOURCE_COMMIT,
+        "image_digest": STRIXVULKAN_IMAGE_DIGEST,
+        "backend": "vulkan-radv",
+        "device": "Vulkan0",
+        "speculation": "dflash2" if dflash else "none",
+    }
 
 
 def ds4_image_valid(image: str) -> bool:
@@ -2400,6 +2568,10 @@ def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) ->
             trial["backend"] = rocmfpx_backend_info(
                 target_name, image_for(config, profile["engine"]), profile,
             )
+        elif profile["engine"] == "strixvulkan":
+            trial["backend"] = strixvulkan_backend_info(
+                target_name, image_for(config, profile["engine"]), profile,
+            )
         elif profile["engine"] == "ds4":
             trial["backend"] = ds4_backend_info(
                 target_name, image_for(config, profile["engine"]), profile,
@@ -2496,6 +2668,13 @@ def command_status(config: Config, _catalog: Catalog, _args: argparse.Namespace)
                 try:
                     backend_info = rocmfpx_backend_info(
                         container_name("rocmfpx"), image_for(config, "rocmfpx"), profile,
+                    )
+                except HaloError as exc:
+                    backend_info = {"valid": False, "error": str(exc)}
+            elif profile["engine"] == "strixvulkan":
+                try:
+                    backend_info = strixvulkan_backend_info(
+                        container_name("strixvulkan"), image_for(config, "strixvulkan"), profile,
                     )
                 except HaloError as exc:
                     backend_info = {"valid": False, "error": str(exc)}
@@ -3293,8 +3472,8 @@ def command_bench_rocmfpx_context(
     profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
-    if profile["engine"] != "rocmfpx":
-        fail("ROCmFPX context benchmark requires a rocmfpx profile")
+    if profile["engine"] not in {"rocmfpx", "strixvulkan"}:
+        fail("context benchmark requires a rocmfpx or strixvulkan profile")
     try:
         contexts = [int(value) for value in args.prompt_tokens.split(",")]
     except ValueError:
@@ -3313,21 +3492,22 @@ def command_bench_rocmfpx_context(
 
     active_path = state_path(config, "active-profile.json")
     if not active_path.exists():
-        fail(f"start {profile['id']} before running the ROCmFPX context benchmark")
+        fail(f"start {profile['id']} before running the context benchmark")
     try:
         active = json.loads(read_text(active_path))
     except json.JSONDecodeError:
         fail(f"active profile record is corrupt: {active_path}")
     if active.get("profile") != profile["id"]:
         fail(f"active profile is {active.get('profile')}; start {profile['id']} first")
-    container = container_name("rocmfpx")
+    engine = profile["engine"]
+    container = container_name(engine)
     running = podman([
         "inspect", container, "--format", "{{.State.Running}}",
     ], capture=True, check=False)
     if running.returncode != 0 or running.stdout.strip() != "true":
-        fail(f"ROCmFPX container is not running: {container}")
+        fail(f"context benchmark container is not running: {container}")
 
-    port = port_for(config, "rocmfpx")
+    port = port_for(config, engine)
     base_url = f"http://127.0.0.1:{port}"
     if args.prompt_pattern == "repeated":
         benchmark_text = ROCMFPX_BENCHMARK_SEED_TEXT
@@ -3414,11 +3594,11 @@ def command_bench_rocmfpx_context(
                 fail("ROCmFPX benchmark did not generate the requested token count")
             drafted = timings.get("draft_n")
             accepted = timings.get("draft_n_accepted")
-            if "mtp" in profile.get("features", []) and (
+            if {"mtp", "dflash"}.intersection(profile.get("features", [])) and (
                 not isinstance(drafted, int) or drafted < 1
                 or not isinstance(accepted, int) or not 0 <= accepted <= drafted
             ):
-                fail("ROCmFPX MTP benchmark returned invalid acceptance metrics")
+                fail("speculative benchmark returned invalid acceptance metrics")
             run_record = {
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": predicted,
@@ -3489,12 +3669,12 @@ def command_bench_rocmfpx_context(
 def command_bench_rocmfpx_quality(
     config: Config, catalog: Catalog, args: argparse.Namespace,
 ) -> int:
-    """Run the fixed quality suite against one active ROCmFPX process."""
+    """Run the fixed quality suite against one active compatible process."""
     profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
-    if profile["engine"] != "rocmfpx":
-        fail("ROCmFPX quality benchmark requires a rocmfpx profile")
+    if profile["engine"] not in {"rocmfpx", "strixvulkan"}:
+        fail("fixed quality benchmark requires a rocmfpx or strixvulkan profile")
     suite_path = (
         Path(args.suite).expanduser().resolve()
         if args.suite else ROCMFPX_QUALITY_SUITE
@@ -3506,33 +3686,34 @@ def command_bench_rocmfpx_quality(
 
     active_path = state_path(config, "active-profile.json")
     if not active_path.exists():
-        fail(f"start {profile['id']} before running the ROCmFPX quality benchmark")
+        fail(f"start {profile['id']} before running the fixed quality benchmark")
     try:
         active = json.loads(read_text(active_path))
     except json.JSONDecodeError:
         fail(f"active profile record is corrupt: {active_path}")
     if active.get("profile") != profile["id"]:
         fail(f"active profile is {active.get('profile')}; start {profile['id']} first")
-    container = container_name("rocmfpx")
+    engine = profile["engine"]
+    container = container_name(engine)
     running = podman([
         "inspect", container, "--format", "{{.State.Running}}",
     ], capture=True, check=False)
     if running.returncode != 0 or running.stdout.strip() != "true":
-        fail(f"ROCmFPX container is not running: {container}")
+        fail(f"quality benchmark container is not running: {container}")
 
-    port = port_for(config, "rocmfpx")
+    port = port_for(config, engine)
     base_url = f"http://127.0.0.1:{port}"
     models = http_json(f"{base_url}/v1/models")
     candidates = models.get("data", models) if isinstance(models, dict) else models
     if not isinstance(candidates, list) or not candidates:
-        fail("active ROCmFPX service returned no models")
+        fail("active quality benchmark service returned no models")
     first_model = candidates[0]
     model_name = (
         first_model.get("id") or first_model.get("name")
         if isinstance(first_model, dict) else str(first_model)
     )
     if not isinstance(model_name, str) or not model_name:
-        fail("active ROCmFPX service returned an invalid model identity")
+        fail("active quality benchmark service returned an invalid model identity")
 
     results: list[dict[str, Any]] = []
     drafted_total = 0
@@ -3609,10 +3790,10 @@ def command_bench_rocmfpx_quality(
             file=sys.stderr, flush=True,
         )
 
-    if "mtp" in profile.get("features", []) and (
+    if {"mtp", "dflash"}.intersection(profile.get("features", [])) and (
         drafted_total < 1 or accepted_total < 1 or accepted_total > drafted_total
     ):
-        fail("ROCmFPX quality suite observed no valid accepted MTP proposals")
+        fail("quality suite observed no valid accepted speculative proposals")
     try:
         summary = rocmfpx_quality.summarize_results(results)
     except rocmfpx_quality.QualityError as exc:
@@ -3827,7 +4008,7 @@ def build_parser() -> argparse.ArgumentParser:
     presets.add_parser("list")
     show_preset = presets.add_parser("show"); show_preset.add_argument("preset_id")
     render_preset = presets.add_parser("render"); render_preset.add_argument("preset_id")
-    install = sub.add_parser("install"); install.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "ds4", "speech", "vllm", "all"], nargs="?", default="all")
+    install = sub.add_parser("install"); install.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "strixvulkan", "ds4", "speech", "vllm", "all"], nargs="?", default="all")
     start = sub.add_parser("start", help="start one catalog profile")
     start.add_argument("profile_id")
     start.add_argument(
@@ -3890,7 +4071,7 @@ def build_parser() -> argparse.ArgumentParser:
     rocmfpx_quality_parser.add_argument("--process-repetition", type=int, default=1)
     rocmfpx_quality_parser.add_argument("--timeout", type=int, default=900)
     rocmfpx_quality_parser.add_argument("--output", help="optional atomic JSON report path")
-    update = sub.add_parser("update"); update.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "ds4", "speech", "vllm", "all"])
+    update = sub.add_parser("update"); update.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "strixvulkan", "ds4", "speech", "vllm", "all"])
     tune = sub.add_parser("tune", help="inspect guarded trials and score optimization evidence").add_subparsers(dest="tune_action", required=True)
     tune.add_parser("status")
     tune.add_parser("discard")

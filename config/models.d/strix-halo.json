@@ -168,6 +168,84 @@
       ]
     },
     {
+      "id": "qwen3.8-27b-ud-q6-k-xl",
+      "repository": "unsloth/Qwen3.8-27B-GGUF",
+      "revision": "4ca720788d1e01f1bff70c033e0d0028fd02e502",
+      "architecture": "qwen35",
+      "quantization": "UD-Q6_K_XL",
+      "modalities": ["text", "vision"],
+      "engines": ["strixvulkan"],
+      "download": {
+        "provider": "huggingface",
+        "repository": "unsloth/Qwen3.8-27B-GGUF",
+        "revision": "4ca720788d1e01f1bff70c033e0d0028fd02e502",
+        "allow_patterns": [
+          "Qwen3.8-27B-UD-Q6_K_XL.gguf",
+          "mmproj-BF16.gguf"
+        ]
+      },
+      "files": [
+        {
+          "role": "main",
+          "path": "unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q6_K_XL.gguf",
+          "bytes": 25299061664,
+          "sha256": "701d8fa9ed214ab21bfc130cd2a7df19ca89bbef7713e2dfb19f3c63696aa917"
+        },
+        {
+          "role": "mmproj",
+          "path": "unsloth/Qwen3.8-27B-GGUF/mmproj-BF16.gguf",
+          "bytes": 931146432,
+          "sha256": "83ee4f4f205fa514161778c41df1ea14144faa0f713510893b63c2395f5c2d53"
+        }
+      ]
+    },
+    {
+      "id": "qwen3.8-27b-dflash2-q4-k-m",
+      "repository": "incoai/Qwen3.8-27B-DFlash2-GGUF",
+      "revision": "6cb5872e2cee6b4e780a8414922350be8e42d65c",
+      "architecture": "dflash",
+      "quantization": "Q4_K_M",
+      "modalities": ["text"],
+      "engines": ["strixvulkan"],
+      "download": {
+        "provider": "huggingface",
+        "repository": "incoai/Qwen3.8-27B-DFlash2-GGUF",
+        "revision": "6cb5872e2cee6b4e780a8414922350be8e42d65c",
+        "allow_patterns": ["Qwen3.8-27B-DFlash2-Q4_K_M.gguf"]
+      },
+      "files": [
+        {
+          "role": "main",
+          "path": "incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-Q4_K_M.gguf",
+          "bytes": 1143006752,
+          "sha256": "18a380efc9b7ed8d88677fc895f5c11ae170653434ee378f7348f715c14d0594"
+        }
+      ]
+    },
+    {
+      "id": "qwen3.8-27b-dflash2-bf16",
+      "repository": "incoai/Qwen3.8-27B-DFlash2-GGUF",
+      "revision": "6cb5872e2cee6b4e780a8414922350be8e42d65c",
+      "architecture": "dflash",
+      "quantization": "BF16",
+      "modalities": ["text"],
+      "engines": ["strixvulkan"],
+      "download": {
+        "provider": "huggingface",
+        "repository": "incoai/Qwen3.8-27B-DFlash2-GGUF",
+        "revision": "6cb5872e2cee6b4e780a8414922350be8e42d65c",
+        "allow_patterns": ["Qwen3.8-27B-DFlash2-BF16.gguf"]
+      },
+      "files": [
+        {
+          "role": "main",
+          "path": "incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-BF16.gguf",
+          "bytes": 3860293152,
+          "sha256": "26af33a15b21475d668e4ee55639beea49932e7360b1144c6282721bcd127c14"
+        }
+      ]
+    },
+    {
       "id": "seamless-m4t-v2-large",
       "repository": "facebook/seamless-m4t-v2-large",
       "revision": "5f8cc790b19fc3f67a61c105133b20b34e3dcb76",
@@ -303,7 +381,6 @@
       "engine": "rocmfpx",
       "context": 32768,
       "risk": "experimental",
-      "gate": "disabled after fixed-suite strict identity matched only 11 of 13 FP4 baseline cases",
       "features": ["mtp"],
       "thinking": false,
       "proposal_policy": "probabilistic-draft-strict-target-verification",
@@ -384,6 +461,120 @@
         "spec_draft_p_min": 0.60
       }
     },
+    {
+      "id": "qwen38-27b-q6xl-strix-baseline",
+      "model": "qwen3.8-27b-ud-q6-k-xl",
+      "engine": "strixvulkan",
+      "context": 262144,
+      "risk": "experimental",
+      "features": [],
+      "thinking": false,
+      "settings": {
+        "device": "Vulkan0",
+        "gpu_layers": "all",
+        "fit": false,
+        "parallel": 1,
+        "batch": 4096,
+        "ubatch": 4096,
+        "flash_attention": true,
+        "kv": "f16",
+        "threads": 16,
+        "threads_batch": 32
+      }
+    },
+    {
+      "id": "qwen38-27b-q6xl-strix-dflash2",
+      "model": "qwen3.8-27b-ud-q6-k-xl",
+      "draft_model": "qwen3.8-27b-dflash2-q4-k-m",
+      "engine": "strixvulkan",
+      "context": 262144,
+      "risk": "experimental",
+      "features": ["dflash"],
+      "thinking": false,
+      "proposal_policy": "distribution-preserving-target-verification",
+      "settings": {
+        "device": "Vulkan0",
+        "gpu_layers": "all",
+        "fit": false,
+        "parallel": 1,
+        "batch": 4096,
+        "ubatch": 4096,
+        "flash_attention": true,
+        "kv": "f16",
+        "threads": 16,
+        "threads_batch": 32,
+        "spec_draft_n_max": 7
+      }
+    },
+    {
+      "id": "qwen38-27b-q6xl-strix-vision",
+      "model": "qwen3.8-27b-ud-q6-k-xl",
+      "engine": "strixvulkan",
+      "context": 262144,
+      "risk": "experimental",
+      "features": ["vision"],
+      "thinking": false,
+      "settings": {
+        "device": "Vulkan0",
+        "gpu_layers": "all",
+        "fit": false,
+        "parallel": 1,
+        "batch": 4096,
+        "ubatch": 4096,
+        "flash_attention": true,
+        "kv": "f16",
+        "threads": 16,
+        "threads_batch": 32
+      }
+    },
+    {
+      "id": "qwen38-27b-q6xl-strix-vision-dflash2",
+      "model": "qwen3.8-27b-ud-q6-k-xl",
+      "draft_model": "qwen3.8-27b-dflash2-q4-k-m",
+      "engine": "strixvulkan",
+      "context": 262144,
+      "risk": "experimental",
+      "features": ["vision", "dflash"],
+      "thinking": false,
+      "proposal_policy": "distribution-preserving-target-verification-with-accepted-multimodal-divergence",
+      "settings": {
+        "device": "Vulkan0",
+        "gpu_layers": "all",
+        "fit": false,
+        "parallel": 1,
+        "batch": 4096,
+        "ubatch": 4096,
+        "flash_attention": true,
+        "kv": "f16",
+        "threads": 16,
+        "threads_batch": 32,
+        "spec_draft_n_max": 7
+      }
+    },
+    {
+      "id": "qwen38-27b-q6xl-strix-vision-dflash2-bf16",
+      "model": "qwen3.8-27b-ud-q6-k-xl",
+      "draft_model": "qwen3.8-27b-dflash2-bf16",
+      "engine": "strixvulkan",
+      "context": 262144,
+      "risk": "experimental",
+      "features": ["vision", "dflash"],
+      "thinking": false,
+      "proposal_policy": "bf16-draft-diagnostic-with-accepted-multimodal-divergence",
+      "settings": {
+        "device": "Vulkan0",
+        "gpu_layers": "all",
+        "fit": false,
+        "parallel": 1,
+        "batch": 4096,
+        "ubatch": 4096,
+        "flash_attention": true,
+        "kv": "f16",
+        "threads": 16,
+        "threads_batch": 32,
+        "spec_draft_n_max": 7
+      }
+    },
     {"id": "qwen3.6-35b-a3b-q8xl-lemonade", "model": "qwen3.6-35b-a3b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 32768, "risk": "baseline", "features": [], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
     {"id": "qwen3.6-27b-q8xl-lemonade", "model": "qwen3.6-27b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 32768, "risk": "baseline", "features": [], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
     {"id": "qwen3.6-35b-a3b-q8xl-mtp-lemonade", "model": "qwen3.6-35b-a3b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 32768, "risk": "experimental", "features": ["mtp"], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none", "spec_draft_n_max": 2}},
@@ -409,6 +600,7 @@
   ],
   "profile_aliases": {
     "ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max",
+    "qwen38df2": "qwen38-27b-q6xl-strix-vision-dflash2",
     "qwen38fp4": "qwen38-27b-rocmfp4-baseline",
     "qwen38fp8": "qwen38-27b-rocmfp8-baseline"
   }

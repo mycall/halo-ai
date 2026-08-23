@@ -49,6 +49,16 @@ def gguf_fixture(payload: bytes = b"") -> bytes:
 
 
 class ConfigurationTests(unittest.TestCase):
+    def test_opencode_exposes_native_context_qwen38_vision_alias(self) -> None:
+        document = json.loads((ROOT / "config/opencode.json").read_text(encoding="utf-8"))
+        self.assertIn("halo-qwen38", document["enabled_providers"])
+        provider = document["provider"]["halo-qwen38"]
+        self.assertEqual(provider["options"]["baseURL"], "http://127.0.0.1:8003/v1")
+        model = provider["models"]["qwen38df2"]
+        self.assertEqual(model["limit"]["context"], 262_144)
+        self.assertTrue(model["attachment"])
+        self.assertEqual(model["modalities"]["input"], ["text", "image"])
+
     def test_start_help_describes_switch(self) -> None:
         parser = cli.build_parser()
         commands = next(
@@ -67,6 +77,34 @@ class ConfigurationTests(unittest.TestCase):
             parsed = cli.parse_env_file(config)
             self.assertEqual(parsed["HALO_AI_RUN_USER"], f"$(touch {marker})")
             self.assertFalse(marker.exists())
+
+    def test_explicit_config_resolves_workspace_lookup_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            catalog = root / "config/models.d"
+            presets = root / "config/request-presets.d"
+            catalog.mkdir(parents=True)
+            presets.mkdir(parents=True)
+            workspace = root / "workspace.env"
+            workspace.write_text(
+                "HALO_AI_RUN_USER=\n"
+                "HALO_AI_CATALOG_DIR=config/models.d\n"
+                "HALO_AI_PRESET_DIR=config/request-presets.d\n",
+                encoding="utf-8",
+            )
+            loaded = cli.load_config(str(workspace))
+            self.assertEqual(loaded.path("HALO_AI_CATALOG_DIR"), catalog)
+            self.assertEqual(loaded.path("HALO_AI_PRESET_DIR"), presets)
+
+    def test_empty_run_user_selects_only_a_non_root_caller(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            config = make_config(Path(temporary))
+            config.values["HALO_AI_RUN_USER"] = ""
+            with mock.patch.object(cli.os, "geteuid", return_value=1000):
+                cli.assert_operator(config)
+            with mock.patch.object(cli.os, "geteuid", return_value=0):
+                with self.assertRaisesRegex(cli.HaloError, "non-root operator"):
+                    cli.assert_operator(config)
 
     def test_gtt_candidates_must_be_strictly_increasing(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -102,12 +140,13 @@ class CatalogTests(unittest.TestCase):
             self.catalog = cli.load_catalog(self.config)
 
     def test_checked_in_catalog_validates(self) -> None:
-        self.assertEqual(len(self.catalog.models), 7)
-        self.assertEqual(len(self.catalog.profiles), 28)
+        self.assertEqual(len(self.catalog.models), 9)
+        self.assertEqual(len(self.catalog.profiles), 32)
         self.assertEqual(
             self.catalog.profile_aliases,
             {
                 "ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max",
+                "qwen38df2": "qwen38-27b-q6xl-strix-vision-dflash2",
                 "qwen38fp4": "qwen38-27b-rocmfp4-baseline",
                 "qwen38fp8": "qwen38-27b-rocmfp8-baseline",
             },
@@ -128,6 +167,13 @@ class CatalogTests(unittest.TestCase):
             with self.subTest(alias=alias):
                 canonical = self.catalog.profiles[canonical_id]
                 self.assertIs(cli.resolve_profile(self.catalog, alias), canonical)
+
+    def test_qwen38df2_alias_resolves_to_q6_vision_dflash2(self) -> None:
+        canonical = self.catalog.profiles["qwen38-27b-q6xl-strix-vision-dflash2"]
+        self.assertIs(cli.resolve_profile(self.catalog, "qwen38df2"), canonical)
+        self.assertEqual(canonical["model"], "qwen3.8-27b-ud-q6-k-xl")
+        self.assertEqual(canonical["features"], ["vision", "dflash"])
+        self.assertEqual(canonical["draft_model"], "qwen3.8-27b-dflash2-q4-k-m")
 
     def test_showing_ds4_alias_preserves_alias_and_canonical_identity(self) -> None:
         arguments = __import__("argparse").Namespace(
@@ -180,7 +226,7 @@ class CatalogTests(unittest.TestCase):
     def test_catalog_matches_documented_expected_manifest(self) -> None:
         documented = {}
         for digest, size, relative in __import__("re").findall(
-            r"^([0-9a-f]{64}) ([0-9]+) ((?:antirez|unsloth|facebook|julianmb)/[^\n]+\.(?:gguf|jinja|json|safetensors|model))$",
+            r"^([0-9a-f]{64}) ([0-9]+) ((?:antirez|unsloth|facebook|julianmb|incoai)/[^\n]+\.(?:gguf|jinja|json|safetensors|model))$",
             (ROOT / "docs/halo-ai.md").read_text(encoding="utf-8"),
             __import__("re").MULTILINE,
         ):
@@ -302,6 +348,86 @@ class CatalogTests(unittest.TestCase):
         self.assertIn("localhost/halo-ai-rocmfpx:v1.0.0", command)
         self.assertIn("ROCmFP4-FAST.gguf,ro", rendered)
 
+    def test_q6_strix_profiles_isolate_baseline_dflash_and_vision(self) -> None:
+        baseline = __import__("shlex").join(cli.render_container(
+            self.config, self.catalog,
+            self.catalog.profiles["qwen38-27b-q6xl-strix-baseline"],
+        ))
+        dflash = __import__("shlex").join(cli.render_container(
+            self.config, self.catalog,
+            self.catalog.profiles["qwen38-27b-q6xl-strix-dflash2"],
+        ))
+        vision = __import__("shlex").join(cli.render_container(
+            self.config, self.catalog,
+            self.catalog.profiles["qwen38-27b-q6xl-strix-vision"],
+        ))
+        vision_dflash = __import__("shlex").join(cli.render_container(
+            self.config, self.catalog,
+            self.catalog.profiles["qwen38-27b-q6xl-strix-vision-dflash2"],
+        ))
+        for rendered in (baseline, dflash, vision, vision_dflash):
+            self.assertIn("--name halo-strixvulkan", rendered)
+            self.assertIn("--device=/dev/dri", rendered)
+            self.assertNotIn("--device=/dev/kfd", rendered)
+            self.assertIn("--device Vulkan0 --gpu-layers all --fit off", rendered)
+            self.assertIn("--threads 16 --threads-batch 32", rendered)
+            self.assertIn("--cache-type-k f16 --cache-type-v f16", rendered)
+        self.assertIn("--spec-type none", baseline)
+        self.assertNotIn("draft.gguf", baseline)
+        self.assertIn("dst=/models/draft.gguf,ro", dflash)
+        self.assertIn("--spec-type draft-dflash", dflash)
+        self.assertIn("--spec-draft-model /models/draft.gguf", dflash)
+        self.assertIn("--spec-draft-n-max 7 --spec-draft-ngl all", dflash)
+        self.assertIn("--mmproj /models/mmproj-BF16.gguf", vision)
+        self.assertIn("--spec-type none", vision)
+        self.assertNotIn("draft-dflash", vision)
+        self.assertIn("--mmproj /models/mmproj-BF16.gguf", vision_dflash)
+        self.assertIn("--spec-type draft-dflash", vision_dflash)
+        self.assertIn("dst=/models/draft.gguf,ro", vision_dflash)
+
+    def test_q6_dflash_acquisition_includes_only_exact_companion(self) -> None:
+        profile = self.catalog.profiles["qwen38-27b-q6xl-strix-dflash2"]
+        with mock.patch.object(cli, "strixvulkan_image_valid", return_value=True):
+            plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
+        self.assertEqual(
+            plan["selected_artifact_classes"],
+            ["q6-xl", "dflash2", "strixvulkan-runtime"],
+        )
+        self.assertEqual(len(plan["model"]["files"]), 1)
+        self.assertEqual(len(plan["draft_model"]["files"]), 1)
+        self.assertTrue(plan["draft_model"]["files"][0]["destination"].endswith(
+            "Qwen3.8-27B-DFlash2-Q4_K_M.gguf"
+        ))
+        self.assertEqual(plan["runtime"]["source_commit"], cli.STRIXVULKAN_SOURCE_COMMIT)
+        self.assertEqual(plan["runtime"]["image_digest"], cli.STRIXVULKAN_IMAGE_DIGEST)
+
+    def test_strixvulkan_image_requires_digest_and_source_labels(self) -> None:
+        labels = {
+            "org.opencontainers.image.source": "https://github.com/Nathanw1014/strix-halo-llamacpp",
+            "org.opencontainers.image.title": "strix-halo-llamacpp-vulkan",
+        }
+        with (
+            mock.patch.object(cli, "image_identity", return_value=cli.STRIXVULKAN_IMAGE_DIGEST),
+            mock.patch.object(cli, "image_labels", return_value=labels),
+        ):
+            self.assertTrue(cli.strixvulkan_image_valid("fixture"))
+        with (
+            mock.patch.object(cli, "image_identity", return_value="sha256:" + "0" * 64),
+            mock.patch.object(cli, "image_labels", return_value=labels),
+        ):
+            self.assertFalse(cli.strixvulkan_image_valid("fixture"))
+
+    def test_vision_dflash_profile_records_accepted_divergence_policy(self) -> None:
+        profile = self.catalog.profiles["qwen38-27b-q6xl-strix-vision-dflash2"]
+        self.assertEqual(profile["risk"], "experimental")
+        self.assertIn("accepted-multimodal-divergence", profile["proposal_policy"])
+        with mock.patch.object(cli, "strixvulkan_image_valid", return_value=True):
+            plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
+        self.assertEqual(
+            plan["selected_artifact_classes"],
+            ["q6-xl", "vision", "dflash2", "strixvulkan-runtime"],
+        )
+
     def test_rocmfpx_profile_acquisition_excludes_every_optional_class(self) -> None:
         profile = self.catalog.profiles["qwen38-27b-rocmfp4-baseline"]
         with mock.patch.object(cli, "rocmfpx_image_valid", return_value=True):
@@ -354,11 +480,10 @@ class CatalogTests(unittest.TestCase):
         self.assertIn("--spec-draft-n-max 6 --spec-draft-p-min 0.6", compressed_rendered)
         self.assertIn("--spec-draft-n-max 2 --spec-draft-p-min 0.85", conservative_rendered)
 
-    def test_rocmfpx_mtp_profiles_are_gated_after_quality_failure(self) -> None:
+    def test_rocmfpx_mtp_profile_gates_reflect_quality_policy(self) -> None:
         expected_matches = {
             "qwen38-27b-rocmfp4-mtp": "7 of 13",
             "qwen38-27b-rocmfp4-mtp-q5-draft": "7 of 13",
-            "qwen38-27b-rocmfp4-mtp-conservative-q5-draft": "11 of 13",
             "qwen38-27b-rocmfp8-mtp": "4 of 13",
         }
         for profile_id, expected in expected_matches.items():
@@ -367,6 +492,15 @@ class CatalogTests(unittest.TestCase):
             )
             self.assertFalse(ready)
             self.assertIn(expected, reason)
+        conservative = self.catalog.profiles[
+            "qwen38-27b-rocmfp4-mtp-conservative-q5-draft"
+        ]
+        self.assertEqual(conservative["risk"], "experimental")
+        self.assertNotIn("gate", conservative)
+        self.assertEqual(
+            self.catalog.profile_aliases["qwen38fp4"],
+            "qwen38-27b-rocmfp4-baseline",
+        )
 
     def test_ds4_dspark_profile_selects_only_exact_antirez_support(self) -> None:
         control = self.catalog.profiles["ds4-deepseek-v4-flash-hybrid"]

@@ -8,8 +8,10 @@ most value for the least downloading and engineering work.
 - The first and only required baseline is the text-only
   `Qwen3.8-27B-ROCmFP4-FAST.gguf` running on the iGPU without NPU drafting.
 - Built-in GPU MTP was the first acceleration tried because it uses the same
-  model file and requires no draft-model download. It is now gated: the fixed
-  quality suite disproved strict output identity for every tested policy.
+  model file and requires no draft-model download. The conservative FP4 policy
+  is available only as an explicit experimental profile: it retained the
+  baseline's 9/13 bounded quality score, but strict output identity is not
+  proven. The two aggressive FP4 policies and FP8 MTP remain gated.
 - External NPU and cross-version drafting are deferred; their research notes
   remain in `docs/TODO backup.md`.
 - The already-present ROCmFP8 artifact is optional and GPU-only. There will be
@@ -79,8 +81,13 @@ dependency.
       token-for-token equivalence across clean processes.
   **Result: failed.** The FP4 baseline was stable on all 13 cases across two
   fresh processes. Aggressive MTP matched only 7/13 output-token sequences;
-  conservative MTP matched 11/13. The strict-Qwen backend flag therefore does
-  not establish end-to-end greedy identity on this build.
+  conservative MTP matched 11/13. A 2026-08-23 cache-isolation follow-up
+  (`cache_ram_mb=0`, both no-cache flags, and slot similarity zero) matched
+  13/13 only when no request preceded the suite. Under Halo's normal
+  smoke-then-suite lifecycle it still differed on code slicing (12/13), so it
+  is not production-history invariant. Aggressive no-cache MTP matched 8/13.
+  The strict-Qwen backend flag therefore does not establish end-to-end greedy
+  identity on this build.
 - [x] Benchmark unassisted FP4 versus strict greedy MTP on the same fixed
       prompts and contexts.
 - [x] Resolve the conditional evaluation of q38rocm's suggested proposal
@@ -93,10 +100,14 @@ dependency.
 
 ### Gate
 
-- [x] **Not taken:** the mutually exclusive GPU MTP pass branch did not apply.
-- [x] **Fail:** retain the unassisted FP4 baseline and stop tuning MTP. All four
-      ROCmFPX MTP profiles remain cataloged but are gated pending a specific
-      backend fix and a complete rerun of the identity suite.
+- [x] **Strict gate failed:** retain the unassisted FP4 baseline and
+      `qwen38fp4` alias. Keep the two aggressive FP4 profiles and FP8 MTP gated
+      pending a backend fix and complete identity-suite rerun.
+- [x] **Operator-approved exception:** expose
+      `qwen38-27b-rocmfp4-mtp-conservative-q5-draft` as an opt-in experimental
+      profile because its bounded quality score remained 9/13 and its observed
+      divergence was accepted; do not describe it as lossless or make it the
+      default alias.
 
 ## Stage 3: Optimize same-host long-context PP/TPS
 
@@ -125,8 +136,9 @@ draft-cache control while saving 0.09--0.11 GiB GTT. Against unassisted FP4 it
 improves median decode throughput by 69.61% at 4K and 68.25% at 32K, with an
 end-to-end crossover near 44 and 66 generated tokens respectively, at a
 4.89--4.91 GiB GTT cost. The conservative policy saves another 0.56--0.57 GiB
-but loses 10.41% and 24.16% decode throughput. The subsequent quality gate
-disqualified every MTP profile despite these speed results. FP8 uses
+but loses 10.41% and 24.16% decode throughput. The subsequent strict-identity
+gate disqualified every MTP policy from default promotion. The conservative FP4
+profile remains available as an explicit experimental exception; FP8 uses
 substantially more GTT and remains a quality experiment, not a performance
 default.
 
@@ -183,11 +195,119 @@ default.
 
 ### Gate
 
-- [x] Keep only correctness-qualified profiles active: retain the FP4 baseline,
-      keep FP8 baseline as a quality-only control, and gate all ROCmFPX MTP
-      profiles despite their performance frontier.
+- [x] Keep default and alias choices correctness-qualified: retain the FP4
+      baseline, keep FP8 baseline as a quality-only control, expose conservative
+      FP4 MTP only as an explicitly accepted experimental exception, and gate
+      the other three ROCmFPX MTP profiles.
 - [x] Promote no default from a single run. The repeated correctness evidence
       instead retains the existing FP4 baseline default.
+
+## Stage 3B: Qualify one Vulkan DFlash2 alternative
+
+**Value:** test the strongest published same-device speed/quality candidate
+without downloading an entire quant ladder.
+
+### Research decision
+
+- [x] Select exactly one target quant:
+      `unsloth/Qwen3.8-27B-GGUF` `UD-Q6_K_XL`. Initial research selected Q5,
+      but direct inspection of Unsloth's more relevant Divergence-300@32 graph
+      changed the decision: Q5 XL is near 70% 32-token trajectory agreement,
+      while the Q6 tier is roughly 77--79%. The approximately 7--9 point
+      absolute gain is large enough to matter for agentic/tool trajectories.
+      Q6 costs 21% more weight bytes, and a separate same-device MTP comparison
+      measured it about 15% slower than Q5 target-only; this is the preferred
+      quality/speed trade on a 128 GB Strix Halo.
+- [x] Verify the exact release generation rather than relying on the repository
+      title. The selected current Q6 file was uploaded in the 2026-08-19
+      Dynamic 3 release and differs from the 2026-08-14 preview
+      (25,924,152,384 bytes, SHA-256 `739202186fd9389bb58497c58b56c8a0d4253d99d20131e6a0427e363e678fc8`).
+      However, Unsloth explicitly says its gains were small on larger quants and
+      it retained the older Dynamic 2 methodology there. Describe Q6 as the
+      current Dynamic 3 release artifact with a retained large-quant recipe,
+      not as an all-new Dynamic 3 layer layout.
+- [x] Reject Q5 and Q8 downloads for the qualified trial. The reported Q5
+      DFlash2 result—31.4 tok/s at 80 W and 30.2 tok/s at 70 W—remains a useful
+      speed hypothesis, but it does not outweigh the observed Q6 trajectory
+      gap. Q8 is larger again, while fidelity measurements above roughly 25 GB
+      converge toward noise. No published same-device DFlash2 run establishes
+      Q6 throughput, so Halo must measure it rather than extrapolate.
+- [x] Include only the matching 1,143,006,752-byte DFlash2 Q4_K_M draft GGUF
+      required by the selected acceleration path. Treat it as a bounded support
+      artifact, not a second target-model choice.
+- [x] Include the target repository's 931,146,432-byte BF16 vision projector,
+      but not its redundant F16 projector. The main GGUF already embeds runtime
+      tokenizer/model/template metadata; README and `config.json` are not
+      runtime dependencies.
+
+### Exact artifact pins
+
+- Target: `unsloth/Qwen3.8-27B-GGUF` revision
+  `4ca720788d1e01f1bff70c033e0d0028fd02e502`, file
+  `Qwen3.8-27B-UD-Q6_K_XL.gguf`, 25,299,061,664 bytes, SHA-256
+  `701d8fa9ed214ab21bfc130cd2a7df19ca89bbef7713e2dfb19f3c63696aa917`.
+- Vision: same revision, `mmproj-BF16.gguf`, 931,146,432 bytes, SHA-256
+  `83ee4f4f205fa514161778c41df1ea14144faa0f713510893b63c2395f5c2d53`.
+- Drafter: `incoai/Qwen3.8-27B-DFlash2-GGUF` revision
+  `6cb5872e2cee6b4e780a8414922350be8e42d65c`, file
+  `Qwen3.8-27B-DFlash2-Q4_K_M.gguf`, 1,143,006,752 bytes, SHA-256
+  `18a380efc9b7ed8d88677fc895f5c11ae170653434ee378f7348f715c14d0594`.
+- Text reproduction control: Nathan's `dev-20260819-0b0f35d` image at
+  `sha256:041e6491a241e48a75bd900644783eb20b2d0da5104f4c4d55f7ed1932b8b4a8`.
+  DFlash2 support is still carried outside upstream llama.cpp's merged release
+  line, so this runtime is experimental.
+- Vision candidate: `dev-20260822-f25eefe` source
+  `f25eefeaf0386c18499f23f4fc4f400397638d51`, image
+  `sha256:a4a3dfe5813df1f0687e526bcba639bfd8b7cdb1d5e4c1c855abc240fb574d3a`.
+  It contains the later M-RoPE DFlash draft-cache alignment fix; do not enable
+  vision speculation merely because the artifacts load.
+
+### Qualification tasks
+
+- [x] Acquire and fully verify only the selected Q6 target, BF16 projector, and
+      DFlash2 Q4_K_M sidecar. Their exact byte counts, GGUF headers, and SHA-256
+      digests match the catalog; no Q5 or Q8 target remains on disk.
+- [x] Add a distinct engine identity for Nathan's prerelease Strix Halo Vulkan
+      fork; do not replace the ordinary llama.cpp image globally.
+- [x] Add target-only, text+DFlash2, and target-only vision profiles at the
+      model's native 262,144-token context. Keep
+      DFlash2 off for vision until the M-RoPE fixed runtime passes paired image
+      correctness tests. The target-only vision profile passed the red-image
+      canary with the pinned BF16 projector. A controlled vision+DFlash2 trial
+      on build 10577 proved that drafting executes (40/42 proposals accepted
+      on a 46-token structured response) and raised decode from 8.44 to 28.00
+      tok/s, but it did not match the target-only greedy output under identical
+      request history. The operator explicitly accepted that bounded divergence
+      for continued experimentation, so the combined profile is now exposed as
+      experimental while the target-only vision control remains available.
+- [ ] Prove target-only versus DFlash2 greedy token identity across fresh
+      processes and after request-history perturbation. The drafter's
+      distribution-preserving design claim does not substitute for this test.
+      The first fresh-process matrix matched 12/13 output-token sequences; the
+      code-trace case diverged (`-1` baseline, `1` DFlash2), so this gate has
+      not passed even though both profiles scored 10/13. A controlled retry
+      with both engines freshly started and no preceding smoke request matched
+      exactly (`-1`, tokens `[12,16]`) and accepted one of seven DFlash drafts.
+      This identifies request history as the confounder but does not replace a
+      full equal-history suite rerun.
+- [x] Run the fixed task-quality suite and same-host 4K/32K performance matrix.
+      Retain Q6 only if its quality is competitive with the current FP4
+      baseline and its end-to-end latency materially improves.
+      Q6 scored 10/13 versus the recorded FP4 baseline's 9/13. At 4K+64,
+      DFlash2 improved decode from 8.27 to 15.46 tok/s and reduced wall time
+      6.9%; at 32K+64 it improved decode from 7.77 to 14.14 tok/s but increased
+      wall time 8.7% because prefill fell from 175.64 to 158.03 tok/s. Peak GTT
+      was 72.91--73.06 GiB versus 60.80--60.84 GiB target-only.
+- [ ] Keep Q8 out of scope unless Q6 first demonstrates a task failure that a
+      higher-fidelity control is likely to resolve.
+
+### Gate
+
+- [x] Keep `qwen38fp4` on the ROCmFP4 baseline. Map the operator-selected
+      `qwen38df2` alias to the experimental Q6 vision+DFlash2 profile after the
+      operator accepted the measured multimodal divergence. Preserve both
+      target-only controls because the speed advantage depends on the
+      input/output ratio and history-invariant identity has not passed.
 
 ## Stage 4: Extend the existing DwarfStar lane
 
@@ -290,6 +410,8 @@ runtime plumbing, and vision/video qualification are outside the active PP/TPS
 loop. Preserve their constraints and possible future work in
 [`docs/TODO backup.md`](docs/TODO%20backup.md). Do not download another language
 model or install host packages for these tracks without an explicit new gate.
+Stage 3B is the sole approved exception and permits only its one Q6 target plus
+the exact DFlash2 and vision support artifacts listed there.
 
 ## Active constraints and artifact policy
 
@@ -300,6 +422,7 @@ model or install host packages for these tracks without an explicit new gate.
   recurrent rollback requirements conflict.
 - FP4 and FP8 are already present and verified. Selecting either profile must
   not download the other artifact.
-- Do not download another language model. Container runtime updates and bounded
-  support artifacts such as Ninja, templates, video fixtures, and a selected
-  compatible mmproj remain allowed.
+- Do not download another language model beyond the single Stage 3B Q6 target.
+  Its exact DFlash2 sidecar and BF16 projector are approved bounded companions;
+  Q5, Q8, alternate Qwen3.8 targets, and the redundant F16 projector remain
+  excluded.

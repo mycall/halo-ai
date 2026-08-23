@@ -128,13 +128,13 @@ Performance claims collected on other q38rocm setups are not used as pass/fail
 evidence for this host; these measurements are the baseline for subsequent
 optimization.
 
-The separate `qwen38-27b-rocmfp4-mtp` profile reuses the same GGUF and downloads
-no model weights. It enables the backend's strict Qwen verifier with the
-experimental `n_max=6`, `p_min=0.60` proposal settings. On the same prompts it
-improved decode throughput by 29.5% at short context, 59.1% at 4K, and 45.9% at
-32K, while increasing TTFT and memory use. Keep it for generation-heavy
-experiments; use the baseline for cold long prompts with short answers. The
-full results and current conformance caveat are in
+The enabled `qwen38-27b-rocmfp4-mtp-conservative-q5-draft` profile reuses the
+same GGUF and downloads no model weights. It uses `n_max=2`, `p_min=0.85`, and
+q5_1 draft K/V. Its bounded quality score matched the baseline at 9/13, but it
+did not satisfy strict token identity, so it remains an explicit experimental
+choice and `qwen38fp4` still resolves to the unassisted baseline. The faster
+`n_max=6` profiles remain gated. Performance results and the conformance caveat
+are in
 [`docs/results/qwen38-rocmfp4-mtp-2026-08-16.json`](docs/results/qwen38-rocmfp4-mtp-2026-08-16.json).
 
 The already-present, hash-verified ROCmFP8 artifact is exposed only through the
@@ -160,10 +160,11 @@ halo-ai tune context-compare BASELINE.json CANDIDATE.json
 ```
 
 The MTP comparison accepts only matching prompt-token sets and the same model
-SHA-256, calculates TTFT/prefill/decode/GTT deltas, and keeps the current
-candidate experimental while strict token identity is unresolved. External NPU
-and cross-version drafting remain deferred research and are not part of the
-active FP4/FP8 GPU tuning loop.
+SHA-256 and calculates TTFT/prefill/decode/GTT deltas. The conservative profile
+is available under an explicit experimental quality policy; strict token
+identity remains unresolved, so it is not the default alias. External NPU and
+cross-version drafting remain deferred research and are not part of the active
+FP4/FP8 GPU tuning loop.
 
 Engine build 213 accepts `ngram-mod,draft-mtp` and the `24/48/64` ngram flags
 syntactically, but refuses model load with strict-Qwen MTP: ngram-mod disables
@@ -234,12 +235,24 @@ halo-ai start ds4 --switch
 halo-ai test ds4 --preset deepseek-v4-think-max
 ```
 
-The qualified Qwen3.8 ROCmFPX baselines also have short aliases:
+The Qwen3.8 lanes have explicit short aliases:
 
 ```bash
+halo-ai start qwen38df2 --switch  # Q6 XL vision + DFlash2, native 262K
 halo-ai start qwen38fp4 --switch
 halo-ai start qwen38fp8 --switch
 ```
+
+`qwen38df2` uses the separately pinned Strix Vulkan llama.cpp fork, not
+ROCmFPX. It aliases the experimental vision+DFlash2 profile. A paired image
+trial accepted 40/42 drafts and decoded at 28.00 tok/s versus 8.44 target-only,
+but its greedy JSON differed semantically from the control. This divergence was
+explicitly accepted for continued experimentation; use
+`qwen38-27b-q6xl-strix-vision` for the target-only rollback.
+
+The checked-in OpenCode configuration exposes this alias as
+`halo-qwen38/qwen38df2` on the Strix Vulkan loopback endpoint (port 8003), with
+text and image inputs enabled.
 
 DS4 exposes an OpenAI-compatible API on loopback. Inspect the loaded model and
 send a non-thinking chat request with:
