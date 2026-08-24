@@ -1633,6 +1633,10 @@ provider: `halo-ai/ds4`, `halo-ai/qwen3.8fp4`, `halo-ai/qwen3.8fp8`, and
 managed runtimes, so they share `http://127.0.0.1:8000/v1`; this avoids a second
 provider solely for a provider-wide OpenCode `baseURL`. The DFlash2 entry keeps
 its text/image modalities and 262,144-token context limit.
+Each Qwen3.8 entry defines `none`, `low`, `medium`, and `xhigh` OpenCode
+variants. `low`, `medium`, and `xhigh` are the model template's accepted effort
+values; `none` disables thinking through llama.cpp. `high` is intentionally
+omitted because the pinned template accepts `xhigh` instead.
 
 The fixed quality suite deliberately disables Qwen thinking. Its CRT case
 returned `17` under both target-only and DFlash, so that failure belongs to the

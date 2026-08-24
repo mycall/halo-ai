@@ -58,6 +58,11 @@ class ConfigurationTests(unittest.TestCase):
         self.assertEqual(
             set(provider["models"]), {"ds4", "qwen3.8df2", "qwen3.8fp4", "qwen3.8fp8"},
         )
+        for model_id in ("qwen3.8df2", "qwen3.8fp4", "qwen3.8fp8"):
+            variants = provider["models"][model_id]["variants"]
+            self.assertEqual(set(variants), {"none", "low", "medium", "xhigh"})
+            self.assertEqual(variants["medium"]["reasoningEffort"], "medium")
+            self.assertNotIn("high", variants)
         model = provider["models"]["qwen3.8df2"]
         self.assertEqual(model["limit"]["context"], 262_144)
         self.assertTrue(model["attachment"])

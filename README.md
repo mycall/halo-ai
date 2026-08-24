@@ -262,6 +262,9 @@ The checked-in OpenCode configuration exposes this alias as
 `halo-ai/qwen3.8df2`, alongside `ds4`, `qwen3.8fp4`, and `qwen3.8fp8` under one
 provider. These mutually exclusive managed LLM runtimes share the loopback
 endpoint on port 8000, with text and image inputs enabled for DFlash2.
+All three Qwen3.8 entries expose OpenCode variants for `none`, `low`, `medium`,
+and `xhigh` reasoning; the thinking variants use Qwen's recommended
+temperature 1.0 and top-p 0.95 sampling policy.
 
 The experimental `qwen3.8-27b-q6xl-vision-lemonade` profile reuses the same
 on-disk Q6 XL target and BF16 projector through Lemonade's real ROCm/HIP
