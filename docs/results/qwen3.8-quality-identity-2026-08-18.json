@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "recorded_local_date": "2026-08-18",
-  "kind": "halo-ai-qwen38-fixed-quality-and-identity-summary",
+  "kind": "halo-ai-qwen3.8-fixed-quality-and-identity-summary",
   "host": {
     "cpu": "AMD Ryzen AI Max+ 395",
     "gpu": "AMD Radeon 8060S (gfx1151)",
@@ -38,14 +38,14 @@
   ],
   "comparison_record": "/var/opt/halo-ai/state/benchmarks/rocmfpx-quality/20260818T205620Z/comparison-all.json",
   "profiles": {
-    "qwen38-27b-rocmfp4-baseline": {
+    "qwen3.8-27b-rocmfp4-baseline": {
       "score": "9/13",
       "score_percent": 69.23,
       "wilson_95_percent": [42.37, 87.32],
       "self_consistent_cases": "13/13",
       "state": "enabled-default"
     },
-    "qwen38-27b-rocmfp8-baseline": {
+    "qwen3.8-27b-rocmfp8-baseline": {
       "score": "9/13",
       "score_percent": 69.23,
       "wilson_95_percent": [42.37, 87.32],
@@ -53,7 +53,7 @@
       "quality_difference_vs_fp4_percentage_points": 0.0,
       "state": "enabled-quality-experiment"
     },
-    "qwen38-27b-rocmfp4-mtp": {
+    "qwen3.8-27b-rocmfp4-mtp": {
       "score": "7/13",
       "score_percent": 53.85,
       "self_consistent_cases": "13/13",
@@ -61,7 +61,7 @@
       "mtp_acceptance_by_process": ["83/120", "83/120"],
       "state": "gated"
     },
-    "qwen38-27b-rocmfp4-mtp-q5-draft": {
+    "qwen3.8-27b-rocmfp4-mtp-q5-draft": {
       "score": "7/13",
       "score_percent": 53.85,
       "self_consistent_cases": "13/13",
@@ -69,7 +69,7 @@
       "mtp_acceptance_by_process": ["83/124", "83/124"],
       "state": "gated"
     },
-    "qwen38-27b-rocmfp4-mtp-conservative-q5-draft": {
+    "qwen3.8-27b-rocmfp4-mtp-conservative-q5-draft": {
       "score": "9/13",
       "score_percent": 69.23,
       "self_consistent_cases": "13/13",
@@ -81,7 +81,7 @@
       ],
       "state": "gated"
     },
-    "qwen38-27b-rocmfp8-mtp": {
+    "qwen3.8-27b-rocmfp8-mtp": {
       "score": "5/13",
       "score_percent": 38.46,
       "self_consistent_cases": "12/13",

@@ -174,7 +174,7 @@
       "architecture": "qwen35",
       "quantization": "UD-Q6_K_XL",
       "modalities": ["text", "vision"],
-      "engines": ["strixvulkan"],
+      "engines": ["lemonade", "strixvulkan"],
       "download": {
         "provider": "huggingface",
         "repository": "unsloth/Qwen3.8-27B-GGUF",
@@ -206,7 +206,7 @@
       "architecture": "dflash",
       "quantization": "Q4_K_M",
       "modalities": ["text"],
-      "engines": ["strixvulkan"],
+      "engines": ["lemonade", "strixvulkan"],
       "download": {
         "provider": "huggingface",
         "repository": "incoai/Qwen3.8-27B-DFlash2-GGUF",
@@ -312,7 +312,7 @@
   ],
   "profiles": [
     {
-      "id": "qwen38-27b-rocmfp4-baseline",
+      "id": "qwen3.8-27b-rocmfp4-baseline",
       "model": "qwen3.8-27b-rocmfp4",
       "engine": "rocmfpx",
       "context": 32768,
@@ -337,7 +337,7 @@
       }
     },
     {
-      "id": "qwen38-27b-rocmfp4-mtp",
+      "id": "qwen3.8-27b-rocmfp4-mtp",
       "model": "qwen3.8-27b-rocmfp4",
       "engine": "rocmfpx",
       "context": 32768,
@@ -367,7 +367,7 @@
       }
     },
     {
-      "id": "qwen38-27b-rocmfp4-mtp-q5-draft",
+      "id": "qwen3.8-27b-rocmfp4-mtp-q5-draft",
       "model": "qwen3.8-27b-rocmfp4",
       "engine": "rocmfpx",
       "context": 32768,
@@ -399,7 +399,7 @@
       }
     },
     {
-      "id": "qwen38-27b-rocmfp4-mtp-conservative-q5-draft",
+      "id": "qwen3.8-27b-rocmfp4-mtp-conservative-q5-draft",
       "model": "qwen3.8-27b-rocmfp4",
       "engine": "rocmfpx",
       "context": 32768,
@@ -430,7 +430,7 @@
       }
     },
     {
-      "id": "qwen38-27b-rocmfp8-baseline",
+      "id": "qwen3.8-27b-rocmfp8-baseline",
       "model": "qwen3.8-27b-rocmfp8",
       "engine": "rocmfpx",
       "context": 32768,
@@ -455,7 +455,7 @@
       }
     },
     {
-      "id": "qwen38-27b-rocmfp8-mtp",
+      "id": "qwen3.8-27b-rocmfp8-mtp",
       "model": "qwen3.8-27b-rocmfp8",
       "engine": "rocmfpx",
       "context": 32768,
@@ -485,7 +485,7 @@
       }
     },
     {
-      "id": "qwen38-27b-q6xl-strix-baseline",
+      "id": "qwen3.8-27b-q6xl-strix-baseline",
       "model": "qwen3.8-27b-ud-q6-k-xl",
       "engine": "strixvulkan",
       "context": 262144,
@@ -506,7 +506,7 @@
       }
     },
     {
-      "id": "qwen38-27b-q6xl-strix-dflash2",
+      "id": "qwen3.8-27b-q6xl-strix-dflash2",
       "model": "qwen3.8-27b-ud-q6-k-xl",
       "draft_model": "qwen3.8-27b-dflash2-q4-k-m",
       "engine": "strixvulkan",
@@ -530,7 +530,7 @@
       }
     },
     {
-      "id": "qwen38-27b-q6xl-strix-vision",
+      "id": "qwen3.8-27b-q6xl-strix-vision",
       "model": "qwen3.8-27b-ud-q6-k-xl",
       "engine": "strixvulkan",
       "context": 262144,
@@ -551,7 +551,7 @@
       }
     },
     {
-      "id": "qwen38-27b-q6xl-strix-vision-dflash2",
+      "id": "qwen3.8-27b-q6xl-strix-vision-dflash2",
       "model": "qwen3.8-27b-ud-q6-k-xl",
       "draft_model": "qwen3.8-27b-dflash2-q4-k-m",
       "engine": "strixvulkan",
@@ -575,7 +575,7 @@
       }
     },
     {
-      "id": "qwen38-27b-q6xl-strix-vision-dflash2-bf16",
+      "id": "qwen3.8-27b-q6xl-strix-vision-dflash2-bf16",
       "model": "qwen3.8-27b-ud-q6-k-xl",
       "draft_model": "qwen3.8-27b-dflash2-bf16",
       "engine": "strixvulkan",
@@ -599,7 +599,7 @@
       }
     },
     {
-      "id": "qwen38-27b-q6xl-strix-vision-dflash2-q8",
+      "id": "qwen3.8-27b-q6xl-strix-vision-dflash2-q8",
       "model": "qwen3.8-27b-ud-q6-k-xl",
       "draft_model": "qwen3.8-27b-dflash2-q8-0",
       "engine": "strixvulkan",
@@ -620,6 +620,44 @@
         "threads": 16,
         "threads_batch": 32,
         "spec_draft_n_max": 7
+      }
+    },
+    {
+      "id": "qwen3.8-27b-q6xl-vision-lemonade",
+      "model": "qwen3.8-27b-ud-q6-k-xl",
+      "engine": "lemonade",
+      "context": 262144,
+      "risk": "experimental-lockup",
+      "features": ["vision"],
+      "thinking": false,
+      "settings": {
+        "parallel": 1,
+        "batch": 4096,
+        "ubatch": 4096,
+        "flash_attention": true,
+        "kv": "f16",
+        "load_mode": "none"
+      }
+    },
+    {
+      "id": "qwen3.8-27b-q6xl-vision-dflash2-lemonade",
+      "model": "qwen3.8-27b-ud-q6-k-xl",
+      "draft_model": "qwen3.8-27b-dflash2-q4-k-m",
+      "engine": "lemonade",
+      "context": 262144,
+      "risk": "experimental-lockup",
+      "features": ["vision", "dflash"],
+      "thinking": false,
+      "gate": "disabled: Lemonade 11.7 stable b10597/build 10594 and nightly b1315 reject the Qwen3.8 DFlash2 GGUF with expected 81, got 58 because they implement DFlash v1; wait for upstream llama.cpp PR #27342 or an equivalently patched ROCm backend",
+      "proposal_policy": "distribution-preserving-target-verification-rocm-ab-candidate",
+      "settings": {
+        "parallel": 1,
+        "batch": 4096,
+        "ubatch": 4096,
+        "flash_attention": true,
+        "kv": "f16",
+        "load_mode": "none",
+        "spec_draft_n_max": 5
       }
     },
     {"id": "qwen3.6-35b-a3b-q8xl-lemonade", "model": "qwen3.6-35b-a3b-q8xl", "engine": "lemonade", "chat_template": "nonthinking", "context": 32768, "risk": "baseline", "features": [], "settings": {"batch": 2048, "ubatch": 512, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
@@ -647,8 +685,8 @@
   ],
   "profile_aliases": {
     "ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max",
-    "qwen38df2": "qwen38-27b-q6xl-strix-vision-dflash2",
-    "qwen38fp4": "qwen38-27b-rocmfp4-baseline",
-    "qwen38fp8": "qwen38-27b-rocmfp8-baseline"
+    "qwen3.8df2": "qwen3.8-27b-q6xl-strix-vision-dflash2",
+    "qwen3.8fp4": "qwen3.8-27b-rocmfp4-baseline",
+    "qwen3.8fp8": "qwen3.8-27b-rocmfp8-baseline"
   }
 }

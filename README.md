@@ -96,12 +96,12 @@ ABI over `Vulkan0`; it is intentionally separate from the ordinary llama.cpp
 engine. Preview the exact acquisition closure before making any download:
 
 ```bash
-halo-ai profiles acquire qwen38-27b-rocmfp4-baseline --dry-run
-halo-ai profiles acquire qwen38-27b-rocmfp4-baseline
+halo-ai profiles acquire qwen3.8-27b-rocmfp4-baseline --dry-run
+halo-ai profiles acquire qwen3.8-27b-rocmfp4-baseline
 halo-ai models verify qwen3.8-27b-rocmfp4 --full
-halo-ai start qwen38-27b-rocmfp4-baseline --switch
-halo-ai test qwen38-27b-rocmfp4-baseline
-halo-ai stop qwen38-27b-rocmfp4-baseline
+halo-ai start qwen3.8-27b-rocmfp4-baseline --switch
+halo-ai test qwen3.8-27b-rocmfp4-baseline
+halo-ai stop qwen3.8-27b-rocmfp4-baseline
 ```
 
 The only model artifact selected by that profile is the pinned
@@ -116,44 +116,44 @@ short source revision `e87d53e`; upstream has not published a resolvable full
 commit for that claim, so Halo records it as unresolved rather than presenting
 the q38rocm release-tag commit as the engine source revision.
 
-Rollback is non-destructive: `halo-ai stop qwen38-27b-rocmfp4-baseline` stops
+Rollback is non-destructive: `halo-ai stop qwen3.8-27b-rocmfp4-baseline` stops
 the service while preserving the verified GGUF and image. Start the previous
 profile with `--switch`; remove the local ROCmFPX image separately only when
 its cached runtime is no longer wanted.
 
 The same-host Stage 1 qualification, including short/4K/32K cold-prompt
 measurements and the direct `llama-bench` control, is recorded in
-[`docs/results/qwen38-rocmfp4-baseline-2026-08-16.json`](docs/results/qwen38-rocmfp4-baseline-2026-08-16.json).
+[`docs/results/qwen3.8-rocmfp4-baseline-2026-08-16.json`](docs/results/qwen3.8-rocmfp4-baseline-2026-08-16.json).
 Performance claims collected on other q38rocm setups are not used as pass/fail
 evidence for this host; these measurements are the baseline for subsequent
 optimization.
 
-The enabled `qwen38-27b-rocmfp4-mtp-conservative-q5-draft` profile reuses the
+The enabled `qwen3.8-27b-rocmfp4-mtp-conservative-q5-draft` profile reuses the
 same GGUF and downloads no model weights. It uses `n_max=2`, `p_min=0.85`, and
 q5_1 draft K/V. Its bounded quality score matched the baseline at 9/13, but it
 did not satisfy strict token identity, so it remains an explicit experimental
-choice and `qwen38fp4` still resolves to the unassisted baseline. The faster
+choice and `qwen3.8fp4` still resolves to the unassisted baseline. The faster
 `n_max=6` profiles remain gated. Performance results and the conformance caveat
 are in
-[`docs/results/qwen38-rocmfp4-mtp-2026-08-16.json`](docs/results/qwen38-rocmfp4-mtp-2026-08-16.json).
+[`docs/results/qwen3.8-rocmfp4-mtp-2026-08-16.json`](docs/results/qwen3.8-rocmfp4-mtp-2026-08-16.json).
 
 The already-present, hash-verified ROCmFP8 artifact is exposed only through the
-explicit `qwen38-27b-rocmfp8-baseline` and `qwen38-27b-rocmfp8-mtp` GPU
+explicit `qwen3.8-27b-rocmfp8-baseline` and `qwen3.8-27b-rocmfp8-mtp` GPU
 profiles. A matched single-run 4K/32K screen found no FP8 performance reason to
 change defaults: FP8 baseline decode was about 35% slower than FP4, and FP8 MTP
 was tied at 4K but 9.1% slower at 32K than FP4 MTP while using about 12 GiB more
 GTT. Keep FP8 for a future fixed quality comparison. The aligned record is
-[`docs/results/qwen38-fp4-fp8-exact-context-2026-08-17.json`](docs/results/qwen38-fp4-fp8-exact-context-2026-08-17.json).
+[`docs/results/qwen3.8-fp4-fp8-exact-context-2026-08-17.json`](docs/results/qwen3.8-fp4-fp8-exact-context-2026-08-17.json).
 
 Turn those records into a repeatable gate with:
 
 ```bash
 halo-ai tune mtp-compare \
-  docs/results/qwen38-rocmfp4-baseline-2026-08-16.json \
-  docs/results/qwen38-rocmfp4-mtp-2026-08-16.json
+  docs/results/qwen3.8-rocmfp4-baseline-2026-08-16.json \
+  docs/results/qwen3.8-rocmfp4-mtp-2026-08-16.json
 
 # With the selected profile already active, issue requests inside its container.
-halo-ai bench rocmfpx-context qwen38-27b-rocmfp4-mtp \
+halo-ai bench rocmfpx-context qwen3.8-27b-rocmfp4-mtp \
   --prompt-tokens 4095,31998 --completion-tokens 64 \
   --prompt-pattern unique --repetitions 3 --output RESULT.json
 halo-ai tune context-compare BASELINE.json CANDIDATE.json
@@ -209,11 +209,11 @@ peak are retained with the results.
 
 The first Lemonade ROCm start downloads a llama.cpp backend and TheRock runtime.
 They are cached in the persistent `halo-lemonade-config` volume, while Hugging
-Face downloads use `halo-lemonade-huggingface`. The default
-`LEMONADE_LLAMACPP_ROCM_BIN=latest` asks Lemonade to check for the newest stable
-ROCm package on each explicit start; already downloaded versions and the large
-TheRock runtime are reused. Set a specific `bNNNN` value when reproducibility is
-more important than tracking current llama.cpp.
+Face downloads use `halo-lemonade-huggingface`. The default pins
+`LEMONADE_LLAMACPP_ROCM_BIN=b10597` on the stable channel; its Linux ROCm archive
+reports active llama.cpp build 10594. Already downloaded versions and the large
+TheRock runtime are reused. Change the package or channel only for an explicit
+compatibility trial, then restore the qualified pin.
 
 ## DS4 disk KV cache
 
@@ -238,17 +238,18 @@ halo-ai test ds4 --preset deepseek-v4-think-max
 The Qwen3.8 lanes have explicit short aliases:
 
 ```bash
-halo-ai start qwen38df2 --switch  # Q6 XL vision + DFlash2, native 262K
-halo-ai start qwen38fp4 --switch
-halo-ai start qwen38fp8 --switch
+halo-ai start qwen3.8df2 --switch  # Q6 XL vision + DFlash2, native 262K
+halo-ai start qwen3.8-27b-q6xl-vision-lemonade --switch  # Same Q6/BF16 target on ROCm/HIP
+halo-ai start qwen3.8fp4 --switch
+halo-ai start qwen3.8fp8 --switch
 ```
 
-`qwen38df2` uses the separately pinned Strix Vulkan llama.cpp fork, not
+`qwen3.8df2` uses the separately pinned Strix Vulkan llama.cpp fork, not
 ROCmFPX. It aliases the experimental vision+DFlash2 profile with the Q4_K_M
 drafter at `n-max=5`. A paired structured-image canary matched target-only in
 three fresh processes while decoding at 24.53 tok/s versus 8.43 target-only.
 The equal-history fixed suite also matched all 13 output-token streams in two
-fresh-process repetitions. Use `qwen38-27b-q6xl-strix-vision` for the
+fresh-process repetitions. Use `qwen3.8-27b-q6xl-strix-vision` for the
 target-only rollback.
 Three fresh-process repetitions also tested the official Q8_0 and BF16
 DFlash2 drafters at `n-max=7`. They did not resolve the observed divergence and
@@ -258,8 +259,31 @@ batch shape as the important variable. The vision projector remains the
 official BF16 file in every profile.
 
 The checked-in OpenCode configuration exposes this alias as
-`halo-qwen38/qwen38df2` on the Strix Vulkan loopback endpoint (port 8003), with
-text and image inputs enabled.
+`halo-ai/qwen3.8df2`, alongside `ds4`, `qwen3.8fp4`, and `qwen3.8fp8` under one
+provider. These mutually exclusive managed LLM runtimes share the loopback
+endpoint on port 8000, with text and image inputs enabled for DFlash2.
+
+The experimental `qwen3.8-27b-q6xl-vision-lemonade` profile reuses the same
+on-disk Q6 XL target and BF16 projector through Lemonade's real ROCm/HIP
+llama.cpp backend. It holds the target-only Vulkan profile's native 262K
+context, F16 K/V, one slot, Flash Attention, and 4096/4096 batch settings fixed
+for a backend A/B test. Halo can register a local target, projector, and draft
+as one first-class Lemonade 11.7 model. The resulting
+`qwen3.8-27b-q6xl-vision-dflash2-lemonade` profile is deliberately disabled,
+however: stable `b10597`/build 10594 and nightly `b1315` both reject the valid
+58-tensor DFlash2 draft with `expected 81, got 58`. Lemonade's companion wiring
+works, but its ROCm binaries currently contain upstream DFlash v1; Qwen3.8
+DFlash2 support remains in open llama.cpp PR #27342. Compare target-only ROCm
+directly with `qwen3.8-27b-q6xl-strix-vision` until a compatible backend lands.
+The first controlled 81-token prompt / 256-token generation A/B measured median
+decode at 8.05 tok/s on Lemonade HIP and 8.44 tok/s on Vulkan. HIP won the first
+uncached prefill 138.84 to 65.10 tok/s. See
+[`docs/results/qwen3.8-q6xl-vulkan-rocm-ab-2026-08-23.json`](docs/results/qwen3.8-q6xl-vulkan-rocm-ab-2026-08-23.json)
+for the exact runtime identities and samples.
+The Lemonade 11.7 follow-up repeated the vision canary in three fresh processes
+and reran both target-only controls without prompt caching. ROCm median
+prefill/decode was 130.07/8.013 tok/s versus Vulkan 99.69/8.466 tok/s. See
+[`docs/results/qwen3.8-q6xl-lemonade-dflash2-compat-2026-08-23.json`](docs/results/qwen3.8-q6xl-lemonade-dflash2-compat-2026-08-23.json).
 
 DS4 exposes an OpenAI-compatible API on loopback. Inspect the loaded model and
 send a non-thinking chat request with:

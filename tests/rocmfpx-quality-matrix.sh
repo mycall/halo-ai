@@ -14,7 +14,7 @@ halo="$project_root/bin/halo-ai"
 config_path=""
 output_root=/var/opt/halo-ai/state/benchmarks/rocmfpx-quality
 process_repetitions=2
-profile_csv="qwen38-27b-rocmfp4-baseline,qwen38-27b-rocmfp8-baseline"
+profile_csv="qwen3.8-27b-rocmfp4-baseline,qwen3.8-27b-rocmfp8-baseline"
 run_container_tests=true
 
 usage() {

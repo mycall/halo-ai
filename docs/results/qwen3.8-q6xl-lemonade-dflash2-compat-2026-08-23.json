@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "recorded_local_date": "2026-08-23",
+  "qualification": "lemonade-dflash2-blocked-target-only-pass",
+  "host": {
+    "cpu": "AMD Ryzen AI Max+ 395",
+    "gpu": "AMD Radeon 8060S (gfx1151)",
+    "kernel": "7.1.8-1-cachyos-deckify",
+    "gtt_aperture_gib": 118
+  },
+  "artifacts": {
+    "target": {
+      "repository": "unsloth/Qwen3.8-27B-GGUF",
+      "revision": "4ca720788d1e01f1bff70c033e0d0028fd02e502",
+      "file": "Qwen3.8-27B-UD-Q6_K_XL.gguf",
+      "sha256": "701d8fa9ed214ab21bfc130cd2a7df19ca89bbef7713e2dfb19f3c63696aa917"
+    },
+    "projector": {
+      "file": "mmproj-BF16.gguf",
+      "sha256": "83ee4f4f205fa514161778c41df1ea14144faa0f713510893b63c2395f5c2d53"
+    },
+    "draft": {
+      "repository": "incoai/Qwen3.8-27B-DFlash2-GGUF",
+      "revision": "6cb5872e2cee6b4e780a8414922350be8e42d65c",
+      "file": "Qwen3.8-27B-DFlash2-Q4_K_M.gguf",
+      "bytes": 1143006752,
+      "sha256": "18a380efc9b7ed8d88677fc895f5c11ae170653434ee378f7348f715c14d0594",
+      "tensor_count": 58
+    }
+  },
+  "lemonade": {
+    "version": "11.7.0",
+    "image_manifest_digest": "sha256:87aec2fb7e42f75b38faf3775a343b58941496add050b8de47519c0d212921d4",
+    "image_id": "adca808e3f6008b71395c2be97ca6f83c78479eb15fbe5429d301656a5f0fb66",
+    "local_registration": {
+      "source": "local_path",
+      "checkpoints": ["main", "mmproj", "draft"],
+      "labels": ["chat", "dflash", "reasoning", "tool-calling", "vision"],
+      "result": "pass",
+      "process_arguments_verified": ["--model-draft", "--spec-type draft-dflash", "--spec-draft-n-max 5"]
+    }
+  },
+  "dflash2_trials": [
+    {
+      "channel": "stable",
+      "package": "b10597",
+      "active_binary": "b10594",
+      "system_fingerprint": "b10594-ba8e0eddf",
+      "result": "load-fail",
+      "error": "done_getting_tensors: wrong number of tensors; expected 81, got 58"
+    },
+    {
+      "channel": "nightly",
+      "package": "b1315",
+      "llama_cpp_commit": "95b8e",
+      "rocm_version": "10.1.0a20260822",
+      "result": "load-fail",
+      "error": "done_getting_tensors: wrong number of tensors; expected 81, got 58"
+    }
+  ],
+  "root_cause": {
+    "classification": "runtime-model-schema-incompatibility",
+    "finding": "Lemonade correctly attaches the external draft, but both ROCm binaries implement upstream DFlash v1 and reject the 58-tensor DFlash2 schema. Qwen3.8 DFlash2 support remains in open upstream llama.cpp PR #27342; the qualified Strix Vulkan fork explicitly cherry-picks it.",
+    "upstream_pr": "https://github.com/ggml-org/llama.cpp/pull/27342",
+    "lemonade_companion_support": "https://github.com/lemonade-sdk/lemonade/pull/3051",
+    "stable_release": "https://github.com/lemonade-sdk/llama.cpp/releases/tag/b10597",
+    "nightly_release": "https://github.com/lemonade-sdk/llamacpp-rocm/releases/tag/b1315"
+  },
+  "gpu_max_hw_queues": {
+    "default": null,
+    "trial_with_one_queue": "not-applicable",
+    "reason": "Tensor-count validation fails before HIP queue creation; queue count cannot change model-schema parsing. The opt-in setting remains implemented for future backend execution diagnostics."
+  },
+  "stable_target_only_validation": {
+    "profile": "qwen3.8-27b-q6xl-vision-lemonade",
+    "fresh_process_vision_runs": [
+      {"result": "red", "prompt_tokens_per_second": 55.11743, "decode_tokens_per_second": 8.041688},
+      {"result": "red", "prompt_tokens_per_second": 56.048123, "decode_tokens_per_second": 8.172739},
+      {"result": "red", "prompt_tokens_per_second": 56.32182, "decode_tokens_per_second": 8.031032}
+    ],
+    "fixed_81_prompt_256_decode": {
+      "rocm_decode_tokens_per_second": [8.038415, 8.008574, 8.01297],
+      "rocm_median_decode_tokens_per_second": 8.01297,
+      "rocm_prompt_tokens_per_second": [141.078115, 130.069917, 129.593572],
+      "rocm_median_prompt_tokens_per_second": 130.069917,
+      "rocm_peak_gtt_bytes": 43882029056,
+      "vulkan_decode_tokens_per_second": [8.445027, 8.478851, 8.466444],
+      "vulkan_median_decode_tokens_per_second": 8.466444,
+      "vulkan_prompt_tokens_per_second": [79.299424, 102.548261, 99.692062],
+      "vulkan_median_prompt_tokens_per_second": 99.692062,
+      "vulkan_peak_gtt_bytes": 48148897792,
+      "vulkan_decode_advantage_percent": 5.66,
+      "rocm_prefill_advantage_percent": 30.47
+    }
+  },
+  "decision": {
+    "lemonade_dflash2_profile": "disabled by compatibility gate",
+    "lemonade_target_only_profile": "enabled",
+    "preferred_alias": "qwen3.8df2 remains qwen3.8-27b-q6xl-strix-vision-dflash2",
+    "next_trigger": "Re-test after llama.cpp PR #27342 or equivalent DFlash2 loader support appears in a Lemonade ROCm backend."
+  }
+}

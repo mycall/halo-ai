@@ -245,8 +245,8 @@ def compare_records(records: list[dict[str, Any]]) -> dict[str, Any]:
                 "status": "proven" if proven else "not-proven",
             }
 
-    fp4_baseline = profiles.get("qwen38-27b-rocmfp4-baseline")
-    fp8_baseline = profiles.get("qwen38-27b-rocmfp8-baseline")
+    fp4_baseline = profiles.get("qwen3.8-27b-rocmfp4-baseline")
+    fp8_baseline = profiles.get("qwen3.8-27b-rocmfp8-baseline")
     fp8_vs_fp4 = None
     if fp4_baseline and fp8_baseline:
         fp8_vs_fp4 = {

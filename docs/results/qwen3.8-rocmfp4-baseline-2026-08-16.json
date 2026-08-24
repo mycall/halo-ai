@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "recorded_local_date": "2026-08-16",
-  "profile": "qwen38-27b-rocmfp4-baseline",
+  "profile": "qwen3.8-27b-rocmfp4-baseline",
   "qualification": "functional-pass-with-open-source-provenance-item",
   "host": {
     "cpu": "AMD Ryzen AI Max+ 395",

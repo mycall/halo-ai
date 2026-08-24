@@ -326,10 +326,10 @@ The pinned reference invocation is in q38rocm's
 
 - [ ] Add the exact Qwen3.8 FP4 target artifact to
       `config/models.d/strix-halo.json` as the default acquisition target.
-- [ ] Add profile `qwen38-27b-rocmfp4-baseline` with speculation disabled.
-- [ ] Add profile `qwen38-27b-rocmfp4-mtp` using the model's GPU MTP head.
-- [ ] Define `qwen38-27b-rocmfp8-baseline` and
-      `qwen38-27b-rocmfp8-mtp` only as disabled, opt-in GPU profiles after the
+- [ ] Add profile `qwen3.8-27b-rocmfp4-baseline` with speculation disabled.
+- [ ] Add profile `qwen3.8-27b-rocmfp4-mtp` using the model's GPU MTP head.
+- [ ] Define `qwen3.8-27b-rocmfp8-baseline` and
+      `qwen3.8-27b-rocmfp8-mtp` only as disabled, opt-in GPU profiles after the
       FP4 exit criterion passes; neither profile may activate an NPU service.
 - [ ] Do not describe FP8 as improving answer quality until the evaluation
       suite confirms it; the source repository's perplexity claim is useful
@@ -919,7 +919,7 @@ stateful token/KV operations required for efficient speculation.
 ### Engines and profiles
 
 - [ ] Add `fastflow-npu` as an internal engine/service.
-- [ ] Add profile `qwen38-27b-rocmfp4-npu-draft`.
+- [ ] Add profile `qwen3.8-27b-rocmfp4-npu-draft`.
 - [ ] Do not add an FP8+NPU profile; reject that combination in catalog
       validation if it is declared accidentally.
 - [ ] Mark the FP4 NPU profile experimental and disabled unless the host,

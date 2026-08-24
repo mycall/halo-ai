@@ -49,12 +49,16 @@ def gguf_fixture(payload: bytes = b"") -> bytes:
 
 
 class ConfigurationTests(unittest.TestCase):
-    def test_opencode_exposes_native_context_qwen38_vision_alias(self) -> None:
+    def test_opencode_exposes_native_context_qwen3_8_vision_alias(self) -> None:
         document = json.loads((ROOT / "config/opencode.json").read_text(encoding="utf-8"))
-        self.assertIn("halo-qwen38", document["enabled_providers"])
-        provider = document["provider"]["halo-qwen38"]
-        self.assertEqual(provider["options"]["baseURL"], "http://127.0.0.1:8003/v1")
-        model = provider["models"]["qwen38df2"]
+        self.assertEqual(document["enabled_providers"], ["halo-ai"])
+        self.assertEqual(set(document["provider"]), {"halo-ai"})
+        provider = document["provider"]["halo-ai"]
+        self.assertEqual(provider["options"]["baseURL"], "http://127.0.0.1:8000/v1")
+        self.assertEqual(
+            set(provider["models"]), {"ds4", "qwen3.8df2", "qwen3.8fp4", "qwen3.8fp8"},
+        )
+        model = provider["models"]["qwen3.8df2"]
         self.assertEqual(model["limit"]["context"], 262_144)
         self.assertTrue(model["attachment"])
         self.assertEqual(model["modalities"]["input"], ["text", "image"])
@@ -123,6 +127,19 @@ class ConfigurationTests(unittest.TestCase):
             with self.assertRaises(cli.HaloError):
                 cli.validate_config(config)
 
+    def test_lemonade_rocm_environment_is_allowlisted_and_bounded(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            config = make_config(Path(temporary))
+            config.values["LEMONADE_ROCM_CHANNEL"] = "nightly"
+            config.values["LEMONADE_GPU_MAX_HW_QUEUES"] = "1"
+            cli.validate_config(config)
+            self.assertEqual(
+                cli.lemonade_runtime_environment(config), {"GPU_MAX_HW_QUEUES": "1"},
+            )
+            config.values["LEMONADE_GPU_MAX_HW_QUEUES"] = "0"
+            with self.assertRaises(cli.HaloError):
+                cli.validate_config(config)
+
     def test_deepseek_think_max_preset_uses_official_sampling_policy(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             config = make_config(Path(temporary))
@@ -141,14 +158,14 @@ class CatalogTests(unittest.TestCase):
 
     def test_checked_in_catalog_validates(self) -> None:
         self.assertEqual(len(self.catalog.models), 11)
-        self.assertEqual(len(self.catalog.profiles), 34)
+        self.assertEqual(len(self.catalog.profiles), 36)
         self.assertEqual(
             self.catalog.profile_aliases,
             {
                 "ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max",
-                "qwen38df2": "qwen38-27b-q6xl-strix-vision-dflash2",
-                "qwen38fp4": "qwen38-27b-rocmfp4-baseline",
-                "qwen38fp8": "qwen38-27b-rocmfp8-baseline",
+                "qwen3.8df2": "qwen3.8-27b-q6xl-strix-vision-dflash2",
+                "qwen3.8fp4": "qwen3.8-27b-rocmfp4-baseline",
+                "qwen3.8fp8": "qwen3.8-27b-rocmfp8-baseline",
             },
         )
 
@@ -159,18 +176,18 @@ class CatalogTests(unittest.TestCase):
         self.assertIs(cli.resolve_profile(self.catalog, "ds4"), canonical)
         self.assertIs(cli.resolve_profile(self.catalog, canonical["id"]), canonical)
 
-    def test_qwen38_aliases_resolve_to_baseline_profiles(self) -> None:
+    def test_qwen3_8_aliases_resolve_to_baseline_profiles(self) -> None:
         for alias, canonical_id in (
-            ("qwen38fp4", "qwen38-27b-rocmfp4-baseline"),
-            ("qwen38fp8", "qwen38-27b-rocmfp8-baseline"),
+            ("qwen3.8fp4", "qwen3.8-27b-rocmfp4-baseline"),
+            ("qwen3.8fp8", "qwen3.8-27b-rocmfp8-baseline"),
         ):
             with self.subTest(alias=alias):
                 canonical = self.catalog.profiles[canonical_id]
                 self.assertIs(cli.resolve_profile(self.catalog, alias), canonical)
 
-    def test_qwen38df2_alias_resolves_to_q6_vision_dflash2(self) -> None:
-        canonical = self.catalog.profiles["qwen38-27b-q6xl-strix-vision-dflash2"]
-        self.assertIs(cli.resolve_profile(self.catalog, "qwen38df2"), canonical)
+    def test_qwen3_8df2_alias_resolves_to_q6_vision_dflash2(self) -> None:
+        canonical = self.catalog.profiles["qwen3.8-27b-q6xl-strix-vision-dflash2"]
+        self.assertIs(cli.resolve_profile(self.catalog, "qwen3.8df2"), canonical)
         self.assertEqual(canonical["model"], "qwen3.8-27b-ud-q6-k-xl")
         self.assertEqual(canonical["features"], ["vision", "dflash"])
         self.assertEqual(canonical["draft_model"], "qwen3.8-27b-dflash2-q4-k-m")
@@ -330,7 +347,7 @@ class CatalogTests(unittest.TestCase):
         self.assertIn("--load-mode none", rendered)
 
     def test_rocmfpx_baseline_is_distinct_unassisted_vulkan_engine(self) -> None:
-        profile = self.catalog.profiles["qwen38-27b-rocmfp4-baseline"]
+        profile = self.catalog.profiles["qwen3.8-27b-rocmfp4-baseline"]
         model = self.catalog.models[profile["model"]]
         command = cli.render_container(self.config, self.catalog, profile)
         rendered = __import__("shlex").join(command)
@@ -351,19 +368,19 @@ class CatalogTests(unittest.TestCase):
     def test_q6_strix_profiles_isolate_baseline_dflash_and_vision(self) -> None:
         baseline = __import__("shlex").join(cli.render_container(
             self.config, self.catalog,
-            self.catalog.profiles["qwen38-27b-q6xl-strix-baseline"],
+            self.catalog.profiles["qwen3.8-27b-q6xl-strix-baseline"],
         ))
         dflash = __import__("shlex").join(cli.render_container(
             self.config, self.catalog,
-            self.catalog.profiles["qwen38-27b-q6xl-strix-dflash2"],
+            self.catalog.profiles["qwen3.8-27b-q6xl-strix-dflash2"],
         ))
         vision = __import__("shlex").join(cli.render_container(
             self.config, self.catalog,
-            self.catalog.profiles["qwen38-27b-q6xl-strix-vision"],
+            self.catalog.profiles["qwen3.8-27b-q6xl-strix-vision"],
         ))
         vision_dflash = __import__("shlex").join(cli.render_container(
             self.config, self.catalog,
-            self.catalog.profiles["qwen38-27b-q6xl-strix-vision-dflash2"],
+            self.catalog.profiles["qwen3.8-27b-q6xl-strix-vision-dflash2"],
         ))
         for rendered in (baseline, dflash, vision, vision_dflash):
             self.assertIn("--name halo-strixvulkan", rendered)
@@ -385,8 +402,70 @@ class CatalogTests(unittest.TestCase):
         self.assertIn("--spec-type draft-dflash", vision_dflash)
         self.assertIn("dst=/models/draft.gguf,ro", vision_dflash)
 
+    def test_q6_lemonade_profile_reuses_q6_and_bf16_vision_artifacts(self) -> None:
+        profile = self.catalog.profiles["qwen3.8-27b-q6xl-vision-lemonade"]
+        model = self.catalog.models[profile["model"]]
+        self.assertEqual(model["engines"], ["lemonade", "strixvulkan"])
+        self.assertEqual(profile["context"], 262_144)
+        self.assertEqual(profile["features"], ["vision"])
+        self.assertFalse(profile["thinking"])
+        rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, profile)
+        )
+        self.assertIn("--name halo-lemonade", rendered)
+        self.assertIn("--device=/dev/kfd", rendered)
+        self.assertIn("--device=/dev/dri", rendered)
+        self.assertIn("--group-add keep-groups", rendered)
+        self.assertIn(
+            "dst=/models/extra/qwen3.8-27b-ud-q6-k-xl-vision/"
+            "Qwen3.8-27B-UD-Q6_K_XL.gguf,ro",
+            rendered,
+        )
+        self.assertIn(
+            "dst=/models/extra/qwen3.8-27b-ud-q6-k-xl-vision/mmproj-BF16.gguf,ro",
+            rendered,
+        )
+        payload = cli.lemonade_load_payload(profile)
+        self.assertEqual(payload["ctx_size"], 262_144)
+        self.assertEqual(payload["llamacpp_backend"], "rocm")
+        self.assertIn("--batch-size 4096 --ubatch-size 4096", payload["llamacpp_args"])
+        self.assertIn("--cache-type-k f16 --cache-type-v f16", payload["llamacpp_args"])
+        self.assertIn("--spec-type none", payload["llamacpp_args"])
+        plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
+        self.assertEqual(plan["selected_artifact_classes"], ["model", "vision", "runtime"])
+        self.assertNotIn("vision", plan["excluded_artifact_classes"])
+
+    def test_q6_lemonade_dflash_profile_registers_existing_local_artifacts(self) -> None:
+        profile = self.catalog.profiles["qwen3.8-27b-q6xl-vision-dflash2-lemonade"]
+        available, reason = cli.profile_availability(self.config, self.catalog, profile)
+        self.assertFalse(available)
+        self.assertIn("expected 81, got 58", reason)
+        self.assertIn("PR #27342", reason)
+        rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, profile)
+        )
+        root = "/models/registered/qwen3.8-27b-q6xl-vision-dflash2-lemonade"
+        self.assertIn(f"dst={root}/main,ro", rendered)
+        self.assertIn(f"dst={root}/mmproj-BF16.gguf,ro", rendered)
+        self.assertIn(f"dst={root}/dflash-Qwen3.8-27B-DFlash2-Q4_K_M.gguf,ro", rendered)
+        self.assertNotIn("/models/extra/qwen3.8-27b-dflash2", rendered)
+        registration = cli.lemonade_dflash_registration(self.config, self.catalog, profile)
+        self.assertEqual(registration["source"], "local_path")
+        self.assertEqual(registration["model_name"], f"user.{profile['id']}")
+        self.assertEqual(set(registration["checkpoints"]), {"main", "mmproj", "draft"})
+        self.assertIn("dflash", registration["labels"])
+        payload = cli.lemonade_load_payload(profile)
+        self.assertIn("--spec-type draft-dflash", payload["llamacpp_args"])
+        self.assertIn("--spec-draft-n-max 5", payload["llamacpp_args"])
+        self.assertNotIn("--model-draft", payload["llamacpp_args"])
+        plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
+        self.assertEqual(
+            plan["selected_artifact_classes"], ["model", "vision", "dflash2", "runtime"],
+        )
+        self.assertEqual(len(plan["draft_model"]["files"]), 1)
+
     def test_q6_dflash_acquisition_includes_only_exact_companion(self) -> None:
-        profile = self.catalog.profiles["qwen38-27b-q6xl-strix-dflash2"]
+        profile = self.catalog.profiles["qwen3.8-27b-q6xl-strix-dflash2"]
         with mock.patch.object(cli, "strixvulkan_image_valid", return_value=True):
             plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
         self.assertEqual(
@@ -418,7 +497,7 @@ class CatalogTests(unittest.TestCase):
             self.assertFalse(cli.strixvulkan_image_valid("fixture"))
 
     def test_vision_dflash_profile_records_nmax5_qualification_policy(self) -> None:
-        profile = self.catalog.profiles["qwen38-27b-q6xl-strix-vision-dflash2"]
+        profile = self.catalog.profiles["qwen3.8-27b-q6xl-strix-vision-dflash2"]
         self.assertEqual(profile["risk"], "experimental")
         self.assertIn("nmax5-equal-history", profile["proposal_policy"])
         self.assertEqual(profile["settings"]["spec_draft_n_max"], 5)
@@ -431,9 +510,9 @@ class CatalogTests(unittest.TestCase):
 
     def test_vision_dflash_diagnostic_profiles_select_exact_drafters(self) -> None:
         expected = {
-            "qwen38-27b-q6xl-strix-vision-dflash2-bf16":
+            "qwen3.8-27b-q6xl-strix-vision-dflash2-bf16":
                 "Qwen3.8-27B-DFlash2-BF16.gguf",
-            "qwen38-27b-q6xl-strix-vision-dflash2-q8":
+            "qwen3.8-27b-q6xl-strix-vision-dflash2-q8":
                 "Qwen3.8-27B-DFlash2-Q8_0.gguf",
         }
         for profile_id, filename in expected.items():
@@ -449,7 +528,7 @@ class CatalogTests(unittest.TestCase):
                 self.assertTrue(draft["files"][0]["path"].endswith(filename))
 
     def test_rocmfpx_profile_acquisition_excludes_every_optional_class(self) -> None:
-        profile = self.catalog.profiles["qwen38-27b-rocmfp4-baseline"]
+        profile = self.catalog.profiles["qwen3.8-27b-rocmfp4-baseline"]
         with mock.patch.object(cli, "rocmfpx_image_valid", return_value=True):
             plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
         self.assertEqual(plan["selected_artifact_classes"], ["fp4", "rocmfpx-runtime"])
@@ -466,7 +545,7 @@ class CatalogTests(unittest.TestCase):
             self.assertNotIn(forbidden, serialized)
 
     def test_rocmfpx_mtp_uses_strict_qwen_verification_and_no_new_model(self) -> None:
-        profile = self.catalog.profiles["qwen38-27b-rocmfp4-mtp"]
+        profile = self.catalog.profiles["qwen3.8-27b-rocmfp4-mtp"]
         rendered = __import__("shlex").join(
             cli.render_container(self.config, self.catalog, profile)
         )
@@ -483,9 +562,9 @@ class CatalogTests(unittest.TestCase):
         self.assertNotIn("q4nx", json.dumps(plan).lower())
 
     def test_rocmfpx_q5_draft_candidates_isolate_cache_and_policy(self) -> None:
-        compressed = self.catalog.profiles["qwen38-27b-rocmfp4-mtp-q5-draft"]
+        compressed = self.catalog.profiles["qwen3.8-27b-rocmfp4-mtp-q5-draft"]
         conservative = self.catalog.profiles[
-            "qwen38-27b-rocmfp4-mtp-conservative-q5-draft"
+            "qwen3.8-27b-rocmfp4-mtp-conservative-q5-draft"
         ]
         compressed_rendered = __import__("shlex").join(
             cli.render_container(self.config, self.catalog, compressed)
@@ -502,9 +581,9 @@ class CatalogTests(unittest.TestCase):
 
     def test_rocmfpx_mtp_profile_gates_reflect_quality_policy(self) -> None:
         expected_matches = {
-            "qwen38-27b-rocmfp4-mtp": "7 of 13",
-            "qwen38-27b-rocmfp4-mtp-q5-draft": "7 of 13",
-            "qwen38-27b-rocmfp8-mtp": "4 of 13",
+            "qwen3.8-27b-rocmfp4-mtp": "7 of 13",
+            "qwen3.8-27b-rocmfp4-mtp-q5-draft": "7 of 13",
+            "qwen3.8-27b-rocmfp8-mtp": "4 of 13",
         }
         for profile_id, expected in expected_matches.items():
             ready, reason = cli.profile_availability(
@@ -513,13 +592,13 @@ class CatalogTests(unittest.TestCase):
             self.assertFalse(ready)
             self.assertIn(expected, reason)
         conservative = self.catalog.profiles[
-            "qwen38-27b-rocmfp4-mtp-conservative-q5-draft"
+            "qwen3.8-27b-rocmfp4-mtp-conservative-q5-draft"
         ]
         self.assertEqual(conservative["risk"], "experimental")
         self.assertNotIn("gate", conservative)
         self.assertEqual(
-            self.catalog.profile_aliases["qwen38fp4"],
-            "qwen38-27b-rocmfp4-baseline",
+            self.catalog.profile_aliases["qwen3.8fp4"],
+            "qwen3.8-27b-rocmfp4-baseline",
         )
 
     def test_ds4_dspark_profile_selects_only_exact_antirez_support(self) -> None:
@@ -670,7 +749,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_rocmfpx_strict_mtp_rejects_incompatible_ngram_composition(self) -> None:
         profile = json.loads(json.dumps(
-            self.catalog.profiles["qwen38-27b-rocmfp4-mtp"]
+            self.catalog.profiles["qwen3.8-27b-rocmfp4-mtp"]
         ))
         profile["features"].append("ngram")
         with self.assertRaises(cli.HaloError):
@@ -691,7 +770,7 @@ class CatalogTests(unittest.TestCase):
             model["gguf_expectations"]["tensor_type_counts"], {"0": 360, "103": 506},
         )
 
-        baseline = self.catalog.profiles["qwen38-27b-rocmfp8-baseline"]
+        baseline = self.catalog.profiles["qwen3.8-27b-rocmfp8-baseline"]
         rendered = __import__("shlex").join(
             cli.render_container(self.config, self.catalog, baseline)
         )
@@ -707,7 +786,7 @@ class CatalogTests(unittest.TestCase):
         )
         self.assertEqual(plan["model"]["files"][0]["bytes"], 28_193_396_704)
 
-        mtp = self.catalog.profiles["qwen38-27b-rocmfp8-mtp"]
+        mtp = self.catalog.profiles["qwen3.8-27b-rocmfp8-mtp"]
         mtp_rendered = __import__("shlex").join(
             cli.render_container(self.config, self.catalog, mtp)
         )
@@ -945,7 +1024,7 @@ class TrialTests(unittest.TestCase):
                 result = cli.command_test(
                     config, catalog,
                     __import__("argparse").Namespace(
-                        profile_id="qwen38-27b-rocmfp4-baseline", preset=None,
+                        profile_id="qwen3.8-27b-rocmfp4-baseline", preset=None,
                     ),
                 )
             self.assertEqual(result, 0)
@@ -1254,10 +1333,10 @@ class RocmFpxTuningTests(unittest.TestCase):
 
     def test_recorded_mtp_result_is_faster_but_held_experimental(self) -> None:
         baseline = json.loads((
-            ROOT / "docs/results/qwen38-rocmfp4-baseline-2026-08-16.json"
+            ROOT / "docs/results/qwen3.8-rocmfp4-baseline-2026-08-16.json"
         ).read_text(encoding="utf-8"))
         candidate = json.loads((
-            ROOT / "docs/results/qwen38-rocmfp4-mtp-2026-08-16.json"
+            ROOT / "docs/results/qwen3.8-rocmfp4-mtp-2026-08-16.json"
         ).read_text(encoding="utf-8"))
         result = cli.rocmfpx_tune.compare_mtp_records(baseline, candidate)
         self.assertEqual(result["decision"], "hold-experimental")
@@ -1437,7 +1516,59 @@ class RocmFpxTuningTests(unittest.TestCase):
         with mock.patch.object(cli, "podman", side_effect=[first, second]):
             self.assertEqual(
                 cli.lemonade_backend_versions("halo-lemonade"),
-                {"package_version": "b10334", "binary_version": "b10333"},
+                {"package_version": "b10334", "binary_version": "b10333", "channel": "stable"},
+            )
+
+    def test_lemonade_backend_versions_handles_update_available_status(self) -> None:
+        backends = mock.MagicMock()
+        backends.stdout = (
+            "llamacpp            cpu         installable     not installed\n"
+            "                    rocm        update_availableNewer upstream release available: b10597\n"
+            "moonshine           cpu         installable     not installed\n"
+        )
+        version = mock.MagicMock()
+        version.stdout = "b10597\n"
+        processes = mock.MagicMock()
+        processes.stdout = (
+            "COMMAND\n/opt/lemonade/.cache/lemonade/bin/llamacpp/rocm-stable/"
+            "llama-b10594/llama-server -m /models/model.gguf\n"
+        )
+        with mock.patch.object(cli, "podman", side_effect=[backends, processes, version]):
+            self.assertEqual(
+                cli.lemonade_backend_versions("halo-lemonade"),
+                {"package_version": "b10597", "binary_version": "b10594", "channel": "stable"},
+            )
+
+    def test_lemonade_backend_versions_handles_flat_nightly_binary(self) -> None:
+        backends = mock.MagicMock()
+        backends.stdout = (
+            "llamacpp            cpu         installable     not installed\n"
+            "                    rocm        update_availableNewer upstream release available: b1315\n"
+            "moonshine           cpu         installable     not installed\n"
+        )
+        processes = mock.MagicMock()
+        processes.stdout = (
+            "COMMAND\n/opt/lemonade/.cache/lemonade/bin/llamacpp/rocm-nightly/"
+            "llama-server -m /models/model.gguf\n"
+        )
+        version = mock.MagicMock()
+        version.stdout = "b1315\n"
+        binary_version = mock.MagicMock()
+        binary_version.stdout = (
+            "version: 0.2.0-dev (build 1, commit 95b8e33)\n"
+            "built with Clang 23.0.0 for Linux\n"
+        )
+        with mock.patch.object(
+            cli, "podman", side_effect=[backends, processes, version, binary_version],
+        ):
+            self.assertEqual(
+                cli.lemonade_backend_versions("halo-lemonade"),
+                {
+                    "package_version": "b1315",
+                    "channel": "nightly",
+                    "binary_version": "b1",
+                    "source_commit": "95b8e33",
+                },
             )
 
     def test_lemonade_backend_running_uses_exact_process_name(self) -> None:

@@ -78,6 +78,10 @@ ROCMFPX_VULKAN_BASE = "sha256:8cdde6d42ab621b3d0f1e02618f4234c58b7036bec984a2a64
 ROCMFPX_ROCM_BASE = "sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b"
 ROCMFPX_QUALITY_SUITE = SOURCE_CONFIG / "benchmarks" / "rocmfpx-quality-v1.json"
 
+LEMONADE_VERSION = "11.7.0"
+LEMONADE_IMAGE_DIGEST = "sha256:87aec2fb7e42f75b38faf3775a343b58941496add050b8de47519c0d212921d4"
+LEMONADE_IMAGE = f"ghcr.io/lemonade-sdk/lemonade-server@{LEMONADE_IMAGE_DIGEST}"
+
 STRIXVULKAN_IMAGE_DIGEST = "sha256:a4a3dfe5813df1f0687e526bcba639bfd8b7cdb1d5e4c1c855abc240fb574d3a"
 STRIXVULKAN_SOURCE_COMMIT = "f25eefeaf0386c18499f23f4fc4f400397638d51"
 STRIXVULKAN_IMAGE = f"ghcr.io/nathanw1014/strix-halo-llamacpp@{STRIXVULKAN_IMAGE_DIGEST}"
@@ -173,16 +177,18 @@ DEFAULTS = {
     "HALO_AI_MODELS_REQUIRE_MOUNT": "0",
     "HALO_AI_MODELS_EXPECT_UUID": "",
     "HALO_AI_DEFAULT_PROFILE": "qwen3.6-35b-a3b-q8xl-lemonade",
-    "LEMONADE_IMAGE": "ghcr.io/lemonade-sdk/lemonade-server:latest",
+    "LEMONADE_IMAGE": LEMONADE_IMAGE,
     "LEMONADE_PORT": "13305",
     "LEMONADE_VALIDATION_MODEL": "Qwen3-0.6B-GGUF",
-    "LEMONADE_LLAMACPP_ROCM_BIN": "latest",
+    "LEMONADE_LLAMACPP_ROCM_BIN": "b10597",
+    "LEMONADE_ROCM_CHANNEL": "stable",
+    "LEMONADE_GPU_MAX_HW_QUEUES": "",
     "LLAMACPP_IMAGE": "docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14",
     "LLAMACPP_PORT": "8080",
     "ROCMFPX_IMAGE": "localhost/halo-ai-rocmfpx:v1.0.0",
-    "ROCMFPX_PORT": "8002",
+    "ROCMFPX_PORT": "8000",
     "STRIXVULKAN_IMAGE": STRIXVULKAN_IMAGE,
-    "STRIXVULKAN_PORT": "8003",
+    "STRIXVULKAN_PORT": "8000",
     "DS4_IMAGE": "localhost/halo-ai-ds4:b0001",
     "DS4_PORT": "8000",
     "DS4_KV_CACHE_ENABLED": "0",
@@ -294,6 +300,11 @@ def validate_config(config: Config) -> None:
     rocm_bin = config.get("LEMONADE_LLAMACPP_ROCM_BIN")
     if not re.fullmatch(r"(?:builtin|latest|b[0-9]+)", rocm_bin):
         fail("LEMONADE_LLAMACPP_ROCM_BIN must be builtin, latest, or a bNNNN build")
+    if config.get("LEMONADE_ROCM_CHANNEL") not in {"stable", "nightly"}:
+        fail("LEMONADE_ROCM_CHANNEL must be stable or nightly")
+    max_queues = config.get("LEMONADE_GPU_MAX_HW_QUEUES")
+    if max_queues and (not max_queues.isdigit() or not 1 <= int(max_queues) <= 64):
+        fail("LEMONADE_GPU_MAX_HW_QUEUES must be empty or an integer in [1, 64]")
 
 
 def assert_operator(config: Config) -> None:
@@ -462,7 +473,7 @@ def validate_catalog(
             draft_id = profile.get("draft_model")
             draft = models.get(draft_id) if isinstance(draft_id, str) else None
             if (
-                engine != "strixvulkan"
+                engine not in {"lemonade", "strixvulkan"}
                 or settings.get("parallel") != 1
                 or draft is None
                 or draft.get("architecture") != "dflash"
@@ -500,6 +511,10 @@ def validate_catalog(
                     fail(f"profile {identifier} has invalid DFlash draft length")
             elif "spec_draft_n_max" in settings:
                 fail(f"baseline profile {identifier} cannot contain DFlash settings")
+        if engine == "lemonade" and "dflash" in features:
+            value = settings.get("spec_draft_n_max")
+            if not isinstance(value, int) or not 1 <= value <= 16:
+                fail(f"profile {identifier} has invalid Lemonade DFlash draft length")
         if engine == "rocmfpx":
             integer_settings = {
                 "gpu_layers": (1, 999), "parallel": (1, 1), "batch": (1, 8192),
@@ -994,10 +1009,69 @@ def container_template_path(model: dict[str, Any], profile: dict[str, Any]) -> s
     return None if entry is None else f"/models/templates/{Path(entry['path']).name}"
 
 
+def lemonade_registered_model_name(profile: dict[str, Any]) -> str:
+    return f"user.{profile['id']}"
+
+
+def lemonade_registered_model_dir(profile: dict[str, Any]) -> str:
+    return f"/models/registered/{profile['id']}"
+
+
+def lemonade_dflash_paths(
+    config: Config, catalog: Catalog, profile: dict[str, Any],
+) -> dict[str, tuple[str, Path]]:
+    if profile["engine"] != "lemonade" or "dflash" not in profile.get("features", []):
+        return {}
+    root = lemonade_registered_model_dir(profile)
+    target = catalog.models[profile["model"]]
+    draft = catalog.models[profile["draft_model"]]
+    selected: dict[str, tuple[str, Path]] = {}
+    main = next(
+        path for entry, path in model_paths(config, target, {"main"})
+        if entry["role"] == "main"
+    )
+    # Lemonade 11.7 validates remotely registered *.gguf main checkpoints as
+    # registry IDs. An extensionless bind target keeps this explicitly local;
+    # llama.cpp identifies GGUF by file magic, not by the destination suffix.
+    selected["main"] = (f"{root}/main", main)
+    if "vision" in profile.get("features", []):
+        mmproj = next(
+            path for entry, path in model_paths(config, target, {"mmproj"})
+            if entry["role"] == "mmproj"
+        )
+        selected["mmproj"] = (f"{root}/{mmproj.name}", mmproj)
+    draft_path = next(
+        path for entry, path in model_paths(config, draft, {"main"})
+        if entry["role"] == "main"
+    )
+    # Lemonade intentionally enables DFlash only when the draft checkpoint's
+    # basename starts with dflash- (or is exactly dflash.gguf).
+    selected["draft"] = (f"{root}/dflash-{draft_path.name}", draft_path)
+    return selected
+
+
+def lemonade_dflash_registration(
+    config: Config, catalog: Catalog, profile: dict[str, Any],
+) -> dict[str, Any]:
+    paths = lemonade_dflash_paths(config, catalog, profile)
+    if not paths:
+        fail(f"profile {profile['id']} is not a Lemonade DFlash composition")
+    labels = ["chat", "dflash", "reasoning", "tool-calling"]
+    if "vision" in profile.get("features", []):
+        labels.append("vision")
+    return {
+        "model_name": lemonade_registered_model_name(profile),
+        "recipe": "llamacpp",
+        "source": "local_path",
+        "checkpoints": {role: destination for role, (destination, _) in paths.items()},
+        "labels": labels,
+    }
+
+
 def lemonade_runtime_mounts(config: Config, catalog: Catalog) -> dict[str, Path]:
     mounts: dict[str, Path] = {}
     for candidate in catalog.models.values():
-        if "lemonade" not in candidate["engines"]:
+        if "lemonade" not in candidate["engines"] or candidate.get("architecture") == "dflash":
             continue
         for entry, path in model_paths(config, candidate, {"main", "chat_template"}):
             if entry["role"] == "chat_template":
@@ -1023,7 +1097,21 @@ def lemonade_runtime_mounts(config: Config, catalog: Catalog) -> dict[str, Path]
                 if prior is not None and prior != path:
                     fail(f"container mount collision for {destination}: {prior} and {path}")
                 mounts[destination] = path
+    for profile in catalog.profiles.values():
+        for destination, path in lemonade_dflash_paths(config, catalog, profile).values():
+            prior = mounts.get(destination)
+            if prior is not None and prior != path:
+                fail(f"container mount collision for {destination}: {prior} and {path}")
+            mounts[destination] = path
     return mounts
+
+
+def lemonade_runtime_environment(config: Config) -> dict[str, str]:
+    environment: dict[str, str] = {}
+    max_queues = config.get("LEMONADE_GPU_MAX_HW_QUEUES")
+    if max_queues:
+        environment["GPU_MAX_HW_QUEUES"] = max_queues
+    return environment
 
 
 def lemonade_runtime_spec(config: Config, catalog: Catalog) -> str:
@@ -1032,6 +1120,8 @@ def lemonade_runtime_spec(config: Config, catalog: Catalog) -> str:
         "image": image_for(config, "lemonade"),
         "port": port_for(config, "lemonade"),
         "devices": ["/dev/kfd", "/dev/dri"],
+        "groups": ["keep-groups"],
+        "environment": lemonade_runtime_environment(config),
         "mounts": sorted((destination, str(path)) for destination, path in lemonade_runtime_mounts(config, catalog).items()),
         "volumes": ["halo-lemonade-huggingface", "halo-lemonade-llama", "halo-lemonade-config"],
         "configuration": {
@@ -1042,7 +1132,7 @@ def lemonade_runtime_spec(config: Config, catalog: Catalog) -> str:
             "llamacpp.rocm_bin": config.get("LEMONADE_LLAMACPP_ROCM_BIN"),
             "max_loaded_models": 1,
             "no_broadcast": True,
-            "rocm_channel": "stable",
+            "rocm_channel": config.get("LEMONADE_ROCM_CHANNEL"),
         },
     }
     return hashlib.sha256(json.dumps(document, sort_keys=True).encode()).hexdigest()[:16]
@@ -1078,9 +1168,16 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
         command.extend(["--device=/dev/dri", "--group-add", "keep-groups"])
     else:
         command.extend(["--device=/dev/kfd", "--device=/dev/dri"])
+        if engine == "lemonade":
+            # Downloaded artifacts are intentionally owner/group-readable, not
+            # world-readable. Preserve the rootless operator's supplementary
+            # groups so Lemonade's fixed container UID can read bind mounts.
+            command.extend(["--group-add", "keep-groups"])
     selected = model_paths(config, model, required_roles(profile))
     if engine == "lemonade":
         command.extend(["--label", f"local.halo-ai.runtime-spec={lemonade_runtime_spec(config, catalog)}"])
+        for key, value in sorted(lemonade_runtime_environment(config).items()):
+            command.extend(["-e", f"{key}={value}"])
         command.extend([
             "-v", "halo-lemonade-huggingface:/opt/lemonade/.cache/huggingface:U",
             "-v", "halo-lemonade-llama:/opt/lemonade/llama:U",
@@ -1235,7 +1332,12 @@ def lemonade_load_payload(
     ]
     if settings.get("load_mode"):
         args.extend(["--load-mode", settings["load_mode"]])
-    if "mtp" in profile.get("features", []):
+    if "dflash" in profile.get("features", []):
+        args.extend([
+            "--spec-type", "draft-dflash",
+            "--spec-draft-n-max", str(settings["spec_draft_n_max"]),
+        ])
+    elif "mtp" in profile.get("features", []):
         args.extend(["--spec-type", "draft-mtp", "--spec-draft-n-max", str(settings["spec_draft_n_max"])])
     else:
         # Lemonade marks these checkpoints as MTP-capable and otherwise enables
@@ -1403,16 +1505,46 @@ def lemonade_backend_versions(container: str) -> dict[str, str]:
     package_match = None if section_match is None else re.search(
         r"(?m)^\s*rocm\s+installed\s+(b[0-9]+)\b", section_match.group(0)
     )
-    if package_match is None:
+    status_match = None if section_match is None else re.search(
+        r"(?m)^\s*rocm\s+(installed|update_available)", section_match.group(0)
+    )
+    if status_match is None:
         fail("Lemonade did not report an installed llama.cpp ROCm backend")
     binary = lemonade_backend_binary(container)
+    channel_match = re.search(r"/llamacpp/(rocm-(?:stable|nightly))/", binary)
+    if channel_match is None:
+        fail("active llama.cpp backend path does not identify a ROCm channel")
+    channel_key = channel_match.group(1)
+    if package_match is not None:
+        package_version = package_match.group(1)
+    else:
+        # Lemonade 11.5 can concatenate the update-available detail directly
+        # after the status and reports the remote version rather than the
+        # installed package. Its backend cache version file is authoritative.
+        package_version = podman([
+            "exec", container, "cat",
+            f"/opt/lemonade/.cache/lemonade/bin/llamacpp/{channel_key}/version.txt",
+        ], capture=True).stdout.strip()
+        if not re.fullmatch(r"b[0-9]+", package_version):
+            fail("installed Lemonade ROCm package has an invalid version record")
     binary_match = re.search(r"/llamacpp/[^/\s]+/llama-(b[0-9]+)/llama-server\b", binary)
-    if binary_match is None:
-        fail("active llama.cpp path does not contain a build version")
-    return {
-        "package_version": package_match.group(1),
-        "binary_version": binary_match.group(1),
+    result = {
+        "package_version": package_version,
+        "channel": channel_key.removeprefix("rocm-"),
     }
+    if binary_match is not None:
+        result["binary_version"] = binary_match.group(1)
+        return result
+    version_text = podman(["exec", container, binary, "--version"], capture=True).stdout
+    version_match = re.search(
+        r"version:\s+[^\n]*\(build\s+([0-9]+),\s+commit\s+([0-9a-f]+)\)",
+        version_text,
+    )
+    if version_match is None:
+        fail("active llama.cpp backend did not report a parseable build version")
+    result["binary_version"] = f"b{version_match.group(1)}"
+    result["source_commit"] = version_match.group(2)
+    return result
 
 
 def lemonade_backend_binary(container: str) -> str:
@@ -1441,6 +1573,27 @@ def assert_lemonade_mtp_backend(container: str) -> None:
     missing = [flag for flag in required if flag not in help_text]
     if missing:
         fail(f"active llama.cpp backend lacks MTP capability: {', '.join(missing)}")
+
+
+def assert_lemonade_dflash_backend(
+    container: str, config: Config, catalog: Catalog, profile: dict[str, Any],
+) -> None:
+    binary = lemonade_backend_binary(container)
+    help_text = podman(["exec", container, binary, "--help"], capture=True).stdout
+    required_help = ("draft-dflash", "--spec-draft-n-max", "--model-draft")
+    missing = [flag for flag in required_help if flag not in help_text]
+    if missing:
+        fail(f"active llama.cpp backend lacks DFlash capability: {', '.join(missing)}")
+    paths = lemonade_dflash_paths(config, catalog, profile)
+    process = podman(["top", container, "args"], capture=True).stdout
+    required_process = (
+        f"--model-draft {paths['draft'][0]}",
+        "--spec-type draft-dflash",
+        f"--spec-draft-n-max {profile['settings']['spec_draft_n_max']}",
+    )
+    missing = [value for value in required_process if value not in process]
+    if missing:
+        fail(f"active Lemonade process does not match DFlash policy: {', '.join(missing)}")
 
 
 def finish_trial(config: Config, trial: dict[str, Any], status_value: str, error: str = "") -> None:
@@ -1904,6 +2057,12 @@ def profile_availability(config: Config, catalog: Catalog, profile: dict[str, An
         return False, "pinned Strix Vulkan image is not installed or failed provenance checks"
     if profile["engine"] == "ds4" and not ds4_image_valid(config.get(key)):
         return False, "pinned DS4 image is not installed or failed provenance checks"
+    if (
+        profile["engine"] == "lemonade"
+        and "dflash" in profile.get("features", [])
+        and not lemonade_image_valid(config.get(key))
+    ):
+        return False, f"Lemonade DFlash requires the pinned {LEMONADE_VERSION} image"
     model = catalog.models[profile["model"]]
     memory_roles = {"weights"} if model.get("format") == "transformers" else {"main"}
     main_bytes = sum(int(entry["bytes"]) for entry in model["files"] if entry["role"] in memory_roles)
@@ -2009,6 +2168,14 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
             "base_digest": DS4_UBUNTU_BASE,
             "additional_download_bytes": 0 if installed else DS4_RELEASE_BYTES,
         })
+    elif engine == "lemonade":
+        runtime.update({
+            "lemonade_version": LEMONADE_VERSION,
+            "image_digest": LEMONADE_IMAGE_DIGEST,
+            "rocm_channel": config.get("LEMONADE_ROCM_CHANNEL"),
+            "rocm_package": config.get("LEMONADE_LLAMACPP_ROCM_BIN"),
+            "gpu_max_hw_queues": config.get("LEMONADE_GPU_MAX_HW_QUEUES") or None,
+        })
     rocmfpx_artifact_class = (
         "fp8" if model.get("quantization") == "Q8_0_ROCMFPX" else "fp4"
     )
@@ -2035,12 +2202,21 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
                 ["q6-xl", "vision", "strixvulkan-runtime"]
                 if engine == "strixvulkan" and "vision" in profile.get("features", []) else
                 ["q6-xl", "strixvulkan-runtime"]
-                if engine == "strixvulkan" else ["model", "runtime"]
+                if engine == "strixvulkan" else
+                ["model"]
+                + (["vision"] if "vision" in profile.get("features", []) else [])
+                + (["dflash2"] if draft_plan else [])
+                + ["runtime"]
             )
         ),
         "excluded_artifact_classes": (
             [excluded_quantization, "npu", "vision", "bf16", "reference"]
-            if engine == "rocmfpx" else ["fp8", "npu", "vision", "bf16", "reference"]
+            if engine == "rocmfpx" else
+            ["fp8", "npu", "vision", "bf16", "reference"]
+            if engine == "strixvulkan" else
+            ["npu"]
+            + ([] if "vision" in profile.get("features", []) else ["vision"])
+            + ["reference"]
         ),
         "total_additional_download_bytes": (
             model_plan["additional_download_bytes"] + runtime["additional_download_bytes"]
@@ -2167,6 +2343,10 @@ def rocmfpx_image_valid(image: str) -> bool:
         "local.halo-ai.rocm-base": ROCMFPX_ROCM_BASE,
     }
     return expected.items() <= labels.items()
+
+
+def lemonade_image_valid(image: str) -> bool:
+    return image_identity(image, required=False) == LEMONADE_IMAGE_DIGEST
 
 
 def strixvulkan_image_valid(image: str) -> bool:
@@ -2399,6 +2579,20 @@ def ensure_speech_test_audio(config: Config) -> Path:
 
 def exact_lemonade_model(config: Config, catalog: Catalog, profile: dict[str, Any], port: int) -> str:
     models = http_json(f"http://127.0.0.1:{port}/api/v1/models")
+    if "dflash" in profile.get("features", []):
+        registration = lemonade_dflash_registration(config, catalog, profile)
+        expected = registration["checkpoints"]
+        candidates = models.get("data", models) if isinstance(models, dict) else models
+        matches = [
+            item for item in candidates or []
+            if isinstance(item, dict)
+            and item.get("source") == "local_path"
+            and item.get("checkpoints") == expected
+            and "dflash" in item.get("labels", [])
+        ]
+        if len(matches) != 1:
+            fail(f"expected one exact registered Lemonade DFlash model, found {len(matches)}")
+        return lemonade_registered_model_name(profile)
     main = next(
         path for entry, path in model_paths(config, catalog.models[profile["model"]], {"main"})
         if entry["role"] == "main"
@@ -2425,6 +2619,22 @@ def exact_lemonade_model(config: Config, catalog: Catalog, profile: dict[str, An
     if len(matches) != 1:
         fail(f"expected one exact Lemonade model for {main.name}, found {len(matches)}")
     return matches[0]
+
+
+def ensure_lemonade_profile_model(
+    config: Config, catalog: Catalog, profile: dict[str, Any], port: int,
+) -> str:
+    if "dflash" not in profile.get("features", []):
+        return exact_lemonade_model(config, catalog, profile, port)
+    registration = lemonade_dflash_registration(config, catalog, profile)
+    response = http_json(
+        f"http://127.0.0.1:{port}/v1/models/register",
+        method="POST", payload=registration, timeout=180,
+    )
+    canonical = response.get("canonical_model_name") if isinstance(response, dict) else None
+    if canonical != registration["model_name"]:
+        fail("Lemonade did not preserve the canonical DFlash registration identity")
+    return exact_lemonade_model(config, catalog, profile, port)
 
 
 def lemonade_backend_running(container: str) -> bool:
@@ -2466,7 +2676,7 @@ def configure_lemonade_runtime(config: Config, container: str, health_url: str) 
         "extra_models_dir=/models/extra",
         "llamacpp.backend=rocm",
         f"llamacpp.rocm_bin={config.get('LEMONADE_LLAMACPP_ROCM_BIN')}",
-        "rocm_channel=stable",
+        f"rocm_channel={config.get('LEMONADE_ROCM_CHANNEL')}",
         "max_loaded_models=1",
         "no_broadcast=true",
         "auto_check_model_updates=false",
@@ -2551,7 +2761,7 @@ def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) ->
             podman(["restart", "--time", "120", target_name])
             wait_http(health, 180)
         if profile["engine"] == "lemonade":
-            match = exact_lemonade_model(config, catalog, profile, port)
+            match = ensure_lemonade_profile_model(config, catalog, profile, port)
             if "mtp" in profile.get("features", []):
                 assert_lemonade_mtp_model(port, match)
             model = catalog.models[profile["model"]]
@@ -2563,7 +2773,15 @@ def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) ->
             http_json(f"http://127.0.0.1:{port}/v1/load", method="POST", payload=payload, timeout=600)
             if "mtp" in profile.get("features", []):
                 assert_lemonade_mtp_backend(target_name)
+            if "dflash" in profile.get("features", []):
+                assert_lemonade_dflash_backend(target_name, config, catalog, profile)
             trial["backend"] = lemonade_backend_versions(target_name)
+            trial["backend"].update({
+                "speculation": "dflash2" if "dflash" in profile.get("features", []) else (
+                    "mtp" if "mtp" in profile.get("features", []) else "none"
+                ),
+                "gpu_max_hw_queues": config.get("LEMONADE_GPU_MAX_HW_QUEUES") or None,
+            })
         elif profile["engine"] == "rocmfpx":
             trial["backend"] = rocmfpx_backend_info(
                 target_name, image_for(config, profile["engine"]), profile,
@@ -2993,7 +3211,7 @@ def command_test(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
         ds4_dspark_probe = {"usage": probe_usage, "timings": probe_timings}
         response["dspark_probe"] = ds4_dspark_probe
     speculative_feature = next(
-        (feature for feature in ("mtp", "dspark") if feature in profile.get("features", [])),
+        (feature for feature in ("mtp", "dflash", "dspark") if feature in profile.get("features", [])),
         None,
     )
     if speculative_feature == "dspark" and profile["engine"] == "ds4":
@@ -3472,8 +3690,8 @@ def command_bench_rocmfpx_context(
     profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
-    if profile["engine"] not in {"rocmfpx", "strixvulkan"}:
-        fail("context benchmark requires a rocmfpx or strixvulkan profile")
+    if profile["engine"] not in {"lemonade", "rocmfpx", "strixvulkan"}:
+        fail("context benchmark requires a Lemonade, ROCmFPX, or Strix Vulkan profile")
     try:
         contexts = [int(value) for value in args.prompt_tokens.split(",")]
     except ValueError:
@@ -3509,6 +3727,10 @@ def command_bench_rocmfpx_context(
 
     port = port_for(config, engine)
     base_url = f"http://127.0.0.1:{port}"
+    request_base_url = (
+        f"http://127.0.0.1:{lemonade_backend_port(container)}"
+        if engine == "lemonade" else base_url
+    )
     if args.prompt_pattern == "repeated":
         benchmark_text = ROCMFPX_BENCHMARK_SEED_TEXT
         prompt_description = "repeated fixed varied token sequence, exact token count"
@@ -3517,7 +3739,7 @@ def command_bench_rocmfpx_context(
         benchmark_text = rocmfpx_unique_benchmark_text(line_count)
         prompt_description = "deterministic pseudo-random word records, exact token count"
     tokenized = container_http_json(
-        container, f"{base_url}/tokenize", {"content": benchmark_text}, timeout=args.timeout,
+        container, f"{request_base_url}/tokenize", {"content": benchmark_text}, timeout=args.timeout,
     )
     seed_tokens = tokenized.get("tokens") if isinstance(tokenized, dict) else None
     if (
@@ -3562,7 +3784,7 @@ def command_bench_rocmfpx_context(
             started = time.monotonic()
             try:
                 response = container_http_json(
-                    container, f"{base_url}/completion", {
+                    container, f"{request_base_url}/completion", {
                         "prompt": prompt,
                         "n_predict": args.completion_tokens,
                         "temperature": 0,
@@ -3673,8 +3895,8 @@ def command_bench_rocmfpx_quality(
     profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
-    if profile["engine"] not in {"rocmfpx", "strixvulkan"}:
-        fail("fixed quality benchmark requires a rocmfpx or strixvulkan profile")
+    if profile["engine"] not in {"lemonade", "rocmfpx", "strixvulkan"}:
+        fail("fixed quality benchmark requires a Lemonade, ROCmFPX, or Strix Vulkan profile")
     suite_path = (
         Path(args.suite).expanduser().resolve()
         if args.suite else ROCMFPX_QUALITY_SUITE
@@ -3703,15 +3925,20 @@ def command_bench_rocmfpx_quality(
 
     port = port_for(config, engine)
     base_url = f"http://127.0.0.1:{port}"
-    models = http_json(f"{base_url}/v1/models")
-    candidates = models.get("data", models) if isinstance(models, dict) else models
-    if not isinstance(candidates, list) or not candidates:
-        fail("active quality benchmark service returned no models")
-    first_model = candidates[0]
-    model_name = (
-        first_model.get("id") or first_model.get("name")
-        if isinstance(first_model, dict) else str(first_model)
-    )
+    if engine == "lemonade":
+        model_name = exact_lemonade_model(config, catalog, profile, port)
+        tokenize_base_url = f"http://127.0.0.1:{lemonade_backend_port(container)}"
+    else:
+        models = http_json(f"{base_url}/v1/models")
+        candidates = models.get("data", models) if isinstance(models, dict) else models
+        if not isinstance(candidates, list) or not candidates:
+            fail("active quality benchmark service returned no models")
+        first_model = candidates[0]
+        model_name = (
+            first_model.get("id") or first_model.get("name")
+            if isinstance(first_model, dict) else str(first_model)
+        )
+        tokenize_base_url = base_url
     if not isinstance(model_name, str) or not model_name:
         fail("active quality benchmark service returned an invalid model identity")
 
@@ -3744,7 +3971,7 @@ def command_bench_rocmfpx_quality(
         if not isinstance(content, str):
             fail(f"quality case {case['id']} returned non-text content")
         tokenized = container_http_json(
-            container, f"{base_url}/tokenize", {"content": content},
+            container, f"{tokenize_base_url}/tokenize", {"content": content},
             timeout=args.timeout,
         )
         output_tokens = tokenized.get("tokens") if isinstance(tokenized, dict) else None

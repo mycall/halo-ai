@@ -272,12 +272,12 @@ seed_seconds[ds4-deepseek-v4-flash-hybrid]=107.2
 seed_seconds[ds4-deepseek-v4-flash-hybrid-kv]=107.7
 seed_seconds[deepseek-v4-flash-0731-iq3xxs-llamacpp]=183.9
 seed_seconds[deepseek-v4-flash-0731-iq3xxs-dspark-llamacpp]=283.7
-seed_seconds[qwen38-27b-rocmfp4-baseline]=267
-seed_seconds[qwen38-27b-rocmfp4-mtp-conservative-q5-draft]=296
-seed_seconds[qwen38-27b-rocmfp4-mtp]=299
-seed_seconds[qwen38-27b-rocmfp4-mtp-q5-draft]=304
-seed_seconds[qwen38-27b-rocmfp8-baseline]=275
-seed_seconds[qwen38-27b-rocmfp8-mtp]=305
+seed_seconds[qwen3.8-27b-rocmfp4-baseline]=267
+seed_seconds[qwen3.8-27b-rocmfp4-mtp-conservative-q5-draft]=296
+seed_seconds[qwen3.8-27b-rocmfp4-mtp]=299
+seed_seconds[qwen3.8-27b-rocmfp4-mtp-q5-draft]=304
+seed_seconds[qwen3.8-27b-rocmfp8-baseline]=275
+seed_seconds[qwen3.8-27b-rocmfp8-mtp]=305
 seed_seconds[ds4-deepseek-v4-flash-hybrid-dspark-16k]=999
 seed_seconds[seamless-m4t-v2-large-speech]=999
 
@@ -301,12 +301,12 @@ if [[ -n "$profile_csv" ]]; then
     IFS=, read -r -a requested <<<"$profile_csv"
 elif [[ "$scope" == optimize ]]; then
     requested=(
-        qwen38-27b-rocmfp4-baseline
-        qwen38-27b-rocmfp4-mtp
-        qwen38-27b-rocmfp4-mtp-q5-draft
-        qwen38-27b-rocmfp4-mtp-conservative-q5-draft
-        qwen38-27b-rocmfp8-baseline
-        qwen38-27b-rocmfp8-mtp
+        qwen3.8-27b-rocmfp4-baseline
+        qwen3.8-27b-rocmfp4-mtp
+        qwen3.8-27b-rocmfp4-mtp-q5-draft
+        qwen3.8-27b-rocmfp4-mtp-conservative-q5-draft
+        qwen3.8-27b-rocmfp8-baseline
+        qwen3.8-27b-rocmfp8-mtp
         ds4-deepseek-v4-flash-hybrid
         ds4-deepseek-v4-flash-hybrid-kv
         ds4-deepseek-v4-flash-hybrid-dspark-16k

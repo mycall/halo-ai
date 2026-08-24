@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "recorded_local_date": "2026-08-23",
+  "qualification": "target-only-backend-ab-pass",
+  "host": {
+    "cpu": "AMD Ryzen AI Max+ 395",
+    "gpu": "AMD Radeon 8060S (gfx1151)",
+    "kernel": "7.1.8-1-cachyos-deckify",
+    "gtt_aperture_gib": 118,
+    "cpu_visible_memory_bytes": 132564013056
+  },
+  "model": {
+    "repository": "unsloth/Qwen3.8-27B-GGUF",
+    "revision": "4ca720788d1e01f1bff70c033e0d0028fd02e502",
+    "target": "Qwen3.8-27B-UD-Q6_K_XL.gguf",
+    "target_sha256": "701d8fa9ed214ab21bfc130cd2a7df19ca89bbef7713e2dfb19f3c63696aa917",
+    "projector": "mmproj-BF16.gguf",
+    "projector_sha256": "83ee4f4f205fa514161778c41df1ea14144faa0f713510893b63c2395f5c2d53"
+  },
+  "common_policy": {
+    "context": 262144,
+    "parallel": 1,
+    "batch": 4096,
+    "ubatch": 4096,
+    "flash_attention": true,
+    "cache_type_k": "f16",
+    "cache_type_v": "f16",
+    "speculation": "none",
+    "temperature": 0,
+    "seed": 1
+  },
+  "runtimes": {
+    "lemonade_rocm": {
+      "profile": "qwen3.8-27b-q6xl-vision-lemonade",
+      "lemonade_version": "11.5.2",
+      "image_digest": "sha256:b2f403179d18327b030f8c71131451541cce80ee1a300475637697716e9b2985",
+      "rocm_package": "b10597",
+      "active_binary": "b10594",
+      "system_fingerprint": "b10594-ba8e0eddf"
+    },
+    "strix_vulkan": {
+      "profile": "qwen3.8-27b-q6xl-strix-vision",
+      "image_digest": "sha256:a4a3dfe5813df1f0687e526bcba639bfd8b7cdb1d5e4c1c855abc240fb574d3a",
+      "engine_build": 10577,
+      "source_revision": "f25eefeaf0386c18499f23f4fc4f400397638d51"
+    }
+  },
+  "vision_canary": {
+    "prompt_tokens": 37,
+    "completion_tokens": 2,
+    "expected": "red",
+    "lemonade_rocm": {
+      "result": "red",
+      "prompt_tokens_per_second": 55.68724837265305,
+      "decode_tokens_per_second": 8.151753034490067
+    },
+    "strix_vulkan": {
+      "result": "red",
+      "prompt_tokens_per_second": 29.8829074615197,
+      "decode_tokens_per_second": 6.2043591827618085
+    },
+    "interpretation": "Correctness smoke only; two generated tokens are too few for a performance conclusion."
+  },
+  "fixed_decode": {
+    "method": "same loaded process per backend; identical deterministic request; 81 prompt tokens; max_tokens 256; all runs reached length",
+    "lemonade_rocm": {
+      "prompt_tokens": 81,
+      "completion_tokens": 256,
+      "decode_tokens_per_second": [8.06, 8.04, 8.05],
+      "median_decode_tokens_per_second": 8.05,
+      "first_uncached_prompt_tokens_per_second": 138.84
+    },
+    "strix_vulkan": {
+      "prompt_tokens": 81,
+      "completion_tokens": 256,
+      "decode_tokens_per_second": [8.419881737973215, 8.444001353291949, 8.476376057382208],
+      "median_decode_tokens_per_second": 8.444001353291949,
+      "first_uncached_prompt_tokens_per_second": 65.10254454500956,
+      "later_cached_prompt_tokens": 77
+    },
+    "comparison": {
+      "vulkan_decode_advantage_percent": 4.89,
+      "rocm_uncached_prefill_ratio": 2.13
+    }
+  },
+  "interpretation": "Vulkan remains slightly faster for target-only decode, while ROCm/HIP is a strong prompt-prefill candidate. Neither target-only path approaches the separately qualified qwen3.8df2 DFlash2 decode rate near 24.5 tok/s."
+}

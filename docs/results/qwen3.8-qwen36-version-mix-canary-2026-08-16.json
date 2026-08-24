@@ -4,7 +4,7 @@
   "recorded_local_date": "2026-08-16",
   "status": "short-context-early-screen",
   "target": {
-    "profile": "qwen38-27b-rocmfp4-baseline",
+    "profile": "qwen3.8-27b-rocmfp4-baseline",
     "model": "qwen3.8-27b-rocmfp4",
     "sha256": "fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9",
     "engine": "q38rocm ROCmFPX build 213",
@@ -94,7 +94,7 @@
     "Overlapping positions from each fixed 12-token target continuation are correlated, so proposal count is not equivalent to 70 independent prompts."
   ],
   "raw_state_records": [
-    "/var/opt/halo-ai/state/benchmarks/stage3/qwen38-target-canary-2026-08-16.json",
+    "/var/opt/halo-ai/state/benchmarks/stage3/qwen3.8-target-canary-2026-08-16.json",
     "/var/opt/halo-ai/state/benchmarks/stage3/qwen36-proxy-canary-2026-08-16.json",
     "/var/opt/halo-ai/state/benchmarks/stage3/qwen36-proxy-canary-2026-08-16.score.json"
   ]

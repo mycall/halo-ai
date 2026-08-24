@@ -453,7 +453,7 @@ changes remain explicit operator actions.
 
 ### Qwen3.8 ROCmFP4 Stage 1 qualification
 
-The `qwen38-27b-rocmfp4-baseline` profile was qualified on this gfx1151 host on
+The `qwen3.8-27b-rocmfp4-baseline` profile was qualified on this gfx1151 host on
 2026-08-16. It uses only `Vulkan0`, mounts the single verified FP4 GGUF
 read-only, forces `--spec-type none`, and disables template thinking in the
 deterministic smoke request. Acquisition reported zero additional bytes on the
@@ -473,7 +473,7 @@ over three 128-token repetitions. Values reported from other q38rocm setups are
 not acceptance evidence for this host; optimization work should compare
 against this same-host record. The complete machine-readable inputs, software
 revisions, timings, and memory values are in
-[`results/qwen38-rocmfp4-baseline-2026-08-16.json`](results/qwen38-rocmfp4-baseline-2026-08-16.json).
+[`results/qwen3.8-rocmfp4-baseline-2026-08-16.json`](results/qwen3.8-rocmfp4-baseline-2026-08-16.json).
 
 The runtime distribution is immutable at the archive and image-input level,
 but one upstream provenance item remains open: the v1.0.0 binary reports build
@@ -483,17 +483,17 @@ this unresolved engine claim without conflating them.
 
 ### Qwen3.8 GPU-MTP experiment
 
-`qwen38-27b-rocmfp4-mtp` reuses the MTP tensors in the same FP4 GGUF, so its
+`qwen3.8-27b-rocmfp4-mtp` reuses the MTP tensors in the same FP4 GGUF, so its
 profile-scoped acquisition adds zero model bytes. It enables the fork's
 boundary-safe strict-Qwen verifier with one slot and uses `n_max=6`,
 `p_min=0.60`. It is retained for reproducibility but is now gated after the
 fixed correctness suite disproved end-to-end token identity.
 
-`qwen38-27b-rocmfp4-mtp-conservative-q5-draft` uses `n_max=2`, `p_min=0.85`,
+`qwen3.8-27b-rocmfp4-mtp-conservative-q5-draft` uses `n_max=2`, `p_min=0.85`,
 and q5_1 draft K/V. It retained the FP4 baseline's 9/13 bounded quality score
 but did not prove strict token identity. It is therefore available only as an
-operator-approved experimental profile; `qwen38fp4` remains mapped to
-`qwen38-27b-rocmfp4-baseline`.
+operator-approved experimental profile; `qwen3.8fp4` remains mapped to
+`qwen3.8-27b-rocmfp4-baseline`.
 
 | Prompt tokens | Baseline decode | MTP decode | Change | MTP TTFT | Acceptance | Peak GTT |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -514,14 +514,14 @@ aggressive MTP matched only 7/13 output-token sequences and scored 7/13 versus
 the baseline's 9/13. The same result with F16 and q5_1 draft K/V isolates the
 failure from cache compression. Detailed performance and the original
 conformance note remain recorded in
-[`results/qwen38-rocmfp4-mtp-2026-08-16.json`](results/qwen38-rocmfp4-mtp-2026-08-16.json).
+[`results/qwen3.8-rocmfp4-mtp-2026-08-16.json`](results/qwen3.8-rocmfp4-mtp-2026-08-16.json).
 
 ### Aligned FP4/FP8 context screen
 
 The already-present `Qwen3.8-27B-ROCmFP8.gguf` matches its exact
 28,193,396,704-byte size and SHA-256 and passes the cataloged 866-tensor GGUF
 inventory. It is selectable only through the explicit GPU-only
-`qwen38-27b-rocmfp8-baseline` and `qwen38-27b-rocmfp8-mtp` profiles; their
+`qwen3.8-27b-rocmfp8-baseline` and `qwen3.8-27b-rocmfp8-mtp` profiles; their
 acquisition plans report zero additional bytes on this host.
 
 The first exact-token screen used identical cold 4,095- and 31,998-token arrays
@@ -541,18 +541,18 @@ suite. FP4 MTP crossed FP4 baseline end-to-end time after about 42 generated
 tokens at 4K and 954 at 32K on this repeated-context workload. These are
 single-run screens; repeat finalists with the non-repeating pattern before
 changing defaults. The machine summary is
-[`results/qwen38-fp4-fp8-exact-context-2026-08-17.json`](results/qwen38-fp4-fp8-exact-context-2026-08-17.json).
+[`results/qwen3.8-fp4-fp8-exact-context-2026-08-17.json`](results/qwen3.8-fp4-fp8-exact-context-2026-08-17.json).
 
 The tuning helpers make these conclusions reproducible rather than relying on
 hand comparison:
 
 ```bash
 halo-ai tune mtp-compare \
-  docs/results/qwen38-rocmfp4-baseline-2026-08-16.json \
-  docs/results/qwen38-rocmfp4-mtp-2026-08-16.json \
-  --output /var/opt/halo-ai/state/qwen38-mtp-comparison.json
+  docs/results/qwen3.8-rocmfp4-baseline-2026-08-16.json \
+  docs/results/qwen3.8-rocmfp4-mtp-2026-08-16.json \
+  --output /var/opt/halo-ai/state/qwen3.8-mtp-comparison.json
 
-halo-ai bench rocmfpx-context qwen38-27b-rocmfp4-mtp \
+halo-ai bench rocmfpx-context qwen3.8-27b-rocmfp4-mtp \
   --prompt-tokens 4095,31998 --completion-tokens 64 \
   --prompt-pattern unique --repetitions 3 --output RESULT.json
 halo-ai tune context-compare BASELINE.json CANDIDATE.json
@@ -606,7 +606,7 @@ profiles and FP8 MTP are therefore gated pending a specific backend correction
 and a complete suite rerun. Conservative FP4 MTP is exposed only under the
 explicitly accepted experimental policy above, not as a lossless candidate.
 The full machine summary is
-[`results/qwen38-quality-identity-2026-08-18.json`](results/qwen38-quality-identity-2026-08-18.json).
+[`results/qwen3.8-quality-identity-2026-08-18.json`](results/qwen3.8-quality-identity-2026-08-18.json).
 
 A 2026-08-23 cache-isolation follow-up disabled RAM, prompt, idle-slot, and
 slot-similarity reuse. Conservative MTP matched 13/13 only when the suite was
@@ -1078,7 +1078,7 @@ podman exec halo-lemonade \
   lemonade config set \
     enable_dgpu_gtt=true \
     llamacpp.backend=rocm \
-    llamacpp.rocm_bin=latest \
+    llamacpp.rocm_bin=b10597 \
     rocm_channel=stable \
     max_loaded_models=1 \
     no_broadcast=true \
@@ -1093,7 +1093,7 @@ curl --fail http://127.0.0.1:13305/api/v1/models | jq \
 ```
 
 Verify that the persisted configuration reports `enable_dgpu_gtt: true`, the
-backend is `rocm`, `llamacpp.rocm_bin` is `latest`, the stable ROCm channel, one
+backend is `rocm`, `llamacpp.rocm_bin` is `b10597`, the stable ROCm channel, one
 loaded model maximum, discovery broadcasting disabled, and automatic update
 checks disabled. System information
 must enumerate the expected Radeon 8060S and large GPU-addressable pool. Treat a
@@ -1108,11 +1108,10 @@ cache. On the first validated gfx1151 ROCm install it held about 17 GiB: about
 runtime on later starts; it downloads again only when the selected
 backend/channel/version changes or the volume is removed. Normal `stop`, host
 reinstall, and project upgrades preserve it. With the project default
-`LEMONADE_LLAMACPP_ROCM_BIN=latest`, every explicit `halo-ai start` restarts the
-small Lemonade supervisor before loading weights so Lemonade re-resolves the
-newest stable-channel ROCm package. Existing package bytes remain cached. A
-specific `bNNNN` value gives a reproducible pin; `builtin` follows the server
-image's tested bundle.
+`LEMONADE_LLAMACPP_ROCM_BIN=b10597`, every explicit `halo-ai start` restarts the
+small Lemonade supervisor before loading weights and verifies the pinned stable
+package. Existing package bytes remain cached. Use `latest` only for a bounded
+upgrade trial; `builtin` follows the server image's tested bundle.
 
 Do not equate the package tag with the embedded binary's build string. Record
 both. For example, a Lemonade package named `b10334` can legitimately contain a
@@ -1513,10 +1512,10 @@ halo-ai start ds4 --switch
 halo-ai test ds4 --preset deepseek-v4-think-max
 ```
 
-`ds4`, `qwen38df2`, `qwen38fp4`, and `qwen38fp8` are catalog aliases, not copied
-profiles. At the operator's request, `qwen38df2` targets the native-262K,
+`ds4`, `qwen3.8df2`, `qwen3.8fp4`, and `qwen3.8fp8` are catalog aliases, not copied
+profiles. At the operator's request, `qwen3.8df2` targets the native-262K,
 experimental Q6 XL vision+DFlash2 profile.
-`qwen38fp4` and `qwen38fp8` remain specific to the ROCmFPX artifacts. Alias targets must be canonical
+`qwen3.8fp4` and `qwen3.8fp8` remain specific to the ROCmFPX artifacts. Alias targets must be canonical
 profile IDs, and the runtime records the canonical profile so status, trial
 history, and benchmarks remain unambiguous.
 
@@ -1528,12 +1527,14 @@ profiles use the model's native 262,144-token context and F16 K/V cache:
 
 | Profile | Composition | Status |
 | --- | --- | --- |
-| `qwen38-27b-q6xl-strix-baseline` | Q6 XL target only | Experimental control |
-| `qwen38-27b-q6xl-strix-dflash2` | Q6 XL + exact Q4_K_M DFlash2 sidecar | Experimental; history-invariant identity pending |
-| `qwen38-27b-q6xl-strix-vision` | Q6 XL + BF16 projector, no speculation | Experimental target-only rollback; red-image canary passed |
-| `qwen38-27b-q6xl-strix-vision-dflash2` / `qwen38df2` | Q6 XL + BF16 projector + exact Q4_K_M DFlash2 sidecar, `n-max=5` | Experimental; paired canary and equal-history suite matched target-only |
-| `qwen38-27b-q6xl-strix-vision-dflash2-q8` | Same target/projector + exact Q8_0 DFlash2 sidecar, `n-max=7` | Diagnostic quant control; not selected by alias |
-| `qwen38-27b-q6xl-strix-vision-dflash2-bf16` | Same target/projector + exact BF16 DFlash2 sidecar, `n-max=7` | Diagnostic quant control; not selected by alias |
+| `qwen3.8-27b-q6xl-strix-baseline` | Q6 XL target only | Experimental control |
+| `qwen3.8-27b-q6xl-strix-dflash2` | Q6 XL + exact Q4_K_M DFlash2 sidecar | Experimental; history-invariant identity pending |
+| `qwen3.8-27b-q6xl-strix-vision` | Q6 XL + BF16 projector, no speculation | Experimental target-only rollback; red-image canary passed |
+| `qwen3.8-27b-q6xl-strix-vision-dflash2` / `qwen3.8df2` | Q6 XL + BF16 projector + exact Q4_K_M DFlash2 sidecar, `n-max=5` | Experimental; paired canary and equal-history suite matched target-only |
+| `qwen3.8-27b-q6xl-strix-vision-dflash2-q8` | Same target/projector + exact Q8_0 DFlash2 sidecar, `n-max=7` | Diagnostic quant control; not selected by alias |
+| `qwen3.8-27b-q6xl-strix-vision-dflash2-bf16` | Same target/projector + exact BF16 DFlash2 sidecar, `n-max=7` | Diagnostic quant control; not selected by alias |
+| `qwen3.8-27b-q6xl-vision-lemonade` | Same Q6 XL target + BF16 projector through Lemonade ROCm/HIP, no speculation | Experimental target-only backend A/B; reuses installed artifacts |
+| `qwen3.8-27b-q6xl-vision-dflash2-lemonade` | Same target/projector + local Q4_K_M DFlash2 registration through Lemonade ROCm/HIP | Disabled compatibility probe; current stable and nightly loaders expect DFlash v1's 81 tensors, not DFlash2's 58 |
 
 Vision+DFlash2 was tested on pinned build 10577. At `n-max=7` the combined
 runtime returned the correct red-image canary and reported real drafting. On a
@@ -1577,17 +1578,61 @@ target-only and 73.1 GiB with DFlash2.
 
 ```bash
 halo-ai install strixvulkan
-halo-ai start qwen38df2 --switch  # Experimental Q6 vision+DFlash2 profile
-halo-ai test qwen38df2
+halo-ai start qwen3.8df2 --switch  # Experimental Q6 vision+DFlash2 profile
+halo-ai test qwen3.8df2
 # Controls:
-halo-ai start qwen38-27b-q6xl-strix-baseline --switch
-halo-ai start qwen38-27b-q6xl-strix-vision --switch
+halo-ai start qwen3.8-27b-q6xl-strix-baseline --switch
+halo-ai start qwen3.8-27b-q6xl-strix-vision --switch
+halo-ai start qwen3.8-27b-q6xl-vision-lemonade --switch
 ```
 
-The repo's `config/opencode.json` exposes the vision alias as
-`halo-qwen38/qwen38df2` through `http://127.0.0.1:8003/v1`, including text/image
-modalities and the 262,144-token context limit. OpenCode 1.18.21 discovered the
-model and completed a live request against the managed endpoint.
+For the backend comparison, the Lemonade profile matches the target-only
+Vulkan vision control at native 262K context, F16 K/V, one slot, Flash
+Attention, and 4096/4096 batch/ubatch. It mounts the same Q6 XL GGUF and
+`mmproj-BF16.gguf` read-only and forces `--spec-type none`. This isolates ROCm
+HIP from Vulkan as closely as the managed APIs permit.
+
+Lemonade 11.7 adds the missing external-draft integration. Halo registers the
+catalog's main, projector, and renamed `dflash-*` companion as one `local_path`
+model and verifies that the spawned server receives `--model-draft`,
+`--spec-type draft-dflash`, and the catalog's draft width. That wiring passed,
+but the DFlash2 load did not: stable package `b10597`/active build 10594 and
+nightly `b1315` both returned `done_getting_tensors: wrong number of tensors;
+expected 81, got 58`. The companion is a valid 58-tensor Qwen3.8 DFlash2 GGUF;
+the Lemonade binaries implement upstream DFlash v1, while Qwen3.8 DFlash2
+support remains open llama.cpp PR #27342. The ROCm DFlash2 profile therefore
+has a catalog gate until a compatible loader ships. `GPU_MAX_HW_QUEUES=1` was
+not run against this failure because schema validation occurs before HIP queue
+creation; Halo retains the empty-by-default knob for future runtime diagnostics.
+The Lemonade container preserves the rootless operator's supplementary groups,
+allowing its fixed service UID to read the deliberately non-world-readable
+`0640` model files without weakening their host permissions.
+
+The first same-process backend A/B used the same deterministic 81-token prompt
+and forced 256 generated tokens in three repetitions. Lemonade HIP decoded at
+8.06, 8.04, and 8.05 tok/s (median 8.05); Vulkan decoded at 8.42, 8.44, and
+8.48 tok/s (median 8.44), making Vulkan 4.9% faster for sustained target-only
+decode. On the first uncached prompt, HIP prefilled at 138.84 tok/s versus
+65.10 tok/s for Vulkan, a 2.13x advantage. The separate two-token image canary
+also returned `red` on both backends. Treat the prefill result as a strong
+follow-up hypothesis rather than a complete context-length curve; the repeated
+Vulkan requests reused 77 prompt tokens, so only the first request is used for
+the prefill comparison. The full record is
+[`docs/results/qwen3.8-q6xl-vulkan-rocm-ab-2026-08-23.json`](results/qwen3.8-q6xl-vulkan-rocm-ab-2026-08-23.json).
+
+After pinning Lemonade 11.7.0 by manifest digest and stable package `b10597`,
+three fresh-process vision canaries all returned `red` with fingerprint
+`b10594-ba8e0eddf`. A new uncached 81-token/256-token, three-run control measured
+ROCm median prefill/decode at 130.07/8.013 tok/s and Vulkan at
+99.69/8.466 tok/s. The exact compatibility trials and samples are in
+[`docs/results/qwen3.8-q6xl-lemonade-dflash2-compat-2026-08-23.json`](results/qwen3.8-q6xl-lemonade-dflash2-compat-2026-08-23.json).
+
+The repo's `config/opencode.json` exposes all configured models through one
+provider: `halo-ai/ds4`, `halo-ai/qwen3.8fp4`, `halo-ai/qwen3.8fp8`, and
+`halo-ai/qwen3.8df2`. DS4, ROCmFPX, and Strix Vulkan are mutually exclusive
+managed runtimes, so they share `http://127.0.0.1:8000/v1`; this avoids a second
+provider solely for a provider-wide OpenCode `baseURL`. The DFlash2 entry keeps
+its text/image modalities and 262,144-token context limit.
 
 The fixed quality suite deliberately disables Qwen thinking. Its CRT case
 returned `17` under both target-only and DFlash, so that failure belongs to the
@@ -1883,7 +1928,7 @@ remain gated. FP4 baseline remains the default; FP8 baseline remains a
 quality-only experiment with no observed suite advantage. Full repetitions and
 qualification notes are in
 `docs/results/office-profile-matrix-2026-08-18.json` and
-`docs/results/qwen38-quality-identity-2026-08-18.json`.
+`docs/results/qwen3.8-quality-identity-2026-08-18.json`.
 
 ### LongBench-v2 at 128K
 
@@ -2184,20 +2229,22 @@ HALO_AI_MODELS_REQUIRE_MOUNT=0
 HALO_AI_MODELS_EXPECT_UUID=
 HALO_AI_DEFAULT_PROFILE=qwen3.6-35b-a3b-q8xl-lemonade
 
-LEMONADE_IMAGE=ghcr.io/lemonade-sdk/lemonade-server:latest
+LEMONADE_IMAGE=ghcr.io/lemonade-sdk/lemonade-server@sha256:87aec2fb7e42f75b38faf3775a343b58941496add050b8de47519c0d212921d4
 LEMONADE_PORT=13305
 LEMONADE_VALIDATION_MODEL=Qwen3-0.6B-GGUF
-LEMONADE_LLAMACPP_ROCM_BIN=latest
+LEMONADE_LLAMACPP_ROCM_BIN=b10597
+LEMONADE_ROCM_CHANNEL=stable
+LEMONADE_GPU_MAX_HW_QUEUES=
 
 # Stable gfx1151 tag; each pull and trial records its resolved digest/build.
 LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14
 LLAMACPP_PORT=8080
 
 ROCMFPX_IMAGE=localhost/halo-ai-rocmfpx:v1.0.0
-ROCMFPX_PORT=8002
+ROCMFPX_PORT=8000
 
 STRIXVULKAN_IMAGE=ghcr.io/nathanw1014/strix-halo-llamacpp@sha256:a4a3dfe5813df1f0687e526bcba639bfd8b7cdb1d5e4c1c855abc240fb574d3a
-STRIXVULKAN_PORT=8003
+STRIXVULKAN_PORT=8000
 
 DS4_IMAGE=localhost/halo-ai-ds4:b0001
 DS4_PORT=8000

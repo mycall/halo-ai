@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "recorded_local_date": "2026-08-16",
-  "profile": "qwen38-27b-rocmfp4-mtp",
+  "profile": "qwen3.8-27b-rocmfp4-mtp",
   "status": "experimental-generation-optimization",
   "model_download_bytes": 0,
   "reused_model": {
@@ -42,7 +42,7 @@
     "caveat": "The unassisted Vulkan baseline also selected different compact, pretty-printed, and fenced outputs across fresh processes despite temperature 0 and fixed request/server seeds. The one differing optimized case was semantically equivalent Python (x*x versus x**2)."
   },
   "benchmark_method": {
-    "baseline_record": "qwen38-rocmfp4-baseline-2026-08-16.json",
+    "baseline_record": "qwen3.8-rocmfp4-baseline-2026-08-16.json",
     "same_prompts": true,
     "streaming": true,
     "thinking": false,

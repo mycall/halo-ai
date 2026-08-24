@@ -48,7 +48,7 @@ dependency.
   the source-provenance part of this item remains open.
 - [x] Add a distinct `rocmfpx` engine to Halo; do not disguise the custom
       ROCmFPX ABI as ordinary `llamacpp`.
-- [x] Add the FP4 artifact and a `qwen38-27b-rocmfp4-baseline` profile to the
+- [x] Add the FP4 artifact and a `qwen3.8-27b-rocmfp4-baseline` profile to the
       catalog with speculation and vision disabled.
 - [x] Add profile-scoped acquisition with dry-run, resume, exact size/SHA
       verification, and atomic completion.
@@ -75,7 +75,7 @@ dependency.
 
 ### Tasks
 
-- [x] Add `qwen38-27b-rocmfp4-mtp` using the MTP tensors already stored in the
+- [x] Add `qwen3.8-27b-rocmfp4-mtp` using the MTP tensors already stored in the
       FP4 GGUF.
 - [x] Run strict greedy MTP against the unassisted FP4 profile and verify
       token-for-token equivalence across clean processes.
@@ -101,10 +101,10 @@ dependency.
 ### Gate
 
 - [x] **Strict gate failed:** retain the unassisted FP4 baseline and
-      `qwen38fp4` alias. Keep the two aggressive FP4 profiles and FP8 MTP gated
+      `qwen3.8fp4` alias. Keep the two aggressive FP4 profiles and FP8 MTP gated
       pending a backend fix and complete identity-suite rerun.
 - [x] **Operator-approved exception:** expose
-      `qwen38-27b-rocmfp4-mtp-conservative-q5-draft` as an opt-in experimental
+      `qwen3.8-27b-rocmfp4-mtp-conservative-q5-draft` as an opt-in experimental
       profile because its bounded quality score remained 9/13 and its observed
       divergence was accepted; do not describe it as lossless or make it the
       default alias.
@@ -306,6 +306,28 @@ without downloading an entire quant ladder.
       6.9%; at 32K+64 it improved decode from 7.77 to 14.14 tok/s but increased
       wall time 8.7% because prefill fell from 175.64 to 158.03 tok/s. Peak GTT
       was 72.91--73.06 GiB versus 60.80--60.84 GiB target-only.
+- [x] Add a no-download Lemonade ROCm/HIP A/B profile that reuses the exact Q6
+      target and BF16 projector. Match the target-only Vulkan control at native
+      262K context, F16 K/V, one slot, Flash Attention, and 4096/4096
+      batch/ubatch, with speculation explicitly disabled. The vision canary
+      passed on Lemonade 11.5.2 with ROCm package `b10597` / active binary
+      `b10594`. A same-process three-run 81-prompt/256-generation comparison
+      measured median decode at 8.05 tok/s HIP versus 8.44 Vulkan (Vulkan 4.9%
+      faster), while the first uncached prefill measured 138.84 versus 65.10
+      tok/s (HIP 2.13x faster). Keep this as a prompt-heavy target-only option;
+      it does not replace DFlash2's roughly 24.5 tok/s qualified decode path.
+- [x] Upgrade the managed Lemonade path to pinned 11.7.0 and test a first-class
+      local target + BF16 projector + DFlash2 companion registration. Lemonade
+      correctly emitted `--model-draft`, `--spec-type draft-dflash`, and
+      `--spec-draft-n-max 5`, but stable package `b10597`/active build 10594 and
+      nightly `b1315` both failed before inference with `expected 81, got 58`.
+      The 58-tensor sidecar is Qwen3.8 DFlash2; Lemonade's binaries follow
+      upstream DFlash v1 while DFlash2 remains open llama.cpp PR #27342. Keep
+      `qwen3.8-27b-q6xl-vision-dflash2-lemonade` compatibility-gated and retest
+      only after that PR or an equivalent loader lands. Do not run the
+      `GPU_MAX_HW_QUEUES=1` arm for this error: tensor-schema validation occurs
+      before HIP queue creation, so the variable cannot affect it. The opt-in
+      knob remains available for a future backend-execution diagnostic.
 - [x] Test the official Q8_0 and BF16 DFlash2 drafters as higher-fidelity
       controls after the combined vision path diverged at `n-max=7`. Across
       three fresh processes per arm, Q8_0 and BF16 produced the same alternate
@@ -314,7 +336,7 @@ without downloading an entire quant ladder.
       This single canary does not establish a drafter-quality ordering: the
       later Q4_K_M `n-max` sweep proved verification-batch shape can select a
       different near-tie trajectory. Retain the larger profiles as diagnostics;
-      keep the smaller, faster Q4_K_M behind `qwen38df2` at qualified `n-max=5`.
+      keep the smaller, faster Q4_K_M behind `qwen3.8df2` at qualified `n-max=5`.
 - [ ] **Deferred; do not pursue yet:** maintain a local experimental branch of
       Nathan's `strix-halo-vulkan` llama.cpp fork only if configuration-level
       qualification still shows consequential target divergence. Start from
@@ -341,8 +363,8 @@ without downloading an entire quant ladder.
 
 ### Gate
 
-- [x] Keep `qwen38fp4` on the ROCmFP4 baseline. Map the operator-selected
-      `qwen38df2` alias to the experimental Q6 vision+DFlash2 Q4_K_M profile at
+- [x] Keep `qwen3.8fp4` on the ROCmFP4 baseline. Map the operator-selected
+      `qwen3.8df2` alias to the experimental Q6 vision+DFlash2 Q4_K_M profile at
       `n-max=5`. Its paired vision canary matched target-only in three fresh
       processes and its equal-history suite matched 13/13 token streams in two
       fresh-process repetitions. Preserve both target-only controls because the
