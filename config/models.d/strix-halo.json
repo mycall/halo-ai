@@ -73,6 +73,7 @@
       "revision": "e439c125804f73ccb1d9e6aebb5ea50f112833fa",
       "architecture": "qwen35",
       "quantization": "ROCmFP4_FAST",
+      "default_reasoning_effort": "medium",
       "modalities": ["text"],
       "engines": ["rocmfpx"],
       "download": {
@@ -123,6 +124,7 @@
       "revision": "e439c125804f73ccb1d9e6aebb5ea50f112833fa",
       "architecture": "qwen35",
       "quantization": "Q8_0_ROCMFPX",
+      "default_reasoning_effort": "medium",
       "modalities": ["text"],
       "engines": ["rocmfpx"],
       "download": {
@@ -173,6 +175,7 @@
       "revision": "4ca720788d1e01f1bff70c033e0d0028fd02e502",
       "architecture": "qwen35",
       "quantization": "UD-Q6_K_XL",
+      "default_reasoning_effort": "medium",
       "modalities": ["text", "vision"],
       "engines": ["lemonade", "strixvulkan"],
       "download": {

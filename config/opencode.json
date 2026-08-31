@@ -67,8 +67,9 @@
             "output": 8192
           },
           "options": {
-            "reasoningEffort": "none",
-            "temperature": 0
+            "reasoningEffort": "medium",
+            "temperature": 1.0,
+            "topP": 0.95
           },
           "variants": {
             "none": {
@@ -106,8 +107,9 @@
             "output": 8192
           },
           "options": {
-            "reasoningEffort": "none",
-            "temperature": 0
+            "reasoningEffort": "medium",
+            "temperature": 1.0,
+            "topP": 0.95
           },
           "variants": {
             "none": {
@@ -152,8 +154,9 @@
           "experimental": true,
           "status": "beta",
           "options": {
-            "reasoningEffort": "none",
-            "temperature": 0
+            "reasoningEffort": "medium",
+            "temperature": 1.0,
+            "topP": 0.95
           },
           "variants": {
             "none": {

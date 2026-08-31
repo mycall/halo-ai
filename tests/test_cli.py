@@ -75,10 +75,14 @@ class ConfigurationTests(unittest.TestCase):
             set(provider["models"]), {"ds4", "qwen3.8df2", "qwen3.8fp4", "qwen3.8fp8"},
         )
         for model_id in ("qwen3.8df2", "qwen3.8fp4", "qwen3.8fp8"):
-            variants = provider["models"][model_id]["variants"]
+            model = provider["models"][model_id]
+            variants = model["variants"]
             self.assertEqual(set(variants), {"none", "low", "medium", "xhigh"})
             self.assertEqual(variants["medium"]["reasoningEffort"], "medium")
             self.assertNotIn("high", variants)
+            self.assertEqual(model["options"]["reasoningEffort"], "medium")
+            self.assertEqual(model["options"]["temperature"], 1.0)
+            self.assertEqual(model["options"]["topP"], 0.95)
         model = provider["models"]["qwen3.8df2"]
         self.assertEqual(model["limit"]["context"], 262_144)
         self.assertTrue(model["attachment"])
@@ -261,6 +265,46 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaises(cli.HaloError):
             cli.validate_catalog({model["id"]: model}, {})
 
+    def test_qwen3_8_models_default_to_medium_reasoning(self) -> None:
+        for model_id in (
+            "qwen3.8-27b-rocmfp4",
+            "qwen3.8-27b-rocmfp8",
+            "qwen3.8-27b-ud-q6-k-xl",
+        ):
+            with self.subTest(model_id=model_id):
+                self.assertEqual(
+                    self.catalog.models[model_id]["default_reasoning_effort"],
+                    "medium",
+                )
+
+    def test_live_reasoning_default_canary_matches_medium_and_differs_from_xhigh(self) -> None:
+        profile = {"engine": "rocmfpx"}
+        model = {"default_reasoning_effort": "medium"}
+
+        def render(_url: str, **kwargs: object) -> dict[str, str]:
+            payload = kwargs["payload"]
+            self.assertIsInstance(payload, dict)
+            template_kwargs = payload.get("chat_template_kwargs", {})
+            effort = template_kwargs.get("reasoning_effort")
+            return {"prompt": "xhigh prompt" if effort == "xhigh" else "medium prompt"}
+
+        with mock.patch.object(cli, "http_json", side_effect=render):
+            result = cli.validate_default_reasoning_template(profile, model, 8000)
+        self.assertIsNotNone(result)
+        self.assertEqual(result["default"], "medium")
+        self.assertEqual(
+            result["omitted_prompt_sha256"], result["explicit_prompt_sha256"],
+        )
+        self.assertNotEqual(
+            result["omitted_prompt_sha256"], result["control_prompt_sha256"],
+        )
+
+    def test_invalid_default_reasoning_effort_is_rejected(self) -> None:
+        model = json.loads(json.dumps(self.catalog.models["qwen3.8-27b-rocmfp4"]))
+        model["default_reasoning_effort"] = "max"
+        with self.assertRaises(cli.HaloError):
+            cli.validate_catalog({model["id"]: model}, {})
+
     def test_catalog_matches_documented_expected_manifest(self) -> None:
         documented = {}
         for digest, size, relative in __import__("re").findall(
@@ -440,6 +484,10 @@ class CatalogTests(unittest.TestCase):
         self.assertNotIn("--device=/dev/kfd", command)
         self.assertIn("--device Vulkan0", rendered)
         self.assertIn("--cache-type-k q8_0 --cache-type-v turbo4", rendered)
+        self.assertIn(
+            "--chat-template-kwargs '{\"reasoning_effort\":\"medium\"}'",
+            rendered,
+        )
         self.assertIn("--seed 1 --temp 0", rendered)
         self.assertIn("--spec-type none", rendered)
         self.assertNotIn("draft-mtp", rendered)
@@ -471,6 +519,10 @@ class CatalogTests(unittest.TestCase):
             self.assertIn("--device Vulkan0 --gpu-layers all --fit off", rendered)
             self.assertIn("--threads 16 --threads-batch 32", rendered)
             self.assertIn("--cache-type-k f16 --cache-type-v f16", rendered)
+            self.assertIn(
+                "--chat-template-kwargs '{\"reasoning_effort\":\"medium\"}'",
+                rendered,
+            )
         self.assertIn("--spec-type none", baseline)
         self.assertNotIn("draft.gguf", baseline)
         self.assertIn("dst=/models/draft.gguf,ro", dflash)
@@ -507,11 +559,18 @@ class CatalogTests(unittest.TestCase):
             "dst=/models/extra/qwen3.8-27b-ud-q6-k-xl-vision/mmproj-BF16.gguf,ro",
             rendered,
         )
-        payload = cli.lemonade_load_payload(profile)
+        payload = cli.lemonade_load_payload(
+            profile,
+            default_reasoning_effort=model["default_reasoning_effort"],
+        )
         self.assertEqual(payload["ctx_size"], 262_144)
         self.assertEqual(payload["llamacpp_backend"], "rocm")
         self.assertIn("--batch-size 4096 --ubatch-size 4096", payload["llamacpp_args"])
         self.assertIn("--cache-type-k f16 --cache-type-v f16", payload["llamacpp_args"])
+        self.assertIn(
+            "--chat-template-kwargs '{\"reasoning_effort\":\"medium\"}'",
+            payload["llamacpp_args"],
+        )
         self.assertIn("--spec-type none", payload["llamacpp_args"])
         with mock.patch.object(cli, "image_identity", return_value=cli.LEMONADE_IMAGE_DIGEST):
             plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
@@ -1139,7 +1198,13 @@ class TrialTests(unittest.TestCase):
             }
             with (
                 mock.patch.object(cli, "hardware_snapshot", return_value={}),
-                mock.patch.object(cli, "http_json", side_effect=[models, completion]) as request,
+                mock.patch.object(cli, "http_json", side_effect=[
+                    models,
+                    {"prompt": "medium prompt"},
+                    {"prompt": "medium prompt"},
+                    {"prompt": "xhigh prompt"},
+                    completion,
+                ]) as request,
             ):
                 result = cli.command_test(
                     config, catalog,
@@ -1148,7 +1213,7 @@ class TrialTests(unittest.TestCase):
                     ),
                 )
             self.assertEqual(result, 0)
-            payload = request.call_args_list[1].kwargs["payload"]
+            payload = request.call_args_list[-1].kwargs["payload"]
             self.assertEqual(payload["reasoning_effort"], "none")
             self.assertEqual(payload["chat_template_kwargs"], {"enable_thinking": False})
             self.assertEqual(payload["temperature"], 0)
@@ -1295,6 +1360,22 @@ class LongBenchTests(unittest.TestCase):
         self.assertEqual(score["truncated"], 1)
         self.assertEqual(score["accuracy_percent"], 50.0)
 
+    def test_reasoning_arms_are_explicit_except_for_default_canary(self) -> None:
+        self.assertEqual(cli.reasoning_request_fields("default"), {})
+        self.assertEqual(
+            cli.reasoning_request_fields("none"),
+            {
+                "reasoning_effort": "none",
+                "chat_template_kwargs": {"enable_thinking": False},
+            },
+        )
+        self.assertEqual(
+            cli.reasoning_request_fields("medium")["chat_template_kwargs"],
+            {"enable_thinking": True, "reasoning_effort": "medium"},
+        )
+        with self.assertRaises(cli.HaloError):
+            cli.reasoning_request_fields("max")
+
     def test_lemonade_token_counter_streams_request_on_stdin(self) -> None:
         processes = mock.MagicMock()
         processes.stdout = "COMMAND\n/opt/lemonade/llama-server --port 8001\n"
@@ -1314,6 +1395,24 @@ class LongBenchTests(unittest.TestCase):
         self.assertIn("@-", arguments)
         self.assertIn("large prompt", keywords["input_text"])
         self.assertNotIn("large prompt", arguments)
+
+    def test_direct_token_counter_falls_back_to_apply_template_and_tokenize(self) -> None:
+        with mock.patch.object(cli, "http_json", side_effect=[
+            cli.HaloError("missing input_tokens endpoint"),
+            {"prompt": "rendered medium prompt"},
+            {"tokens": [11, 12, 13]},
+        ]) as request:
+            count = cli.longbench_input_tokens(
+                "http://127.0.0.1:8000", "fixture", "large prompt",
+                reasoning_effort="medium",
+            )
+        self.assertEqual(count, 3)
+        self.assertEqual(request.call_count, 3)
+        template_payload = request.call_args_list[1].kwargs["payload"]
+        self.assertEqual(
+            template_payload["chat_template_kwargs"],
+            {"enable_thinking": True, "reasoning_effort": "medium"},
+        )
 
     def test_lemonade_payload_excludes_server_managed_arguments(self) -> None:
         profile = {

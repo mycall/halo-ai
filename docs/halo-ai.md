@@ -1681,19 +1681,35 @@ provider: `halo-ai/ds4`, `halo-ai/qwen3.8fp4`, `halo-ai/qwen3.8fp8`, and
 managed runtimes, so they share `http://127.0.0.1:8000/v1`; this avoids a second
 provider solely for a provider-wide OpenCode `baseURL`. The DFlash2 entry keeps
 its text/image modalities and 262,144-token context limit.
-Each Qwen3.8 entry defines `none`, `low`, `medium`, and `xhigh` OpenCode
-variants. `low`, `medium`, and `xhigh` are the model template's accepted effort
-values; `none` disables thinking through llama.cpp. `high` is intentionally
-omitted because the pinned template accepts `xhigh` instead.
+Each Qwen3.8 entry defaults to `medium` reasoning at both the managed server and
+OpenCode layers, and defines `none`, `low`, `medium`, and `xhigh` variants.
+`medium` is the template's neutral reasoning tier; `low` and `xhigh` add effort
+instructions, while `none` disables thinking through llama.cpp. `xhigh` is now
+opt-in because [Qwen3.8 issue #216](https://github.com/QwenLM/Qwen3.8/issues/216)
+reports excessive reasoning and intermittent empty final answers under the
+template's upstream `xhigh` fallback. `high` remains omitted because the pinned
+template accepts `xhigh` instead.
 
 The fixed quality suite deliberately disables Qwen thinking. Its CRT case
 returned `17` under both target-only and DFlash, so that failure belongs to the
 non-thinking target behavior rather than speculation. With request-level
 `chat_template_kwargs.enable_thinking=true`, both profiles returned the correct
 `38` with identical 162-token reasoning traces. On that request DFlash accepted
-131/155 proposals and decoded at 23.64 tok/s versus 8.39 target-only. For this
-llama.cpp/Qwen template, use the explicit `enable_thinking` template argument;
-do not assume a non-`none` `reasoning_effort` value alone changes the mode.
+131/155 proposals and decoded at 23.64 tok/s versus 8.39 target-only. Ordinary
+requests now inherit `medium`; clients that explicitly toggle modes should
+still send `chat_template_kwargs.enable_thinking=true` for reasoning or
+`reasoning_effort=none` for the deterministic non-thinking path.
+
+The managed smoke test now verifies this policy against the live backend's
+`/apply-template` endpoint. The omitted-effort and explicit-`medium` prompt
+hashes must match, and an explicit `xhigh` control must differ. The 2026-08-30
+build-213 validation passed that gate and retained the exact non-thinking smoke
+response. A pinned LongBench-v2 sample with 29,698 input tokens then returned a
+non-empty final answer and the correct choice under omitted/default, explicit
+`medium`, and `xhigh` arms. This is a bounded no-regression result, not evidence
+that one effort always uses fewer tokens: the one-sample completion counts were
+396, 623, and 250 respectively. The machine record is
+[`docs/results/qwen3.8-reasoning-default-validation-2026-08-30.json`](results/qwen3.8-reasoning-default-validation-2026-08-30.json).
 
 Normal stop/restart preserves models and cache:
 
@@ -2060,6 +2076,15 @@ result file per profile, for example:
 halo-ai bench longbench-v2 run PROFILE \
   --sample-id 66f37eb9821e116aacb2d295
 ```
+
+Use `--reasoning-effort none|default|low|medium|xhigh` for isolated reasoning
+arms. `none` preserves the historical non-thinking benchmark behavior;
+`default` deliberately omits the request field and tests the server policy.
+Thinking arms use temperature 1.0, top-p 0.95, and seed 1. Records include
+final-content presence, finish reason, reasoning character count/hash, and the
+ordinary LongBench answer judgment. q38rocm build 213 lacks the newer
+`/input_tokens` endpoint, so Halo falls back to the exact `/apply-template` plus
+`/tokenize` composition rather than estimating its token budget.
 
 LongBench remains a text request when run against a vision profile; it measures
 that profile's loaded text path and memory overhead but does not exercise the

@@ -294,9 +294,13 @@ The checked-in OpenCode configuration exposes this alias as
 `halo-ai/qwen3.8df2`, alongside `ds4`, `qwen3.8fp4`, and `qwen3.8fp8` under one
 provider. These mutually exclusive managed LLM runtimes share the loopback
 endpoint on port 8000, with text and image inputs enabled for DFlash2.
-All three Qwen3.8 entries expose OpenCode variants for `none`, `low`, `medium`,
-and `xhigh` reasoning; the thinking variants use Qwen's recommended
-temperature 1.0 and top-p 0.95 sampling policy.
+All three Qwen3.8 entries default to `medium` reasoning and expose OpenCode
+variants for `none`, `low`, `medium`, and `xhigh`. The thinking variants use
+Qwen's recommended temperature 1.0 and top-p 0.95 sampling policy; `xhigh`
+remains an explicit opt-in for unusually difficult requests.
+`halo-ai test qwen3.8fp4` also performs a live template canary: an omitted
+effort must render byte-for-byte like explicit `medium`, while the `xhigh`
+control must differ, before the ordinary non-thinking smoke can pass.
 
 The experimental `qwen3.8-27b-q6xl-vision-lemonade` profile reuses the same
 on-disk Q6 XL target and BF16 projector through Lemonade's real ROCm/HIP
@@ -428,6 +432,18 @@ separate output identity:
 ```bash
 halo-ai bench longbench-v2 run qwen3.6-35b-a3b-q8xl-128k-lemonade \
   --suite full --overflow middle
+```
+
+Reasoning-policy comparisons use separate resumable outputs and preserve the
+historical non-thinking default when the option is omitted:
+
+```bash
+halo-ai bench longbench-v2 run qwen3.8fp4 --sample-id SAMPLE \
+  --max-tokens 1024 --reasoning-effort default
+halo-ai bench longbench-v2 run qwen3.8fp4 --sample-id SAMPLE \
+  --max-tokens 1024 --reasoning-effort medium
+halo-ai bench longbench-v2 run qwen3.8fp4 --sample-id SAMPLE \
+  --max-tokens 1024 --reasoning-effort xhigh
 ```
 
 Every sample is flushed to disk, so rerunning the identical command resumes.

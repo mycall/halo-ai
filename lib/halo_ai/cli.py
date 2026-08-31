@@ -401,6 +401,11 @@ def validate_catalog(
         model_format = model.get("format", "gguf")
         if model_format not in {"gguf", "transformers"}:
             fail(f"model {identifier} has unsupported format {model_format!r}")
+        default_reasoning_effort = model.get("default_reasoning_effort")
+        if default_reasoning_effort is not None and default_reasoning_effort not in {
+            "low", "medium", "xhigh",
+        }:
+            fail(f"model {identifier} has invalid default reasoning effort")
         if not isinstance(engines, list) or not engines or not isinstance(files, list) or not files:
             fail(f"model {identifier} requires engines and files")
         if any(engine not in ENGINE_IMAGE_KEYS for engine in engines):
@@ -1328,6 +1333,15 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
             ])
         command.append(image_for(config, engine))
         command.extend(llama_server_common_arguments(executable, profile, f"/models/{main.name}", port))
+        default_reasoning_effort = model.get("default_reasoning_effort")
+        if default_reasoning_effort:
+            command.extend([
+                "--chat-template-kwargs",
+                json.dumps(
+                    {"reasoning_effort": default_reasoning_effort},
+                    separators=(",", ":"),
+                ),
+            ])
         if engine == "rocmfpx":
             command.extend([
                 "--device", settings["device"], "--gpu-layers", str(settings["gpu_layers"]),
@@ -1392,6 +1406,7 @@ def lemonade_load_payload(
     profile: dict[str, Any],
     model_name: str = "<resolved-extra-id>",
     chat_template_path: str | None = None,
+    default_reasoning_effort: str | None = None,
 ) -> dict[str, Any]:
     settings = profile["settings"]
     if "native-ds4" in profile.get("features", []):
@@ -1411,6 +1426,14 @@ def lemonade_load_payload(
     ]
     if settings.get("load_mode"):
         args.extend(["--load-mode", settings["load_mode"]])
+    if default_reasoning_effort:
+        args.extend([
+            "--chat-template-kwargs",
+            json.dumps(
+                {"reasoning_effort": default_reasoning_effort},
+                separators=(",", ":"),
+            ),
+        ])
     if "dflash" in profile.get("features", []):
         args.extend([
             "--spec-type", "draft-dflash",
@@ -2195,7 +2218,11 @@ def command_profiles(config: Config, catalog: Catalog, args: argparse.Namespace)
         print(shlex.join(render_container(config, catalog, profile)))
         if profile["engine"] == "lemonade":
             model = catalog.models[profile["model"]]
-            print(json.dumps(lemonade_load_payload(profile, chat_template_path=container_template_path(model, profile)), indent=2))
+            print(json.dumps(lemonade_load_payload(
+                profile,
+                chat_template_path=container_template_path(model, profile),
+                default_reasoning_effort=model.get("default_reasoning_effort"),
+            ), indent=2))
     return 0
 
 
@@ -2960,6 +2987,7 @@ def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) ->
                 profile,
                 match,
                 chat_template_path=container_template_path(model, profile),
+                default_reasoning_effort=model.get("default_reasoning_effort"),
             )
             http_json(f"http://127.0.0.1:{port}/v1/load", method="POST", payload=payload, timeout=600)
             if "mtp" in profile.get("features", []):
@@ -3183,6 +3211,67 @@ def validate_lemonade_reasoning_template(container: str, payload: dict[str, Any]
         fail("non-thinking request did not render the disabled-reasoning suffix")
 
 
+def validate_default_reasoning_template(
+    profile: dict[str, Any], model: dict[str, Any], port: int,
+) -> dict[str, Any] | None:
+    """Prove that an omitted Qwen effort renders as the cataloged default."""
+    effort = model.get("default_reasoning_effort")
+    if not effort:
+        return None
+    request = {
+        "messages": [{"role": "user", "content": "Return OK."}],
+        "add_generation_prompt": True,
+    }
+
+    def render(extra: dict[str, Any]) -> str:
+        payload = {**request, **extra}
+        if profile["engine"] == "lemonade":
+            container = container_name("lemonade")
+            result = container_http_json(
+                container,
+                f"http://127.0.0.1:{lemonade_backend_port(container)}/apply-template",
+                payload,
+                timeout=30,
+            )
+        else:
+            result = http_json(
+                f"http://127.0.0.1:{port}/apply-template",
+                method="POST",
+                payload=payload,
+                timeout=30,
+            )
+        prompt = result.get("prompt") if isinstance(result, dict) else None
+        if not isinstance(prompt, str) or not prompt:
+            fail("reasoning-default canary returned an invalid rendered prompt")
+        return prompt
+
+    omitted_prompt = render({})
+    explicit_prompt = render({
+        "chat_template_kwargs": {
+            "enable_thinking": True,
+            "reasoning_effort": effort,
+        },
+    })
+    control_effort = "low" if effort == "xhigh" else "xhigh"
+    control_prompt = render({
+        "chat_template_kwargs": {
+            "enable_thinking": True,
+            "reasoning_effort": control_effort,
+        },
+    })
+    if omitted_prompt != explicit_prompt:
+        fail(f"omitted reasoning effort did not render as {effort}")
+    if omitted_prompt == control_prompt:
+        fail(f"reasoning-default canary could not distinguish {effort} from {control_effort}")
+    return {
+        "default": effort,
+        "control": control_effort,
+        "omitted_prompt_sha256": hashlib.sha256(omitted_prompt.encode()).hexdigest(),
+        "explicit_prompt_sha256": hashlib.sha256(explicit_prompt.encode()).hexdigest(),
+        "control_prompt_sha256": hashlib.sha256(control_prompt.encode()).hexdigest(),
+    }
+
+
 def merge_request_preset(payload: dict[str, Any], request: dict[str, Any]) -> None:
     template_kwargs = request.get("chat_template_kwargs")
     if (
@@ -3323,6 +3412,9 @@ def command_test(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
     is_vision = "vision" in profile.get("features", [])
     expected = "red" if is_vision else "halo-ai smoke test passed"
     model = catalog.models[profile["model"]]
+    reasoning_default_canary = validate_default_reasoning_template(
+        profile, model, port,
+    )
     # DeepSeek V4's native template emits a separate reasoning_content field
     # even when the answer itself follows the requested exact form. Unlike the
     # pinned Qwen non-thinking template, that is expected behavior here.
@@ -3375,6 +3467,8 @@ def command_test(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
         validate_lemonade_reasoning_template(container_name("lemonade"), payload, thinking)
     response = http_json(f"http://127.0.0.1:{port}/v1/chat/completions", method="POST", payload=payload, timeout=180)
     validate_smoke_response(response, expected, thinking)
+    if reasoning_default_canary is not None:
+        response["reasoning_default_canary"] = reasoning_default_canary
     ds4_dspark_probe: dict[str, Any] | None = None
     if profile["engine"] == "ds4" and "dspark" in profile.get("features", []):
         probe_response = http_json(
@@ -3442,6 +3536,8 @@ def command_test(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
                     "feature": speculative_feature,
                     **speculative_metrics,
                 }
+            if reasoning_default_canary is not None:
+                smoke_record["reasoning_default_canary"] = reasoning_default_canary
             smoke_tests = trial.setdefault("smoke_tests", [])
             if not isinstance(smoke_tests, list):
                 fail("last trial smoke_tests record is corrupt")
@@ -3507,6 +3603,26 @@ def longbench_request(url: str, payload: dict[str, Any], timeout: int = 600) -> 
     fail(f"LongBench-v2 request failed after 3 attempts: {error}")
 
 
+def reasoning_request_fields(effort: str) -> dict[str, Any]:
+    """Map a benchmark effort arm to explicit llama.cpp request fields."""
+    if effort == "default":
+        return {}
+    if effort == "none":
+        return {
+            "reasoning_effort": "none",
+            "chat_template_kwargs": {"enable_thinking": False},
+        }
+    if effort not in {"low", "medium", "xhigh"}:
+        fail(f"unsupported reasoning effort: {effort}")
+    return {
+        "reasoning_effort": effort,
+        "chat_template_kwargs": {
+            "enable_thinking": True,
+            "reasoning_effort": effort,
+        },
+    }
+
+
 def ds4_recent_timings(container: str, usage: Any) -> dict[str, Any] | None:
     """Translate ds4's latest completed request log into llama.cpp timing keys."""
     if not isinstance(usage, dict):
@@ -3565,17 +3681,43 @@ def lemonade_backend_port(container: str) -> int:
 
 
 def longbench_input_tokens(
-    base_url: str, model_name: str, prompt: str, *, lemonade_container: str | None = None,
+    base_url: str, model_name: str, prompt: str, *,
+    lemonade_container: str | None = None, reasoning_effort: str = "none",
 ) -> int:
     payload = {
         "model": model_name,
         "messages": [{"role": "user", "content": prompt}],
-        "reasoning_effort": "none",
+        **reasoning_request_fields(reasoning_effort),
     }
     if lemonade_container is None:
-        response = longbench_request(
-            f"{base_url}/v1/chat/completions/input_tokens", payload, timeout=180,
-        )
+        try:
+            response = http_json(
+                f"{base_url}/v1/chat/completions/input_tokens",
+                method="POST", payload=payload, timeout=180,
+            )
+        except HaloError:
+            # q38rocm build 213 predates /input_tokens but exposes both of the
+            # exact primitives needed to reproduce it without approximation.
+            template_payload = {
+                "messages": payload["messages"],
+                "add_generation_prompt": True,
+                **reasoning_request_fields(reasoning_effort),
+            }
+            rendered = http_json(
+                f"{base_url}/apply-template", method="POST",
+                payload=template_payload, timeout=180,
+            )
+            rendered_prompt = rendered.get("prompt") if isinstance(rendered, dict) else None
+            if not isinstance(rendered_prompt, str) or not rendered_prompt:
+                fail("active backend returned an invalid /apply-template response")
+            tokenized = http_json(
+                f"{base_url}/tokenize", method="POST",
+                payload={"content": rendered_prompt}, timeout=180,
+            )
+            tokens = tokenized.get("tokens") if isinstance(tokenized, dict) else None
+            if not isinstance(tokens, list) or not tokens:
+                fail("active backend returned an invalid /tokenize response")
+            return len(tokens)
     else:
         port = lemonade_backend_port(lemonade_container)
         error = ""
@@ -3605,6 +3747,9 @@ def longbench_output_path(config: Config, profile_id: str, args: argparse.Namesp
     if args.output:
         return Path(args.output).expanduser().resolve()
     suite_name = f"sample-{args.sample_id}" if args.sample_id else args.suite
+    reasoning_effort = getattr(args, "reasoning_effort", "none")
+    if reasoning_effort != "none":
+        suite_name += f"-reasoning-{reasoning_effort}"
     name = f"{profile_id}-{suite_name}-{args.overflow}-{longbench.DATASET_REVISION[:12]}.jsonl"
     return config.path("HALO_AI_STATE_DIR") / "benchmarks" / "longbench-v2" / name
 
@@ -3649,6 +3794,7 @@ def command_bench_run(config: Config, catalog: Catalog, args: argparse.Namespace
         longbench_input_tokens(
             base_url, model_name, "LongBench-v2 token counter canary",
             lemonade_container=token_container,
+            reasoning_effort=args.reasoning_effort,
         )
     elif args.sample_id is None:
         fail("ds4 has no token-count endpoint; use --sample-id for one bounded sample")
@@ -3669,6 +3815,15 @@ def command_bench_run(config: Config, catalog: Catalog, args: argparse.Namespace
     if not selected:
         fail("LongBench-v2 filters selected no samples")
 
+    reasoning_enabled = args.reasoning_effort != "none"
+    temperature = (
+        0
+        if profile["engine"] == "ds4" and "dspark" in profile.get("features", [])
+        else (1.0 if reasoning_enabled else 0.1)
+    )
+    top_p = 0.95 if reasoning_enabled else None
+    seed = 1 if reasoning_enabled else None
+
     output = longbench_output_path(config, profile["id"], args)
     manifest_path = output.with_suffix(output.suffix + ".manifest.json")
     run_spec = {
@@ -3683,6 +3838,8 @@ def command_bench_run(config: Config, catalog: Catalog, args: argparse.Namespace
         "suite": args.suite,
         "overflow": args.overflow,
         "max_output_tokens": args.max_tokens,
+        "reasoning_effort": args.reasoning_effort,
+        "sampling": {"temperature": temperature, "top_p": top_p, "seed": seed},
         "length": args.length,
         "difficulty": args.difficulty,
         "domain": args.domain,
@@ -3727,6 +3884,7 @@ def command_bench_run(config: Config, catalog: Catalog, args: argparse.Namespace
         if exact_counter:
             input_tokens = longbench_input_tokens(
                 base_url, model_name, prompt, lemonade_container=token_container,
+                reasoning_effort=args.reasoning_effort,
             )
             token_count_method = "backend_input_tokens"
         else:
@@ -3751,7 +3909,9 @@ def command_bench_run(config: Config, catalog: Catalog, args: argparse.Namespace
                 prompt, input_tokens = longbench.truncate_to_budget(
                     item, budget,
                     lambda value: longbench_input_tokens(
-                        base_url, model_name, value, lemonade_container=token_container,
+                        base_url, model_name, value,
+                        lemonade_container=token_container,
+                        reasoning_effort=args.reasoning_effort,
                     ),
                 )
             except longbench.LongBenchError as exc:
@@ -3760,22 +3920,20 @@ def command_bench_run(config: Config, catalog: Catalog, args: argparse.Namespace
 
         before = hardware_snapshot(config)
         started = time.monotonic()
+        request_payload: dict[str, Any] = {
+            "model": model_name,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": temperature,
+            "max_tokens": args.max_tokens,
+            "stream": False,
+            **reasoning_request_fields(args.reasoning_effort),
+        }
+        if top_p is not None:
+            request_payload["top_p"] = top_p
+        if seed is not None:
+            request_payload["seed"] = seed
         response = longbench_request(
-            f"{base_url}/v1/chat/completions",
-            {
-                "model": model_name,
-                "messages": [{"role": "user", "content": prompt}],
-                # DSpark is a greedy-only path; sampled decoding silently
-                # remains target-only in ds4-server.
-                "temperature": (
-                    0
-                    if profile["engine"] == "ds4" and "dspark" in profile.get("features", [])
-                    else 0.1
-                ),
-                "max_tokens": args.max_tokens,
-                "stream": False,
-                "reasoning_effort": "none",
-            },
+            f"{base_url}/v1/chat/completions", request_payload,
         )
         elapsed = time.monotonic() - started
         try:
@@ -3783,6 +3941,10 @@ def command_bench_run(config: Config, catalog: Catalog, args: argparse.Namespace
             answer_text = message.get("content") or ""
         except (KeyError, IndexError, TypeError):
             fail(f"sample {item['_id']} returned an invalid chat completion")
+        reasoning_text = message.get("reasoning_content") or ""
+        if not isinstance(reasoning_text, str):
+            fail(f"sample {item['_id']} returned invalid reasoning content")
+        finish_reason = response["choices"][0].get("finish_reason")
         prediction = longbench.extract_answer(answer_text)
         usage = response.get("usage") if isinstance(response, dict) else None
         reported_prompt_tokens = usage.get("prompt_tokens") if isinstance(usage, dict) else None
@@ -3801,6 +3963,11 @@ def command_bench_run(config: Config, catalog: Catalog, args: argparse.Namespace
             "difficulty": item["difficulty"], "length": item["length"],
             "answer": item["answer"], "response": answer_text,
             "pred": prediction, "judge": prediction == item["answer"],
+            "reasoning_effort": args.reasoning_effort,
+            "finish_reason": finish_reason,
+            "final_content_present": bool(answer_text.strip()),
+            "reasoning_characters": len(reasoning_text),
+            "reasoning_sha256": hashlib.sha256(reasoning_text.encode()).hexdigest(),
             "input_tokens": input_tokens, "token_budget": budget,
             "token_count_method": token_count_method,
             "truncated": truncated, "elapsed_seconds": round(elapsed, 3),
@@ -4478,6 +4645,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="skip over-context samples (fit) or explicitly middle-truncate documents (middle)",
     )
     bench_run.add_argument("--max-tokens", type=int, default=128)
+    bench_run.add_argument(
+        "--reasoning-effort",
+        choices=["none", "default", "low", "medium", "xhigh"],
+        default="none",
+        help="reasoning arm; default omits the field and exercises the server policy",
+    )
     bench_run.add_argument("--limit", type=int)
     bench_run.add_argument("--length", choices=["short", "medium", "long"])
     bench_run.add_argument("--difficulty", choices=["easy", "hard"])

@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "kind": "halo-ai-qwen3.8-reasoning-default-validation",
+  "recorded_at": "2026-08-31T04:22:31Z",
+  "policy": {
+    "model_family": "Qwen3.8-27B",
+    "default_reasoning_effort": "medium",
+    "control_reasoning_effort": "xhigh"
+  },
+  "runtime": {
+    "profile": "qwen3.8-27b-rocmfp4-baseline",
+    "model": "Qwen3.8-27B-ROCmFP4-FAST.gguf",
+    "engine_version": "213",
+    "backend_fingerprint": "b213-e87d53e",
+    "image": "localhost/halo-ai-rocmfpx:v1.0.0",
+    "image_digest": "sha256:09e700ee3b87bb6cc5ccf0fba08d791e5411df825d30f423f55bb4fdb2c54d78"
+  },
+  "live_template_canary": {
+    "status": "pass",
+    "omitted_prompt_sha256": "d651cd7c31445656d17adb6dcde77588189ba046af8d2d4307c3840600527395",
+    "explicit_medium_prompt_sha256": "d651cd7c31445656d17adb6dcde77588189ba046af8d2d4307c3840600527395",
+    "xhigh_prompt_sha256": "20ba140fc1b01e5e4e79bde5a6c1bfe78ef4409aacd40eb19513f6259fda3cb9",
+    "nonthinking_smoke": "pass"
+  },
+  "gsm8k_style_pilot": {
+    "question_class": "single-step arithmetic",
+    "expected_answer": "18",
+    "arms": [
+      {"effort": "default", "answer": "18", "finish_reason": "stop", "completion_tokens": 76, "reasoning_characters": 184, "elapsed_seconds": 6.822},
+      {"effort": "medium", "answer": "18", "finish_reason": "stop", "completion_tokens": 76, "reasoning_characters": 185, "elapsed_seconds": 6.888},
+      {"effort": "xhigh", "answer": "18", "finish_reason": "stop", "completion_tokens": 72, "reasoning_characters": 206, "elapsed_seconds": 6.590}
+    ]
+  },
+  "longbench_v2": {
+    "dataset_repository": "zai-org/LongBench-v2",
+    "dataset_revision": "2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9",
+    "dataset_sha256": "15d61c22d92c96900b3c4948b6aeea218d3214b676a65df48e7b8555604c7fe2",
+    "sample_id": "66ebc0c95a08c7b9b35de7f3",
+    "domain": "Single-Document QA",
+    "difficulty": "easy",
+    "length_label": "short",
+    "expected_choice": "C",
+    "max_output_tokens": 1024,
+    "sampling": {"temperature": 1.0, "top_p": 0.95, "seed": 1},
+    "arms": [
+      {
+        "effort": "default",
+        "input_tokens": 29698,
+        "predicted_choice": "C",
+        "correct": true,
+        "finish_reason": "stop",
+        "final_content_present": true,
+        "reasoning_characters": 1053,
+        "completion_tokens": 396,
+        "prompt_seconds": 237.054,
+        "decode_seconds": 36.557,
+        "elapsed_seconds": 273.675,
+        "decode_tokens_per_second": 10.832
+      },
+      {
+        "effort": "medium",
+        "input_tokens": 29698,
+        "predicted_choice": "C",
+        "correct": true,
+        "finish_reason": "stop",
+        "final_content_present": true,
+        "reasoning_characters": 1874,
+        "completion_tokens": 623,
+        "prompt_seconds": 234.679,
+        "decode_seconds": 57.673,
+        "elapsed_seconds": 292.478,
+        "decode_tokens_per_second": 10.802
+      },
+      {
+        "effort": "xhigh",
+        "input_tokens": 29740,
+        "predicted_choice": "C",
+        "correct": true,
+        "finish_reason": "stop",
+        "final_content_present": true,
+        "reasoning_characters": 876,
+        "completion_tokens": 250,
+        "prompt_seconds": 235.777,
+        "decode_seconds": 23.058,
+        "elapsed_seconds": 258.969,
+        "decode_tokens_per_second": 10.842
+      }
+    ]
+  },
+  "decision": {
+    "configuration_and_template_routing": "pass",
+    "bounded_behavioral_regression": "pass",
+    "medium_reliability_superiority": "inconclusive",
+    "default_policy": "retain medium",
+    "rationale": "Medium is the neutral template tier, passed both bounded workloads, and avoids making the upstream xhigh fallback the implicit policy. One LongBench sample cannot estimate the reported intermittent empty-answer rate."
+  },
+  "follow_up": {
+    "test": "Repeated long-input agentic or structured-output reliability matrix",
+    "minimum_calls_per_arm": 24,
+    "primary_metric": "empty final content with finish_reason stop",
+    "secondary_metrics": ["correct final answer", "reasoning tokens", "completion tokens", "wall time", "energy"]
+  }
+}

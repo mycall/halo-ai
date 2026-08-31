@@ -20,6 +20,10 @@ most value for the least downloading and engineering work.
   disabled for image and video requests.
 - Selecting one profile must never download artifacts belonging only to
   another profile or experiment.
+- A Qwen3.8 Flash Next ROCmFP4/Unsloth comparison is approved as the next
+  download-backed experiment, but acquisition is intentionally deferred to the
+  next work session. It must remain isolated from the qualified Qwen3.8 27B
+  q38rocm runtime.
 
 ## Stage 1: Ship the FP4 baseline
 
@@ -57,6 +61,15 @@ dependency.
 - [x] Validate the GGUF header and tensor inventory. Trust the verified GGUF,
       not the repository's inconsistent companion `config.json`.
 - [x] Add render, lifecycle, readiness, and deterministic smoke tests.
+- [x] Change the Qwen3.8-27B default reasoning effort from the template's
+      implicit `xhigh` to neutral `medium`. The live `/apply-template` canary
+      proved omitted equals explicit medium and differs from xhigh; a GSM8K-
+      style pilot and one 29,698-token pinned LongBench-v2 sample returned
+      correct, nonempty final answers under default, medium, and xhigh.
+- [ ] Estimate the reported intermittent empty-final-answer rate with at least
+      24 repeated long-input agentic or structured-output calls per arm. Treat
+      the current LongBench result as a bounded no-regression pass, not proof
+      that medium is always faster, shorter, or more accurate than xhigh.
 - [x] Benchmark unassisted greedy generation at short, 4K, and 32K contexts;
       record TTFT, prompt speed, decode speed, memory, and software revisions.
 - [x] Document the baseline command, expected storage, supported text-only
@@ -465,6 +478,142 @@ remain context only.
       configured 4 GiB host reserve and exercised the max-effort response path.
       Prefer 256K for ordinary work; 384K is tighter and remains experimental.
 
+## Stage 5: Compare Qwen3.8 Flash Next ROCmFP4, Unsloth, and DeepSeek V4 Flash
+
+**Value:** determine whether the new 180B-class Flash Next ROCmFP4 layout is a
+faster daily model on this Strix Halo without mistaking publisher results,
+runtime improvements, or a different memory budget for a quantization win.
+No Stage 5 model has been downloaded yet.
+
+### Pinned research snapshot (2026-08-30 PDT)
+
+- The new model is
+  [`agentionai/Qwen3.8-Flash-Next-ROCmFP4-FAST-imatrix-GGUF`](https://huggingface.co/agentionai/Qwen3.8-Flash-Next-ROCmFP4-FAST-imatrix-GGUF/tree/ad4c5717254a630ee0c5a8db5208eb1f8476e56c),
+  revision `ad4c5717254a630ee0c5a8db5208eb1f8476e56c`. The recommended split-PLE
+  root file is `Qwen3.8-Flash-Next-ROCmFP4-FAST-v2-ple16.gguf`,
+  `93,484,237,760` bytes (87.064 GiB), SHA-256
+  `552a7a162f6a620c3aa0850d070086bc2b95094e0a4e8b860694c7f212cb59d8`.
+  Prefer it over the byte-equivalent joined-table `v2/` layout because the
+  latter requires an on-disk or host-RAM n-gram table.
+- Its optional adaptive MTP companion is
+  [`agentionai/Qwen3.8-Flash-Next-MTP-ROCmFP4-FAST-GGUF`](https://huggingface.co/agentionai/Qwen3.8-Flash-Next-MTP-ROCmFP4-FAST-GGUF/tree/5a2cf56c3e0f8bc8d395d53bec649ec8e358a993),
+  revision `5a2cf56c3e0f8bc8d395d53bec649ec8e358a993`. File
+  `Qwen3.8-Flash-Next-MTP-ROCmFP4-FAST.gguf` is `2,444,519,296` bytes
+  (2.277 GiB), SHA-256
+  `5046d69571bb35c699e19c7a00b36633c2fdfdd06d70482551744ec523a6b590`.
+  The optional F16 vision projector is `904,004,128` bytes (0.842 GiB),
+  SHA-256 `f456cd796fdbdef0cadb22710b54e0071b6cdf22c07963365baa898267aec517`.
+- The closest size-matched Unsloth control is
+  [`unsloth/Qwen3.8-Flash-Next-GGUF`](https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/tree/c8b5954a88c2775c546b92593eda40ea041d3176/UD-Q3_K_XL)
+  `UD-Q3_K_XL`, revision
+  `c8b5954a88c2775c546b92593eda40ea041d3176`: three shards totaling
+  `89,986,353,824` bytes (83.806 GiB). Their SHA-256 values, in shard order,
+  are `f2ef4328929d8b8c8930e2856eef52128dd4ce3425302f04bc3c657431cc4c49`,
+  `7d230e7c9421d868b89eebaf23033af0ea1a4e046956df00fb156814fb62346e`,
+  and `21d4f90f9cd7b7c3a1582667c20cb22f7b03de895b88a23bb20aaeaa44f2c199`.
+  This is a fairer first control than `UD-Q4_K_XL` (103.69 GiB); a nominal
+  Q-bit label is less useful than similar bytes resident on this APU.
+- The installed DeepSeek V4 Flash Antirez hybrid remains the independent
+  system control: `97,591,747,456` bytes (90.889 GiB), 97.73 prompt tok/s and
+  12.56 decode tok/s in the existing direct 32K measurement. Its 384K DSpark
+  Think Max lane remains the locally qualified capability/context control.
+- Flash Next requires the
+  [`LaurentZuijdwijk/llama.cpp` `vulkan/qwen4exp-rocmfpx` branch](https://github.com/LaurentZuijdwijk/llama.cpp/tree/vulkan/qwen4exp-rocmfpx),
+  not the current q38rocm image. The observed branch head is
+  `3466b48806f9fefe1162aa4053ffebcfcabe83aa`; re-check and pin the chosen
+  commit immediately before building because this branch is moving quickly.
+
+### q38rocm change review
+
+- [`q38rocm` v1.5.3](https://github.com/julianmb/q38rocm/releases/tag/v1.5.3)
+  finally maps its prebuilt binary to source
+  `0fc9568e07ccc8553010864cb8db1957e629cbfa` (build 244), with SHA-256
+  `10f060aa19ce9976f8807ecdacda8f708a13209cad0aa7c3111293ebe0ca5ad7`.
+  It adds MTP prompt-cache checkpoint salvage and reduces router child-stop
+  delay. Current main also documents 21x/44x/79x repeated-prefix cache reuse at
+  32K/64K/130K and improves release automation, model paths, and defaults.
+- Those are useful 27B operational changes, but they do not provide the
+  qwen4exp/ROCmFPx per-head-PLE runtime required by Flash Next. Conversely, the
+  Flash Next fork is not evidence that the existing 27B engine should change.
+- Halo already rejected build 244 at `0fc9568` as a drop-in update because it
+  produced nonsensical output with the installed 27B ROCmFP4 GGUF. Preserve
+  the qualified v1.0/build-213 image. Any v1.5.3/cache experiment must use a
+  separate image and repeat the exact smoke and 13-case quality canaries first.
+
+### Working hypothesis, not qualification evidence
+
+- The publisher reports 245.5 prompt tok/s and 24.67 no-MTP decode tok/s at
+  32K. Against this host's existing DeepSeek control that is a tempting 2.51x
+  prefill and 1.96x decode hypothesis, but it is not an A/B result: the host,
+  engine, prompt, quant, and model all differ. Reported MTP reaches up to 40
+  tok/s and is explicitly content-dependent.
+- ROCmFP4 plus its MTP file occupies about 89.34 GiB before KV and runtime
+  allocations, versus 83.81 GiB for Unsloth UD-Q3_K_XL and 90.89 GiB for the
+  installed DeepSeek hybrid. All should be feasible candidates, but only a
+  monitored allocation test can establish the safe context ceiling.
+- Qwen offers a 262K context target and optional vision. DeepSeek retains the
+  larger architectural context, locally qualified 384K Think Max path, and a
+  different reasoning/coding capability profile. “Faster daily model” and
+  “best difficult-task model” are separate decisions.
+
+### Tomorrow-session tasks
+
+- [ ] Re-read all three repository heads before acquisition. Keep the revisions,
+      filenames, byte counts, and SHA-256 values above unless an upstream
+      change is deliberately reviewed and re-pinned; never download from
+      mutable `main` or `latest`.
+- [ ] Add resumable, cache-reusing, atomic acquisition for the split-PLE
+      ROCmFP4 target and size-matched Unsloth shards. Keep MTP and the projector
+      optional so a baseline selection does not fetch them. Prove a second
+      acquisition reuses the verified local files without network transfer.
+- [ ] Build the Laurent branch as a new digest-pinned candidate engine. Record
+      source commit, build flags, base image digest, `llama-server --version`,
+      Mesa/Vulkan identity, and ROCm packages. Do not replace or retag the
+      current q38rocm image.
+- [ ] First load each target at 32K with Q8 K/V, Flash Attention, no MTP, and
+      no prompt cache. Verify qwen4exp metadata, the intended PLE placement,
+      exact smoke output, chat/tool template behavior, peak GTT, host
+      `MemAvailable`, swap activity, kernel errors, and absence of a GPU reset.
+- [ ] Run Unsloth UD-Q3_K_XL on stock mainline and on the candidate fork where
+      supported. Run ROCmFP4 on the candidate fork. This separates runtime
+      benefit from quant/layout benefit; do not call a fork-vs-stock result a
+      ROCmFP4-vs-Unsloth result.
+- [ ] Add the ROCmFP4 MTP companion only after target-only passes. Compare
+      target-only with adaptive draft lengths 2-4 and record proposed/accepted
+      tokens by workload. Keep exact greedy output identity and sampled
+      recommended-settings quality as separate trials.
+- [ ] Run the fixed 13-case suite twice in fresh processes for both Qwen quants,
+      followed by long-context retrieval, structured tool calls, vision when
+      the projector is selected, and two or three real repository coding tasks.
+      Stable and equal quality is a pass; do not require a synthetic score win.
+- [ ] Benchmark cold, unique prompts at 4K, 16K, 32K, and 128K with fixed
+      completion lengths and at least three interleaved repetitions. Re-run the
+      direct DeepSeek 32K control in the same session. Record PP, TTFT, decode,
+      end-to-end time, GTT/VRAM, `MemAvailable`, PPT/TDP, and MTP acceptance.
+      Make same-session throughput and energy ratios primary because this
+      machine's power limit may differ from earlier measurements.
+- [ ] Run warm repeated-prefix/cache tests as a separate table only after the
+      cold matrix. Label cache reuse explicitly; never mix q38rocm's reported
+      21x/44x/79x reuse with uncached model throughput.
+- [ ] Expand context only after 32K passes: 128K first, then 262K if at least
+      8 GiB host `MemAvailable` remains after the probe and there are no GPU or
+      allocation errors. DeepSeek's existing 384K profile is the rollback and
+      context-capability control, not proof that Qwen can allocate the same.
+
+### Gate
+
+- [ ] Promote the new ROCmFP4 profile only if it is repeatably sane, stable or
+      equal in the fixed and practical quality checks versus the selected
+      Unsloth control, and has a meaningful same-session speed/energy or memory
+      advantage. A publisher benchmark alone cannot pass the gate.
+- [ ] Keep DeepSeek V4 Flash available regardless of the Qwen outcome. Qwen may
+      become the interactive default while DeepSeek remains the stronger
+      long-context/Think Max option; let measured work decide rather than force
+      one global winner.
+- [ ] Do not promote q38rocm v1.5.3 for the existing 27B model unless its
+      isolated candidate reruns eliminate the previously observed build-244
+      output corruption and pass the full regression suite.
+
 ## Deferred research
 
 External NPU drafting, cross-version Qwen3.6 drafting, generalized multi-service
@@ -472,19 +621,20 @@ runtime plumbing, and vision/video qualification are outside the active PP/TPS
 loop. Preserve their constraints and possible future work in
 [`docs/TODO backup.md`](docs/TODO%20backup.md). Do not download another language
 model or install host packages for these tracks without an explicit new gate.
-Stage 3B is the sole approved exception and permits only its one Q6 target plus
-the exact DFlash2 and vision support artifacts listed there.
+Stages 3B and 5 are the approved exceptions. Stage 3B permits only its one Q6
+target plus the exact DFlash2 and vision support artifacts listed there; Stage
+5 permits only the pinned Flash Next ROCmFP4, optional MTP/projector, and
+size-matched Unsloth artifacts above, beginning in the next work session.
 
 ## Active constraints and artifact policy
 
-- The q38rocm FP4/FP8 GGUFs are text-only language/MTP artifacts; vision needs
-  a separately qualified companion.
+- The existing q38rocm 27B FP4/FP8 GGUFs are text-only language/MTP artifacts.
+  Flash Next vision needs its separately acquired and qualified projector.
 - Performance claims from other hosts are context only, never pass/fail evidence.
 - Build 213 cannot compose `ngram-mod` with strict-Qwen MTP because their
   recurrent rollback requirements conflict.
 - FP4 and FP8 are already present and verified. Selecting either profile must
   not download the other artifact.
-- Do not download another language model beyond the single Stage 3B Q6 target.
-  Its exact Q4_K_M, Q8_0, and BF16 DFlash2 diagnostic sidecars and BF16
-  projector are approved bounded companions; Q5, Q8, alternate Qwen3.8
-  *targets*, and the redundant F16 projector remain excluded.
+- Do not download another language model beyond the exact Stage 3B and Stage 5
+  targets. Their listed sidecars are approved bounded companions; unlisted
+  quant tiers and redundant projectors remain excluded.
