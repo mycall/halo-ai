@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "candidate_image": "localhost/halo-ai-speech:rocm-10.0-py3.14",
+  "qualified": false,
+  "researched_at": "2026-08-30",
+  "platform": "linux/amd64",
+  "base": {
+    "reference": "docker.io/library/python:3.14.7-slim-trixie",
+    "index_digest": "sha256:cae66f2ef0ec51a9891263eeee7f987dacf0a9879e8aa9353d5606e0530619a5",
+    "linux_amd64_manifest_digest": "sha256:5b945726c4d7ffe6595dc7498ad17fd0397e373c5181c24819a7028e8b1276dc"
+  },
+  "indexes": {
+    "rocm": "https://stable.repo.amd.com/rocm/whl-next/",
+    "application": "https://pypi.org/simple"
+  },
+  "direct_versions": {
+    "python": "3.14.7",
+    "rocm": "10.0.0",
+    "torch": "2.13.0+rocm10.0.0",
+    "torchvision": "0.28.0+rocm10.0.0",
+    "torchaudio": "2.11.0.2+rocm10.0.0",
+    "transformers": "5.16.1",
+    "safetensors": "0.8.0",
+    "tiktoken": "0.14.0",
+    "accelerate": "1.14.0",
+    "soundfile": "0.14.0",
+    "sentencepiece": "0.2.2",
+    "protobuf": "7.36.0",
+    "scipy": "1.18.1",
+    "gradio": "6.26.0",
+    "fastapi": "0.141.1",
+    "uvicorn": "0.52.4",
+    "python-multipart": "0.0.32"
+  },
+  "locks": {
+    "rocm": {
+      "path": "requirements-rocm10-py314.lock",
+      "sha256": "6cf11a6fd4b6dd2ec0179bf6ee088c58f9034ce4385e54c0a979fc9859227595"
+    },
+    "application": {
+      "path": "requirements-application-py314.lock",
+      "sha256": "cae99b3e9c604764407af50bd849bf75a2fefc642d3d13de3f3691fa8bd3ac19"
+    }
+  },
+  "required_host_gate": "candidate_validate.py --gpu"
+}

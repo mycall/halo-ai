@@ -1,0 +1,70 @@
+ARG BASE=docker.io/library/python:3.14.7-slim-trixie@sha256:cae66f2ef0ec51a9891263eeee7f987dacf0a9879e8aa9353d5606e0530619a5
+FROM ${BASE}
+
+ARG BUILD_INPUT_SHA256=unresolved
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONUNBUFFERED=1 \
+    HF_HUB_OFFLINE=1 \
+    TRANSFORMERS_OFFLINE=1 \
+    HOME=/tmp/halo-speech
+
+RUN test "$BUILD_INPUT_SHA256" != unresolved \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+      ca-certificates ffmpeg libatomic1 libnuma-dev libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/halo-speech
+
+# Keep AMD and PyPI trust domains separate. Both lock files contain the complete
+# resolver result and install with --no-deps so neither index can replace a
+# package owned by the other stack.
+COPY requirements-rocm10-py314.lock /opt/halo-speech/requirements-rocm10-py314.lock
+RUN echo '6cf11a6fd4b6dd2ec0179bf6ee088c58f9034ce4385e54c0a979fc9859227595  /opt/halo-speech/requirements-rocm10-py314.lock' \
+      | sha256sum --check --strict \
+    && python -m pip install --no-deps \
+      --index-url https://stable.repo.amd.com/rocm/whl-next/ \
+      setuptools==81.0.0 \
+    && python -m pip install --no-deps \
+      --no-build-isolation \
+      --index-url https://stable.repo.amd.com/rocm/whl-next/ \
+      --requirement /opt/halo-speech/requirements-rocm10-py314.lock
+
+COPY requirements-application-py314.lock /opt/halo-speech/requirements-application-py314.lock
+RUN echo 'cae99b3e9c604764407af50bd849bf75a2fefc642d3d13de3f3691fa8bd3ac19  /opt/halo-speech/requirements-application-py314.lock' \
+      | sha256sum --check --strict \
+    && python -m pip install --no-deps \
+      --index-url https://pypi.org/simple \
+      --requirement /opt/halo-speech/requirements-application-py314.lock \
+    && python -m pip check
+
+COPY speech_languages.py /opt/halo-speech/speech_languages.py
+COPY speech_server.py /opt/halo-speech/speech_server.py
+COPY candidate_validate.py /opt/halo-speech/candidate_validate.py
+COPY candidate-manifest.json /opt/halo-speech/candidate-manifest.json
+
+RUN python /opt/halo-speech/candidate_validate.py
+
+LABEL org.opencontainers.image.title="Halo AI speech ROCm 10 candidate"
+LABEL org.opencontainers.image.version="rocm-10.0-py3.14"
+LABEL org.opencontainers.image.source="https://github.com/mycall/halo-ai"
+LABEL org.opencontainers.image.revision="${BUILD_INPUT_SHA256}"
+LABEL local.halo-ai.engine="speech-candidate"
+LABEL local.halo-ai.qualified="false"
+LABEL local.halo-ai.base="sha256:cae66f2ef0ec51a9891263eeee7f987dacf0a9879e8aa9353d5606e0530619a5"
+LABEL local.halo-ai.build-input-sha256="${BUILD_INPUT_SHA256}"
+LABEL local.halo-ai.python-version="3.14.7"
+LABEL local.halo-ai.rocm-version="10.0.0"
+LABEL local.halo-ai.torch-version="2.13.0+rocm10.0.0"
+LABEL local.halo-ai.torchvision-version="0.28.0+rocm10.0.0"
+LABEL local.halo-ai.torchaudio-version="2.11.0.2+rocm10.0.0"
+LABEL local.halo-ai.transformers-version="5.16.1"
+LABEL local.halo-ai.gradio-version="6.26.0"
+LABEL local.halo-ai.rocm-lock-sha256="6cf11a6fd4b6dd2ec0179bf6ee088c58f9034ce4385e54c0a979fc9859227595"
+LABEL local.halo-ai.application-lock-sha256="cae99b3e9c604764407af50bd849bf75a2fefc642d3d13de3f3691fa8bd3ac19"
+
+EXPOSE 7860
+ENTRYPOINT ["python", "/opt/halo-speech/speech_server.py"]

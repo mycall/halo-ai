@@ -113,6 +113,31 @@ DS4_SOURCE_COMMIT = "84cc882352757baf628a1776badf7cc54d584e28"
 DS4_ROCM_VERSION = "7.15.0a20260728"
 DS4_UBUNTU_BASE = "sha256:1e0a86e57d247923571b75e0aaf48a1449cf8c543d51fb3e07a4a7d7bfa79316"
 
+SPEECH_CANDIDATE_IMAGE = "localhost/halo-ai-speech:rocm-10.0-py3.14"
+SPEECH_CANDIDATE_BASE = "sha256:cae66f2ef0ec51a9891263eeee7f987dacf0a9879e8aa9353d5606e0530619a5"
+SPEECH_CANDIDATE_PYTHON = "3.14.7"
+SPEECH_CANDIDATE_ROCM = "10.0.0"
+SPEECH_CANDIDATE_TORCH = "2.13.0+rocm10.0.0"
+SPEECH_CANDIDATE_TORCHVISION = "0.28.0+rocm10.0.0"
+SPEECH_CANDIDATE_TORCHAUDIO = "2.11.0.2+rocm10.0.0"
+SPEECH_CANDIDATE_TRANSFORMERS = "5.16.1"
+SPEECH_CANDIDATE_GRADIO = "6.26.0"
+SPEECH_CANDIDATE_ROCM_LOCK_SHA256 = (
+    "6cf11a6fd4b6dd2ec0179bf6ee088c58f9034ce4385e54c0a979fc9859227595"
+)
+SPEECH_CANDIDATE_APPLICATION_LOCK_SHA256 = (
+    "cae99b3e9c604764407af50bd849bf75a2fefc642d3d13de3f3691fa8bd3ac19"
+)
+SPEECH_CANDIDATE_BUILD_FILES = (
+    "Containerfile.rocm10",
+    "candidate-manifest.json",
+    "candidate_validate.py",
+    "requirements-application-py314.lock",
+    "requirements-rocm10-py314.lock",
+    "speech_languages.py",
+    "speech_server.py",
+)
+
 
 class HaloError(RuntimeError):
     """A user-facing, fail-closed error."""
@@ -135,6 +160,20 @@ def read_text(path: Path) -> str:
         return path.read_text(encoding="utf-8")
     except OSError as exc:
         fail(f"cannot read {path}: {exc}")
+
+
+def speech_candidate_build_input_sha256() -> str:
+    context = PROJECT_ROOT / "lib/halo_ai/speech"
+    digest = hashlib.sha256()
+    for name in SPEECH_CANDIDATE_BUILD_FILES:
+        path = context / name
+        try:
+            payload = path.read_bytes()
+        except OSError as exc:
+            fail(f"cannot read speech candidate build input {path}: {exc}")
+        digest.update(name.encode("utf-8") + b"\0")
+        digest.update(payload + b"\0")
+    return digest.hexdigest()
 
 
 def atomic_write(path: Path, data: str, mode: int = 0o600) -> None:
@@ -2502,6 +2541,137 @@ def image_labels(image: str) -> dict[str, str]:
     except json.JSONDecodeError:
         return {}
     return labels if isinstance(labels, dict) else {}
+
+
+def speech_candidate_expected_labels() -> dict[str, str]:
+    build_input = speech_candidate_build_input_sha256()
+    return {
+        "org.opencontainers.image.revision": build_input,
+        "local.halo-ai.engine": "speech-candidate",
+        "local.halo-ai.qualified": "false",
+        "local.halo-ai.base": SPEECH_CANDIDATE_BASE,
+        "local.halo-ai.build-input-sha256": build_input,
+        "local.halo-ai.python-version": SPEECH_CANDIDATE_PYTHON,
+        "local.halo-ai.rocm-version": SPEECH_CANDIDATE_ROCM,
+        "local.halo-ai.torch-version": SPEECH_CANDIDATE_TORCH,
+        "local.halo-ai.torchvision-version": SPEECH_CANDIDATE_TORCHVISION,
+        "local.halo-ai.torchaudio-version": SPEECH_CANDIDATE_TORCHAUDIO,
+        "local.halo-ai.transformers-version": SPEECH_CANDIDATE_TRANSFORMERS,
+        "local.halo-ai.gradio-version": SPEECH_CANDIDATE_GRADIO,
+        "local.halo-ai.rocm-lock-sha256": SPEECH_CANDIDATE_ROCM_LOCK_SHA256,
+        "local.halo-ai.application-lock-sha256": (
+            SPEECH_CANDIDATE_APPLICATION_LOCK_SHA256
+        ),
+    }
+
+
+def speech_candidate_image_valid(image: str) -> bool:
+    labels = image_labels(image)
+    return speech_candidate_expected_labels().items() <= labels.items()
+
+
+def validate_speech_candidate_packages(image: str, *, require_gpu: bool) -> dict[str, Any]:
+    arguments = ["run", "--rm"]
+    if require_gpu:
+        arguments.extend([
+            "--device=/dev/kfd", "--device=/dev/dri",
+            "--group-add", "keep-groups",
+        ])
+    arguments.extend([
+        "--entrypoint", "python", image,
+        "/opt/halo-speech/candidate_validate.py",
+    ])
+    if require_gpu:
+        arguments.append("--gpu")
+    result = podman(arguments, capture=True)
+    try:
+        report = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        fail(f"speech candidate validator returned invalid JSON: {exc}")
+    expected_status = "gpu-valid" if require_gpu else "packages-valid"
+    if not isinstance(report, dict) or report.get("status") != expected_status:
+        fail(f"speech candidate validator did not report {expected_status}")
+    if report.get("python") != SPEECH_CANDIDATE_PYTHON:
+        fail("speech candidate validator reported an unexpected Python version")
+    if report.get("hip") != SPEECH_CANDIDATE_ROCM:
+        fail("speech candidate validator reported an unexpected HIP version")
+    if require_gpu and not any(
+        str(architecture).startswith("gfx1151")
+        for architecture in report.get("architectures", [])
+    ):
+        fail("speech candidate validator did not report a gfx1151 architecture")
+    if require_gpu and not str(report.get("device_architecture", "")).startswith(
+        "gfx1151"
+    ):
+        fail("speech candidate validator did not run on a gfx1151 device")
+    return report
+
+
+def build_speech_candidate_image(image: str, *, force: bool = False) -> dict[str, Any]:
+    if not force and speech_candidate_image_valid(image):
+        print(f"Reusing verified speech candidate image: {image}")
+    else:
+        context = PROJECT_ROOT / "lib/halo_ai/speech"
+        containerfile = context / "Containerfile.rocm10"
+        if not containerfile.is_file():
+            fail(f"speech candidate build recipe is missing: {containerfile}")
+        build_input = speech_candidate_build_input_sha256()
+        print(
+            f"Building isolated speech candidate: {image} "
+            "(Python 3.14, ROCm 10, gfx1151 wheels)"
+        )
+        podman([
+            "build", "--pull=missing", "--timestamp", "0", "--layers=false",
+            "--platform", "linux/amd64",
+            "--build-arg", f"BUILD_INPUT_SHA256={build_input}",
+            "-t", image, "-f", str(containerfile), str(context),
+        ])
+        if not speech_candidate_image_valid(image):
+            fail("built speech candidate image failed its provenance label checks")
+    package_report = validate_speech_candidate_packages(image, require_gpu=False)
+    return {
+        "image": image,
+        "identity": image_identity(image),
+        "labels": image_labels(image),
+        "package_validation": package_report,
+        "qualified": False,
+        "next_gate": "validate-gpu on the target gfx1151 host",
+    }
+
+
+def command_speech_candidate(args: argparse.Namespace) -> int:
+    image = args.image
+    if args.speech_candidate_action == "inspect":
+        labels = image_labels(image)
+        expected = speech_candidate_expected_labels()
+        print(json.dumps({
+            "image": image,
+            "identity": image_identity(image, required=False) or None,
+            "valid": expected.items() <= labels.items(),
+            "qualified": False,
+            "build_input_sha256": expected["local.halo-ai.build-input-sha256"],
+            "labels": labels,
+        }, indent=2, sort_keys=True))
+        return 0
+    if args.speech_candidate_action == "build":
+        print(json.dumps(
+            build_speech_candidate_image(image, force=args.force),
+            indent=2, sort_keys=True,
+        ))
+        return 0
+    if args.speech_candidate_action == "validate-gpu":
+        if not speech_candidate_image_valid(image):
+            fail("speech candidate image is missing or failed provenance checks; build it first")
+        report = validate_speech_candidate_packages(image, require_gpu=True)
+        print(json.dumps({
+            "image": image,
+            "identity": image_identity(image),
+            "qualified": False,
+            "gpu_validation": report,
+            "next_gate": "Whisper and Qwen3-TTS model smoke tests",
+        }, indent=2, sort_keys=True))
+        return 0
+    fail(f"unsupported speech candidate action: {args.speech_candidate_action}")
 
 
 def rocmfpx_image_valid(image: str) -> bool:
@@ -5013,6 +5183,19 @@ def build_parser() -> argparse.ArgumentParser:
     reasoning_reliability.add_argument("--timeout", type=int, default=900)
     reasoning_reliability.add_argument("--output", help="resumable atomic JSON report path")
     update = sub.add_parser("update"); update.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "strixvulkan", "ds4", "speech", "vllm", "all"])
+    speech_candidate = sub.add_parser(
+        "speech-candidate",
+        help="build and validate the isolated Python 3.14 / ROCm 10 speech candidate",
+    ).add_subparsers(dest="speech_candidate_action", required=True)
+    speech_candidate_build = speech_candidate.add_parser("build")
+    speech_candidate_build.add_argument("--image", default=SPEECH_CANDIDATE_IMAGE)
+    speech_candidate_build.add_argument("--force", action="store_true")
+    speech_candidate_inspect = speech_candidate.add_parser("inspect")
+    speech_candidate_inspect.add_argument("--image", default=SPEECH_CANDIDATE_IMAGE)
+    speech_candidate_gpu = speech_candidate.add_parser(
+        "validate-gpu", help="exercise the ROCm wheel on the target gfx1151 host",
+    )
+    speech_candidate_gpu.add_argument("--image", default=SPEECH_CANDIDATE_IMAGE)
     tune = sub.add_parser("tune", help="inspect guarded trials and score optimization evidence").add_subparsers(dest="tune_action", required=True)
     tune.add_parser("status")
     tune.add_parser("discard")
@@ -5050,7 +5233,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     config = load_config(args.config)
     catalog = load_catalog(config)
-    if args.command in {"install", "update", "start", "stop", "restart", "status", "logs", "test", "bench"} or (
+    if args.command in {"install", "update", "start", "stop", "restart", "status", "logs", "test", "bench", "speech-candidate"} or (
         args.command == "models" and args.models_action == "download"
     ) or (
         args.command == "profiles" and args.profiles_action == "acquire"
@@ -5079,6 +5262,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "logs": return command_logs(catalog, args)
     if args.command == "test": return command_test(config, catalog, args)
     if args.command == "bench": return command_bench(config, catalog, args)
+    if args.command == "speech-candidate": return command_speech_candidate(args)
     if args.command == "tune": return command_tune(config, catalog, args)
     if args.command == "host-profile": return command_host_profile(args)
     fail(f"unhandled command: {args.command}")

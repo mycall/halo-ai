@@ -3,8 +3,10 @@
 
 from __future__ import annotations
 
+import importlib.metadata
 import io
 import os
+import platform
 import threading
 import time
 from typing import Annotated
@@ -101,8 +103,15 @@ def health() -> JSONResponse:
         "model_path": MODEL_PATH,
         "model_revision": MODEL_REVISION,
         "device": properties.name,
+        "python": platform.python_version(),
         "torch": torch.__version__,
         "hip": torch.version.hip,
+        "torchvision": importlib.metadata.version("torchvision"),
+        "torchaudio": torchaudio.__version__,
+        "transformers": importlib.metadata.version("transformers"),
+        "gradio": gr.__version__,
+        "numpy": np.__version__,
+        "scipy": importlib.metadata.version("scipy"),
         "dtype": str(DTYPE),
         "input_sample_rate": INPUT_SAMPLE_RATE,
         "output_sample_rate": OUTPUT_SAMPLE_RATE,

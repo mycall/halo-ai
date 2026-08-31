@@ -653,10 +653,11 @@ matrix, so only a live same-host trial can pass this stage.
       dependencies, source indexes, and resulting image manifest. Generate a
       machine-readable lock or build manifest and fail closed on an unexpected
       source or version.
-- [ ] Add the preferred challenger as an isolated build path and tag. Keep the
+- [x] Add the preferred challenger as an isolated build path and tag. Keep the
       current Containerfile/image available as the control, and do not update
-      CLI, installer, or example-config defaults during the experiment.
-- [ ] Make the candidate build run `pip check` and import the complete service
+      production engine selection, installer, or example-config defaults
+      during the experiment.
+- [x] Make the candidate build run `pip check` and import the complete service
       dependency set. Record Python, Torch, HIP, torchvision, torchaudio,
       Transformers, Gradio, NumPy, SciPy, and ROCm device-package versions in
       image labels or a retained manifest.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import os
@@ -25,6 +26,14 @@ SPEECH_LANGUAGE_SPEC = importlib.util.spec_from_file_location(
 assert SPEECH_LANGUAGE_SPEC and SPEECH_LANGUAGE_SPEC.loader
 speech_languages = importlib.util.module_from_spec(SPEECH_LANGUAGE_SPEC)
 SPEECH_LANGUAGE_SPEC.loader.exec_module(speech_languages)
+
+CANDIDATE_VALIDATOR_SPEC = importlib.util.spec_from_file_location(
+    "halo_ai_speech_candidate_validate",
+    ROOT / "lib/halo_ai/speech/candidate_validate.py",
+)
+assert CANDIDATE_VALIDATOR_SPEC and CANDIDATE_VALIDATOR_SPEC.loader
+candidate_validate = importlib.util.module_from_spec(CANDIDATE_VALIDATOR_SPEC)
+CANDIDATE_VALIDATOR_SPEC.loader.exec_module(candidate_validate)
 
 
 def make_config(root: Path) -> object:
@@ -173,6 +182,161 @@ class ConfigurationTests(unittest.TestCase):
         self.assertEqual(preset["request"]["temperature"], 1.0)
         self.assertEqual(preset["request"]["top_p"], 1.0)
         self.assertIn("context.393216", preset["requires"])
+
+
+class SpeechCandidateTests(unittest.TestCase):
+    def test_candidate_is_isolated_from_the_production_speech_default(self) -> None:
+        self.assertEqual(
+            cli.DEFAULTS["SPEECH_IMAGE"],
+            "localhost/halo-ai-speech:rocm-7.14",
+        )
+        self.assertNotEqual(cli.SPEECH_CANDIDATE_IMAGE, cli.DEFAULTS["SPEECH_IMAGE"])
+        self.assertNotIn("speech-candidate", cli.ENGINE_IMAGE_KEYS)
+
+    def test_manifest_versions_and_lock_digests_are_consistent(self) -> None:
+        speech_root = ROOT / "lib/halo_ai/speech"
+        manifest = json.loads(
+            (speech_root / "candidate-manifest.json").read_text(encoding="utf-8")
+        )
+        self.assertFalse(manifest["qualified"])
+        self.assertEqual(manifest["candidate_image"], cli.SPEECH_CANDIDATE_IMAGE)
+        self.assertEqual(manifest["base"]["index_digest"], cli.SPEECH_CANDIDATE_BASE)
+        expected_versions = {
+            "python": cli.SPEECH_CANDIDATE_PYTHON,
+            "rocm": cli.SPEECH_CANDIDATE_ROCM,
+            "torch": cli.SPEECH_CANDIDATE_TORCH,
+            "torchvision": cli.SPEECH_CANDIDATE_TORCHVISION,
+            "torchaudio": cli.SPEECH_CANDIDATE_TORCHAUDIO,
+            "transformers": cli.SPEECH_CANDIDATE_TRANSFORMERS,
+            "gradio": cli.SPEECH_CANDIDATE_GRADIO,
+        }
+        for name, version in expected_versions.items():
+            self.assertEqual(manifest["direct_versions"][name], version)
+        for lock in manifest["locks"].values():
+            payload = (speech_root / lock["path"]).read_bytes()
+            self.assertEqual(hashlib.sha256(payload).hexdigest(), lock["sha256"])
+        self.assertEqual(
+            manifest["locks"]["rocm"]["sha256"],
+            cli.SPEECH_CANDIDATE_ROCM_LOCK_SHA256,
+        )
+        self.assertEqual(
+            manifest["locks"]["application"]["sha256"],
+            cli.SPEECH_CANDIDATE_APPLICATION_LOCK_SHA256,
+        )
+
+    def test_candidate_recipe_pins_sources_and_keeps_indexes_separate(self) -> None:
+        recipe = (ROOT / "lib/halo_ai/speech/Containerfile.rocm10").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(cli.SPEECH_CANDIDATE_BASE, recipe)
+        self.assertIn(cli.SPEECH_CANDIDATE_ROCM_LOCK_SHA256, recipe)
+        self.assertIn(cli.SPEECH_CANDIDATE_APPLICATION_LOCK_SHA256, recipe)
+        self.assertEqual(recipe.count("--index-url"), 3)
+        self.assertEqual(recipe.count("--no-deps"), 4)  # comment plus three installs
+        self.assertIn("--no-build-isolation", recipe)
+        self.assertIn("https://stable.repo.amd.com/rocm/whl-next/", recipe)
+        self.assertIn("https://pypi.org/simple", recipe)
+        self.assertIn('LABEL local.halo-ai.qualified="false"', recipe)
+        self.assertIn("python -m pip check", recipe)
+
+    def test_candidate_validator_matches_direct_runtime_versions(self) -> None:
+        locked = candidate_validate.locked_distributions()
+        self.assertEqual(len(locked), 81)
+        self.assertEqual(candidate_validate.EXPECTED_PYTHON, cli.SPEECH_CANDIDATE_PYTHON)
+        self.assertEqual(candidate_validate.EXPECTED_HIP, cli.SPEECH_CANDIDATE_ROCM)
+        self.assertEqual(
+            candidate_validate.EXPECTED_DISTRIBUTIONS["torch"],
+            cli.SPEECH_CANDIDATE_TORCH,
+        )
+        self.assertEqual(
+            candidate_validate.EXPECTED_DISTRIBUTIONS["torchaudio"],
+            cli.SPEECH_CANDIDATE_TORCHAUDIO,
+        )
+        self.assertEqual(
+            candidate_validate.EXPECTED_DISTRIBUTIONS["torchvision"],
+            cli.SPEECH_CANDIDATE_TORCHVISION,
+        )
+        self.assertLessEqual(
+            candidate_validate.EXPECTED_DISTRIBUTIONS.items(), locked.items(),
+        )
+
+    def test_speech_health_exposes_candidate_comparison_versions(self) -> None:
+        server = (ROOT / "lib/halo_ai/speech/speech_server.py").read_text(
+            encoding="utf-8"
+        )
+        for field in (
+            '"python"', '"torch"', '"hip"', '"torchvision"', '"torchaudio"',
+            '"transformers"', '"gradio"', '"numpy"', '"scipy"',
+        ):
+            self.assertIn(field, server)
+
+    def test_candidate_image_requires_every_provenance_label(self) -> None:
+        labels = cli.speech_candidate_expected_labels()
+        with mock.patch.object(cli, "image_labels", return_value=labels):
+            self.assertTrue(cli.speech_candidate_image_valid("fixture"))
+        labels.pop("local.halo-ai.qualified")
+        with mock.patch.object(cli, "image_labels", return_value=labels):
+            self.assertFalse(cli.speech_candidate_image_valid("fixture"))
+
+    def test_candidate_build_uses_distinct_recipe_and_build_input_digest(self) -> None:
+        package_report = {
+            "status": "packages-valid",
+            "python": cli.SPEECH_CANDIDATE_PYTHON,
+            "hip": cli.SPEECH_CANDIDATE_ROCM,
+        }
+        with (
+            mock.patch.object(
+                cli, "speech_candidate_image_valid", side_effect=[False, True]
+            ),
+            mock.patch.object(
+                cli, "validate_speech_candidate_packages", return_value=package_report
+            ),
+            mock.patch.object(cli, "image_identity", return_value="sha256:fixture"),
+            mock.patch.object(cli, "image_labels", return_value={}),
+            mock.patch.object(cli, "podman") as podman,
+        ):
+            report = cli.build_speech_candidate_image("fixture", force=False)
+        arguments = podman.call_args.args[0]
+        self.assertEqual(arguments[0], "build")
+        self.assertIn("linux/amd64", arguments)
+        self.assertIn(str(ROOT / "lib/halo_ai/speech/Containerfile.rocm10"), arguments)
+        self.assertIn(
+            f"BUILD_INPUT_SHA256={cli.speech_candidate_build_input_sha256()}",
+            arguments,
+        )
+        self.assertFalse(report["qualified"])
+        self.assertEqual(report["package_validation"], package_report)
+
+    def test_gpu_gate_passes_devices_and_requires_gfx1151_report(self) -> None:
+        completed = mock.MagicMock()
+        completed.stdout = json.dumps({
+            "status": "gpu-valid",
+            "python": cli.SPEECH_CANDIDATE_PYTHON,
+            "hip": cli.SPEECH_CANDIDATE_ROCM,
+            "architectures": ["gfx1151"],
+            "device_architecture": "gfx1151",
+            "matrix_result": [[7.0, 10.0], [15.0, 22.0]],
+        })
+        with mock.patch.object(cli, "podman", return_value=completed) as podman:
+            report = cli.validate_speech_candidate_packages(
+                "fixture", require_gpu=True,
+            )
+        arguments = podman.call_args.args[0]
+        self.assertIn("--device=/dev/kfd", arguments)
+        self.assertIn("--device=/dev/dri", arguments)
+        self.assertIn("keep-groups", arguments)
+        self.assertEqual(arguments[-1], "--gpu")
+        self.assertEqual(report["status"], "gpu-valid")
+
+    def test_candidate_cli_defaults_to_the_isolated_tag(self) -> None:
+        parser = cli.build_parser()
+        build = parser.parse_args(["speech-candidate", "build"])
+        inspect = parser.parse_args(["speech-candidate", "inspect"])
+        gpu = parser.parse_args(["speech-candidate", "validate-gpu"])
+        self.assertEqual(build.image, cli.SPEECH_CANDIDATE_IMAGE)
+        self.assertFalse(build.force)
+        self.assertEqual(inspect.image, cli.SPEECH_CANDIDATE_IMAGE)
+        self.assertEqual(gpu.image, cli.SPEECH_CANDIDATE_IMAGE)
 
 
 class CatalogTests(unittest.TestCase):
