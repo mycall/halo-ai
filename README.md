@@ -449,6 +449,20 @@ halo-ai bench longbench-v2 run qwen3.8fp4 --sample-id SAMPLE \
 Every sample is flushed to disk, so rerunning the identical command resumes.
 The score always reports completed, skipped, error, and truncated counts.
 
+For the narrower Qwen3.8 final-answer reliability question, run the paired,
+interleaved fixed suite. Two repetitions produce 26 matched calls per arm and
+checkpoint atomically after every response:
+
+```bash
+halo-ai start qwen3.8fp4
+halo-ai bench reasoning-reliability qwen3.8fp4 --repetitions 2 --max-tokens 1024
+```
+
+This separately reports API/protocol errors, empty content with `finish_reason`
+`stop`, output-budget exhaustion, final-answer delivery, and validator results.
+Its Wilson intervals and paired ratios support only a bounded claim for the
+recorded host, runtime, suite, sampling policy, and output budget.
+
 ## Verified test findings
 
 These measurements were collected on 2026-08-09 PDT (2026-08-10 UTC). They are

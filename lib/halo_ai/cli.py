@@ -4441,11 +4441,331 @@ def command_bench_rocmfpx_quality(
     return 0
 
 
+def reasoning_reliability_output_path(
+    config: Config, profile_id: str, suite_sha256: str, args: argparse.Namespace,
+) -> Path:
+    if args.output:
+        return Path(args.output).expanduser().resolve()
+    name = (
+        f"{profile_id}-{suite_sha256[:12]}-r{args.repetitions}-"
+        f"m{args.max_tokens}-s{args.seed}.json"
+    )
+    return config.path("HALO_AI_STATE_DIR") / "benchmarks" / "reasoning-reliability" / name
+
+
+def command_bench_reasoning_reliability(
+    config: Config, catalog: Catalog, args: argparse.Namespace,
+) -> int:
+    """Run resumable, paired default-versus-xhigh final-answer checks."""
+    if not 1 <= args.repetitions <= 20:
+        fail("--repetitions must be in [1, 20]")
+    if not 64 <= args.max_tokens <= 8192:
+        fail("--max-tokens must be in [64, 8192]")
+    if args.seed < 0:
+        fail("--seed must be non-negative")
+    profile = resolve_profile(catalog, args.profile_id)
+    if not profile:
+        fail(f"unknown profile: {args.profile_id}")
+    if profile["engine"] not in {"lemonade", "llamacpp", "rocmfpx", "strixvulkan"}:
+        fail("reasoning reliability benchmark requires a llama.cpp-compatible profile")
+    model = catalog.models[profile["model"]]
+    if model.get("default_reasoning_effort") != "medium":
+        fail("reasoning reliability benchmark requires a cataloged medium default")
+    suite_path = (
+        Path(args.suite).expanduser().resolve()
+        if args.suite else ROCMFPX_QUALITY_SUITE
+    )
+    try:
+        suite, suite_sha256 = rocmfpx_quality.load_suite(suite_path)
+    except rocmfpx_quality.QualityError as exc:
+        fail(str(exc))
+
+    active_path = state_path(config, "active-profile.json")
+    if not active_path.exists():
+        fail(f"start {profile['id']} before running the reasoning reliability benchmark")
+    try:
+        active = json.loads(read_text(active_path))
+    except json.JSONDecodeError:
+        fail(f"active profile record is corrupt: {active_path}")
+    if active.get("profile") != profile["id"]:
+        fail(f"active profile is {active.get('profile')}; start {profile['id']} first")
+    engine = profile["engine"]
+    container = container_name(engine)
+    running = podman([
+        "inspect", container, "--format", "{{.State.Running}}",
+    ], capture=True, check=False)
+    if running.returncode != 0 or running.stdout.strip() != "true":
+        fail(f"reasoning reliability benchmark container is not running: {container}")
+    port = port_for(config, engine)
+    base_url = f"http://127.0.0.1:{port}"
+    if engine == "lemonade":
+        model_name = exact_lemonade_model(config, catalog, profile, port)
+    else:
+        models = http_json(f"{base_url}/v1/models")
+        candidates = models.get("data", models) if isinstance(models, dict) else models
+        if not isinstance(candidates, list) or not candidates:
+            fail("active reasoning reliability service returned no models")
+        first_model = candidates[0]
+        model_name = (
+            first_model.get("id") or first_model.get("name")
+            if isinstance(first_model, dict) else str(first_model)
+        )
+    if not isinstance(model_name, str) or not model_name:
+        fail("active reasoning reliability service returned an invalid model identity")
+
+    template_canary = validate_default_reasoning_template(profile, model, port)
+    if template_canary is None:
+        fail("active profile does not expose a default-reasoning template canary")
+    trial_path = state_path(config, "last-trial.json")
+    try:
+        trial = json.loads(read_text(trial_path)) if trial_path.exists() else {}
+    except json.JSONDecodeError:
+        fail(f"last trial record is corrupt: {trial_path}")
+    main_sha256 = next(
+        item["sha256"] for item in model["files"] if item["role"] == "main"
+    )
+    run_spec = {
+        "benchmark_version": 1,
+        "profile": profile["id"],
+        "profile_context_tokens": profile["context"],
+        "model_service_id": model_name,
+        "model_sha256": main_sha256,
+        "suite_id": suite["suite_id"],
+        "suite_sha256": suite_sha256,
+        "case_ids": [case["id"] for case in suite["cases"]],
+        "arms": {
+            "default": {"request_fields": {}, "effective_server_default": "medium"},
+            "xhigh": {"request_fields": reasoning_request_fields("xhigh")},
+        },
+        "repetitions": args.repetitions,
+        "max_output_tokens": args.max_tokens,
+        "sampling": {"temperature": 1.0, "top_p": 0.95, "base_seed": args.seed},
+        "order": "alternating default/xhigh within each matched case pair",
+        "template_canary": template_canary,
+        "runtime_fingerprint": trial.get("fingerprint"),
+    }
+    output = reasoning_reliability_output_path(config, profile["id"], suite_sha256, args)
+    if output.exists():
+        try:
+            document = json.loads(read_text(output))
+        except json.JSONDecodeError:
+            fail(f"reasoning reliability output is corrupt: {output}")
+        if document.get("kind") != "halo-ai-reasoning-reliability-benchmark":
+            fail(f"reasoning reliability output has the wrong kind: {output}")
+        if document.get("run") != run_spec:
+            fail(f"reasoning reliability output belongs to a different run: {output}")
+        if not isinstance(document.get("records"), list):
+            fail(f"reasoning reliability output has invalid records: {output}")
+    else:
+        document = {
+            "schema_version": 1,
+            "kind": "halo-ai-reasoning-reliability-benchmark",
+            "created_at": utc_now(),
+            "updated_at": utc_now(),
+            "run": run_spec,
+            "runtime": {
+                "engine": engine,
+                "image": trial.get("image"),
+                "image_digest": trial.get("image_digest"),
+                "backend": trial.get("backend"),
+                "backend_fingerprint": trial.get("backend_fingerprint"),
+            },
+            "records": [],
+            "summary": None,
+        }
+        atomic_json(output, document, mode=0o644)
+
+    records = document["records"]
+    completed: set[tuple[int, str, str]] = set()
+    valid_case_ids = set(run_spec["case_ids"])
+    for record in records:
+        key = (record.get("repetition"), record.get("case_id"), record.get("arm"))
+        if (
+            not isinstance(key[0], int) or key[1] not in valid_case_ids
+            or key[2] not in {"default", "xhigh"} or key in completed
+        ):
+            fail(f"reasoning reliability output contains an invalid or duplicate record: {output}")
+        completed.add(key)
+    total = args.repetitions * len(suite["cases"]) * 2
+    print(
+        f"Reasoning reliability: {total} calls, {len(records)} recorded, "
+        f"{total - len(records)} remaining; output {output}",
+        flush=True,
+    )
+
+    call_number = len(records)
+    for repetition in range(1, args.repetitions + 1):
+        for case_index, case in enumerate(suite["cases"]):
+            order = (
+                ("default", "xhigh")
+                if ((repetition - 1) + case_index) % 2 == 0
+                else ("xhigh", "default")
+            )
+            seed = args.seed + (repetition - 1) * len(suite["cases"]) + case_index
+            try:
+                messages = rocmfpx_quality.case_messages(suite, case)
+            except rocmfpx_quality.QualityError as exc:
+                fail(str(exc))
+            for pair_position, arm in enumerate(order, 1):
+                key = (repetition, case["id"], arm)
+                if key in completed:
+                    continue
+                call_number += 1
+                payload = {
+                    "model": model_name,
+                    "messages": messages,
+                    "stream": False,
+                    "temperature": 1.0,
+                    "top_p": 0.95,
+                    "seed": seed,
+                    "max_tokens": args.max_tokens,
+                    **reasoning_request_fields(arm),
+                }
+                started = time.monotonic()
+                response = None
+                request_error = None
+                attempts = 0
+                for attempts in range(1, 4):
+                    try:
+                        response = container_http_json(
+                            container, f"{base_url}/v1/chat/completions", payload,
+                            timeout=args.timeout,
+                        )
+                        break
+                    except HaloError as exc:
+                        request_error = str(exc)
+                        if attempts < 3:
+                            time.sleep(attempts)
+                elapsed = time.monotonic() - started
+                base_record: dict[str, Any] = {
+                    "repetition": repetition,
+                    "case_id": case["id"],
+                    "category": case["category"],
+                    "arm": arm,
+                    "pair_position": pair_position,
+                    "seed": seed,
+                    "attempts": attempts,
+                    "wall_seconds": round(elapsed, 6),
+                    "recorded_at": utc_now(),
+                }
+                if response is None:
+                    record = {
+                        **base_record,
+                        "status": "request_error",
+                        "error": request_error,
+                        "finish_reason": None,
+                        "final_content": "",
+                        "final_content_present": False,
+                        "empty_stop_failure": False,
+                        "output_budget_exhausted": False,
+                        "delivery_success": False,
+                        "validator_passed": False,
+                        "reasoning_characters": None,
+                        "reasoning_sha256": None,
+                        "prompt_tokens": None,
+                        "completion_tokens": None,
+                        "decode_tokens_per_second": None,
+                        "backend_fingerprint": None,
+                    }
+                else:
+                    try:
+                        choice = response["choices"][0]
+                        message = choice["message"]
+                        content_value = message.get("content")
+                        reasoning_value = message.get("reasoning_content")
+                        if content_value is not None and not isinstance(content_value, str):
+                            raise TypeError("content is not text or null")
+                        if reasoning_value is not None and not isinstance(reasoning_value, str):
+                            raise TypeError("reasoning_content is not text or null")
+                        content = content_value or ""
+                        reasoning = reasoning_value or ""
+                        finish_reason = choice.get("finish_reason")
+                        if not isinstance(finish_reason, str):
+                            raise TypeError("finish_reason is not text")
+                    except (KeyError, IndexError, TypeError, AttributeError) as exc:
+                        record = {
+                            **base_record,
+                            "status": "invalid_response",
+                            "error": str(exc),
+                            "finish_reason": None,
+                            "final_content": "",
+                            "final_content_present": False,
+                            "empty_stop_failure": False,
+                            "output_budget_exhausted": False,
+                            "delivery_success": False,
+                            "validator_passed": False,
+                            "reasoning_characters": None,
+                            "reasoning_sha256": None,
+                            "prompt_tokens": None,
+                            "completion_tokens": None,
+                            "decode_tokens_per_second": None,
+                            "backend_fingerprint": response.get("system_fingerprint") if isinstance(response, dict) else None,
+                        }
+                    else:
+                        final_present = bool(content.strip())
+                        try:
+                            validator_passed, normalized = rocmfpx_quality.score_case(case, content)
+                        except rocmfpx_quality.QualityError as exc:
+                            fail(str(exc))
+                        usage = response.get("usage") if isinstance(response, dict) else None
+                        timings = response.get("timings") if isinstance(response, dict) else None
+                        prompt_tokens = usage.get("prompt_tokens") if isinstance(usage, dict) else None
+                        completion_tokens = usage.get("completion_tokens") if isinstance(usage, dict) else None
+                        decode_rate = timings.get("predicted_per_second") if isinstance(timings, dict) else None
+                        record = {
+                            **base_record,
+                            "status": "complete",
+                            "finish_reason": finish_reason,
+                            "final_content": content,
+                            "normalized_final_content": normalized,
+                            "final_content_sha256": hashlib.sha256(content.encode()).hexdigest(),
+                            "final_content_present": final_present,
+                            "empty_stop_failure": not final_present and finish_reason == "stop",
+                            "output_budget_exhausted": finish_reason == "length",
+                            "delivery_success": final_present and finish_reason == "stop",
+                            "validator_passed": validator_passed,
+                            "reasoning_characters": len(reasoning),
+                            "reasoning_sha256": hashlib.sha256(reasoning.encode()).hexdigest(),
+                            "prompt_tokens": prompt_tokens,
+                            "completion_tokens": completion_tokens,
+                            "decode_tokens_per_second": decode_rate,
+                            "backend_fingerprint": response.get("system_fingerprint") if isinstance(response, dict) else None,
+                        }
+                records.append(record)
+                completed.add(key)
+                try:
+                    document["summary"] = rocmfpx_quality.summarize_reasoning_reliability(records)
+                except rocmfpx_quality.QualityError:
+                    document["summary"] = None
+                document["updated_at"] = utc_now()
+                atomic_json(output, document, mode=0o644)
+                print(
+                    f"[{call_number}/{total}] repetition={repetition} case={case['id']} "
+                    f"arm={arm} status={record['status']} final="
+                    f"{'yes' if record['final_content_present'] else 'NO'} "
+                    f"finish={record['finish_reason'] or '-'} {elapsed:.1f}s",
+                    flush=True,
+                )
+
+    try:
+        summary = rocmfpx_quality.summarize_reasoning_reliability(records)
+    except rocmfpx_quality.QualityError as exc:
+        fail(str(exc))
+    document["summary"] = summary
+    document["completed_at"] = utc_now()
+    document["updated_at"] = utc_now()
+    atomic_json(output, document, mode=0o644)
+    print(json.dumps(summary, indent=2))
+    return 0
+
+
 def command_bench(config: Config, catalog: Catalog, args: argparse.Namespace) -> int:
     if args.bench_name == "rocmfpx-context":
         return command_bench_rocmfpx_context(config, catalog, args)
     if args.bench_name == "rocmfpx-quality":
         return command_bench_rocmfpx_quality(config, catalog, args)
+    if args.bench_name == "reasoning-reliability":
+        return command_bench_reasoning_reliability(config, catalog, args)
     if args.bench_action == "download":
         return command_bench_download(config, args)
     if args.bench_action == "run":
@@ -4681,6 +5001,17 @@ def build_parser() -> argparse.ArgumentParser:
     rocmfpx_quality_parser.add_argument("--process-repetition", type=int, default=1)
     rocmfpx_quality_parser.add_argument("--timeout", type=int, default=900)
     rocmfpx_quality_parser.add_argument("--output", help="optional atomic JSON report path")
+    reasoning_reliability = bench.add_parser(
+        "reasoning-reliability",
+        help="run resumable paired default-medium versus xhigh delivery checks",
+    )
+    reasoning_reliability.add_argument("profile_id")
+    reasoning_reliability.add_argument("--suite", help="alternate versioned quality suite JSON")
+    reasoning_reliability.add_argument("--repetitions", type=int, default=2)
+    reasoning_reliability.add_argument("--max-tokens", type=int, default=1024)
+    reasoning_reliability.add_argument("--seed", type=int, default=1)
+    reasoning_reliability.add_argument("--timeout", type=int, default=900)
+    reasoning_reliability.add_argument("--output", help="resumable atomic JSON report path")
     update = sub.add_parser("update"); update.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "strixvulkan", "ds4", "speech", "vllm", "all"])
     tune = sub.add_parser("tune", help="inspect guarded trials and score optimization evidence").add_subparsers(dest="tune_action", required=True)
     tune.add_parser("status")

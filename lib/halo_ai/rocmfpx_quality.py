@@ -6,6 +6,7 @@ import copy
 import hashlib
 import json
 import math
+import statistics
 from pathlib import Path
 from typing import Any
 
@@ -149,6 +150,162 @@ def summarize_results(results: list[dict[str, Any]]) -> dict[str, Any]:
         "score_percent": round(passed * 100 / len(results), 2),
         "wilson_95_percent": wilson_interval(passed, len(results)),
         "categories": categories,
+    }
+
+
+def _median(values: list[float | int]) -> float | None:
+    return round(float(statistics.median(values)), 6) if values else None
+
+
+def _rate_summary(successes: int, total: int) -> dict[str, Any]:
+    return {
+        "count": successes,
+        "percent": round(successes * 100 / total, 2),
+        "wilson_95_percent": wilson_interval(successes, total),
+    }
+
+
+def summarize_reasoning_reliability(
+    records: list[dict[str, Any]], *, minimum_calls_per_arm: int = 24,
+) -> dict[str, Any]:
+    """Summarize paired final-answer delivery without overstating model quality."""
+    if not records:
+        raise QualityError("reasoning reliability benchmark has no records")
+    if minimum_calls_per_arm < 1:
+        raise QualityError("minimum calls per arm must be positive")
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for record in records:
+        arm = record.get("arm")
+        if arm not in {"default", "xhigh"}:
+            raise QualityError("reasoning reliability record has an invalid arm")
+        grouped.setdefault(arm, []).append(record)
+
+    arms: dict[str, dict[str, Any]] = {}
+    for arm in ("default", "xhigh"):
+        rows = grouped.get(arm, [])
+        if not rows:
+            raise QualityError(f"reasoning reliability benchmark has no {arm} records")
+        total = len(rows)
+        request_errors = sum(row.get("status") == "request_error" for row in rows)
+        invalid_responses = sum(row.get("status") == "invalid_response" for row in rows)
+        final_present = sum(row.get("final_content_present") is True for row in rows)
+        empty_stop = sum(row.get("empty_stop_failure") is True for row in rows)
+        budget_exhaustions = sum(row.get("output_budget_exhausted") is True for row in rows)
+        delivery_successes = sum(row.get("delivery_success") is True for row in rows)
+        validator_passes = sum(row.get("validator_passed") is True for row in rows)
+        completion_tokens = [
+            value for row in rows
+            if isinstance((value := row.get("completion_tokens")), int) and value >= 0
+        ]
+        wall_seconds = [
+            value for row in rows
+            if isinstance((value := row.get("wall_seconds")), (int, float)) and value >= 0
+        ]
+        decode_rates = [
+            value for row in rows
+            if isinstance((value := row.get("decode_tokens_per_second")), (int, float))
+            and value > 0
+        ]
+        arms[arm] = {
+            "calls": total,
+            "request_errors": request_errors,
+            "invalid_responses": invalid_responses,
+            "final_content": _rate_summary(final_present, total),
+            "empty_stop_failures": _rate_summary(empty_stop, total),
+            "output_budget_exhaustions": _rate_summary(budget_exhaustions, total),
+            "delivery_success": _rate_summary(delivery_successes, total),
+            "validator_pass": _rate_summary(validator_passes, total),
+            "median_completion_tokens": _median(completion_tokens),
+            "median_wall_seconds": _median(wall_seconds),
+            "median_decode_tokens_per_second": _median(decode_rates),
+        }
+
+    paired: dict[tuple[int, str], dict[str, dict[str, Any]]] = {}
+    for record in records:
+        repetition = record.get("repetition")
+        case_id = record.get("case_id")
+        if not isinstance(repetition, int) or not isinstance(case_id, str):
+            raise QualityError("reasoning reliability record has an invalid pair identity")
+        pair = paired.setdefault((repetition, case_id), {})
+        arm = record["arm"]
+        if arm in pair:
+            raise QualityError(f"duplicate reasoning reliability record for {repetition}/{case_id}/{arm}")
+        pair[arm] = record
+
+    complete_pairs = [pair for pair in paired.values() if set(pair) == {"default", "xhigh"}]
+    default_only_failure = sum(
+        pair["default"].get("delivery_success") is not True
+        and pair["xhigh"].get("delivery_success") is True
+        for pair in complete_pairs
+    )
+    xhigh_only_failure = sum(
+        pair["default"].get("delivery_success") is True
+        and pair["xhigh"].get("delivery_success") is not True
+        for pair in complete_pairs
+    )
+    both_failure = sum(
+        pair["default"].get("delivery_success") is not True
+        and pair["xhigh"].get("delivery_success") is not True
+        for pair in complete_pairs
+    )
+    neither_failure = len(complete_pairs) - default_only_failure - xhigh_only_failure - both_failure
+    discordant = default_only_failure + xhigh_only_failure
+    mcnemar_p = None
+    if discordant:
+        tail = sum(
+            math.comb(discordant, value)
+            for value in range(min(default_only_failure, xhigh_only_failure) + 1)
+        ) / (2 ** discordant)
+        mcnemar_p = round(min(1.0, 2 * tail), 8)
+
+    def paired_ratios(field: str) -> list[float]:
+        ratios = []
+        for pair in complete_pairs:
+            left = pair["default"].get(field)
+            right = pair["xhigh"].get(field)
+            if (
+                isinstance(left, (int, float)) and left >= 0
+                and isinstance(right, (int, float)) and right > 0
+            ):
+                ratios.append(left / right)
+        return ratios
+
+    default_summary = arms["default"]
+    enough_calls = all(arms[arm]["calls"] >= minimum_calls_per_arm for arm in arms)
+    bounded_reliability_supported = (
+        enough_calls
+        and default_summary["request_errors"] == 0
+        and default_summary["invalid_responses"] == 0
+        and default_summary["delivery_success"]["count"] == default_summary["calls"]
+    )
+    comparative_superiority_supported = (
+        bounded_reliability_supported
+        and xhigh_only_failure > default_only_failure
+        and mcnemar_p is not None and mcnemar_p < 0.05
+    )
+    return {
+        "calls": len(records),
+        "minimum_calls_per_arm": minimum_calls_per_arm,
+        "arms": arms,
+        "paired_delivery": {
+            "complete_pairs": len(complete_pairs),
+            "neither_failed": neither_failure,
+            "both_failed": both_failure,
+            "default_only_failed": default_only_failure,
+            "xhigh_only_failed": xhigh_only_failure,
+            "exact_mcnemar_two_sided_p": mcnemar_p,
+        },
+        "paired_median_default_to_xhigh_ratios": {
+            "completion_tokens": _median(paired_ratios("completion_tokens")),
+            "wall_seconds": _median(paired_ratios("wall_seconds")),
+            "decode_tokens_per_second": _median(paired_ratios("decode_tokens_per_second")),
+        },
+        "claim_gate": {
+            "minimum_sample_met": enough_calls,
+            "bounded_default_reliability_supported": bounded_reliability_supported,
+            "comparative_superiority_supported": comparative_superiority_supported,
+            "scope": "this host, profile, suite, runtime, sampling policy, and output budget only",
+        },
     }
 
 

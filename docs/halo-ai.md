@@ -2086,6 +2086,23 @@ ordinary LongBench answer judgment. q38rocm build 213 lacks the newer
 `/input_tokens` endpoint, so Halo falls back to the exact `/apply-template` plus
 `/tokenize` composition rather than estimating its token budget.
 
+For a repeated final-answer reliability check rather than a LongBench accuracy
+sample, use:
+
+```bash
+halo-ai bench reasoning-reliability qwen3.8fp4 \
+  --repetitions 2 --max-tokens 1024
+```
+
+The runner uses the checked-in 13-case quality suite, pairs the omitted/default
+arm with explicit `xhigh` at the same seed, alternates pair order, and atomically
+checkpoints every call. It requires at least 24 calls per arm before its bounded
+default-reliability gate can pass. Empty final content with `finish_reason=stop`,
+output-budget exhaustion, request errors, invalid responses, semantic validator
+results, Wilson 95% intervals, and paired time/token/TPS ratios remain separate;
+therefore a clean run does not silently become a universal quality or
+superiority claim.
+
 LongBench remains a text request when run against a vision profile; it measures
 that profile's loaded text path and memory overhead but does not exercise the
 projector. Pair it with `halo-ai test VISION_PROFILE`, whose generated-image
