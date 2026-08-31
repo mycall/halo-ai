@@ -1610,6 +1610,23 @@ class RocmFpxTuningTests(unittest.TestCase):
         self.assertIn("Archive record 000397", first[-1]["content"])
         self.assertEqual(first[-1]["content"].count("quartz-8142"), 1)
 
+    def test_reasoning_reliability_suite_has_24_structured_calls_per_arm(self) -> None:
+        suite_path = ROOT / "config/benchmarks/reasoning-reliability-v1.json"
+        suite, digest = cli.rocmfpx_quality.load_suite(suite_path)
+        self.assertEqual(suite["suite_id"], "halo-ai-reasoning-reliability-v1")
+        self.assertEqual(len(digest), 64)
+        self.assertEqual(len(suite["cases"]), 12)
+        self.assertTrue(all(
+            "structured_output" in case["category"] for case in suite["cases"]
+        ))
+        long_case = next(
+            case for case in suite["cases"]
+            if case["id"] == "long-context-tool-result-json"
+        )
+        messages = cli.rocmfpx_quality.case_messages(suite, long_case)
+        self.assertIn("exactly the keys record and retrieval_code", messages[-1]["content"])
+        self.assertEqual(messages[-1]["content"].count("quartz-8142"), 1)
+
     def test_quality_scoring_handles_exact_and_semantic_json(self) -> None:
         exact = {"id": "exact", "validator": {"type": "exact", "expected": "42"}}
         structured = {
@@ -1673,7 +1690,43 @@ class RocmFpxTuningTests(unittest.TestCase):
         self.assertFalse(summary["claim_gate"]["minimum_sample_met"])
         self.assertFalse(summary["claim_gate"]["bounded_default_reliability_supported"])
 
-    def test_reasoning_reliability_cli_defaults_to_26_calls_per_arm(self) -> None:
+    def test_reasoning_reliability_keeps_control_token_failures_visible(self) -> None:
+        records = []
+        for repetition in range(1, 25):
+            for arm in ("default", "xhigh"):
+                records.append({
+                    "repetition": repetition,
+                    "case_id": "ordinary",
+                    "category": "reasoning",
+                    "arm": arm,
+                    "status": "complete",
+                    "delivery_success": True,
+                    "final_content_present": True,
+                    "empty_stop_failure": False,
+                    "output_budget_exhausted": False,
+                    "validator_passed": True,
+                })
+        for arm in ("default", "xhigh"):
+            records.append({
+                "repetition": 25,
+                "case_id": "special",
+                "category": "special_token_boundary",
+                "arm": arm,
+                "status": "complete",
+                "delivery_success": False,
+                "final_content_present": False,
+                "empty_stop_failure": True,
+                "output_budget_exhausted": False,
+                "validator_passed": False,
+            })
+        summary = cli.rocmfpx_quality.summarize_reasoning_reliability(records)
+        self.assertFalse(summary["claim_gate"]["bounded_default_reliability_supported"])
+        self.assertTrue(
+            summary["claim_gate"]["bounded_default_ordinary_reliability_supported"],
+        )
+        self.assertEqual(summary["cohorts"]["special_token_boundary"]["delivery_failures"], 2)
+
+    def test_reasoning_reliability_cli_defaults_to_24_calls_per_arm(self) -> None:
         parser = cli.build_parser()
         args = parser.parse_args([
             "bench", "reasoning-reliability", "qwen3.8fp4",

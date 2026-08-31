@@ -66,7 +66,10 @@ def case_messages(suite: dict[str, Any], case: dict[str, Any]) -> list[dict[str,
         messages.extend(copy.deepcopy(supplied))
     else:
         builder = case["builder"]
-        if not isinstance(builder, dict) or builder.get("type") != "record_needle":
+        if (
+            not isinstance(builder, dict)
+            or builder.get("type") not in {"record_needle", "record_needle_json"}
+        ):
             raise QualityError(f"quality case {case['id']} has an unsupported builder")
         records = builder.get("records")
         target = builder.get("target_index")
@@ -84,9 +87,16 @@ def case_messages(suite: dict[str, Any], case: dict[str, Any]) -> list[dict[str,
                 f"Archive record {index:06d}: owner=team-{index % 97:02d}; "
                 f"state=closed; retrieval_code={code}."
             )
-        lines.append(
-            f"Return only the retrieval_code from archive record {target:06d}."
-        )
+        if builder["type"] == "record_needle_json":
+            lines.append(
+                "Return only one JSON object with exactly the keys record and "
+                f"retrieval_code for archive record {target:06d}. The record value "
+                "must be an integer."
+            )
+        else:
+            lines.append(
+                f"Return only the retrieval_code from archive record {target:06d}."
+            )
         messages.append({"role": "user", "content": "\n".join(lines)})
     for item in messages:
         if (
@@ -283,6 +293,32 @@ def summarize_reasoning_reliability(
         and xhigh_only_failure > default_only_failure
         and mcnemar_p is not None and mcnemar_p < 0.05
     )
+    operational_rows = [
+        row for row in records if row.get("category") != "special_token_boundary"
+    ]
+    operational_arms: dict[str, dict[str, Any]] = {}
+    for arm in ("default", "xhigh"):
+        rows = [row for row in operational_rows if row["arm"] == arm]
+        total = len(rows)
+        delivered = sum(row.get("delivery_success") is True for row in rows)
+        empty_stop = sum(row.get("empty_stop_failure") is True for row in rows)
+        operational_arms[arm] = {
+            "calls": total,
+            "delivery_success": _rate_summary(delivered, total) if total else None,
+            "empty_stop_failures": _rate_summary(empty_stop, total) if total else None,
+            "validator_passes": sum(row.get("validator_passed") is True for row in rows),
+        }
+    operational_minimum_met = all(
+        operational_arms[arm]["calls"] >= minimum_calls_per_arm for arm in operational_arms
+    )
+    operational_default_supported = (
+        operational_minimum_met
+        and operational_arms["default"]["delivery_success"]["count"]
+        == operational_arms["default"]["calls"]
+    )
+    boundary_rows = [
+        row for row in records if row.get("category") == "special_token_boundary"
+    ]
     return {
         "calls": len(records),
         "minimum_calls_per_arm": minimum_calls_per_arm,
@@ -300,9 +336,27 @@ def summarize_reasoning_reliability(
             "wall_seconds": _median(paired_ratios("wall_seconds")),
             "decode_tokens_per_second": _median(paired_ratios("decode_tokens_per_second")),
         },
+        "cohorts": {
+            "ordinary_non_control_token": {
+                "excluded_category": "special_token_boundary",
+                "arms": operational_arms,
+            },
+            "special_token_boundary": {
+                "calls": len(boundary_rows),
+                "delivery_failures": sum(
+                    row.get("delivery_success") is not True for row in boundary_rows
+                ),
+                "empty_stop_failures": sum(
+                    row.get("empty_stop_failure") is True for row in boundary_rows
+                ),
+            },
+        },
         "claim_gate": {
             "minimum_sample_met": enough_calls,
             "bounded_default_reliability_supported": bounded_reliability_supported,
+            "ordinary_minimum_sample_met": operational_minimum_met,
+            "bounded_default_ordinary_reliability_supported": operational_default_supported,
+            "ordinary_scope_exclusion": "literal chat-control-token boundary prompts",
             "comparative_superiority_supported": comparative_superiority_supported,
             "scope": "this host, profile, suite, runtime, sampling policy, and output budget only",
         },

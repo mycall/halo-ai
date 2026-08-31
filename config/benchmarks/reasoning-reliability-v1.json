@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "suite_id": "halo-ai-reasoning-reliability-v1",
+  "system_prompt": "Analyze the task internally, then return only the requested JSON value with no explanation, labels, or markdown.",
+  "cases": [
+    {
+      "id": "code-trace-json",
+      "category": "agentic_structured_output",
+      "prompt": "A Python function initializes total=0 and processes [2,3,4,5]. At even indexes it adds x*x; at odd indexes it subtracts x. Return one JSON object with exactly the key result and the resulting integer.",
+      "max_tokens": 128,
+      "validator": {"type": "json", "expected": {"result": 12}}
+    },
+    {
+      "id": "constraint-solve-json",
+      "category": "agentic_structured_output",
+      "prompt": "Find the smallest positive integer n such that n modulo 7 is 3 and n modulo 11 is 5. Return one JSON object with exactly the key n.",
+      "max_tokens": 128,
+      "validator": {"type": "json", "expected": {"n": 38}}
+    },
+    {
+      "id": "probability-json",
+      "category": "agentic_structured_output",
+      "prompt": "A bag contains 3 red and 2 blue balls. Two are drawn uniformly without replacement. Return the reduced probability that both are red as one JSON object with exactly the integer keys numerator and denominator.",
+      "max_tokens": 128,
+      "validator": {"type": "json", "expected": {"numerator": 3, "denominator": 10}}
+    },
+    {
+      "id": "tool-arguments-json",
+      "category": "agentic_structured_output",
+      "prompt": "A weather tool requires exactly city (string), units (string), and days (integer). Prepare its arguments for Kyiv, metric units, for 3 days.",
+      "max_tokens": 128,
+      "validator": {"type": "json", "expected": {"city": "Kyiv", "units": "metric", "days": 3}}
+    },
+    {
+      "id": "incident-routing-json",
+      "category": "agentic_structured_output",
+      "prompt": "An incident says: production writes fail, database health is red, customer impact is active. Policy maps database failures to queue database, active production impact to priority 1, and priority 1 to notify true. Return one JSON object with exactly queue, priority, and notify.",
+      "max_tokens": 128,
+      "validator": {"type": "json", "expected": {"queue": "database", "priority": 1, "notify": true}}
+    },
+    {
+      "id": "dependency-order-json",
+      "category": "agentic_structured_output",
+      "prompt": "Pipeline constraints: lint precedes test; test precedes build; build precedes deploy. Return one JSON object with exactly the key order whose value is the only valid array of all four stage names.",
+      "max_tokens": 128,
+      "validator": {"type": "json", "expected": {"order": ["lint", "test", "build", "deploy"]}}
+    },
+    {
+      "id": "patch-scope-json",
+      "category": "agentic_structured_output",
+      "prompt": "A bug is in api.py. Policy requires changing its direct test tests/test_api.py and forbids documentation changes for this internal refactor. Candidate files are README.md, api.py, and tests/test_api.py. Return one JSON object with exactly edit and skip arrays, preserving candidate order within each array.",
+      "max_tokens": 128,
+      "validator": {"type": "json", "expected": {"edit": ["api.py", "tests/test_api.py"], "skip": ["README.md"]}}
+    },
+    {
+      "id": "retry-policy-json",
+      "category": "agentic_structured_output",
+      "prompt": "A client makes at most 3 total attempts. It retries only HTTP 429 and 503, waiting 1 second before attempt 2 and 2 seconds before attempt 3. Return one JSON object with exactly max_attempts, retry_status, and delays_seconds; array values must be ascending.",
+      "max_tokens": 128,
+      "validator": {"type": "json", "expected": {"max_attempts": 3, "retry_status": [429, 503], "delays_seconds": [1, 2]}}
+    },
+    {
+      "id": "filter-sort-json",
+      "category": "agentic_structured_output",
+      "prompt": "Given [{\"id\":3,\"ok\":true},{\"id\":1,\"ok\":false},{\"id\":2,\"ok\":true}], keep only objects whose ok value is true, sort by id ascending, and return only the JSON array of id integers.",
+      "max_tokens": 128,
+      "validator": {"type": "json", "expected": [2, 3]}
+    },
+    {
+      "id": "multilingual-extraction-json",
+      "category": "agentic_structured_output",
+      "prompt": "Read this record: Español: estado listo. Deutsch: Status bereit. Українська: код квитка КИЇВ-482. Return one JSON object with exactly ticket containing the Ukrainian code and ready set to true.",
+      "max_tokens": 128,
+      "validator": {"type": "json", "expected": {"ticket": "КИЇВ-482", "ready": true}}
+    },
+    {
+      "id": "multi-turn-state-json",
+      "category": "agentic_structured_output",
+      "messages": [
+        {"role": "user", "content": "Store session cedar-29 at attempt 1. Reply only Stored."},
+        {"role": "assistant", "content": "Stored."},
+        {"role": "user", "content": "The retry increments the attempt by one. Return one JSON object with exactly session and attempt for the new state."}
+      ],
+      "max_tokens": 128,
+      "validator": {"type": "json", "expected": {"session": "cedar-29", "attempt": 2}}
+    },
+    {
+      "id": "long-context-tool-result-json",
+      "category": "long_context_agentic_structured_output",
+      "builder": {"type": "record_needle_json", "records": 512, "target_index": 397, "expected": "quartz-8142"},
+      "max_tokens": 128,
+      "validator": {"type": "json", "expected": {"record": 397, "retrieval_code": "quartz-8142"}}
+    }
+  ]
+}

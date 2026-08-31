@@ -450,7 +450,7 @@ Every sample is flushed to disk, so rerunning the identical command resumes.
 The score always reports completed, skipped, error, and truncated counts.
 
 For the narrower Qwen3.8 final-answer reliability question, run the paired,
-interleaved fixed suite. Two repetitions produce 26 matched calls per arm and
+interleaved structured-output suite. Two repetitions produce 24 matched calls per arm and
 checkpoint atomically after every response:
 
 ```bash
@@ -462,6 +462,14 @@ This separately reports API/protocol errors, empty content with `finish_reason`
 `stop`, output-budget exhaustion, final-answer delivery, and validator results.
 Its Wilson intervals and paired ratios support only a bounded claim for the
 recorded host, runtime, suite, sampling policy, and output budget.
+
+On the recorded FP4 host run, default-medium and xhigh each delivered and
+validator-passed 24/24 structured calls (Wilson 95%: 86.2--100%), so the bounded
+medium reliability gate passed while the superiority gate did not. A separate
+literal ChatML-control-token sentinel failed empty-stop in both arms; raw
+`<|im_start|>`/`<|im_end|>` content is therefore outside the qualified thinking
+input boundary until it is escaped or rejected. See the
+[machine summary](docs/results/qwen3.8-reasoning-reliability-2026-08-30.json).
 
 ## Verified test findings
 

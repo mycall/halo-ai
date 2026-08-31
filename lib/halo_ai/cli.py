@@ -77,6 +77,7 @@ ROCMFPX_Q38ROCM_COMMIT = "66de2f3bc625249eabff5bd919fd6dbdd3d7ccaa"
 ROCMFPX_VULKAN_BASE = "sha256:8cdde6d42ab621b3d0f1e02618f4234c58b7036bec984a2a64fa205d38f99922"
 ROCMFPX_ROCM_BASE = "sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b"
 ROCMFPX_QUALITY_SUITE = SOURCE_CONFIG / "benchmarks" / "rocmfpx-quality-v1.json"
+REASONING_RELIABILITY_SUITE = SOURCE_CONFIG / "benchmarks" / "reasoning-reliability-v1.json"
 
 LEMONADE_VERSION = "11.8.1"
 LEMONADE_IMAGE_DIGEST = "sha256:824359e8633d3cde4afb2c32609930758f4e71424d71ad58f26432a8bb1092cb"
@@ -4643,7 +4644,7 @@ def command_bench_reasoning_reliability(
         fail("reasoning reliability benchmark requires a cataloged medium default")
     suite_path = (
         Path(args.suite).expanduser().resolve()
-        if args.suite else ROCMFPX_QUALITY_SUITE
+        if args.suite else REASONING_RELIABILITY_SUITE
     )
     try:
         suite, suite_sha256 = rocmfpx_quality.load_suite(suite_path)

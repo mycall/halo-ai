@@ -66,10 +66,54 @@ dependency.
       proved omitted equals explicit medium and differs from xhigh; a GSM8K-
       style pilot and one 29,698-token pinned LongBench-v2 sample returned
       correct, nonempty final answers under default, medium, and xhigh.
-- [ ] Estimate the reported intermittent empty-final-answer rate with at least
-      24 repeated long-input agentic or structured-output calls per arm. Treat
-      the current LongBench result as a bounded no-regression pass, not proof
-      that medium is always faster, shorter, or more accurate than xhigh.
+- [x] Estimate the reported intermittent empty-final-answer rate with at least
+      24 repeated long-input agentic or structured-output calls per arm. The
+      paired 12-case JSON suite produced 24/24 delivered and validator-passing
+      answers for both omitted/default-medium and explicit xhigh, with no API,
+      protocol, empty-stop, or output-budget failures. This supports bounded
+      reliability and equality on the tested workload, not a zero population
+      failure rate or medium superiority. A separate adversarial case containing
+      literal ChatML control markers failed empty-stop in both arms and remains
+      a documented template-boundary limitation.
+- [ ] Add an upstream-failure stress track based on
+      [Qwen3.8 issue 216](https://github.com/QwenLM/Qwen3.8/issues/216): pin
+      the three structured-extraction prompts, compare `medium` and `xhigh`
+      with at least six repetitions, and run both the deployment sampler
+      (`temperature=1.0`, `top_p=0.95`) and a temperature-zero diagnostic.
+      Permit a 32K--64K output allowance so the runner can distinguish the
+      reported late empty-stop failure from ordinary output-budget exhaustion.
+- [ ] Add a pinned [IFBench](https://github.com/allenai/IFBench) adapter and
+      paired `medium`/`xhigh` run. Score all 300 verifier-backed prompts with
+      prompt-level loose accuracy, preserve per-constraint results, and record
+      delivery, completion-token, wall-time, and successful-task ratios. Keep
+      the official temperature-zero result separate from a repeated subset
+      using Halo's deployment sampler.
+- [ ] Expand the existing LongBench-v2 comparison from a single canary to a
+      pinned 36--60-sample hard subset balanced across all six domains and
+      limited to native-fit contexts. Use enough completion headroom to avoid
+      systematically truncating `xhigh`, and continue reporting empty-stop and
+      `finish_reason=length` as different outcomes.
+- [ ] Add a sandboxed, pinned LiveCodeBench v6 Lite comparison, beginning with
+      100 recent medium/hard tasks and executable pass@1 scoring. Expand only
+      if the first paired interval cannot distinguish a practically meaningful
+      quality difference.
+- [ ] Add a BFCL v4 non-web multi-turn tool-use comparison against the local
+      OpenAI-compatible endpoint. Cover base, missing-function,
+      missing-parameter, and long-context categories with pinned case IDs;
+      keep this separate from the current JSON-shaped tool-argument smoke
+      cases, which do not execute native tool calls.
+- [ ] After the verifier-backed tracks pass, run a bounded real-agent
+      acceptance slice with the same scaffold and limits for both arms. Prefer
+      Terminal-Bench or SWE-bench Verified, but label a subset as a local
+      acceptance result rather than an official leaderboard score and retain
+      repeated-trial noise in the report.
+- [ ] Keep `medium` as the default when quality is stable or non-inferior.
+      Promote `xhigh` only if paired evidence shows a repeatable, practically
+      meaningful quality gain (initial margin: more than 3 percentage points
+      with a 95% interval excluding zero) without worse delivery, empty-stop,
+      truncation, or agent-completion rates. Make completion tokens per
+      successful task and wall seconds per successful task primary ratios so
+      the decision remains useful if host TDP changes.
 - [x] Benchmark unassisted greedy generation at short, 4K, and 32K contexts;
       record TTFT, prompt speed, decode speed, memory, and software revisions.
 - [x] Document the baseline command, expected storage, supported text-only

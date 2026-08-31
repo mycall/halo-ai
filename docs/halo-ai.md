@@ -1711,6 +1711,28 @@ that one effort always uses fewer tokens: the one-sample completion counts were
 396, 623, and 250 respectively. The machine record is
 [`docs/results/qwen3.8-reasoning-default-validation-2026-08-30.json`](results/qwen3.8-reasoning-default-validation-2026-08-30.json).
 
+The follow-up paired reliability matrix ran 24 matched agentic/structured JSON
+calls per arm, including multi-turn state and two approximately 17K-token
+requests per arm. Default-medium and xhigh each delivered and validator-passed
+24/24, with no request errors, invalid responses, empty-stop failures, or
+output-budget exhaustion. The Wilson 95% delivery interval is 86.2--100% for
+each arm. Paired median default/xhigh ratios were 0.881 for completion tokens,
+0.931 for wall time, and 1.005 for decode TPS. That supports a bounded
+reliability claim for the medium default and observes equality—not superiority—
+on this host and suite.
+
+A separate 26-call-per-arm diagnostic prevents that wording from becoming a
+blanket claim: the ordinary cases passed 24/24 in both arms, but both repetitions
+of the case asking about literal `<|im_start|>`/`<|im_end|>` text returned empty
+final content with `finish_reason=stop` in both arms. The model began repeating
+the literal marker inside its reasoning trace, where the tokenizer treated it
+as a chat control token and stopped before the final channel. The same sentinel
+historically passed with thinking disabled. This is consistent with the open
+[Transformers special-token escaping request](https://github.com/huggingface/transformers/issues/29279)
+and means callers must not treat raw control-token text as qualified thinking
+input until an escaping/rejection layer is added. The complete machine summary
+is [`docs/results/qwen3.8-reasoning-reliability-2026-08-30.json`](results/qwen3.8-reasoning-reliability-2026-08-30.json).
+
 Normal stop/restart preserves models and cache:
 
 ```bash
@@ -2094,7 +2116,7 @@ halo-ai bench reasoning-reliability qwen3.8fp4 \
   --repetitions 2 --max-tokens 1024
 ```
 
-The runner uses the checked-in 13-case quality suite, pairs the omitted/default
+The runner uses a checked-in 12-case agentic/structured-output suite, pairs the omitted/default
 arm with explicit `xhigh` at the same seed, alternates pair order, and atomically
 checkpoints every call. It requires at least 24 calls per arm before its bounded
 default-reliability gate can pass. Empty final content with `finish_reason=stop`,

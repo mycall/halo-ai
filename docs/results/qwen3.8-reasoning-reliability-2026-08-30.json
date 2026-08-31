@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "kind": "halo-ai-qwen3.8-reasoning-reliability-validation",
+  "recorded_at": "2026-08-31T05:22:24.860082+00:00",
+  "host_scope": "the tested Ryzen AI Max+ 395 / Radeon 8060S CachyOS host only",
+  "profile": "qwen3.8-27b-rocmfp4-baseline",
+  "model": {
+    "service_id": "Qwen3.8-27B-ROCmFP4-FAST.gguf",
+    "sha256": "fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9"
+  },
+  "runtime": {
+    "backend_fingerprint": "b213-e87d53e",
+    "q38rocm_release_commit": "66de2f3bc625249eabff5bd919fd6dbdd3d7ccaa",
+    "engine_archive_sha256": "bbc7845db0c012b97f1c9b8a2733a7083c6f9a749a453866fbe1994151d3364f",
+    "image_digest": "sha256:09e700ee3b87bb6cc5ccf0fba08d791e5411df825d30f423f55bb4fdb2c54d78",
+    "speculation": "none"
+  },
+  "default_template_canary": {
+    "catalog_default": "medium",
+    "omitted_prompt_sha256": "d651cd7c31445656d17adb6dcde77588189ba046af8d2d4307c3840600527395",
+    "explicit_medium_prompt_sha256": "d651cd7c31445656d17adb6dcde77588189ba046af8d2d4307c3840600527395",
+    "xhigh_control_prompt_sha256": "20ba140fc1b01e5e4e79bde5a6c1bfe78ef4409aacd40eb19513f6259fda3cb9"
+  },
+  "qualification": {
+    "suite_id": "halo-ai-reasoning-reliability-v1",
+    "suite_sha256": "94fa6f8796775e5566a400252c2b84dbcf558de5f26e4a5c35d322dc0d066bf5",
+    "method": {
+      "cases": 12,
+      "repetitions": 2,
+      "calls_per_arm": 24,
+      "pairing": "same case and seed; default/xhigh order alternated",
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "max_output_tokens": 1024,
+      "coverage": "agentic/structured JSON including multi-turn and 16965/17003-token long-context requests"
+    },
+    "default_medium": {
+      "delivery_successes": 24,
+      "validator_passes": 24,
+      "request_errors": 0,
+      "invalid_responses": 0,
+      "empty_stop_failures": 0,
+      "output_budget_exhaustions": 0,
+      "delivery_success_percent": 100.0,
+      "delivery_success_wilson_95_percent": [86.2, 100.0],
+      "failure_wilson_95_percent": [0.0, 13.8],
+      "median_completion_tokens": 147.5,
+      "median_wall_seconds": 14.046712,
+      "median_decode_tokens_per_second": 12.0637
+    },
+    "xhigh": {
+      "delivery_successes": 24,
+      "validator_passes": 24,
+      "request_errors": 0,
+      "invalid_responses": 0,
+      "empty_stop_failures": 0,
+      "output_budget_exhaustions": 0,
+      "delivery_success_percent": 100.0,
+      "delivery_success_wilson_95_percent": [86.2, 100.0],
+      "failure_wilson_95_percent": [0.0, 13.8],
+      "median_completion_tokens": 152.5,
+      "median_wall_seconds": 14.446915,
+      "median_decode_tokens_per_second": 12.009994
+    },
+    "paired_median_default_to_xhigh_ratios": {
+      "completion_tokens": 0.881377,
+      "wall_seconds": 0.931377,
+      "decode_tokens_per_second": 1.005097
+    },
+    "claim_gate": {
+      "bounded_default_reliability_supported": true,
+      "comparative_superiority_supported": false,
+      "interpretation": "Medium-default and xhigh were equally reliable on this bounded structured suite. The result supports the medium default but does not prove a population failure rate of zero or superiority over xhigh."
+    },
+    "raw_report": {
+      "path": "/var/opt/halo-ai/state/benchmarks/reasoning-reliability/qwen3.8-27b-rocmfp4-baseline-94fa6f879677-r2-m1024-s1.json",
+      "sha256": "3542f953e57612b69ab9a846be80a80c22ff240e5bf1af2c2197cbbd7c98a265"
+    }
+  },
+  "separate_control_token_diagnostic": {
+    "suite_id": "halo-ai-rocmfpx-quality-v1",
+    "suite_sha256": "909ef8bc4f88d69c61e49e6816c81e7a1dbb3450babed7a4c70164392aa7bd8e",
+    "calls_per_arm": 26,
+    "ordinary_cases_per_arm": {
+      "default_medium_delivery_and_validator_passes": 24,
+      "xhigh_delivery_and_validator_passes": 24
+    },
+    "literal_chat_control_token_case": {
+      "default_medium_empty_stop_failures": 2,
+      "xhigh_empty_stop_failures": 2,
+      "paired_both_failed": 2,
+      "cause": "The thinking trace repeats a literal ChatML control marker, which is tokenized as a control token and terminates generation before the final channel.",
+      "historical_nonthinking_result": "passed 2/2"
+    },
+    "raw_report": {
+      "path": "/var/opt/halo-ai/state/benchmarks/reasoning-reliability/qwen3.8-27b-rocmfp4-baseline-909ef8bc4f88-r2-m1024-s1.json",
+      "sha256": "a51eedc899dd00b45995add10956c42040546a148cdfe3f0f6e0918b5fb7c563"
+    }
+  },
+  "deployment_note": "The installed /etc catalog predated the medium-default commit. Qualification used the checked-out catalog through an explicit config and proved the live process arguments. A Snapper-backed sudo install is still required before the system-wide command inherits this source state."
+}
