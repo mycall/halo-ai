@@ -1614,7 +1614,7 @@ Attention, and 4096/4096 batch/ubatch. It mounts the same Q6 XL GGUF and
 `mmproj-BF16.gguf` read-only and forces `--spec-type none`. This isolates ROCm
 HIP from Vulkan as closely as the managed APIs permit.
 
-The Lemonade 11.7 qualification added external-draft integration. Halo registers the
+The historical Lemonade 11.7 qualification added external-draft integration. Halo registers the
 catalog's main, projector, and renamed `dflash-*` companion as one `local_path`
 model and verifies that the spawned server receives `--model-draft`,
 `--spec-type draft-dflash`, and the catalog's draft width. That wiring passed,
@@ -1642,19 +1642,36 @@ Vulkan requests reused 77 prompt tokens, so only the first request is used for
 the prefill comparison. The full record is
 [`docs/results/qwen3.8-q6xl-vulkan-rocm-ab-2026-08-23.json`](results/qwen3.8-q6xl-vulkan-rocm-ab-2026-08-23.json).
 
-After pinning Lemonade 11.7.0 by manifest digest and stable package `b10597`,
+With the now-deprecated Lemonade 11.7.0 image pinned by manifest digest and stable package `b10597`,
 three fresh-process vision canaries all returned `red` with fingerprint
 `b10594-ba8e0eddf`. A new uncached 81-token/256-token, three-run control measured
 ROCm median prefill/decode at 130.07/8.013 tok/s and Vulkan at
 99.69/8.466 tok/s. The exact compatibility trials and samples are in
 [`docs/results/qwen3.8-q6xl-lemonade-dflash2-compat-2026-08-23.json`](results/qwen3.8-q6xl-lemonade-dflash2-compat-2026-08-23.json).
 
-Lemonade 11.8.1 is now the supported server pin. The 11.8 line adds experimental
+Lemonade 11.8.1 is the sole supported server pin. The former 11.7 image digests
+and floating `latest` reference are accepted only so the installer can migrate
+known old defaults; they are not supported runtime choices. The 11.8 line adds experimental
 native DS4 using the same `b0001` gfx1151 archive as Halo's direct DS4 image,
-plus a larger model/backend surface. Halo does not silently route existing DS4 or
-ROCmFPX profiles through Lemonade: the direct engines retain qualified DSpark,
-disk-KV, long-context, provenance, and timing contracts. A Lemonade-native DS4
-profile can replace them only after it passes those same contracts. Likewise,
+plus a larger model/backend surface. Halo does not silently route existing DS4
+or ROCmFPX profiles through Lemonade: the direct engines retain qualified
+DSpark, disk-KV, long-context, provenance, and timing contracts.
+
+The installed 97.6 GB mixed-precision DeepSeek V4 Flash hybrid was registered
+against native `ds4:rocm` `b0001` and loaded at 32K context. Lemonade forced
+`--ssd-streaming`; automatic and maximum accepted expert-cache trials both
+failed first-token prefill with `selected expert id -1` at layer 3 followed by
+`rocm prefill failed`. Halo therefore records
+`ds4-deepseek-v4-flash-hybrid-lemonade-native` as a disabled requalification
+candidate and retains direct DS4 as the qualified default. The exact mixed-Q2/Q4
+ROCm streaming failure is open as
+[antirez/ds4#896](https://github.com/antirez/ds4/issues/896); it also fails
+one-token decode after a successful long prefill, so prompt padding is not a
+workaround. Lemonade's unconditional `--ssd-streaming` and lack of a
+full-residency opt-out are open as
+[lemonade-sdk/lemonade#3431](https://github.com/lemonade-sdk/lemonade/issues/3431).
+Uniform-Q2 DS4 is a separate upstream path and is not disqualified by this
+mixed-quant result. Likewise,
 the Qwen3.8 DFlash2 gate remains closed until the 11.8 server and selected ROCm
 backend pass the recorded load, vision, and equal-history canaries.
 
@@ -1839,15 +1856,14 @@ endpoint provides a no-inference fixture test; Lemonade requires a live tool-cal
 canary because its documented OpenAI layer does not promise every llama.cpp-only
 request extension.
 
-The selected standalone runtime is
-`docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0`. Upstream identifies this
-as the stable ROCm 10.0 Core SDK build for gfx1151 and rebuilds the tag from
-current llama.cpp master. `halo-ai install/update llamacpp`
-pulls it and records the resolved immutable digest, while every trial records
-the serving build fingerprint. The registry manifest observed on 2026-08-30 was
-`sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6`;
-local inspection confirmed Core SDK `10.0.0` and llama.cpp build
-`10711`/`9723942ad`. Re-run the capability canaries after every digest change.
+The selected standalone runtime is the ROCm 10.0 tag's qualified immutable
+manifest,
+`docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6`.
+Upstream identifies the moving `rocm-10.0` tag as its stable Core SDK build for
+gfx1151 and rebuilds it from current llama.cpp master. Local qualification of
+the pinned manifest confirmed Core SDK `10.0.0` and llama.cpp build
+`10711`/`9723942ad`. Move the digest only through an explicit update trial and
+re-run the capability canaries after every digest change.
 The earlier qualified
 `rocm-7.14` digest/build remains in the historical result records as a rollback
 reference. The service binds to
@@ -1883,6 +1899,22 @@ uses explicit `--spec-type draft-dspark` plus the exact cataloged companion; its
 canary must likewise report nonzero drafted and accepted tokens.
 Catalog compatibility is a tested assertion, not an assumption based on the
 `.gguf` suffix.
+
+The ROCm 10 pin was qualified against the earlier 7.14 manifest on the same
+Qwen3.6 27B Q8 model, fixed settings, unique cold prompts, three repetitions,
+and 128 generated tokens. Peak APU PPT was effectively equal (45.029 W versus
+45.027 W), so the decision uses same-run ratios:
+
+| Prompt | TTFT | Prompt throughput | Decode throughput | End-to-end | Peak GTT |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 4K | 4.64% lower | 4.86% higher | 0.26% higher | 2.43% lower | 10.3 MiB lower |
+| 16K | 2.50% lower | 2.57% higher | 0.92% higher | 2.16% lower | 4.3 MiB lower |
+
+Both manifests produced identical normalized output for every case in the
+13-case deterministic quality suite (11/13 passed on each; the same two code
+cases failed). This qualifies ROCm 10 as stable/equal with small latency and
+prefill improvements. The complete summary and immutable runtime identities are
+in [`docs/results/rocm10-lemonade1181-qualification-2026-08-30.json`](results/rocm10-lemonade1181-qualification-2026-08-30.json).
 
 Sampling and reasoning are request presets, not model-server identities. Begin
 with Qwen's current upstream sampling recommendations and make the non-thinking
@@ -2275,8 +2307,8 @@ LEMONADE_LLAMACPP_ROCM_BIN=b10597
 LEMONADE_ROCM_CHANNEL=stable
 LEMONADE_GPU_MAX_HW_QUEUES=
 
-# Stable gfx1151 tag; each pull and trial records its resolved digest/build.
-LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0
+# Qualified ROCm 10.0 Core SDK / llama.cpp build 10711 image for gfx1151.
+LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6
 LLAMACPP_PORT=8080
 
 ROCMFPX_IMAGE=localhost/halo-ai-rocmfpx:v1.0.0

@@ -81,6 +81,8 @@ ROCMFPX_QUALITY_SUITE = SOURCE_CONFIG / "benchmarks" / "rocmfpx-quality-v1.json"
 LEMONADE_VERSION = "11.8.1"
 LEMONADE_IMAGE_DIGEST = "sha256:824359e8633d3cde4afb2c32609930758f4e71424d71ad58f26432a8bb1092cb"
 LEMONADE_IMAGE = f"ghcr.io/lemonade-sdk/lemonade-server@{LEMONADE_IMAGE_DIGEST}"
+LLAMACPP_IMAGE_DIGEST = "sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6"
+LLAMACPP_IMAGE = f"docker.io/kyuz0/amd-strix-halo-toolboxes@{LLAMACPP_IMAGE_DIGEST}"
 LEMONADE_VOLUME_MOUNTS = (
     ("halo-lemonade-huggingface", "lemonade-huggingface", "/opt/lemonade/.cache/huggingface"),
     ("halo-lemonade-llama", "lemonade-llama", "/opt/lemonade/llama"),
@@ -198,7 +200,7 @@ DEFAULTS = {
     "LEMONADE_LLAMACPP_ROCM_BIN": "b10597",
     "LEMONADE_ROCM_CHANNEL": "stable",
     "LEMONADE_GPU_MAX_HW_QUEUES": "",
-    "LLAMACPP_IMAGE": "docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0",
+    "LLAMACPP_IMAGE": LLAMACPP_IMAGE,
     "LLAMACPP_PORT": "8080",
     "ROCMFPX_IMAGE": "localhost/halo-ai-rocmfpx:v1.0.0",
     "ROCMFPX_PORT": "8000",
@@ -498,6 +500,16 @@ def validate_catalog(
                 fail(f"profile {identifier} has an invalid DFlash companion or composition")
         elif "draft_model" in profile:
             fail(f"profile {identifier} names a draft model without DFlash")
+        if "native-ds4" in features:
+            if (
+                engine != "lemonade"
+                or models[model_id].get("architecture") != "deepseek4"
+                or features != {"native-ds4"}
+                or set(settings) != {"prefill_chunk"}
+                or not isinstance(settings.get("prefill_chunk"), int)
+                or not 1 <= settings["prefill_chunk"] <= 8192
+            ):
+                fail(f"profile {identifier} has an invalid Lemonade native DS4 policy")
         if engine == "strixvulkan":
             integer_settings = {
                 "parallel": (1, 1), "batch": (1, 8192), "ubatch": (1, 8192),
@@ -1083,10 +1095,49 @@ def lemonade_dflash_registration(
     }
 
 
+def lemonade_native_ds4_paths(
+    config: Config, catalog: Catalog, profile: dict[str, Any],
+) -> dict[str, tuple[str, Path]]:
+    if profile["engine"] != "lemonade" or "native-ds4" not in profile.get("features", []):
+        return {}
+    model = catalog.models[profile["model"]]
+    main = next(
+        path for entry, path in model_paths(config, model, {"main"})
+        if entry["role"] == "main"
+    )
+    destination = f"{lemonade_registered_model_dir(profile)}/{main.name}"
+    return {"main": (destination, main)}
+
+
+def lemonade_native_ds4_registration(
+    config: Config, catalog: Catalog, profile: dict[str, Any],
+) -> dict[str, Any]:
+    paths = lemonade_native_ds4_paths(config, catalog, profile)
+    if not paths:
+        fail(f"profile {profile['id']} is not a Lemonade native DS4 model")
+    return {
+        "model_name": lemonade_registered_model_name(profile),
+        "recipe": "ds4",
+        "source": "local_path",
+        "checkpoints": {
+            role: destination for role, (destination, _source) in paths.items()
+        },
+        "labels": ["chat", "reasoning", "tool-calling"],
+    }
+
+
 def lemonade_runtime_mounts(config: Config, catalog: Catalog) -> dict[str, Path]:
     mounts: dict[str, Path] = {}
     for candidate in catalog.models.values():
         if "lemonade" not in candidate["engines"] or candidate.get("architecture") == "dflash":
+            continue
+        lemonade_profiles = [
+            profile for profile in catalog.profiles.values()
+            if profile["engine"] == "lemonade" and profile["model"] == candidate["id"]
+        ]
+        if lemonade_profiles and all(
+            "native-ds4" in profile.get("features", []) for profile in lemonade_profiles
+        ):
             continue
         for entry, path in model_paths(config, candidate, {"main", "chat_template"}):
             if entry["role"] == "chat_template":
@@ -1114,6 +1165,11 @@ def lemonade_runtime_mounts(config: Config, catalog: Catalog) -> dict[str, Path]
                 mounts[destination] = path
     for profile in catalog.profiles.values():
         for destination, path in lemonade_dflash_paths(config, catalog, profile).values():
+            prior = mounts.get(destination)
+            if prior is not None and prior != path:
+                fail(f"container mount collision for {destination}: {prior} and {path}")
+            mounts[destination] = path
+        for destination, path in lemonade_native_ds4_paths(config, catalog, profile).values():
             prior = mounts.get(destination)
             if prior is not None and prior != path:
                 fail(f"container mount collision for {destination}: {prior} and {path}")
@@ -1338,6 +1394,15 @@ def lemonade_load_payload(
     chat_template_path: str | None = None,
 ) -> dict[str, Any]:
     settings = profile["settings"]
+    if "native-ds4" in profile.get("features", []):
+        return {
+            "model_name": model_name,
+            "ctx_size": profile["context"],
+            "ds4_args": shlex.join(["--prefill-chunk", str(settings["prefill_chunk"])]),
+            "merge_args": False,
+            "save_options": False,
+            "pinned": False,
+        }
     args = [
         "--flash-attn", "on", "--cache-type-k", settings["kv"], "--cache-type-v", settings["kv"],
         "--parallel", str(settings["parallel"]), "--batch-size", str(settings["batch"]),
@@ -2658,19 +2723,24 @@ def ensure_speech_test_audio(config: Config) -> Path:
 
 def exact_lemonade_model(config: Config, catalog: Catalog, profile: dict[str, Any], port: int) -> str:
     models = http_json(f"http://127.0.0.1:{port}/api/v1/models")
-    if "dflash" in profile.get("features", []):
-        registration = lemonade_dflash_registration(config, catalog, profile)
+    if {"dflash", "native-ds4"}.intersection(profile.get("features", [])):
+        registration = (
+            lemonade_native_ds4_registration(config, catalog, profile)
+            if "native-ds4" in profile.get("features", [])
+            else lemonade_dflash_registration(config, catalog, profile)
+        )
         expected = registration["checkpoints"]
         candidates = models.get("data", models) if isinstance(models, dict) else models
         matches = [
             item for item in candidates or []
             if isinstance(item, dict)
             and item.get("source") == "local_path"
+            and item.get("recipe") == registration["recipe"]
             and item.get("checkpoints") == expected
-            and "dflash" in item.get("labels", [])
+            and all(label in item.get("labels", []) for label in registration["labels"])
         ]
         if len(matches) != 1:
-            fail(f"expected one exact registered Lemonade DFlash model, found {len(matches)}")
+            fail(f"expected one exact registered Lemonade model, found {len(matches)}")
         return lemonade_registered_model_name(profile)
     main = next(
         path for entry, path in model_paths(config, catalog.models[profile["model"]], {"main"})
@@ -2703,24 +2773,64 @@ def exact_lemonade_model(config: Config, catalog: Catalog, profile: dict[str, An
 def ensure_lemonade_profile_model(
     config: Config, catalog: Catalog, profile: dict[str, Any], port: int,
 ) -> str:
-    if "dflash" not in profile.get("features", []):
+    if not {"dflash", "native-ds4"}.intersection(profile.get("features", [])):
         return exact_lemonade_model(config, catalog, profile, port)
-    registration = lemonade_dflash_registration(config, catalog, profile)
+    registration = (
+        lemonade_native_ds4_registration(config, catalog, profile)
+        if "native-ds4" in profile.get("features", [])
+        else lemonade_dflash_registration(config, catalog, profile)
+    )
     response = http_json(
         f"http://127.0.0.1:{port}/v1/models/register",
         method="POST", payload=registration, timeout=180,
     )
     canonical = response.get("canonical_model_name") if isinstance(response, dict) else None
     if canonical != registration["model_name"]:
-        fail("Lemonade did not preserve the canonical DFlash registration identity")
+        fail("Lemonade did not preserve the canonical local registration identity")
     return exact_lemonade_model(config, catalog, profile, port)
 
 
 def lemonade_backend_running(container: str) -> bool:
     result = podman(["top", container, "comm"], check=False, capture=True)
     return result.returncode == 0 and any(
-        line.strip() == "llama-server" for line in result.stdout.splitlines()[1:]
+        line.strip() in {"llama-server", "ds4-server"}
+        for line in result.stdout.splitlines()[1:]
     )
+
+
+def ensure_lemonade_native_ds4_backend(container: str) -> None:
+    def qualified() -> bool:
+        result = podman(["exec", container, "lemonade", "backends", "--all"], capture=True)
+        return bool(re.search(r"(?m)^ds4\s+rocm\s+installed\s+b0001\b", result.stdout))
+
+    if not qualified():
+        podman(["exec", container, "lemonade", "backends", "install", "ds4:rocm"])
+    if not qualified():
+        fail("Lemonade native DS4 backend did not resolve to qualified b0001")
+
+
+def lemonade_native_ds4_backend_info(
+    container: str, profile: dict[str, Any],
+) -> dict[str, Any]:
+    root = "/opt/lemonade/.cache/lemonade/bin/ds4/rocm"
+    version = podman(["exec", container, "/bin/sh", "-c", f"cat {root}/version.txt"], capture=True).stdout.strip()
+    revision = podman(["exec", container, "/bin/sh", "-c", f"cat {root}/ds4-commit.txt"], capture=True).stdout.strip()
+    processes = podman(["top", container, "args"], capture=True).stdout
+    required = [
+        f"{root}/ds4-server", "--ssd-streaming",
+        f"--prefill-chunk {profile['settings']['prefill_chunk']}",
+        f"-c {profile['context']}",
+    ]
+    if version != "b0001" or revision != DS4_SOURCE_COMMIT or any(item not in processes for item in required):
+        fail("active Lemonade native DS4 process failed b0001 provenance/policy checks")
+    return {
+        "package_version": "b0001",
+        "binary_version": "b0001",
+        "source_revision": revision,
+        "backend": "rocm",
+        "speculation": "none",
+        "ssd_streaming": True,
+    }
 
 
 def unload_active_lemonade(config: Config, catalog: Catalog, port: int, container: str) -> None:
@@ -2841,6 +2951,8 @@ def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) ->
             wait_http(health, 180)
         if profile["engine"] == "lemonade":
             match = ensure_lemonade_profile_model(config, catalog, profile, port)
+            if "native-ds4" in profile.get("features", []):
+                ensure_lemonade_native_ds4_backend(target_name)
             if "mtp" in profile.get("features", []):
                 assert_lemonade_mtp_model(port, match)
             model = catalog.models[profile["model"]]
@@ -2854,7 +2966,11 @@ def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) ->
                 assert_lemonade_mtp_backend(target_name)
             if "dflash" in profile.get("features", []):
                 assert_lemonade_dflash_backend(target_name, config, catalog, profile)
-            trial["backend"] = lemonade_backend_versions(target_name)
+            trial["backend"] = (
+                lemonade_native_ds4_backend_info(target_name, profile)
+                if "native-ds4" in profile.get("features", [])
+                else lemonade_backend_versions(target_name)
+            )
             trial["backend"].update({
                 "speculation": "dflash2" if "dflash" in profile.get("features", []) else (
                     "mtp" if "mtp" in profile.get("features", []) else "none"
@@ -2875,9 +2991,10 @@ def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) ->
             )
         trial["container"] = target_name
         trial["image"] = image_for(config, profile["engine"])
-        digest_path = state_path(config, f"{profile['engine']}-image-digest")
-        if digest_path.exists():
-            trial["image_digest"] = read_text(digest_path).strip()
+        # Resolve the image actually selected for this process. The staged
+        # engine digest file can legitimately describe a prior config override
+        # and must not be copied into a new trial as if it were active evidence.
+        trial["image_digest"] = image_identity(trial["image"])
         process_output = podman(["top", target_name, "args"], capture=True).stdout.splitlines()
         trial["process_args"] = process_output[1:]
         trial["hardware_loaded"] = hardware_snapshot(config)
@@ -3254,7 +3371,7 @@ def command_test(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
                 or (profile["engine"] == "ds4" and model.get("architecture") == "deepseek4")
             )
         )
-    if profile["engine"] == "lemonade":
+    if profile["engine"] == "lemonade" and "native-ds4" not in profile.get("features", []):
         validate_lemonade_reasoning_template(container_name("lemonade"), payload, thinking)
     response = http_json(f"http://127.0.0.1:{port}/v1/chat/completions", method="POST", payload=payload, timeout=180)
     validate_smoke_response(response, expected, thinking)
@@ -3441,7 +3558,7 @@ def ds4_recent_timings(container: str, usage: Any) -> dict[str, Any] | None:
 
 def lemonade_backend_port(container: str) -> int:
     processes = podman(["top", container, "args"], capture=True).stdout
-    ports = set(re.findall(r"/llama-server\b[^\n]*?--port\s+([0-9]+)\b", processes))
+    ports = set(re.findall(r"/(?:llama-server|ds4-server)\b[^\n]*?--port\s+([0-9]+)\b", processes))
     if len(ports) != 1:
         fail("could not identify exactly one active Lemonade llama.cpp backend port")
     return int(next(iter(ports)))
@@ -3769,8 +3886,8 @@ def command_bench_rocmfpx_context(
     profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
-    if profile["engine"] not in {"lemonade", "rocmfpx", "strixvulkan"}:
-        fail("context benchmark requires a Lemonade, ROCmFPX, or Strix Vulkan profile")
+    if profile["engine"] not in {"lemonade", "llamacpp", "rocmfpx", "strixvulkan"}:
+        fail("context benchmark requires a Lemonade, llama.cpp, ROCmFPX, or Strix Vulkan profile")
     try:
         contexts = [int(value) for value in args.prompt_tokens.split(",")]
     except ValueError:
@@ -3933,6 +4050,11 @@ def command_bench_rocmfpx_context(
         summary = rocmfpx_tune.summarize_context_runs(runs)
     except rocmfpx_tune.TuneError as exc:
         fail(str(exc))
+    trial_path = state_path(config, "last-trial.json")
+    try:
+        trial = json.loads(read_text(trial_path)) if trial_path.exists() else {}
+    except json.JSONDecodeError:
+        fail(f"last trial record is corrupt: {trial_path}")
     document = {
         "schema_version": 1,
         "kind": "halo-ai-rocmfpx-context-benchmark",
@@ -3944,6 +4066,14 @@ def command_bench_rocmfpx_context(
             "sha256": next(item["sha256"] for item in model["files"] if item["role"] == "main"),
         },
         "settings": copy.deepcopy(profile["settings"]),
+        "runtime": {
+            "engine": engine,
+            "image": trial.get("image"),
+            "image_digest": trial.get("image_digest"),
+            "backend": trial.get("backend"),
+            "backend_fingerprint": trial.get("backend_fingerprint"),
+            "trial_fingerprint": trial.get("fingerprint"),
+        },
         "benchmark_method": {
             "request_location": f"inside {container}",
             "endpoint": "/completion",
@@ -3974,8 +4104,8 @@ def command_bench_rocmfpx_quality(
     profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
-    if profile["engine"] not in {"lemonade", "rocmfpx", "strixvulkan"}:
-        fail("fixed quality benchmark requires a Lemonade, ROCmFPX, or Strix Vulkan profile")
+    if profile["engine"] not in {"lemonade", "llamacpp", "rocmfpx", "strixvulkan"}:
+        fail("fixed quality benchmark requires a Lemonade, llama.cpp, ROCmFPX, or Strix Vulkan profile")
     suite_path = (
         Path(args.suite).expanduser().resolve()
         if args.suite else ROCMFPX_QUALITY_SUITE

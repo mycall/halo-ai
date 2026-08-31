@@ -6,7 +6,7 @@
       "repository": "antirez/deepseek-v4-gguf",
       "revision": "86bb38ce2ba7a98ab0e550359fec5f48859dc723",
       "architecture": "deepseek4",
-      "engines": ["ds4"],
+      "engines": ["ds4", "lemonade"],
       "download": {
         "provider": "huggingface",
         "repository": "antirez/deepseek-v4-gguf",
@@ -648,7 +648,7 @@
       "risk": "experimental-lockup",
       "features": ["vision", "dflash"],
       "thinking": false,
-      "gate": "disabled: the last qualified Lemonade 11.7 stable b10597/build 10594 and nightly b1315 tests reject the Qwen3.8 DFlash2 GGUF with expected 81, got 58; llama.cpp PR #27342 tracked the required loader, and Lemonade 11.8 must pass load, vision, and equal-history canaries before enabling",
+      "gate": "disabled: deprecated Lemonade 11.7 qualification evidence shows stable b10597/build 10594 and nightly b1315 reject the Qwen3.8 DFlash2 GGUF with expected 81, got 58; llama.cpp PR #27342 tracked the required loader, and the supported Lemonade 11.8.1 server/backend must pass load, vision, and equal-history canaries before enabling",
       "proposal_policy": "distribution-preserving-target-verification-rocm-ab-candidate",
       "settings": {
         "parallel": 1,
@@ -676,6 +676,7 @@
     {"id": "deepseek-v4-flash-0731-iq3xxs-llamacpp", "model": "deepseek-v4-flash-0731-iq3xxs", "engine": "llamacpp", "context": 32768, "risk": "high", "features": [], "settings": {"batch": 1024, "ubatch": 256, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
     {"id": "deepseek-v4-flash-0731-iq3xxs-dspark-llamacpp", "model": "deepseek-v4-flash-0731-iq3xxs", "engine": "llamacpp", "context": 32768, "risk": "experimental-lockup", "features": ["dspark"], "settings": {"batch": 512, "ubatch": 128, "parallel": 1, "flash_attention": true, "kv": "f16", "load_mode": "none"}},
     {"id": "ds4-deepseek-v4-flash-hybrid", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 32768, "risk": "high", "features": [], "settings": {"prefill_chunk": 2048}},
+    {"id": "ds4-deepseek-v4-flash-hybrid-lemonade-native", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "lemonade", "context": 32768, "risk": "experimental", "features": ["native-ds4"], "gate": "disabled: Lemonade 11.8.1 native DS4 b0001 forces --ssd-streaming for this installed mixed-precision hybrid; automatic and maximum expert-cache trials hit the exact open antirez/ds4#896 first-token/decode selected expert id -1 ROCm bug, while lemonade-sdk/lemonade#3431 tracks the missing full-residency opt-out", "settings": {"prefill_chunk": 2048}},
     {"id": "ds4-deepseek-v4-flash-hybrid-kv", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 32768, "risk": "high", "features": ["kv-cache"], "settings": {"prefill_chunk": 2048, "kv_cache_mb": 8192}},
     {"id": "ds4-deepseek-v4-flash-hybrid-dspark-16k", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 16384, "risk": "experimental", "features": ["dspark"], "settings": {"prefill_chunk": 1024, "dspark_confidence": 0.7}},
     {"id": "ds4-deepseek-v4-flash-hybrid-dspark-128k", "model": "deepseek-v4-flash-ds4-hybrid", "engine": "ds4", "context": 131072, "risk": "experimental", "features": ["dspark", "kv-cache"], "settings": {"prefill_chunk": 1024, "dspark_confidence": 0.7, "kv_cache_mb": 8192}},

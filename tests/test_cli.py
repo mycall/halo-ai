@@ -58,7 +58,8 @@ class ConfigurationTests(unittest.TestCase):
         )
         self.assertEqual(
             cli.DEFAULTS["LLAMACPP_IMAGE"],
-            "docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0",
+            "docker.io/kyuz0/amd-strix-halo-toolboxes@"
+            "sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6",
         )
         example = cli.parse_env_file(ROOT / "config/halo-ai.env.example")
         self.assertEqual(example["LEMONADE_IMAGE"], cli.DEFAULTS["LEMONADE_IMAGE"])
@@ -178,7 +179,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_checked_in_catalog_validates(self) -> None:
         self.assertEqual(len(self.catalog.models), 11)
-        self.assertEqual(len(self.catalog.profiles), 36)
+        self.assertEqual(len(self.catalog.profiles), 37)
         self.assertEqual(
             self.catalog.profile_aliases,
             {
@@ -546,6 +547,42 @@ class CatalogTests(unittest.TestCase):
             plan["selected_artifact_classes"], ["model", "vision", "dflash2", "runtime"],
         )
         self.assertEqual(len(plan["draft_model"]["files"]), 1)
+
+    def test_lemonade_native_ds4_candidate_records_failed_streaming_gate(self) -> None:
+        profile = self.catalog.profiles[
+            "ds4-deepseek-v4-flash-hybrid-lemonade-native"
+        ]
+        model = self.catalog.models[profile["model"]]
+        self.assertEqual(model["engines"], ["ds4", "lemonade"])
+        self.assertEqual(profile["features"], ["native-ds4"])
+        available, reason = cli.profile_availability(self.config, self.catalog, profile)
+        self.assertFalse(available)
+        self.assertIn("forces --ssd-streaming", reason)
+        self.assertIn("selected expert id -1", reason)
+
+        registration = cli.lemonade_native_ds4_registration(
+            self.config, self.catalog, profile,
+        )
+        self.assertEqual(registration["recipe"], "ds4")
+        self.assertEqual(registration["source"], "local_path")
+        self.assertEqual(registration["model_name"], f"user.{profile['id']}")
+        self.assertEqual(set(registration["checkpoints"]), {"main"})
+        self.assertTrue(registration["checkpoints"]["main"].endswith(".gguf"))
+
+        payload = cli.lemonade_load_payload(profile, registration["model_name"])
+        self.assertEqual(payload["ctx_size"], 32_768)
+        self.assertEqual(payload["ds4_args"], "--prefill-chunk 2048")
+        self.assertNotIn("llamacpp_backend", payload)
+        self.assertNotIn("--ssd-streaming", payload["ds4_args"])
+
+        rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, profile)
+        )
+        destination = registration["checkpoints"]["main"]
+        self.assertIn(f"dst={destination},ro", rendered)
+        self.assertNotIn(
+            "/models/extra/deepseek-v4-flash-ds4-hybrid", rendered,
+        )
 
     def test_q6_dflash_acquisition_includes_only_exact_companion(self) -> None:
         profile = self.catalog.profiles["qwen3.8-27b-q6xl-strix-dflash2"]
@@ -1659,6 +1696,12 @@ class RocmFpxTuningTests(unittest.TestCase):
         result.stdout = "COMMAND\nlemond\nllama-server\n"
         with mock.patch.object(cli, "podman", return_value=result):
             self.assertTrue(cli.lemonade_backend_running("halo-lemonade"))
+        result.stdout = "COMMAND\nlemond\nds4-server\n"
+        with mock.patch.object(cli, "podman", return_value=result):
+            self.assertTrue(cli.lemonade_backend_running("halo-lemonade"))
+        result.stdout = "COMMAND\nlemond\nmy-ds4-server-wrapper\n"
+        with mock.patch.object(cli, "podman", return_value=result):
+            self.assertFalse(cli.lemonade_backend_running("halo-lemonade"))
 
     def test_mtp_capability_requires_exact_model_label_and_backend_flags(self) -> None:
         top = mock.MagicMock()

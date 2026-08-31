@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "recorded_local_date": "2026-08-30",
+  "host": {
+    "cpu": "AMD Ryzen AI Max+ 395",
+    "gpu": "AMD Radeon 8060S (gfx1151)"
+  },
+  "standalone_llamacpp": {
+    "decision": "qualify-rocm-10-as-default",
+    "acceptance": "stable/equal is sufficient; compare same-host ratios because platform TDP may differ from older runs",
+    "profile": "qwen3.6-27b-q8xl-vision-llamacpp",
+    "model_sha256": "3d6ff16be3258f910eac4dcec7142edc7a7100d8400fe363035c8cfedc151164",
+    "method": {
+      "prompt_tokens": [4096, 16384],
+      "completion_tokens": 128,
+      "repetitions": 3,
+      "prompt_cache": false,
+      "prompt_pattern": "unique deterministic pseudo-random word records",
+      "temperature": 0
+    },
+    "baseline": {
+      "image": "docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b",
+      "backend_fingerprint": "b10335-74ce15741",
+      "peak_apu_ppt_watts": 45.027,
+      "summary": [
+        {"prompt_tokens": 4096, "prompt_tokens_per_second_median": 202.807146, "decode_tokens_per_second_median": 6.225697, "ttft_seconds_median": 20.196527, "peak_gtt_bytes_max": 37894647808},
+        {"prompt_tokens": 16384, "prompt_tokens_per_second_median": 211.963651, "decode_tokens_per_second_median": 6.051836, "ttft_seconds_median": 77.296272, "peak_gtt_bytes_max": 37892550656}
+      ]
+    },
+    "candidate": {
+      "image": "docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6",
+      "rocm_core_sdk": "10.0.0",
+      "backend_fingerprint": "b10711-9723942ad",
+      "peak_apu_ppt_watts": 45.029,
+      "summary": [
+        {"prompt_tokens": 4096, "prompt_tokens_per_second_median": 212.673414, "decode_tokens_per_second_median": 6.242036, "ttft_seconds_median": 19.259577, "peak_gtt_bytes_max": 37883858944},
+        {"prompt_tokens": 16384, "prompt_tokens_per_second_median": 217.404585, "decode_tokens_per_second_median": 6.107529, "ttft_seconds_median": 75.361796, "peak_gtt_bytes_max": 37888053248}
+      ]
+    },
+    "ratios": [
+      {"prompt_tokens": 4096, "ttft_change_percent": -4.64, "prompt_speed_change_percent": 4.86, "decode_speed_change_percent": 0.26, "end_to_end_change_percent": -2.43, "peak_gtt_change_bytes": -10788864},
+      {"prompt_tokens": 16384, "ttft_change_percent": -2.50, "prompt_speed_change_percent": 2.57, "decode_speed_change_percent": 0.92, "end_to_end_change_percent": -2.16, "peak_gtt_change_bytes": -4497408}
+    ],
+    "quality": {
+      "suite_sha256": "909ef8bc4f88d69c61e49e6816c81e7a1dbb3450babed7a4c70164392aa7bd8e",
+      "cases": 13,
+      "passed_each": 11,
+      "normalized_outputs_identical": 13,
+      "decision": "no observed quality regression"
+    }
+  },
+  "lemonade": {
+    "decision": "11.8.1-is-sole-supported-default",
+    "version": "11.8.1",
+    "image": "ghcr.io/lemonade-sdk/lemonade-server@sha256:824359e8633d3cde4afb2c32609930758f4e71424d71ad58f26432a8bb1092cb",
+    "llamacpp_rocm_package": "b10597",
+    "deprecated": ["11.7", "latest"],
+    "native_ds4": {
+      "backend": "ds4:rocm",
+      "package": "b0001",
+      "artifact_sha256": "e63b7c9428fd10de75b3f69164eccd564a8e7261c2f9087cd8bec2b4b19a8ad1",
+      "model": "installed 97.6 GB mixed-precision DeepSeek V4 Flash hybrid",
+      "context": 32768,
+      "result": "disabled",
+      "reason": "Lemonade forces SSD streaming and first-token prefill fails with selected expert id -1 at layer 3 / rocm prefill failed, both with automatic and maximum accepted expert cache",
+      "fallback": "retain qualified direct DS4 engine",
+      "upstream": {
+        "exact_runtime_bug": "https://github.com/antirez/ds4/issues/896",
+        "forced_streaming_policy": "https://github.com/lemonade-sdk/lemonade/issues/3431",
+        "scope": "mixed-Q2/Q4 ROCm SSD streaming; uniform-Q2 DS4 is not disqualified by this result"
+      }
+    }
+  }
+}

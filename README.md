@@ -207,7 +207,9 @@ a non-smoke run, requires the observed run peak to exceed 45 W. Override only
 the observation threshold with `--minimum-ppt-watts N`; raw samples and the run
 peak are retained with the results.
 
-Halo pins Lemonade 11.8.1 by its immutable amd64 image-manifest digest. The
+Halo supports one Lemonade server release: 11.8.1, pinned by its immutable
+amd64 image-manifest digest. The former 11.7 pin and the floating `latest`
+reference are deprecated migration inputs, not selectable defaults. The
 first Lemonade ROCm start downloads a llama.cpp backend and TheRock runtime.
 Backend/runtime data remains in the historical `halo-lemonade-config` cache
 volume, Hugging Face downloads use `halo-lemonade-huggingface`, and 11.8's
@@ -229,15 +231,21 @@ TheRock runtime are reused. Change the package or channel only for an explicit
 compatibility trial, then restore the qualified pin.
 
 Standalone llama.cpp now defaults to Kyuz0's supported `rocm-10.0` Strix Halo
-image. Its tag tracks rebuilt llama.cpp master images, so every install, update,
-and trial records the resolved immutable digest/build for rollback and audit.
+image, pinned at the qualified registry manifest digest. Explicit update trials
+may follow the rebuilt upstream tag, but normal installs and starts reuse the
+audited ROCm 10.0 / llama.cpp build 10711 artifact.
 
-Lemonade 11.8 also exposes an experimental native DS4 backend using the same
+Lemonade 11.8.1 also exposes an experimental native DS4 backend using the same
 `b0001` gfx1151 artifact Halo already pins. Halo keeps its direct DS4 engine as
-the qualified default for now because its DSpark, 384K context, disk-KV,
-process-provenance, and timing checks are stricter than Lemonade's initial DS4
-adapter. Native Lemonade DS4 is a migration candidate, not an implicit engine
-replacement in this release.
+the qualified default. A trial with the installed mixed-precision hybrid showed
+that Lemonade forces SSD streaming and its ROCm prefill fails before the first
+token (`selected expert id -1` at layer 3), including with the maximum accepted
+expert cache. The native profile is recorded but disabled; direct DS4 remains
+the working path for DSpark, 384K context, disk-KV, provenance, and timings.
+This is the exact mixed-quant ROCm streaming defect tracked in
+[DS4 #896](https://github.com/antirez/ds4/issues/896); Lemonade's unconditional
+streaming policy and missing full-residency opt-out are tracked in
+[Lemonade #3431](https://github.com/lemonade-sdk/lemonade/issues/3431).
 
 ## DS4 disk KV cache
 
@@ -297,10 +305,10 @@ context, F16 K/V, one slot, Flash Attention, and 4096/4096 batch settings fixed
 for a backend A/B test. Halo can register a local target, projector, and draft
 as one first-class Lemonade 11.8 model. The resulting
 `qwen3.8-27b-q6xl-vision-dflash2-lemonade` profile is deliberately disabled,
-however: the last qualified 11.7 stable `b10597`/build 10594 and nightly `b1315`
-tests both reject the valid
+however. Historical 11.7 stable `b10597`/build 10594 and nightly `b1315` tests
+both reject the valid
 58-tensor DFlash2 draft with `expected 81, got 58`. Lemonade's companion wiring
-works, but the 11.8 server/backend combination must pass the same load and
+works, but the supported 11.8.1 server/backend combination must pass the same load and
 equal-history canaries before this gate is removed. Compare target-only ROCm
 directly with `qwen3.8-27b-q6xl-strix-vision` in the meantime.
 The first controlled 81-token prompt / 256-token generation A/B measured median
@@ -308,7 +316,7 @@ decode at 8.05 tok/s on Lemonade HIP and 8.44 tok/s on Vulkan. HIP won the first
 uncached prefill 138.84 to 65.10 tok/s. See
 [`docs/results/qwen3.8-q6xl-vulkan-rocm-ab-2026-08-23.json`](docs/results/qwen3.8-q6xl-vulkan-rocm-ab-2026-08-23.json)
 for the exact runtime identities and samples.
-The Lemonade 11.7 follow-up repeated the vision canary in three fresh processes
+The deprecated Lemonade 11.7 qualification record repeated the vision canary in three fresh processes
 and reran both target-only controls without prompt caching. ROCm median
 prefill/decode was 130.07/8.013 tok/s versus Vulkan 99.69/8.466 tok/s. See
 [`docs/results/qwen3.8-q6xl-lemonade-dflash2-compat-2026-08-23.json`](docs/results/qwen3.8-q6xl-lemonade-dflash2-compat-2026-08-23.json).

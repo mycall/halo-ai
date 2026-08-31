@@ -280,14 +280,25 @@ action_config() {
             chown root:"$run_gid" "$CONFIG_ROOT/.config.env.tmp"
             mv -T "$CONFIG_ROOT/.config.env.tmp" "$CONFIG_ROOT/config.env"
         fi
-    elif ! grep -Eq '^[[:space:]]*LEMONADE_LLAMACPP_ROCM_BIN[[:space:]]*=' "$CONFIG_ROOT/config.env"; then
+    fi
+    if ! grep -Eq '^[[:space:]]*LEMONADE_LLAMACPP_ROCM_BIN[[:space:]]*=' "$CONFIG_ROOT/config.env" ||
+        grep -Eq '^[[:space:]]*LEMONADE_LLAMACPP_ROCM_BIN[[:space:]]*=[[:space:]]*latest[[:space:]]*$' \
+            "$CONFIG_ROOT/config.env"; then
         if "$dry_run"; then
-            printf '  append LEMONADE_LLAMACPP_ROCM_BIN=latest to %s\n' "$CONFIG_ROOT/config.env"
+            printf '  set LEMONADE_LLAMACPP_ROCM_BIN=b10597 in %s\n' "$CONFIG_ROOT/config.env"
         else
             cp -- "$CONFIG_ROOT/config.env" "$CONFIG_ROOT/.config.env.tmp"
-            printf '\n# Resolve the newest stable-channel ROCm package on each explicit start.\n' \
-                >>"$CONFIG_ROOT/.config.env.tmp"
-            printf 'LEMONADE_LLAMACPP_ROCM_BIN=latest\n' >>"$CONFIG_ROOT/.config.env.tmp"
+            if grep -Eq '^[[:space:]]*LEMONADE_LLAMACPP_ROCM_BIN[[:space:]]*=' \
+                "$CONFIG_ROOT/.config.env.tmp"; then
+                sed -i \
+                    's|^[[:space:]]*LEMONADE_LLAMACPP_ROCM_BIN[[:space:]]*=.*$|LEMONADE_LLAMACPP_ROCM_BIN=b10597|' \
+                    "$CONFIG_ROOT/.config.env.tmp"
+            else
+                printf '\n# Qualified stable Lemonade ROCm backend package.\n' \
+                    >>"$CONFIG_ROOT/.config.env.tmp"
+                printf 'LEMONADE_LLAMACPP_ROCM_BIN=b10597\n' \
+                    >>"$CONFIG_ROOT/.config.env.tmp"
+            fi
             chmod 0640 "$CONFIG_ROOT/.config.env.tmp"
             chown root:"$run_gid" "$CONFIG_ROOT/.config.env.tmp"
             mv -T "$CONFIG_ROOT/.config.env.tmp" "$CONFIG_ROOT/config.env"
@@ -295,7 +306,7 @@ action_config() {
     fi
     if ! grep -Eq '^[[:space:]]*LEMONADE_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
         "$CONFIG_ROOT/config.env" ||
-        grep -Eq '^[[:space:]]*LEMONADE_IMAGE[[:space:]]*=[[:space:]]*ghcr\.io/lemonade-sdk/lemonade-server@sha256:(87aec2fb7e42f75b38faf3775a343b58941496add050b8de47519c0d212921d4|d53238cc8202d6c8bf2735a6426eaa72c834d1161cdbdf4d9e62b305cbba758e)[[:space:]]*$' \
+        grep -Eq '^[[:space:]]*LEMONADE_IMAGE[[:space:]]*=[[:space:]]*ghcr\.io/lemonade-sdk/lemonade-server(:latest|@sha256:(87aec2fb7e42f75b38faf3775a343b58941496add050b8de47519c0d212921d4|d53238cc8202d6c8bf2735a6426eaa72c834d1161cdbdf4d9e62b305cbba758e))[[:space:]]*$' \
             "$CONFIG_ROOT/config.env"; then
         if "$dry_run"; then
             printf '  set LEMONADE_IMAGE to the immutable Lemonade 11.8.1 image in %s\n' \
@@ -317,19 +328,19 @@ action_config() {
     fi
     if ! grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
         "$CONFIG_ROOT/config.env" ||
-        grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=[[:space:]]*docker\.io/kyuz0/amd-strix-halo-toolboxes:rocm-7\.14[[:space:]]*$' \
+        grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=[[:space:]]*docker\.io/kyuz0/amd-strix-halo-toolboxes:(rocm-7\.14|rocm-10\.0)[[:space:]]*$' \
             "$CONFIG_ROOT/config.env"; then
         if "$dry_run"; then
-            printf '  set LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0 in %s\n' \
+            printf '  set LLAMACPP_IMAGE to the immutable qualified ROCm 10 image in %s\n' \
                 "$CONFIG_ROOT/config.env"
         else
             cp -- "$CONFIG_ROOT/config.env" "$CONFIG_ROOT/.config.env.tmp"
             if grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=' "$CONFIG_ROOT/.config.env.tmp"; then
                 sed -i \
-                    's|^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=.*$|LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0|' \
+                    's|^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=.*$|LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6|' \
                     "$CONFIG_ROOT/.config.env.tmp"
             else
-                printf '\nLLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0\n' \
+                printf '\nLLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6\n' \
                     >>"$CONFIG_ROOT/.config.env.tmp"
             fi
             chmod 0640 "$CONFIG_ROOT/.config.env.tmp"

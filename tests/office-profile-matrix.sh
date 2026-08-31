@@ -354,7 +354,8 @@ while IFS=$'\t' read -r prior_seconds profile; do
         "${halo_cmd[@]}" test "$profile" &&
         if "$smoke_only" || [[ "${engine[$profile]}" == speech ]]; then
             true
-        elif [[ "${engine[$profile]}" == rocmfpx ||
+        elif [[ "${engine[$profile]}" == llamacpp ||
+                "${engine[$profile]}" == rocmfpx ||
                 "${engine[$profile]}" == lemonade ||
                 "${engine[$profile]}" == strixvulkan ]]; then
             "${halo_cmd[@]}" bench rocmfpx-context "$profile" \
