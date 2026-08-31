@@ -256,6 +256,8 @@ verify_config() {
        -r "$CONFIG_ROOT/request-presets.d/qwen3.6-implementer.json" ]] || return 1
     grep -Eq "^[[:space:]]*HALO_AI_RUN_USER[[:space:]]*=[[:space:]]*${run_user}[[:space:]]*$" \
         "$CONFIG_ROOT/config.env" &&
+        grep -Eq '^[[:space:]]*LEMONADE_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
+            "$CONFIG_ROOT/config.env" &&
         grep -Eq '^[[:space:]]*LEMONADE_LLAMACPP_ROCM_BIN[[:space:]]*=[[:space:]]*(builtin|latest|b[0-9]+)[[:space:]]*$' \
             "$CONFIG_ROOT/config.env" &&
         grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
@@ -291,19 +293,43 @@ action_config() {
             mv -T "$CONFIG_ROOT/.config.env.tmp" "$CONFIG_ROOT/config.env"
         fi
     fi
-    if ! grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
-        "$CONFIG_ROOT/config.env"; then
+    if ! grep -Eq '^[[:space:]]*LEMONADE_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
+        "$CONFIG_ROOT/config.env" ||
+        grep -Eq '^[[:space:]]*LEMONADE_IMAGE[[:space:]]*=[[:space:]]*ghcr\.io/lemonade-sdk/lemonade-server@sha256:(87aec2fb7e42f75b38faf3775a343b58941496add050b8de47519c0d212921d4|d53238cc8202d6c8bf2735a6426eaa72c834d1161cdbdf4d9e62b305cbba758e)[[:space:]]*$' \
+            "$CONFIG_ROOT/config.env"; then
         if "$dry_run"; then
-            printf '  set LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14 in %s\n' \
+            printf '  set LEMONADE_IMAGE to the immutable Lemonade 11.8.1 image in %s\n' \
+                "$CONFIG_ROOT/config.env"
+        else
+            cp -- "$CONFIG_ROOT/config.env" "$CONFIG_ROOT/.config.env.tmp"
+            if grep -Eq '^[[:space:]]*LEMONADE_IMAGE[[:space:]]*=' "$CONFIG_ROOT/.config.env.tmp"; then
+                sed -i \
+                    's|^[[:space:]]*LEMONADE_IMAGE[[:space:]]*=.*$|LEMONADE_IMAGE=ghcr.io/lemonade-sdk/lemonade-server@sha256:824359e8633d3cde4afb2c32609930758f4e71424d71ad58f26432a8bb1092cb|' \
+                    "$CONFIG_ROOT/.config.env.tmp"
+            else
+                printf '\nLEMONADE_IMAGE=ghcr.io/lemonade-sdk/lemonade-server@sha256:824359e8633d3cde4afb2c32609930758f4e71424d71ad58f26432a8bb1092cb\n' \
+                    >>"$CONFIG_ROOT/.config.env.tmp"
+            fi
+            chmod 0640 "$CONFIG_ROOT/.config.env.tmp"
+            chown root:"$run_gid" "$CONFIG_ROOT/.config.env.tmp"
+            mv -T "$CONFIG_ROOT/.config.env.tmp" "$CONFIG_ROOT/config.env"
+        fi
+    fi
+    if ! grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
+        "$CONFIG_ROOT/config.env" ||
+        grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=[[:space:]]*docker\.io/kyuz0/amd-strix-halo-toolboxes:rocm-7\.14[[:space:]]*$' \
+            "$CONFIG_ROOT/config.env"; then
+        if "$dry_run"; then
+            printf '  set LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0 in %s\n' \
                 "$CONFIG_ROOT/config.env"
         else
             cp -- "$CONFIG_ROOT/config.env" "$CONFIG_ROOT/.config.env.tmp"
             if grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=' "$CONFIG_ROOT/.config.env.tmp"; then
                 sed -i \
-                    's|^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=.*$|LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14|' \
+                    's|^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=.*$|LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0|' \
                     "$CONFIG_ROOT/.config.env.tmp"
             else
-                printf '\nLLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14\n' \
+                printf '\nLLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0\n' \
                     >>"$CONFIG_ROOT/.config.env.tmp"
             fi
             chmod 0640 "$CONFIG_ROOT/.config.env.tmp"

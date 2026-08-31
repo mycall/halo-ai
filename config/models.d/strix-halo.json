@@ -648,7 +648,7 @@
       "risk": "experimental-lockup",
       "features": ["vision", "dflash"],
       "thinking": false,
-      "gate": "disabled: Lemonade 11.7 stable b10597/build 10594 and nightly b1315 reject the Qwen3.8 DFlash2 GGUF with expected 81, got 58 because they implement DFlash v1; wait for upstream llama.cpp PR #27342 or an equivalently patched ROCm backend",
+      "gate": "disabled: the last qualified Lemonade 11.7 stable b10597/build 10594 and nightly b1315 tests reject the Qwen3.8 DFlash2 GGUF with expected 81, got 58; llama.cpp PR #27342 tracked the required loader, and Lemonade 11.8 must pass load, vision, and equal-history canaries before enabling",
       "proposal_policy": "distribution-preserving-target-verification-rocm-ab-candidate",
       "settings": {
         "parallel": 1,

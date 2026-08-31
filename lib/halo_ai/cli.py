@@ -78,9 +78,24 @@ ROCMFPX_VULKAN_BASE = "sha256:8cdde6d42ab621b3d0f1e02618f4234c58b7036bec984a2a64
 ROCMFPX_ROCM_BASE = "sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b"
 ROCMFPX_QUALITY_SUITE = SOURCE_CONFIG / "benchmarks" / "rocmfpx-quality-v1.json"
 
-LEMONADE_VERSION = "11.7.0"
-LEMONADE_IMAGE_DIGEST = "sha256:87aec2fb7e42f75b38faf3775a343b58941496add050b8de47519c0d212921d4"
+LEMONADE_VERSION = "11.8.1"
+LEMONADE_IMAGE_DIGEST = "sha256:824359e8633d3cde4afb2c32609930758f4e71424d71ad58f26432a8bb1092cb"
 LEMONADE_IMAGE = f"ghcr.io/lemonade-sdk/lemonade-server@{LEMONADE_IMAGE_DIGEST}"
+LEMONADE_VOLUME_MOUNTS = (
+    ("halo-lemonade-huggingface", "lemonade-huggingface", "/opt/lemonade/.cache/huggingface"),
+    ("halo-lemonade-llama", "lemonade-llama", "/opt/lemonade/llama"),
+    # This pre-11.8 volume name is retained at its historical cache mount so
+    # downloaded backends and TheRock runtimes remain reusable.
+    ("halo-lemonade-config", "lemonade-cache", "/opt/lemonade/.cache/lemonade"),
+    ("halo-lemonade-state", "lemonade-state", "/opt/lemonade/.config/lemonade"),
+)
+LEMONADE_LEGACY_JSON_FILES = (
+    "config.json",
+    "jobs.json",
+    "mcp_servers.json",
+    "recipe_options.json",
+    "user_models.json",
+)
 
 STRIXVULKAN_IMAGE_DIGEST = "sha256:a4a3dfe5813df1f0687e526bcba639bfd8b7cdb1d5e4c1c855abc240fb574d3a"
 STRIXVULKAN_SOURCE_COMMIT = "f25eefeaf0386c18499f23f4fc4f400397638d51"
@@ -183,7 +198,7 @@ DEFAULTS = {
     "LEMONADE_LLAMACPP_ROCM_BIN": "b10597",
     "LEMONADE_ROCM_CHANNEL": "stable",
     "LEMONADE_GPU_MAX_HW_QUEUES": "",
-    "LLAMACPP_IMAGE": "docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14",
+    "LLAMACPP_IMAGE": "docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0",
     "LLAMACPP_PORT": "8080",
     "ROCMFPX_IMAGE": "localhost/halo-ai-rocmfpx:v1.0.0",
     "ROCMFPX_PORT": "8000",
@@ -1030,7 +1045,7 @@ def lemonade_dflash_paths(
         path for entry, path in model_paths(config, target, {"main"})
         if entry["role"] == "main"
     )
-    # Lemonade 11.7 validates remotely registered *.gguf main checkpoints as
+    # Lemonade validates remotely registered *.gguf main checkpoints as
     # registry IDs. An extensionless bind target keeps this explicitly local;
     # llama.cpp identifies GGUF by file magic, not by the destination suffix.
     selected["main"] = (f"{root}/main", main)
@@ -1123,7 +1138,9 @@ def lemonade_runtime_spec(config: Config, catalog: Catalog) -> str:
         "groups": ["keep-groups"],
         "environment": lemonade_runtime_environment(config),
         "mounts": sorted((destination, str(path)) for destination, path in lemonade_runtime_mounts(config, catalog).items()),
-        "volumes": ["halo-lemonade-huggingface", "halo-lemonade-llama", "halo-lemonade-config"],
+        "volumes": [
+            (name, destination) for name, _component, destination in LEMONADE_VOLUME_MOUNTS
+        ],
         "configuration": {
             "auto_check_model_updates": False,
             "enable_dgpu_gtt": True,
@@ -1178,11 +1195,8 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
         command.extend(["--label", f"local.halo-ai.runtime-spec={lemonade_runtime_spec(config, catalog)}"])
         for key, value in sorted(lemonade_runtime_environment(config).items()):
             command.extend(["-e", f"{key}={value}"])
-        command.extend([
-            "-v", "halo-lemonade-huggingface:/opt/lemonade/.cache/huggingface:U",
-            "-v", "halo-lemonade-llama:/opt/lemonade/llama:U",
-            "-v", "halo-lemonade-config:/opt/lemonade/.cache/lemonade:U",
-        ])
+        for name, _component, destination in LEMONADE_VOLUME_MOUNTS:
+            command.extend(["-v", f"{name}:{destination}:U"])
         # The long-lived Lemonade service carries exactly the cataloged Qwen text
         # mains and hash-pinned templates. This permits unload/load switching
         # without recreating it while keeping every host mount read-only.
@@ -2258,6 +2272,76 @@ def command_presets(config: Config, args: argparse.Namespace) -> int:
     return 0
 
 
+def lemonade_volume_mountpoint(name: str) -> Path | None:
+    result = podman(
+        ["volume", "inspect", name, "--format", "{{.Mountpoint}}"],
+        check=False, capture=True,
+    )
+    if result.returncode != 0:
+        return None
+    mountpoint = Path(result.stdout.strip())
+    if not mountpoint.is_absolute() or not mountpoint.is_dir():
+        fail(f"Lemonade volume {name} reported an invalid mountpoint")
+    return mountpoint
+
+
+def backup_lemonade_legacy_config(config: Config) -> Path | None:
+    """Back up the JSON files that Lemonade 11.8 migrates out of its cache."""
+    mountpoint = lemonade_volume_mountpoint("halo-lemonade-config")
+    if mountpoint is None:
+        return None
+    documents: dict[str, str] = {}
+    try:
+        for name in LEMONADE_LEGACY_JSON_FILES:
+            candidate = mountpoint / name
+            if candidate.is_file():
+                documents[name] = candidate.read_text(encoding="utf-8")
+    except OSError as exc:
+        fail(f"could not back up legacy Lemonade configuration: {exc}")
+    if not documents:
+        return None
+    digest = hashlib.sha256()
+    for name, content in sorted(documents.items()):
+        digest.update(name.encode() + b"\0" + content.encode() + b"\0")
+    backup = state_path(config, "lemonade-config-backups") / digest.hexdigest()[:16]
+    backup.mkdir(mode=0o700, parents=True, exist_ok=True)
+    manifest_files: dict[str, str] = {}
+    for name, content in sorted(documents.items()):
+        destination = backup / name
+        if destination.exists() and read_text(destination) != content:
+            fail(f"Lemonade configuration backup collision at {destination}")
+        if not destination.exists():
+            atomic_write(destination, content)
+        manifest_files[name] = hashlib.sha256(content.encode()).hexdigest()
+    manifest = backup / "manifest.json"
+    expected_manifest = {
+        "schema_version": 1,
+        "source_volume": "halo-lemonade-config",
+        "lemonade_upgrade": LEMONADE_VERSION,
+        "files": manifest_files,
+    }
+    if manifest.exists():
+        if json.loads(read_text(manifest)) != expected_manifest:
+            fail(f"Lemonade configuration backup manifest collision at {manifest}")
+    else:
+        atomic_json(manifest, expected_manifest)
+    print(f"Preserved pre-{LEMONADE_VERSION} Lemonade JSON configuration: {backup}")
+    return backup
+
+
+def prepare_lemonade_storage(config: Config) -> None:
+    # Back up before 11.8 moves persistent JSON from .cache to .config. The old
+    # cache volume remains mounted so downloaded backend/runtime data is reused.
+    backup_lemonade_legacy_config(config)
+    for name, component, _destination in LEMONADE_VOLUME_MOUNTS:
+        exists = podman(["volume", "exists", name], check=False).returncode == 0
+        if not exists:
+            podman([
+                "volume", "create", "--label", MANAGED_LABEL,
+                "--label", f"local.halo-ai.component={component}", name,
+            ])
+
+
 def command_runtime_install(config: Config, engines: Iterable[str]) -> int:
     for engine in engines:
         image = image_for(config, engine)
@@ -2274,14 +2358,7 @@ def command_runtime_install(config: Config, engines: Iterable[str]) -> int:
             print(f"Pulling {engine}: {image}")
             podman(["pull", image])
         if engine == "lemonade":
-            for name, component in (
-                ("halo-lemonade-huggingface", "lemonade-huggingface"),
-                ("halo-lemonade-llama", "lemonade-llama"),
-                ("halo-lemonade-config", "lemonade-config"),
-            ):
-                exists = podman(["volume", "exists", name], check=False).returncode == 0
-                if not exists:
-                    podman(["volume", "create", "--label", MANAGED_LABEL, "--label", f"local.halo-ai.component={component}", name])
+            prepare_lemonade_storage(config)
         digest = image_identity(image)
         state = config.path("HALO_AI_STATE_DIR")
         state.mkdir(parents=True, exist_ok=True)
@@ -2305,6 +2382,8 @@ def command_update(config: Config, engines: Iterable[str]) -> int:
             build_ds4_image(image, force=True)
         else:
             podman(["pull", image])
+        if engine == "lemonade":
+            prepare_lemonade_storage(config)
         new = image_identity(image)
         event = {"updated_at": utc_now(), "engine": engine, "image": image, "old_digest": old, "new_digest": new}
         with history_path.open("a", encoding="utf-8") as stream:
@@ -4279,7 +4358,8 @@ def build_parser() -> argparse.ArgumentParser:
     bench_score = longbench_actions.add_parser("score", help="score an existing halo-ai JSONL run")
     bench_score.add_argument("results")
     rocmfpx_context = bench.add_parser(
-        "rocmfpx-context", help="measure exact-token cold-cache PP/TPS on an active ROCmFPX profile",
+        "rocmfpx-context",
+        help="measure exact-token cold-cache PP/TPS on a supported active GPU profile",
     )
     rocmfpx_context.add_argument("profile_id")
     rocmfpx_context.add_argument("--prompt-tokens", default="4095,31998")

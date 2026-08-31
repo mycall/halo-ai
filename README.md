@@ -207,13 +207,37 @@ a non-smoke run, requires the observed run peak to exceed 45 W. Override only
 the observation threshold with `--minimum-ppt-watts N`; raw samples and the run
 peak are retained with the results.
 
-The first Lemonade ROCm start downloads a llama.cpp backend and TheRock runtime.
-They are cached in the persistent `halo-lemonade-config` volume, while Hugging
-Face downloads use `halo-lemonade-huggingface`. The default pins
-`LEMONADE_LLAMACPP_ROCM_BIN=b10597` on the stable channel; its Linux ROCm archive
-reports active llama.cpp build 10594. Already downloaded versions and the large
+Halo pins Lemonade 11.8.1 by its immutable amd64 image-manifest digest. The
+first Lemonade ROCm start downloads a llama.cpp backend and TheRock runtime.
+Backend/runtime data remains in the historical `halo-lemonade-config` cache
+volume, Hugging Face downloads use `halo-lemonade-huggingface`, and 11.8's
+persistent JSON state uses the new `halo-lemonade-state` volume. Before 11.8
+migrates JSON from `.cache` to `.config`, `halo-ai install/update lemonade`
+makes a content-addressed backup under
+`/var/opt/halo-ai/state/lemonade-config-backups`.
+
+Rootless Podman retains pulled image layers in its content-addressed local
+store, and Halo does not prune them during install or update. Advancing to a
+later 11.8.x pin therefore reuses every common image layer. The four named
+volumes are independent of the image layer store, so backend/runtime downloads,
+registered state, and Hugging Face models also survive container replacement.
+
+The default retains the qualified stable backend package
+`LEMONADE_LLAMACPP_ROCM_BIN=b10597`; the server release and its downloaded
+llama.cpp backend are independent pins. Existing downloads and the large
 TheRock runtime are reused. Change the package or channel only for an explicit
 compatibility trial, then restore the qualified pin.
+
+Standalone llama.cpp now defaults to Kyuz0's supported `rocm-10.0` Strix Halo
+image. Its tag tracks rebuilt llama.cpp master images, so every install, update,
+and trial records the resolved immutable digest/build for rollback and audit.
+
+Lemonade 11.8 also exposes an experimental native DS4 backend using the same
+`b0001` gfx1151 artifact Halo already pins. Halo keeps its direct DS4 engine as
+the qualified default for now because its DSpark, 384K context, disk-KV,
+process-provenance, and timing checks are stricter than Lemonade's initial DS4
+adapter. Native Lemonade DS4 is a migration candidate, not an implicit engine
+replacement in this release.
 
 ## DS4 disk KV cache
 
@@ -271,13 +295,14 @@ on-disk Q6 XL target and BF16 projector through Lemonade's real ROCm/HIP
 llama.cpp backend. It holds the target-only Vulkan profile's native 262K
 context, F16 K/V, one slot, Flash Attention, and 4096/4096 batch settings fixed
 for a backend A/B test. Halo can register a local target, projector, and draft
-as one first-class Lemonade 11.7 model. The resulting
+as one first-class Lemonade 11.8 model. The resulting
 `qwen3.8-27b-q6xl-vision-dflash2-lemonade` profile is deliberately disabled,
-however: stable `b10597`/build 10594 and nightly `b1315` both reject the valid
+however: the last qualified 11.7 stable `b10597`/build 10594 and nightly `b1315`
+tests both reject the valid
 58-tensor DFlash2 draft with `expected 81, got 58`. Lemonade's companion wiring
-works, but its ROCm binaries currently contain upstream DFlash v1; Qwen3.8
-DFlash2 support remains in open llama.cpp PR #27342. Compare target-only ROCm
-directly with `qwen3.8-27b-q6xl-strix-vision` until a compatible backend lands.
+works, but the 11.8 server/backend combination must pass the same load and
+equal-history canaries before this gate is removed. Compare target-only ROCm
+directly with `qwen3.8-27b-q6xl-strix-vision` in the meantime.
 The first controlled 81-token prompt / 256-token generation A/B measured median
 decode at 8.05 tok/s on Lemonade HIP and 8.44 tok/s on Vulkan. HIP won the first
 uncached prefill 138.84 to 65.10 tok/s. See

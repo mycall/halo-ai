@@ -320,7 +320,8 @@ if ! "$keep_podman"; then
     fi
 
     for volume in \
-        halo-lemonade-huggingface halo-lemonade-llama halo-lemonade-config; do
+        halo-lemonade-huggingface halo-lemonade-llama halo-lemonade-config \
+        halo-lemonade-state; do
         if run_as_user podman volume exists "$volume"; then
             if ! printf '%s\n' "${managed_volumes[@]}" | grep -Fxq -- "$volume"; then
                 legacy_volumes+=("$volume")

@@ -49,6 +49,21 @@ def gguf_fixture(payload: bytes = b"") -> bytes:
 
 
 class ConfigurationTests(unittest.TestCase):
+    def test_current_runtime_defaults_select_lemonade_11_8_and_rocm_10(self) -> None:
+        self.assertEqual(cli.LEMONADE_VERSION, "11.8.1")
+        self.assertEqual(
+            cli.DEFAULTS["LEMONADE_IMAGE"],
+            "ghcr.io/lemonade-sdk/lemonade-server@"
+            "sha256:824359e8633d3cde4afb2c32609930758f4e71424d71ad58f26432a8bb1092cb",
+        )
+        self.assertEqual(
+            cli.DEFAULTS["LLAMACPP_IMAGE"],
+            "docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0",
+        )
+        example = cli.parse_env_file(ROOT / "config/halo-ai.env.example")
+        self.assertEqual(example["LEMONADE_IMAGE"], cli.DEFAULTS["LEMONADE_IMAGE"])
+        self.assertEqual(example["LLAMACPP_IMAGE"], cli.DEFAULTS["LLAMACPP_IMAGE"])
+
     def test_opencode_exposes_native_context_qwen3_8_vision_alias(self) -> None:
         document = json.loads((ROOT / "config/opencode.json").read_text(encoding="utf-8"))
         self.assertEqual(document["enabled_providers"], ["halo-ai"])
@@ -286,6 +301,67 @@ class CatalogTests(unittest.TestCase):
             rendered,
         )
 
+    def test_lemonade_11_8_mounts_distinct_cache_and_config_volumes(self) -> None:
+        profile = self.catalog.profiles["qwen3.6-27b-q8xl-lemonade"]
+        rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, profile)
+        )
+        self.assertIn(
+            "halo-lemonade-config:/opt/lemonade/.cache/lemonade:U", rendered,
+        )
+        self.assertIn(
+            "halo-lemonade-state:/opt/lemonade/.config/lemonade:U", rendered,
+        )
+
+    def test_lemonade_11_8_upgrade_backs_up_legacy_json(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config = make_config(root)
+            legacy = root / "legacy-volume"
+            legacy.mkdir()
+            (legacy / "config.json").write_text('{"port": 13305}\n', encoding="utf-8")
+            (legacy / "user_models.json").write_text('{"models": []}\n', encoding="utf-8")
+            (legacy / "unrelated.bin").write_bytes(b"not configuration")
+            inspected = mock.MagicMock(returncode=0, stdout=str(legacy) + "\n")
+            with mock.patch.object(cli, "podman", return_value=inspected):
+                backup = cli.backup_lemonade_legacy_config(config)
+            self.assertIsNotNone(backup)
+            assert backup is not None
+            self.assertEqual(
+                (backup / "config.json").read_text(encoding="utf-8"),
+                '{"port": 13305}\n',
+            )
+            self.assertEqual(
+                (backup / "user_models.json").read_text(encoding="utf-8"),
+                '{"models": []}\n',
+            )
+            self.assertFalse((backup / "unrelated.bin").exists())
+            manifest = json.loads((backup / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["lemonade_upgrade"], "11.8.1")
+            self.assertEqual(set(manifest["files"]), {"config.json", "user_models.json"})
+
+    def test_lemonade_storage_preparation_creates_every_managed_volume(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            config = make_config(Path(temporary))
+
+            def fake_podman(arguments, **_kwargs):
+                return mock.MagicMock(returncode=1 if arguments[1] == "exists" else 0)
+
+            with (
+                mock.patch.object(cli, "backup_lemonade_legacy_config") as backup,
+                mock.patch.object(cli, "podman", side_effect=fake_podman) as podman,
+            ):
+                cli.prepare_lemonade_storage(config)
+            backup.assert_called_once_with(config)
+            created = [
+                call.args[0][-1] for call in podman.call_args_list
+                if call.args[0][:2] == ["volume", "create"]
+            ]
+            self.assertEqual(
+                created,
+                [name for name, _component, _destination in cli.LEMONADE_VOLUME_MOUNTS],
+            )
+
     def test_lemonade_runtime_spec_is_shared_across_profiles(self) -> None:
         first = self.catalog.profiles["qwen3.6-27b-q8xl-lemonade"]
         second = self.catalog.profiles["qwen3.6-35b-a3b-q8xl-lemonade"]
@@ -436,7 +512,8 @@ class CatalogTests(unittest.TestCase):
         self.assertIn("--batch-size 4096 --ubatch-size 4096", payload["llamacpp_args"])
         self.assertIn("--cache-type-k f16 --cache-type-v f16", payload["llamacpp_args"])
         self.assertIn("--spec-type none", payload["llamacpp_args"])
-        plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
+        with mock.patch.object(cli, "image_identity", return_value=cli.LEMONADE_IMAGE_DIGEST):
+            plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
         self.assertEqual(plan["selected_artifact_classes"], ["model", "vision", "runtime"])
         self.assertNotIn("vision", plan["excluded_artifact_classes"])
 
@@ -463,7 +540,8 @@ class CatalogTests(unittest.TestCase):
         self.assertIn("--spec-type draft-dflash", payload["llamacpp_args"])
         self.assertIn("--spec-draft-n-max 5", payload["llamacpp_args"])
         self.assertNotIn("--model-draft", payload["llamacpp_args"])
-        plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
+        with mock.patch.object(cli, "image_identity", return_value=cli.LEMONADE_IMAGE_DIGEST):
+            plan = cli.profile_acquisition_plan(self.config, self.catalog, profile)
         self.assertEqual(
             plan["selected_artifact_classes"], ["model", "vision", "dflash2", "runtime"],
         )

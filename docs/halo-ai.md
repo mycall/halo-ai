@@ -162,7 +162,7 @@ Local applications
 The APIs bind to host loopback only. Remote clients should use SSH port
 forwarding rather than exposing unauthenticated inference ports on the LAN.
 
-Existing `llama-rocm-7.14` and `llama-vulkan-radv` Toolbx containers are useful
+Existing `llama-rocm-10.0` and `llama-vulkan-radv` Toolbx containers are useful
 for interactive testing and benchmarks, but they are not dependencies of this
 project and will not be modified.
 
@@ -960,21 +960,29 @@ and the OpenAI-compatible API.
 
 ### Image and persistent storage
 
-Use AMD/Lemonade's official image:
+Use the official Lemonade 11.8 image by immutable manifest digest:
 
 ```text
-ghcr.io/lemonade-sdk/lemonade-server:latest
+ghcr.io/lemonade-sdk/lemonade-server@sha256:824359e8633d3cde4afb2c32609930758f4e71424d71ad58f26432a8bb1092cb
 ```
 
-For a repeatable installation, `halo-ai install lemonade` resolves `latest` to
-an immutable digest and records it in local state. `halo-ai update lemonade`
-stages and records a newer digest without replacing an active container; perform
-the profile smoke test before switching to it.
+`halo-ai install lemonade` pulls that exact 11.8.1 amd64 manifest and records the
+resolved platform image in local state. A later source update can deliberately
+advance the pin; `halo-ai update lemonade` never replaces an active container.
+Perform the profile smoke test before switching to a newly staged image.
+
+Podman keeps image blobs in its content-addressed rootless store, and Halo's
+install/update path never prunes that store. Pulling a later 11.8.x image reuses
+all common layers while retaining the previous image as a rollback source. On
+this CachyOS host `podman info` reports the graph root beneath
+`$HOME/.local/share/containers/storage`, on the separate `@home` Btrfs
+subvolume, so restoring a root snapshot does not discard the download. Avoid an
+explicit `podman image prune` if that local reuse is required.
 
 Pull the image and create volumes:
 
 ```bash
-podman pull ghcr.io/lemonade-sdk/lemonade-server:latest
+podman pull ghcr.io/lemonade-sdk/lemonade-server@sha256:824359e8633d3cde4afb2c32609930758f4e71424d71ad58f26432a8bb1092cb
 podman volume create \
   --label local.halo-ai.managed=true \
   --label local.halo-ai.component=lemonade-huggingface \
@@ -985,8 +993,12 @@ podman volume create \
   halo-lemonade-llama
 podman volume create \
   --label local.halo-ai.managed=true \
-  --label local.halo-ai.component=lemonade-config \
+  --label local.halo-ai.component=lemonade-cache \
   halo-lemonade-config
+podman volume create \
+  --label local.halo-ai.managed=true \
+  --label local.halo-ai.component=lemonade-state \
+  halo-lemonade-state
 ```
 
 ### Expose existing GGUFs without copying them
@@ -1039,7 +1051,8 @@ podman run -d \
   -v halo-lemonade-huggingface:/opt/lemonade/.cache/huggingface:U \
   -v halo-lemonade-llama:/opt/lemonade/llama:U \
   -v halo-lemonade-config:/opt/lemonade/.cache/lemonade:U \
-  ghcr.io/lemonade-sdk/lemonade-server:latest
+  -v halo-lemonade-state:/opt/lemonade/.config/lemonade:U \
+  ghcr.io/lemonade-sdk/lemonade-server@sha256:824359e8633d3cde4afb2c32609930758f4e71424d71ad58f26432a8bb1092cb
 ```
 
 The server runs as an unprivileged user inside the official image. The `:U`
@@ -1100,9 +1113,17 @@ must enumerate the expected Radeon 8060S and large GPU-addressable pool. Treat a
 small fixed-VRAM-only result as an application-configuration failure even when
 sysfs reports 118 GiB of GTT.
 
-The configuration resides in the persistent `halo-lemonade-config` volume, so it
-survives container recreation. That volume is also Lemonade's executable/backend
-cache. On the first validated gfx1151 ROCm install it held about 17 GiB: about
+Lemonade 11.8 separates persistent JSON configuration from its executable and
+runtime cache; 11.8.1 also repairs the systemd-path regression in 11.8.0. Halo
+retains the historically named `halo-lemonade-config`
+volume at `/opt/lemonade/.cache/lemonade` because it already contains downloaded
+backends, and mounts the new `halo-lemonade-state` volume at
+`/opt/lemonade/.config/lemonade`. Before allowing Lemonade's first-start
+migration, `halo-ai install/update lemonade` copies the five legacy JSON files
+to a content-addressed backup under
+`/var/opt/halo-ai/state/lemonade-config-backups`.
+
+On the first validated gfx1151 ROCm install the legacy cache held about 17 GiB: about
 16 GiB beneath `bin/therock/gfx1151-7.13.0` and about 1.2 GiB beneath
 `bin/llamacpp/rocm-stable`. Lemonade reuses each downloaded backend and TheRock
 runtime on later starts; it downloads again only when the selected
@@ -1120,11 +1141,12 @@ commit. `halo-ai start` records `package_version` from `lemonade backends` and
 `binary_version` from the active `llama-server` path; `halo-ai test` also records
 the API's `system_fingerprint`.
 
-The three persistent Lemonade volumes have separate purposes:
+The four persistent Lemonade volumes have separate purposes:
 
 | Volume | Container path | Purpose |
 | --- | --- | --- |
-| `halo-lemonade-config` | `/opt/lemonade/.cache/lemonade` | Configuration, pinned backend binaries, and TheRock ROCm runtime |
+| `halo-lemonade-config` | `/opt/lemonade/.cache/lemonade` | Historically named cache containing pinned backend binaries and TheRock ROCm runtime |
+| `halo-lemonade-state` | `/opt/lemonade/.config/lemonade` | Lemonade 11.8 persistent JSON configuration, jobs, recipes, MCP servers, and registered models |
 | `halo-lemonade-huggingface` | `/opt/lemonade/.cache/huggingface` | Models downloaded through Lemonade/Hugging Face |
 | `halo-lemonade-llama` | `/opt/lemonade/llama` | Lemonade llama working data retained for compatibility |
 
@@ -1592,7 +1614,7 @@ Attention, and 4096/4096 batch/ubatch. It mounts the same Q6 XL GGUF and
 `mmproj-BF16.gguf` read-only and forces `--spec-type none`. This isolates ROCm
 HIP from Vulkan as closely as the managed APIs permit.
 
-Lemonade 11.7 adds the missing external-draft integration. Halo registers the
+The Lemonade 11.7 qualification added external-draft integration. Halo registers the
 catalog's main, projector, and renamed `dflash-*` companion as one `local_path`
 model and verifies that the spawned server receives `--model-draft`,
 `--spec-type draft-dflash`, and the catalog's draft width. That wiring passed,
@@ -1626,6 +1648,15 @@ three fresh-process vision canaries all returned `red` with fingerprint
 ROCm median prefill/decode at 130.07/8.013 tok/s and Vulkan at
 99.69/8.466 tok/s. The exact compatibility trials and samples are in
 [`docs/results/qwen3.8-q6xl-lemonade-dflash2-compat-2026-08-23.json`](results/qwen3.8-q6xl-lemonade-dflash2-compat-2026-08-23.json).
+
+Lemonade 11.8.1 is now the supported server pin. The 11.8 line adds experimental
+native DS4 using the same `b0001` gfx1151 archive as Halo's direct DS4 image,
+plus a larger model/backend surface. Halo does not silently route existing DS4 or
+ROCmFPX profiles through Lemonade: the direct engines retain qualified DSpark,
+disk-KV, long-context, provenance, and timing contracts. A Lemonade-native DS4
+profile can replace them only after it passes those same contracts. Likewise,
+the Qwen3.8 DFlash2 gate remains closed until the 11.8 server and selected ROCm
+backend pass the recorded load, vision, and equal-history canaries.
 
 The repo's `config/opencode.json` exposes all configured models through one
 provider: `halo-ai/ds4`, `halo-ai/qwen3.8fp4`, `halo-ai/qwen3.8fp8`, and
@@ -1809,13 +1840,17 @@ canary because its documented OpenAI layer does not promise every llama.cpp-only
 request extension.
 
 The selected standalone runtime is
-`docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14`. Upstream rebuilds this
-stable tag from current llama.cpp master; `halo-ai install/update llamacpp`
+`docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0`. Upstream identifies this
+as the stable ROCm 10.0 Core SDK build for gfx1151 and rebuilds the tag from
+current llama.cpp master. `halo-ai install/update llamacpp`
 pulls it and records the resolved immutable digest, while every trial records
-the serving build fingerprint. The 2026-08-09 refresh resolved digest
-`sha256:32d25e6f7608e1d221b71f51389c883afc655b9a3add9f7a787453dca288117b`
-and llama.cpp build `b10335-74ce15741`. Re-run the capability canaries after a
-digest change. The service binds to
+the serving build fingerprint. The registry manifest observed on 2026-08-30 was
+`sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6`;
+local inspection confirmed Core SDK `10.0.0` and llama.cpp build
+`10711`/`9723942ad`. Re-run the capability canaries after every digest change.
+The earlier qualified
+`rocm-7.14` digest/build remains in the historical result records as a rollback
+reference. The service binds to
 `127.0.0.1:8080`, receives `/dev/kfd` and `/dev/dri`, and gets only the catalog
 files required by its active profile as read-only mounts.
 
@@ -2233,7 +2268,7 @@ HALO_AI_MODELS_REQUIRE_MOUNT=0
 HALO_AI_MODELS_EXPECT_UUID=
 HALO_AI_DEFAULT_PROFILE=qwen3.6-35b-a3b-q8xl-lemonade
 
-LEMONADE_IMAGE=ghcr.io/lemonade-sdk/lemonade-server@sha256:87aec2fb7e42f75b38faf3775a343b58941496add050b8de47519c0d212921d4
+LEMONADE_IMAGE=ghcr.io/lemonade-sdk/lemonade-server@sha256:824359e8633d3cde4afb2c32609930758f4e71424d71ad58f26432a8bb1092cb
 LEMONADE_PORT=13305
 LEMONADE_VALIDATION_MODEL=Qwen3-0.6B-GGUF
 LEMONADE_LLAMACPP_ROCM_BIN=b10597
@@ -2241,7 +2276,7 @@ LEMONADE_ROCM_CHANNEL=stable
 LEMONADE_GPU_MAX_HW_QUEUES=
 
 # Stable gfx1151 tag; each pull and trial records its resolved digest/build.
-LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14
+LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0
 LLAMACPP_PORT=8080
 
 ROCMFPX_IMAGE=localhost/halo-ai-rocmfpx:v1.0.0
