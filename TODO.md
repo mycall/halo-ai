@@ -614,6 +614,113 @@ No Stage 5 model has been downloaded yet.
       isolated candidate reruns eliminate the previously observed build-244
       output corruption and pass the full regression suite.
 
+## Stage 6: Qualify the best-current speech runtime
+
+**Value:** test the strongest currently published Python, ROCm, PyTorch, and
+application stack first, then promote it only if the complete Seamless M4T v2
+service wins a same-host comparison with the qualified image. Do not spend the
+first trial stepping through intermediate versions merely to reduce the number
+of changed components; preserve those versions as bisection points only if the
+preferred candidate fails.
+
+### Preferred challenger
+
+- Base image: `python:3.14.7-slim-trixie`.
+- GPU stack: ROCm `10.0.0`, PyTorch `2.13.0`, torchvision `0.28.0`, and
+  torchaudio `2.11.0.2`, using AMD's CPython 3.14 `gfx1151` wheels from
+  `https://stable.repo.amd.com/rocm/whl-next/`.
+- Model/application stack: Transformers `5.16.1`, safetensors `0.8.0`,
+  tiktoken `0.14.0`, Accelerate `1.14.0`, SoundFile `0.14.0`, SentencePiece
+  `0.2.2`, protobuf `7.36.0`, SciPy `1.18.1`, Gradio `6.26.0`, FastAPI
+  `0.141.1`, Uvicorn `0.52.4`, and python-multipart `0.0.32`.
+- Control: retain the qualified Python 3.12 / ROCm 7.14 / PyTorch 2.12 /
+  Transformers 4.57.1 / Gradio 6.16 image unchanged, including its immutable
+  identity and current `SPEECH_IMAGE` selection.
+- Candidate identity: build and record a separate immutable image such as
+  `localhost/halo-ai-speech:rocm-10.0-py3.14`; never reuse or retag the control
+  while qualification is incomplete.
+
+The CPython 3.14 Linux wheel-only application graph resolved successfully in
+the 2026-08-30 research pass, and AMD publishes the matching ROCm 10/PyTorch
+device wheels. That proves availability, not runtime correctness. The target
+CachyOS host is outside AMD's formally listed ROCm 10 `gfx1151` Linux host
+matrix, so only a live same-host trial can pass this stage.
+
+### Qualification tasks
+
+- [ ] Re-check every upstream package and image immediately before the build.
+      Pin the base-image digest, exact wheel versions, resolved transitive
+      dependencies, source indexes, and resulting image manifest. Generate a
+      machine-readable lock or build manifest and fail closed on an unexpected
+      source or version.
+- [ ] Add the preferred challenger as an isolated build path and tag. Keep the
+      current Containerfile/image available as the control, and do not update
+      CLI, installer, or example-config defaults during the experiment.
+- [ ] Make the candidate build run `pip check` and import the complete service
+      dependency set. Record Python, Torch, HIP, torchvision, torchaudio,
+      Transformers, Gradio, NumPy, SciPy, and ROCm device-package versions in
+      image labels or a retained manifest.
+- [ ] On the `gfx1151` host, verify `torch.cuda.is_available()`, device name,
+      `torch.version.hip == "10.0.0"`, architecture coverage, a real GPU tensor
+      operation, and clean ROCm initialization before loading model weights.
+      Treat detection without successful compute as a failure.
+- [ ] Start the challenger with the existing hash-pinned
+      `facebook/seamless-m4t-v2-large` model mounted read-only. Require offline
+      processor/model loading, the same 36 speech-input/output languages, and a
+      ready health response that exposes exact Python/Torch/HIP/application
+      versions.
+- [ ] Run the existing AMD-sample Spanish translated-WAV smoke test against
+      both control and challenger. Add repeated fresh-process and warm-process
+      trials, plus at least one additional language, and inspect duration,
+      sample rate, finite samples, clipping, silence, and intelligibility. A
+      nonempty WAV alone is necessary but not sufficient evidence of parity.
+- [ ] Benchmark the two images in an interleaved same-session comparison.
+      Record image size, build time separately from runtime, cold model-load
+      time, first-request latency, warm inference latency, output duration,
+      peak GTT/VRAM, host `MemAvailable`, CPU/RSS, and run-to-run variability.
+      Use identical model bytes, source audio, target languages, power profile,
+      and completion conditions.
+- [ ] Run a bounded stability soak with repeated translations while monitoring
+      container logs and the host kernel journal for GPU faults, resets, queue
+      stalls, allocation failures, or ROCm warnings. Record kernel, firmware,
+      Mesa/amdgpu, Podman, and host-profile identities with the result.
+- [ ] If the preferred challenger fails, bisect instead of guessing. First
+      retain Python 3.14/ROCm 10/Torch 2.13 while reverting the Transformers 5
+      and Gradio 6.26 application pair; next retain Python 3.14 while reverting
+      to ROCm 7.14/Torch 2.12 and CPython-3.14-compatible SciPy/tiktoken; use
+      Python 3.13 with the original application pins only as the final narrow
+      compatibility control. Stop at the highest stack that passes the same
+      gate.
+- [ ] After a pass, remove only dependencies proven unnecessary by a second
+      isolated image and full rerun. `torchvision`, SciPy, tiktoken, and
+      Accelerate are not direct imports in `speech_server.py`, but static
+      inspection is not proof that Transformers processor/model paths never
+      require them.
+- [ ] Promote only after qualification: update the canonical Containerfile,
+      `SPEECH_IMAGE` defaults, installer text, example configuration,
+      documentation, expected version assertions, and recorded image identity
+      together. Preserve the prior immutable image tag and document the exact
+      rollback command.
+
+### Gate
+
+- [ ] **Preferred-candidate pass:** build and dependency checks succeed; real
+      `gfx1151` compute, offline model load, API/UI health, language discovery,
+      translation quality, and the stability soak pass without GPU or kernel
+      errors. Performance and memory must be at least within measured control
+      variability, or a documented lifecycle/security benefit must justify a
+      small bounded regression.
+- [ ] **Win and promote:** prefer the ROCm 10/Python 3.14 challenger when it is
+      functionally equivalent and either materially improves latency, memory,
+      stability, or image maintenance, or remains performance-neutral while
+      moving the runtime to the current published stack. Report all metrics,
+      including losses; “newer” by itself is not a benchmark win.
+- [ ] **Fail and retain control:** keep the current ROCm 7.14 image and defaults
+      when the challenger corrupts output, loses required languages, exhibits
+      unresolved host instability, or regresses materially. Record the first
+      passing bisection candidate, but do not promote it without the complete
+      control comparison.
+
 ## Deferred research
 
 External NPU drafting, cross-version Qwen3.6 drafting, generalized multi-service
