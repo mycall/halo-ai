@@ -369,6 +369,7 @@ The lifecycle tooling must preserve that distinction per model.
 | `deepseek-v4-flash-0731-iq3xxs` | Unsloth IQ3_XXS shards 1–4; optional DSpark companion | 97.05 GiB main; 107.20 GiB with companion | `deepseek4` + `dflash` | standalone llama.cpp; Lemonade base only | 32,768 |
 | `qwen3.6-27b-q8xl` | Q8_K_XL main; installed F32 vision projector | 35.04 GiB total | `qwen35` + `clip` | Lemonade or standalone llama.cpp | 32,768 |
 | `qwen3.6-35b-a3b-q8xl` | Q8_K_XL main; no local vision projector | 36.41 GiB | `qwen35moe` | Lemonade or standalone llama.cpp | 32,768 |
+| `qwen3.8-flash-next-ud-q4-k-xl` | Four Unsloth UD-Q4_K_XL shards; embedded tokenizer/template; no optional projector or MTP sidecar | 103.69 GiB | `qwen4exp` | standalone llama.cpp build 10711 | 32,768 experimental baseline |
 | `qwen3.8-27b-rocmfp4` | ROCmFP4-FAST language/MTP GGUF; text only | 13.56 GiB | `qwen35` | dedicated q38rocm ROCmFPX/Vulkan | 32,768 |
 | `qwen3.8-27b-rocmfp8` | Q8_0_ROCMFPX language/MTP GGUF; text only | 26.26 GiB | `qwen35` | dedicated q38rocm ROCmFPX/Vulkan | 32,768 |
 | `seamless-m4t-v2-large` | Two safetensors shards plus processor/tokenizer files | 8.62 GiB | `seamless_m4t_v2` | dedicated ROCm speech service | N/A |
@@ -381,8 +382,10 @@ accept an incomplete shard set.
 ### Expected-file manifest
 
 The following SHA-256 values are the **published expected hashes** observed from
-the upstream repositories through 2026-08-23. They become locally verified only after
+the upstream repositories through 2026-09-02. They become locally verified only after
 `halo-ai models verify --full` hashes the installed bytes and records the result.
+The four Flash Next UD-Q4_K_XL shards were also independently hashed locally on
+2026-09-02 and matched these values exactly.
 Each manifest entry is `sha256 bytes relative-path`:
 
 ```text
@@ -398,6 +401,10 @@ fdc443e974cad1f61c45af1cfd5580855855ddce0d6c14cc500a5714c486ac1d 1842940480 unsl
 2770c8c7b8a1ad536168ea51463f3cf1b813e5b4d31f49ea0bf1f628b4688d05 4240 unsloth/qwen3.6-thinking.jinja
 63f41b4f55a044a0c173b403bf901b0027fca2a717f63833fe24784deeb6f614 4333 unsloth/qwen3.6-nonthinking.jinja
 6c6b816537abad90b250a0972b345466028d861ddfe316d5f0de31ca6440f781 39099447584 unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf
+4448186216b3af4cc558bbce2c3213f01608f8f8b2e5267a9767971dd3ec8082 10946624 unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf
+3f342f1c1580473f1ee94ddd5b28206e8c07a70fa1a366f59d1d6c922919a6c9 49859583136 unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf
+56758f40269cad5cd9b0d3d6fbae0f40f6d5be6de49e4ab392dbe83157d9cbd3 49376141504 unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf
+753bda48b98ba4f1636134a90a967de1b2d3908a236c026e464777342e53510a 12087983520 unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf
 fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9 14562236384 julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP4-FAST.gguf
 0bf5bfc9f946090af2d41b388ccb4d627e916c7250517c36a0de37d6eaccfd8e 28193396704 julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP8.gguf
 701d8fa9ed214ab21bfc130cd2a7df19ca89bbef7713e2dfb19f3c63696aa917 25299061664 unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q6_K_XL.gguf

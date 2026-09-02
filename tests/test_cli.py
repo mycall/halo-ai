@@ -346,8 +346,8 @@ class CatalogTests(unittest.TestCase):
             self.catalog = cli.load_catalog(self.config)
 
     def test_checked_in_catalog_validates(self) -> None:
-        self.assertEqual(len(self.catalog.models), 11)
-        self.assertEqual(len(self.catalog.profiles), 37)
+        self.assertEqual(len(self.catalog.models), 12)
+        self.assertEqual(len(self.catalog.profiles), 38)
         self.assertEqual(
             self.catalog.profile_aliases,
             {
@@ -431,6 +431,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_qwen3_8_models_default_to_medium_reasoning(self) -> None:
         for model_id in (
+            "qwen3.8-flash-next-ud-q4-k-xl",
             "qwen3.8-27b-rocmfp4",
             "qwen3.8-27b-rocmfp8",
             "qwen3.8-27b-ud-q6-k-xl",
@@ -440,6 +441,46 @@ class CatalogTests(unittest.TestCase):
                     self.catalog.models[model_id]["default_reasoning_effort"],
                     "medium",
                 )
+
+    def test_flash_next_q4xl_uses_complete_pinned_shards_and_current_llamacpp(self) -> None:
+        model = self.catalog.models["qwen3.8-flash-next-ud-q4-k-xl"]
+        profile = self.catalog.profiles[
+            "qwen3.8-flash-next-ud-q4-k-xl-llamacpp"
+        ]
+        self.assertEqual(model["revision"], "38bb39ee97821de2c9009abb7e93950eec396e66")
+        self.assertEqual(model["architecture"], "qwen4exp")
+        self.assertEqual(model["quantization"], "UD-Q4_K_XL")
+        self.assertEqual(model["engines"], ["llamacpp"])
+        self.assertEqual([entry["shard"] for entry in model["files"]], [1, 2, 3, 4])
+        self.assertEqual(
+            sum(entry["bytes"] for entry in model["files"]),
+            111_334_654_784,
+        )
+        self.assertEqual(
+            [entry["sha256"] for entry in model["files"]],
+            [
+                "4448186216b3af4cc558bbce2c3213f01608f8f8b2e5267a9767971dd3ec8082",
+                "3f342f1c1580473f1ee94ddd5b28206e8c07a70fa1a366f59d1d6c922919a6c9",
+                "56758f40269cad5cd9b0d3d6fbae0f40f6d5be6de49e4ab392dbe83157d9cbd3",
+                "753bda48b98ba4f1636134a90a967de1b2d3908a236c026e464777342e53510a",
+            ],
+        )
+        plan = cli.model_acquisition_plan(self.config, model, {"main"})
+        self.assertTrue(all("/UD-Q4_K_XL/" in item["source"] for item in plan["files"]))
+        rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, profile)
+        )
+        for shard in range(1, 5):
+            self.assertIn(f"-{shard:05d}-of-00004.gguf,ro", rendered)
+        self.assertIn("-e LLAMA_ATTN_ROT_DISABLE=1", rendered)
+        self.assertIn("-e ROCBLAS_USE_HIPBLASLT=1", rendered)
+        self.assertIn("--gpu-layers all", rendered)
+        self.assertIn("--cache-type-k q8_0 --cache-type-v q8_0", rendered)
+        self.assertIn("--load-mode mmap", rendered)
+        self.assertIn("--threads 4 --threads-batch 32", rendered)
+        self.assertIn("--jinja --reasoning-preserve", rendered)
+        self.assertNotIn("--mmproj", rendered)
+        self.assertNotIn("draft-mtp", rendered)
 
     def test_live_reasoning_default_canary_matches_medium_and_differs_from_xhigh(self) -> None:
         profile = {"engine": "rocmfpx"}
@@ -1266,6 +1307,35 @@ class ModelTests(unittest.TestCase):
             self.assertFalse(partial.exists())
             self.assertEqual(requests[0][0].get_header("Range"), "bytes=8-")
             self.assertEqual(requests[0][1], 120)
+
+    def test_pinned_download_uses_nested_huggingface_source_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            config = make_config(Path(temporary))
+            payload = gguf_fixture(b"nested source fixture")
+            entry = {
+                "role": "main",
+                "source_path": "UD-Q4_K_XL/model.gguf",
+                "path": "owner/repo/model.gguf",
+                "bytes": len(payload),
+                "sha256": hashlib.sha256(payload).hexdigest(),
+            }
+            destination = config.path("HALO_AI_MODELS_ROOT") / entry["path"]
+            requests = []
+
+            def open_fixture(request: object, timeout: int) -> object:
+                requests.append((request, timeout))
+                return self.Response(payload)
+
+            with mock.patch.object(cli.urllib.request, "urlopen", side_effect=open_fixture):
+                cli.download_huggingface_file(
+                    config, "owner/repo", "a" * 40, entry, destination,
+                )
+            self.assertEqual(destination.read_bytes(), payload)
+            self.assertTrue(
+                requests[0][0].full_url.endswith(
+                    "/owner/repo/resolve/" + "a" * 40 + "/UD-Q4_K_XL/model.gguf"
+                )
+            )
 
     def test_pinned_download_refuses_symlink_lock(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

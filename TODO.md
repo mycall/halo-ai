@@ -527,7 +527,10 @@ remain context only.
 **Value:** determine whether the new 180B-class Flash Next ROCmFP4 layout is a
 faster daily model on this Strix Halo without mistaking publisher results,
 runtime improvements, or a different memory budget for a quantization win.
-No Stage 5 model has been downloaded yet.
+The user-selected Unsloth `UD-Q4_K_XL` control is now present, hash-verified,
+and cataloged with a conservative 32K standalone llama.cpp profile. The
+ROCmFP4 target, its MTP/projector companions, and the size-matched Unsloth Q3
+control have not been downloaded.
 
 ### Pinned research snapshot (2026-08-30 PDT)
 

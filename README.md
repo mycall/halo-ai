@@ -89,6 +89,47 @@ container images, named cache/config volumes, and downloaded runtime components
 are preserved so the next start does not reinstall them. Use `uninstall.sh`
 when the installed solution itself should be removed.
 
+## Qwen3.8 Flash Next UD-Q4_K_XL baseline
+
+The experimental `qwen3.8-flash-next-ud-q4-k-xl-llamacpp` profile runs the
+four-shard Unsloth quant through Halo's standalone ROCm llama.cpp image at 32K
+context. Preview or re-check the exact artifact closure before starting it:
+
+```bash
+halo-ai profiles acquire qwen3.8-flash-next-ud-q4-k-xl-llamacpp --dry-run
+halo-ai models verify qwen3.8-flash-next-ud-q4-k-xl --full
+halo-ai start qwen3.8-flash-next-ud-q4-k-xl-llamacpp --switch
+halo-ai test qwen3.8-flash-next-ud-q4-k-xl-llamacpp
+```
+
+The pinned four-shard set is 111,334,654,784 bytes (103.69 GiB). All four
+local files were SHA-256 verified against Hugging Face revision
+`38bb39ee97821de2c9009abb7e93950eec396e66` on 2026-09-02. Acquisition keeps
+the repository's `UD-Q4_K_XL/` source subdirectory while preserving the
+existing flat local directory.
+
+No supplementary file is required for this text-only baseline: the tokenizer
+and chat template are embedded in shard 1. The repository's `mmproj-F16.gguf`
+and `mmproj-BF16.gguf` are optional vision projectors, and its `MTP/` files are
+optional speculative-decoding companions. They are deliberately outside this
+profile until the 32K target-only load and multi-message quality canaries pass.
+
+Do not route this profile through Halo's qualified Lemonade configuration yet.
+Lemonade Server 11.8.1 can register arbitrary GGUFs, but the pinned stable ROCm
+package `b10597` contains llama.cpp build 10594, which predates upstream
+`qwen4exp` support. The standalone image reports llama.cpp build 10711 at
+commit `9723942ad`, 51 commits after the architecture merge, so it is the
+compatible baseline already available on this host. The profile enables Q8
+K/V, mmap loading, one slot, explicit all-layer offload, the published
+gfx1151 attention-rotation workaround, and hipBLASLt.
+
+This is an `experimental-lockup` profile because its weights alone occupy most
+of the 123.5 GiB CPU-visible memory. Start at 32K and monitor GTT, available
+memory, swap, and kernel errors. The Strix-specific EngramHalo.cpp fork is a
+promising later runtime candidate for SSD-resident PLE tables and long-context
+HIP performance, but it is moving, lacks a pinned Halo image, and must be
+qualified separately rather than substituted into this baseline.
+
 ## Qwen3.8 ROCmFP4 baseline
 
 The Stage 1 Qwen3.8 profile is text-only and uses a dedicated q38rocm ROCmFPX

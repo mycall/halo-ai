@@ -25,6 +25,7 @@ import tempfile
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any, Iterable, NoReturn
@@ -465,6 +466,14 @@ def validate_catalog(
             digest = entry.get("sha256", "")
             if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
                 fail(f"model {identifier} has invalid SHA-256 for {relative}")
+            source_path = Path(str(entry.get("source_path", relative.name)))
+            if (
+                source_path.is_absolute()
+                or ".." in source_path.parts
+                or not source_path.parts
+                or source_path.name != relative.name
+            ):
+                fail(f"model {identifier} contains unsafe download source path {source_path}")
             if entry["role"] == "main":
                 main_files += 1
                 if "shard" in entry:
@@ -487,12 +496,22 @@ def validate_catalog(
             repository_path = Path(download["repository"])
             catalog_paths = [Path(entry["path"]) for entry in files]
             patterns = download["allow_patterns"]
+            source_paths = [
+                str(entry.get("source_path", Path(entry["path"]).name))
+                for entry in files
+            ]
             if (
                 model.get("repository") != download["repository"]
                 or model.get("revision") != download["revision"]
                 or any(path.parent != repository_path for path in catalog_paths)
-                or any(not isinstance(pattern, str) or Path(pattern).name != pattern for pattern in patterns)
-                or set(patterns) != {path.name for path in catalog_paths}
+                or any(
+                    not isinstance(pattern, str)
+                    or Path(pattern).is_absolute()
+                    or ".." in Path(pattern).parts
+                    or not Path(pattern).parts
+                    for pattern in patterns
+                )
+                or set(patterns) != set(source_paths)
             ):
                 fail(f"model {identifier} download allowlist does not exactly match its catalog files")
         expected_gguf = model.get("gguf_expectations")
@@ -1371,6 +1390,11 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
             command.extend([
                 "--mount", f"type=bind,src={draft_path},dst=/models/draft.gguf,ro",
             ])
+        if engine == "llamacpp":
+            if settings.get("attn_rot_disable"):
+                command.extend(["-e", "LLAMA_ATTN_ROT_DISABLE=1"])
+            if settings.get("rocblas_use_hipblaslt"):
+                command.extend(["-e", "ROCBLAS_USE_HIPBLASLT=1"])
         command.append(image_for(config, engine))
         command.extend(llama_server_common_arguments(executable, profile, f"/models/{main.name}", port))
         default_reasoning_effort = model.get("default_reasoning_effort")
@@ -1403,6 +1427,16 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
             command.extend(["--cache-type-k", settings["kv"], "--cache-type-v", settings["kv"]])
             if settings.get("load_mode"):
                 command.extend(["--load-mode", settings["load_mode"]])
+            if settings.get("gpu_layers") is not None:
+                command.extend(["--gpu-layers", str(settings["gpu_layers"])])
+            if settings.get("threads") is not None:
+                command.extend(["--threads", str(settings["threads"])])
+            if settings.get("threads_batch") is not None:
+                command.extend(["--threads-batch", str(settings["threads_batch"])])
+            if settings.get("jinja"):
+                command.append("--jinja")
+            if settings.get("reasoning_preserve"):
+                command.append("--reasoning-preserve")
         if "vision" in profile.get("features", []):
             projector = next(path for entry, path in selected if entry["role"] == "mmproj")
             command.extend(["--mmproj", f"/models/{projector.name}"])
@@ -2043,7 +2077,10 @@ def approved_download_entries(
     selected_roles = None if model.get("format") == "transformers" else roles
     selected = model_paths(config, model, selected_roles)
     allowed = set(download["allow_patterns"])
-    if any(path.name not in allowed for _entry, path in selected):
+    if any(
+        str(entry.get("source_path", path.name)) not in allowed
+        for entry, path in selected
+    ):
         fail(f"model {model['id']} selected a file outside its download allowlist")
     return selected
 
@@ -2057,13 +2094,15 @@ def model_acquisition_plan(
     additional = 0
     for entry, path in selected:
         verified = file_matches(entry, path)
+        source_path = str(entry.get("source_path", path.name))
+        encoded_source_path = urllib.parse.quote(source_path, safe="/")
         if not verified:
             additional += entry["bytes"]
         files.append({
             "role": entry["role"],
             "source": (
                 f"https://huggingface.co/{download['repository']}/resolve/"
-                f"{download['revision']}/{path.name}"
+                f"{download['revision']}/{encoded_source_path}"
             ),
             "repository": download["repository"],
             "revision": download["revision"],
@@ -2093,7 +2132,9 @@ def download_huggingface_file(
     destination.parent.mkdir(parents=True, exist_ok=True)
     partial = destination.with_name(f".{destination.name}.partial")
     lock_path = destination.with_name(f".{destination.name}.lock")
-    url = f"https://huggingface.co/{repository}/resolve/{revision}/{destination.name}"
+    source_path = str(entry.get("source_path", destination.name))
+    encoded_source_path = urllib.parse.quote(source_path, safe="/")
+    url = f"https://huggingface.co/{repository}/resolve/{revision}/{encoded_source_path}"
     try:
         lock_fd = os.open(
             lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600,
