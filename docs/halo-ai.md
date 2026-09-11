@@ -369,7 +369,7 @@ The lifecycle tooling must preserve that distinction per model.
 | `deepseek-v4-flash-0731-iq3xxs` | Unsloth IQ3_XXS shards 1–4; optional DSpark companion | 97.05 GiB main; 107.20 GiB with companion | `deepseek4` + `dflash` | standalone llama.cpp; Lemonade base only | 32,768 |
 | `qwen3.6-27b-q8xl` | Q8_K_XL main; installed F32 vision projector | 35.04 GiB total | `qwen35` + `clip` | Lemonade or standalone llama.cpp | 32,768 |
 | `qwen3.6-35b-a3b-q8xl` | Q8_K_XL main; no local vision projector | 36.41 GiB | `qwen35moe` | Lemonade or standalone llama.cpp | 32,768 |
-| `qwen3.8-flash-next-ud-q4-k-xl` | Four Unsloth UD-Q4_K_XL shards; embedded tokenizer/template; no optional projector or MTP sidecar | 103.69 GiB | `qwen4exp` | standalone llama.cpp build 10711 | 32,768 experimental baseline |
+| `qwen3.8-flash-next-ud-q4-k-xl` | Four Unsloth UD-Q4_K_XL shards; embedded tokenizer/template; selectable shared Q4_K_M or Q8_0 MTP head | 103.69 GiB target; 105.46 GiB with Q4 MTP; 106.28 GiB with Q8 MTP | `qwen4exp` | standalone Unsloth llama.cpp build 10715 or isolated Strix Vulkan v0.7.5 | 32,768 experimental target-only and MTP |
 | `qwen3.8-27b-rocmfp4` | ROCmFP4-FAST language/MTP GGUF; text only | 13.56 GiB | `qwen35` | dedicated q38rocm ROCmFPX/Vulkan | 32,768 |
 | `qwen3.8-27b-rocmfp8` | Q8_0_ROCMFPX language/MTP GGUF; text only | 26.26 GiB | `qwen35` | dedicated q38rocm ROCmFPX/Vulkan | 32,768 |
 | `seamless-m4t-v2-large` | Two safetensors shards plus processor/tokenizer files | 8.62 GiB | `seamless_m4t_v2` | dedicated ROCm speech service | N/A |
@@ -405,6 +405,8 @@ fdc443e974cad1f61c45af1cfd5580855855ddce0d6c14cc500a5714c486ac1d 1842940480 unsl
 3f342f1c1580473f1ee94ddd5b28206e8c07a70fa1a366f59d1d6c922919a6c9 49859583136 unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf
 56758f40269cad5cd9b0d3d6fbae0f40f6d5be6de49e4ab392dbe83157d9cbd3 49376141504 unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf
 753bda48b98ba4f1636134a90a967de1b2d3908a236c026e464777342e53510a 12087983520 unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf
+f521868a9e143718bef513772f6e04d9642551e362cf2439636d2abdbd149dfc 1907151936 unsloth/Qwen3.8-Flash-Next-GGUF/mtp-Qwen3.8-Flash-Next-shared-Q4_K_M.gguf
+5ff54097406a905cf3a724c709124ceb0e3e10235ee862298969e91c96fa96e6 2786568256 unsloth/Qwen3.8-Flash-Next-GGUF/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf
 fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9 14562236384 julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP4-FAST.gguf
 0bf5bfc9f946090af2d41b388ccb4d627e916c7250517c36a0de37d6eaccfd8e 28193396704 julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP8.gguf
 701d8fa9ed214ab21bfc130cd2a7df19ca89bbef7713e2dfb19f3c63696aa917 25299061664 unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q6_K_XL.gguf
@@ -412,6 +414,7 @@ fb89c78d2be91cdb68eaaaa45b1270710bf34aa721dc1f0b9e3aa7b98d2e1da9 14562236384 jul
 18a380efc9b7ed8d88677fc895f5c11ae170653434ee378f7348f715c14d0594 1143006752 incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-Q4_K_M.gguf
 7f1c9a31a6ed40044c69f6508b50fd63b87abd8e1fb7fe4290303df549153751 2056414752 incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-Q8_0.gguf
 26af33a15b21475d668e4ee55639beea49932e7360b1144c6282721bcd127c14 3860293152 incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-BF16.gguf
+11c7848014bd68040a42837b381bbefff5d0acc22cf20b6055a48d560c834445 1038313376 ilintar/qwen3.8-27b-gguf-strix-halo/Qwen3.8-27B-DFlash2-IQ4_XS.gguf
 9ac8a85d4e97d27fad026a813d52a069680e4e0cae701ef145b204bd533251b2 2066 facebook/seamless-m4t-v2-large/added_tokens.json
 4b2fa9d863cc3033adaf261e6c3e32ad90347ee2f199a349ba1c77d5e26a605f 2716 facebook/seamless-m4t-v2-large/config.json
 febbbbac4f0b122473a0125165c9291add850956315e35a025e16474cc0da5f4 9906948 facebook/seamless-m4t-v2-large/generation_config.json
@@ -1541,9 +1544,11 @@ halo-ai start ds4 --switch
 halo-ai test ds4 --preset deepseek-v4-think-max
 ```
 
-`ds4`, `qwen3.8df2`, `qwen3.8fp4`, and `qwen3.8fp8` are catalog aliases, not copied
-profiles. At the operator's request, `qwen3.8df2` targets the native-262K,
-experimental Q6 XL vision+DFlash2 profile.
+`ds4`, `qwen3.8-27b`, `qwen3.8df2`, `qwen3.8fp4`, and `qwen3.8fp8` are catalog
+aliases, not copied profiles. `qwen3.8-27b` is the balanced family default and
+targets the v0.7.5 65K Q6 XL vision+Q8 DFlash2 profile. At the operator's
+request, `qwen3.8df2` continues to target the native-262K experimental Q6 XL
+vision+Q4 DFlash2 profile.
 `qwen3.8fp4` and `qwen3.8fp8` remain specific to the ROCmFPX artifacts. Alias targets must be canonical
 profile IDs, and the runtime records the canonical profile so status, trial
 history, and benchmarks remain unambiguous.
@@ -1564,6 +1569,57 @@ profiles use the model's native 262,144-token context and F16 K/V cache:
 | `qwen3.8-27b-q6xl-strix-vision-dflash2-bf16` | Same target/projector + exact BF16 DFlash2 sidecar, `n-max=7` | Diagnostic quant control; not selected by alias |
 | `qwen3.8-27b-q6xl-vision-lemonade` | Same Q6 XL target + BF16 projector through Lemonade ROCm/HIP, no speculation | Experimental target-only backend A/B; reuses installed artifacts |
 | `qwen3.8-27b-q6xl-vision-dflash2-lemonade` | Same target/projector + local Q4_K_M DFlash2 registration through Lemonade ROCm/HIP | Disabled compatibility probe; current stable and nightly loaders expect DFlash v1's 81 tensors, not DFlash2's 58 |
+
+An isolated `strixvulkan075` candidate preserves that entire build-10577 lane
+unchanged. It pins upstream release v0.7.5, llama.cpp build 10677, source commit
+`dff60048744f99cb0af68d02be2314456b3269dc`, amd64 image digest
+`sha256:cdb88888ed5547e03c377ea0525f3f281bd6f159e77fc3faf810fe0f24d6a146`,
+and the image's bundled Mesa 26.3 RADV stack. The candidate adds these profiles
+without changing `qwen3.8df2` or any other alias:
+
+| Profile | Composition | Best-guess role |
+| --- | --- | --- |
+| `qwen3.8-27b-q6xl-strix075-65k-vision-baseline` | Existing Q6 XL + BF16 projector, 65K, target only | Matched control |
+| `qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-advanced` | Same target/projector + Q4_K_M DFlash2, width 6, p-min 0.10, Q8 draft K/V | Measured general-assistant guess |
+| `qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-n3` | Same composition, width 3 | Low-width alternative |
+| `qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-q8` / `qwen3.8-27b` | Same target/projector + Q8_0 DFlash2, width 6 | Measured speed winner and balanced family default |
+| `qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-iq4-xs` | Same target/projector + community IQ4_XS DFlash2, width 6 | Measured lower-GTT alternative |
+| `qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-bf16` | Same target/projector + BF16 DFlash2, width 6 | Precision diagnostic; slower and heavier here |
+| `qwen3.8-flash-next-ud-q4-k-xl-strix075-baseline` | Existing four-shard Flash target, 32K, no MTP | Matched control |
+| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-n2` | Existing Q4_K_M shared head, width 2 | Conservative control |
+| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-advanced` | Same head, width 3, p-min 0.75, Q8 target/draft K/V | Educated Flash guess |
+| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-n4` | Same head, width 4 | Throughput challenger |
+| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-q8-n2` | Shared Q8_0 head, width 2 | Upstream-precision control |
+| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-q8-n4` | Shared Q8_0 head, width 4 | Upstream-precision throughput challenger |
+
+The advanced settings are deliberately first-class catalog data rather than
+unreviewed extra arguments. Halo validates and renders the separate draft K/V,
+draft minimum/maximum/probability, lazy-read, repack, host-buffer, reasoning
+effort, and reasoning-budget controls. The pinned build has no speculative
+adaptive switch, despite that spelling appearing in some community recipes;
+Halo therefore does not emit one. All profiles are experimental until a
+same-host matrix establishes end-to-end wins and output parity.
+
+The first same-host Q6 screen chose width 6 over width 3 and rejected ubatch
+2048 in favor of 512. At 4K+64, width 6 improved wall time 9.5% over target-only.
+At 32K+64, decode improved 132.5%, but the request remained 9.5% slower overall
+because prompt processing fell 11.3%; the estimated break-even is 281 generated
+tokens. The smoke canary returned `red` under all three arms and observed real
+draft acceptance. This one-repetition screen is evidence for the initial Q4
+guess, not alias qualification.
+
+A matched draft-weight follow-up kept width 6 and all target settings fixed.
+Q8_0 was fastest end-to-end: 23.90 seconds at 4K+64 and 183.59 seconds at
+32K+64. IQ4_XS used roughly 1 GiB less peak GTT but was 1.3--1.8% slower;
+BF16 was slower and about 1.7--2.0 GiB heavier than Q8. The IQ4_XS file is the
+1,038,313,376-byte sidecar from `ilintar/qwen3.8-27b-gguf-strix-halo`, pinned
+at revision `96c04f96a641f25e56deb3cadefe5399e6b7960b`; its matching target was not
+downloaded. Two fresh processes apiece for the baseline, Q4, and Q8 scored
+10/13, were 13/13 internally consistent, and matched all 13 target output-token
+streams. Strict identity is therefore proven for both Q4 and Q8 under this
+bounded suite. The Q8 profile is the measured optimized choice, while IQ4_XS
+is the lower-memory option. The build-10577 alias remains unchanged. See
+`docs/results/qwen3.8-q6xl-strix075-advanced-2026-09-10.json`.
 
 Vision+DFlash2 was tested on pinned build 10577. At `n-max=7` the combined
 runtime returned the correct red-image canary and reported real drafting. On a
@@ -1607,6 +1663,9 @@ target-only and 73.1 GiB with DFlash2.
 
 ```bash
 halo-ai install strixvulkan
+halo-ai install strixvulkan075  # Isolated build-10677 candidate
+halo-ai start qwen3.8-27b --switch  # Balanced 65K Q6 vision+Q8 DFlash2 default
+halo-ai test qwen3.8-27b
 halo-ai start qwen3.8df2 --switch  # Experimental Q6 vision+DFlash2 profile
 halo-ai test qwen3.8df2
 # Controls:
@@ -1683,8 +1742,8 @@ the Qwen3.8 DFlash2 gate remains closed until the 11.8 server and selected ROCm
 backend pass the recorded load, vision, and equal-history canaries.
 
 The repo's `config/opencode.json` exposes all configured models through one
-provider: `halo-ai/ds4`, `halo-ai/qwen3.8fp4`, `halo-ai/qwen3.8fp8`, and
-`halo-ai/qwen3.8df2`. DS4, ROCmFPX, and Strix Vulkan are mutually exclusive
+provider: `halo-ai/ds4`, `halo-ai/qwen3.8-27b`, `halo-ai/qwen3.8fp4`,
+`halo-ai/qwen3.8fp8`, and `halo-ai/qwen3.8df2`. DS4, ROCmFPX, and Strix Vulkan are mutually exclusive
 managed runtimes, so they share `http://127.0.0.1:8000/v1`; this avoids a second
 provider solely for a provider-wide OpenCode `baseURL`. The DFlash2 entry keeps
 its text/image modalities and 262,144-token context limit.
@@ -1901,14 +1960,19 @@ endpoint provides a no-inference fixture test; Lemonade requires a live tool-cal
 canary because its documented OpenAI layer does not promise every llama.cpp-only
 request extension.
 
-The selected standalone runtime is the ROCm 10.0 tag's qualified immutable
-manifest,
-`docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6`.
-Upstream identifies the moving `rocm-10.0` tag as its stable Core SDK build for
-gfx1151 and rebuilds it from current llama.cpp master. Local qualification of
-the pinned manifest confirmed Core SDK `10.0.0` and llama.cpp build
-`10711`/`9723942ad`. Move the digest only through an explicit update trial and
-re-run the capability canaries after every digest change.
+The selected standalone runtime is the locally derived
+`localhost/halo-ai-llamacpp:b10715-mtp`. It retains Kyuz0's qualified immutable
+ROCm 10.0 gfx1151 base manifest,
+`docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6`,
+but replaces its older llama.cpp binary with Unsloth release
+`b10715-mix-86bd2d3` at source commit
+`92cedc8679d145902ead3f006258e8672eac11e6`. The builder verifies the exact
+351,903,376-byte archive against SHA-256
+`e77e58a117db2c43b6435d7561aa7362288d2b7891b47e723136f90adc71d5d6`
+before extraction. Build 10715 supplies the `qwen4exp` external-head MTP graph
+and shared-target tensor borrowing that build 10711 lacks. Move any base or
+engine artifact only through an explicit update trial and re-run capability
+canaries after every change.
 The earlier qualified
 `rocm-7.14` digest/build remains in the historical result records as a rollback
 reference. The service binds to
@@ -1934,6 +1998,8 @@ The initial execution-profile set is explicit:
 | `qwen3.6-35b-a3b-q8xl-mtp-llamacpp` | llama.cpp | 35B-A3B embedded MTP, text only | Passed; accepted draft tokens observed |
 | `deepseek-v4-flash-0731-iq3xxs-llamacpp` | llama.cpp | Four-shard base model | Passed; high-memory |
 | `deepseek-v4-flash-0731-iq3xxs-dspark-llamacpp` | llama.cpp | Four shards + exact DSpark companion | Passed; accepted draft tokens observed; tight |
+| `qwen3.8-flash-next-ud-q4-k-xl-llamacpp` | llama.cpp | Four-shard target-only baseline | Experimental; 32K high-memory |
+| `qwen3.8-flash-next-ud-q4-k-xl-mtp-llamacpp` | llama.cpp | Four shards + shared Q4_K_M MTP head | Experimental; start at `n=2` and require accepted draft tokens |
 
 `ds4-deepseek-v4-flash-hybrid` is defined in Phase 3. The two Lemonade MTP
 profiles append `--spec-type draft-mtp --spec-draft-n-max 2` and otherwise reuse
@@ -2335,7 +2401,7 @@ halo-ai doctor
 halo-ai models <scan|list|show|verify> [model-id] [--full]
 halo-ai profiles <list|show|render> [profile-id]
 halo-ai presets <list|show|render> [preset-id]
-halo-ai install [lemonade|llamacpp|rocmfpx|strixvulkan|ds4|speech|vllm|all]
+halo-ai install [lemonade|llamacpp|rocmfpx|strixvulkan|strixvulkan075|ds4|speech|vllm|all]
 halo-ai start <profile-id> [--switch]
 halo-ai stop [profile-id|all]
 halo-ai restart <profile-id>
@@ -2343,7 +2409,7 @@ halo-ai status
 halo-ai env
 halo-ai logs [profile-id] [-f]
 halo-ai test [profile-id] [--preset preset-id]
-halo-ai update <lemonade|llamacpp|rocmfpx|strixvulkan|ds4|speech|vllm|all>
+halo-ai update <lemonade|llamacpp|rocmfpx|strixvulkan|strixvulkan075|ds4|speech|vllm|all>
 halo-ai tune <status|discard>
 halo-ai host-profile <status|init|set|rollback> [gpu|npu|backup-id]
 ```
@@ -2378,14 +2444,15 @@ LEMONADE_LLAMACPP_ROCM_BIN=b10597
 LEMONADE_ROCM_CHANNEL=stable
 LEMONADE_GPU_MAX_HW_QUEUES=
 
-# Qualified ROCm 10.0 Core SDK / llama.cpp build 10711 image for gfx1151.
-LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6
+# Locally derived, provenance-labeled Unsloth build 10715 MTP runtime.
+LLAMACPP_IMAGE=localhost/halo-ai-llamacpp:b10715-mtp
 LLAMACPP_PORT=8080
 
 ROCMFPX_IMAGE=localhost/halo-ai-rocmfpx:v1.0.0
 ROCMFPX_PORT=8000
 
 STRIXVULKAN_IMAGE=ghcr.io/nathanw1014/strix-halo-llamacpp@sha256:a4a3dfe5813df1f0687e526bcba639bfd8b7cdb1d5e4c1c855abc240fb574d3a
+STRIXVULKAN075_IMAGE=ghcr.io/nathanw1014/strix-halo-llamacpp@sha256:cdb88888ed5547e03c377ea0525f3f281bd6f159e77fc3faf810fe0f24d6a146
 STRIXVULKAN_PORT=8000
 
 DS4_IMAGE=localhost/halo-ai-ds4:b0001

@@ -133,6 +133,53 @@
             }
           }
         },
+        "qwen3.8-27b": {
+          "id": "/models/Qwen3.8-27B-UD-Q6_K_XL.gguf",
+          "name": "Qwen3.8 27B — balanced 65K vision + Q8 DFlash2",
+          "attachment": true,
+          "reasoning": true,
+          "temperature": true,
+          "tool_call": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "limit": {
+            "context": 65536,
+            "output": 32768
+          },
+          "modalities": {
+            "input": ["text", "image"],
+            "output": ["text"]
+          },
+          "experimental": true,
+          "status": "beta",
+          "options": {
+            "reasoningEffort": "medium",
+            "temperature": 1.0,
+            "topP": 0.95
+          },
+          "variants": {
+            "none": {
+              "reasoningEffort": "none",
+              "temperature": 0
+            },
+            "low": {
+              "reasoningEffort": "low",
+              "temperature": 1.0,
+              "topP": 0.95
+            },
+            "medium": {
+              "reasoningEffort": "medium",
+              "temperature": 1.0,
+              "topP": 0.95
+            },
+            "xhigh": {
+              "reasoningEffort": "xhigh",
+              "temperature": 1.0,
+              "topP": 0.95
+            }
+          }
+        },
         "qwen3.8df2": {
           "id": "/models/Qwen3.8-27B-UD-Q6_K_XL.gguf",
           "name": "Qwen3.8 27B Q6 XL — native 262K vision + DFlash2",

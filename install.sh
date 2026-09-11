@@ -262,6 +262,8 @@ verify_config() {
             "$CONFIG_ROOT/config.env" &&
         grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
             "$CONFIG_ROOT/config.env" &&
+        grep -Eq '^[[:space:]]*STRIXVULKAN075_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
+            "$CONFIG_ROOT/config.env" &&
         grep -Eq '^[[:space:]]*DS4_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
             "$CONFIG_ROOT/config.env" &&
         grep -Eq '^[[:space:]]*SPEECH_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
@@ -328,21 +330,37 @@ action_config() {
     fi
     if ! grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
         "$CONFIG_ROOT/config.env" ||
-        grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=[[:space:]]*docker\.io/kyuz0/amd-strix-halo-toolboxes:(rocm-7\.14|rocm-10\.0)[[:space:]]*$' \
+        grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=[[:space:]]*docker\.io/kyuz0/amd-strix-halo-toolboxes(:rocm-(7\.14|10\.0)|@sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6)[[:space:]]*$' \
             "$CONFIG_ROOT/config.env"; then
         if "$dry_run"; then
-            printf '  set LLAMACPP_IMAGE to the immutable qualified ROCm 10 image in %s\n' \
+            printf '  set LLAMACPP_IMAGE=localhost/halo-ai-llamacpp:b10715-mtp in %s\n' \
                 "$CONFIG_ROOT/config.env"
         else
             cp -- "$CONFIG_ROOT/config.env" "$CONFIG_ROOT/.config.env.tmp"
             if grep -Eq '^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=' "$CONFIG_ROOT/.config.env.tmp"; then
                 sed -i \
-                    's|^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=.*$|LLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6|' \
+                    's|^[[:space:]]*LLAMACPP_IMAGE[[:space:]]*=.*$|LLAMACPP_IMAGE=localhost/halo-ai-llamacpp:b10715-mtp|' \
                     "$CONFIG_ROOT/.config.env.tmp"
             else
-                printf '\nLLAMACPP_IMAGE=docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6\n' \
+                printf '\nLLAMACPP_IMAGE=localhost/halo-ai-llamacpp:b10715-mtp\n' \
                     >>"$CONFIG_ROOT/.config.env.tmp"
             fi
+            chmod 0640 "$CONFIG_ROOT/.config.env.tmp"
+            chown root:"$run_gid" "$CONFIG_ROOT/.config.env.tmp"
+            mv -T "$CONFIG_ROOT/.config.env.tmp" "$CONFIG_ROOT/config.env"
+        fi
+    fi
+    if ! grep -Eq '^[[:space:]]*STRIXVULKAN075_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
+        "$CONFIG_ROOT/config.env"; then
+        if "$dry_run"; then
+            printf '  append the immutable Strix Vulkan v0.7.5 candidate image to %s\n' \
+                "$CONFIG_ROOT/config.env"
+        else
+            cp -- "$CONFIG_ROOT/config.env" "$CONFIG_ROOT/.config.env.tmp"
+            printf '\n# Isolated v0.7.5 candidate; the qualified Strix runtime remains unchanged.\n' \
+                >>"$CONFIG_ROOT/.config.env.tmp"
+            printf 'STRIXVULKAN075_IMAGE=ghcr.io/nathanw1014/strix-halo-llamacpp@sha256:cdb88888ed5547e03c377ea0525f3f281bd6f159e77fc3faf810fe0f24d6a146\n' \
+                >>"$CONFIG_ROOT/.config.env.tmp"
             chmod 0640 "$CONFIG_ROOT/.config.env.tmp"
             chown root:"$run_gid" "$CONFIG_ROOT/.config.env.tmp"
             mv -T "$CONFIG_ROOT/.config.env.tmp" "$CONFIG_ROOT/config.env"

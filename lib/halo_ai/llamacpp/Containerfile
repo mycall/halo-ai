@@ -1,0 +1,38 @@
+ARG BASE=docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6
+ARG EXTRACTOR=docker.io/library/ubuntu@sha256:1e0a86e57d247923571b75e0aaf48a1449cf8c543d51fb3e07a4a7d7bfa79316
+FROM ${EXTRACTOR} AS engine
+
+ADD https://github.com/unslothai/llama.cpp/releases/download/b10715-mix-86bd2d3/app-b10715-mix-86bd2d3-linux-x64-rocm-gfx1151.tar.gz /tmp/llamacpp-b10715-mtp-rocm-gfx1151.tar.gz
+
+# Unsloth's b10715 gfx1151 build is the first pinned release in this project
+# with the qwen4exp MTP graph and shared-target tensor borrowing required by
+# the Qwen3.8-Flash-Next external draft heads.
+RUN set -eu; \
+    archive=/tmp/llamacpp-b10715-mtp-rocm-gfx1151.tar.gz; \
+    test "$(wc -c < "$archive")" -eq 351903376; \
+    echo 'e77e58a117db2c43b6435d7561aa7362288d2b7891b47e723136f90adc71d5d6  /tmp/llamacpp-b10715-mtp-rocm-gfx1151.tar.gz' | sha256sum --check --strict; \
+    mkdir -p /opt/halo-llamacpp; \
+    tar --extract --gzip --file "$archive" --directory /opt/halo-llamacpp; \
+    test -x /opt/halo-llamacpp/llama-server; \
+    rm -f "$archive"
+
+FROM ${BASE}
+
+USER root
+
+COPY --from=engine /opt/halo-llamacpp /opt/halo-llamacpp
+
+ENV PATH=/opt/halo-llamacpp:/opt/rocm/bin:/opt/rocm/core/bin:/opt/rocm/core/lib/llvm/bin:/usr/local/bin:/usr/bin
+ENV LD_LIBRARY_PATH=/opt/halo-llamacpp
+
+LABEL org.opencontainers.image.title="Halo AI llama.cpp qwen4exp MTP runtime"
+LABEL org.opencontainers.image.version="b10715-mix-86bd2d3"
+LABEL org.opencontainers.image.source="https://github.com/unslothai/llama.cpp"
+LABEL org.opencontainers.image.revision="92cedc8679d145902ead3f006258e8672eac11e6"
+LABEL local.halo-ai.engine="llamacpp"
+LABEL local.halo-ai.engine-archive-sha256="e77e58a117db2c43b6435d7561aa7362288d2b7891b47e723136f90adc71d5d6"
+LABEL local.halo-ai.base="sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6"
+LABEL local.halo-ai.extractor="sha256:1e0a86e57d247923571b75e0aaf48a1449cf8c543d51fb3e07a4a7d7bfa79316"
+
+ENTRYPOINT []
+CMD ["/opt/halo-llamacpp/llama-server", "--help"]

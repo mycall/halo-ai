@@ -67,23 +67,27 @@ class ConfigurationTests(unittest.TestCase):
         )
         self.assertEqual(
             cli.DEFAULTS["LLAMACPP_IMAGE"],
-            "docker.io/kyuz0/amd-strix-halo-toolboxes@"
-            "sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6",
+            "localhost/halo-ai-llamacpp:b10715-mtp",
         )
         example = cli.parse_env_file(ROOT / "config/halo-ai.env.example")
         self.assertEqual(example["LEMONADE_IMAGE"], cli.DEFAULTS["LEMONADE_IMAGE"])
         self.assertEqual(example["LLAMACPP_IMAGE"], cli.DEFAULTS["LLAMACPP_IMAGE"])
+        self.assertEqual(
+            example["STRIXVULKAN075_IMAGE"],
+            cli.DEFAULTS["STRIXVULKAN075_IMAGE"],
+        )
 
-    def test_opencode_exposes_native_context_qwen3_8_vision_alias(self) -> None:
+    def test_opencode_exposes_default_and_native_context_qwen3_8_aliases(self) -> None:
         document = json.loads((ROOT / "config/opencode.json").read_text(encoding="utf-8"))
         self.assertEqual(document["enabled_providers"], ["halo-ai"])
         self.assertEqual(set(document["provider"]), {"halo-ai"})
         provider = document["provider"]["halo-ai"]
         self.assertEqual(provider["options"]["baseURL"], "http://127.0.0.1:8000/v1")
         self.assertEqual(
-            set(provider["models"]), {"ds4", "qwen3.8df2", "qwen3.8fp4", "qwen3.8fp8"},
+            set(provider["models"]),
+            {"ds4", "qwen3.8-27b", "qwen3.8df2", "qwen3.8fp4", "qwen3.8fp8"},
         )
-        for model_id in ("qwen3.8df2", "qwen3.8fp4", "qwen3.8fp8"):
+        for model_id in ("qwen3.8-27b", "qwen3.8df2", "qwen3.8fp4", "qwen3.8fp8"):
             model = provider["models"][model_id]
             variants = model["variants"]
             self.assertEqual(set(variants), {"none", "low", "medium", "xhigh"})
@@ -96,6 +100,10 @@ class ConfigurationTests(unittest.TestCase):
         self.assertEqual(model["limit"]["context"], 262_144)
         self.assertTrue(model["attachment"])
         self.assertEqual(model["modalities"]["input"], ["text", "image"])
+        default_model = provider["models"]["qwen3.8-27b"]
+        self.assertEqual(default_model["limit"]["context"], 65_536)
+        self.assertTrue(default_model["attachment"])
+        self.assertEqual(default_model["modalities"]["input"], ["text", "image"])
 
     def test_start_help_describes_switch(self) -> None:
         parser = cli.build_parser()
@@ -346,12 +354,13 @@ class CatalogTests(unittest.TestCase):
             self.catalog = cli.load_catalog(self.config)
 
     def test_checked_in_catalog_validates(self) -> None:
-        self.assertEqual(len(self.catalog.models), 12)
-        self.assertEqual(len(self.catalog.profiles), 38)
+        self.assertEqual(len(self.catalog.models), 13)
+        self.assertEqual(len(self.catalog.profiles), 51)
         self.assertEqual(
             self.catalog.profile_aliases,
             {
                 "ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max",
+                "qwen3.8-27b": "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-q8",
                 "qwen3.8df2": "qwen3.8-27b-q6xl-strix-vision-dflash2",
                 "qwen3.8fp4": "qwen3.8-27b-rocmfp4-baseline",
                 "qwen3.8fp8": "qwen3.8-27b-rocmfp8-baseline",
@@ -380,6 +389,19 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(canonical["model"], "qwen3.8-27b-ud-q6-k-xl")
         self.assertEqual(canonical["features"], ["vision", "dflash"])
         self.assertEqual(canonical["draft_model"], "qwen3.8-27b-dflash2-q4-k-m")
+
+    def test_qwen3_8_27b_alias_resolves_to_qualified_q8_default(self) -> None:
+        canonical = self.catalog.profiles[
+            "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-q8"
+        ]
+        self.assertIs(cli.resolve_profile(self.catalog, "qwen3.8-27b"), canonical)
+        self.assertEqual(canonical["context"], 65_536)
+        self.assertEqual(canonical["features"], ["vision", "dflash"])
+        self.assertEqual(canonical["draft_model"], "qwen3.8-27b-dflash2-q8-0")
+        self.assertEqual(
+            canonical["proposal_policy"],
+            "measured-speed-winner-q8-width-6-q8-draft-kv",
+        )
 
     def test_showing_ds4_alias_preserves_alias_and_canonical_identity(self) -> None:
         arguments = __import__("argparse").Namespace(
@@ -423,6 +445,15 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaises(cli.HaloError):
             cli.validate_catalog(models, {profile["id"]: profile})
 
+    def test_profile_startup_timeout_is_bounded(self) -> None:
+        profile = json.loads(json.dumps(
+            self.catalog.profiles["qwen3.8-flash-next-ud-q4-k-xl-llamacpp"]
+        ))
+        self.assertEqual(cli.profile_startup_timeout(profile), 1200)
+        profile["startup_timeout"] = 3601
+        with self.assertRaises(cli.HaloError):
+            cli.validate_catalog(self.catalog.models, {profile["id"]: profile})
+
     def test_hash_length_is_enforced(self) -> None:
         model = json.loads(json.dumps(self.catalog.models["qwen3.6-35b-a3b-q8xl"]))
         model["files"][0]["sha256"] = "bad"
@@ -450,20 +481,43 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(model["revision"], "38bb39ee97821de2c9009abb7e93950eec396e66")
         self.assertEqual(model["architecture"], "qwen4exp")
         self.assertEqual(model["quantization"], "UD-Q4_K_XL")
-        self.assertEqual(model["engines"], ["llamacpp"])
-        self.assertEqual([entry["shard"] for entry in model["files"]], [1, 2, 3, 4])
+        self.assertEqual(model["engines"], ["llamacpp", "strixvulkan075"])
+        main_files = [entry for entry in model["files"] if entry["role"] == "main"]
+        mtp_file = next(entry for entry in model["files"] if entry["role"] == "mtp")
+        mtp_q8_file = next(
+            entry for entry in model["files"] if entry["role"] == "mtp_q8"
+        )
+        self.assertEqual([entry["shard"] for entry in main_files], [1, 2, 3, 4])
         self.assertEqual(
-            sum(entry["bytes"] for entry in model["files"]),
+            sum(entry["bytes"] for entry in main_files),
             111_334_654_784,
         )
         self.assertEqual(
-            [entry["sha256"] for entry in model["files"]],
+            [entry["sha256"] for entry in main_files],
             [
                 "4448186216b3af4cc558bbce2c3213f01608f8f8b2e5267a9767971dd3ec8082",
                 "3f342f1c1580473f1ee94ddd5b28206e8c07a70fa1a366f59d1d6c922919a6c9",
                 "56758f40269cad5cd9b0d3d6fbae0f40f6d5be6de49e4ab392dbe83157d9cbd3",
                 "753bda48b98ba4f1636134a90a967de1b2d3908a236c026e464777342e53510a",
             ],
+        )
+        self.assertEqual(mtp_file["bytes"], 1_907_151_936)
+        self.assertEqual(
+            mtp_file["sha256"],
+            "f521868a9e143718bef513772f6e04d9642551e362cf2439636d2abdbd149dfc",
+        )
+        self.assertEqual(
+            mtp_file["source_path"],
+            "MTP/mtp-Qwen3.8-Flash-Next-shared-Q4_K_M.gguf",
+        )
+        self.assertEqual(mtp_q8_file["bytes"], 2_786_568_256)
+        self.assertEqual(
+            mtp_q8_file["sha256"],
+            "5ff54097406a905cf3a724c709124ceb0e3e10235ee862298969e91c96fa96e6",
+        )
+        self.assertEqual(
+            mtp_q8_file["source_path"],
+            "MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf",
         )
         plan = cli.model_acquisition_plan(self.config, model, {"main"})
         self.assertTrue(all("/UD-Q4_K_XL/" in item["source"] for item in plan["files"]))
@@ -477,10 +531,83 @@ class CatalogTests(unittest.TestCase):
         self.assertIn("--gpu-layers all", rendered)
         self.assertIn("--cache-type-k q8_0 --cache-type-v q8_0", rendered)
         self.assertIn("--load-mode mmap", rendered)
+        self.assertIn("--fit off", rendered)
         self.assertIn("--threads 4 --threads-batch 32", rendered)
         self.assertIn("--jinja --reasoning-preserve", rendered)
         self.assertNotIn("--mmproj", rendered)
         self.assertNotIn("draft-mtp", rendered)
+        self.assertEqual(profile["startup_timeout"], 1200)
+
+        mtp_profile = self.catalog.profiles[
+            "qwen3.8-flash-next-ud-q4-k-xl-mtp-llamacpp"
+        ]
+        mtp_rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, mtp_profile)
+        )
+        self.assertEqual(cli.required_roles(mtp_profile), {"main", "mtp"})
+        self.assertIn("mtp-Qwen3.8-Flash-Next-shared-Q4_K_M.gguf,ro", mtp_rendered)
+        self.assertIn(
+            "--spec-draft-model /models/mtp-Qwen3.8-Flash-Next-shared-Q4_K_M.gguf",
+            mtp_rendered,
+        )
+        self.assertIn("--spec-type draft-mtp", mtp_rendered)
+        self.assertIn("--spec-draft-ngl all", mtp_rendered)
+        self.assertIn("--spec-draft-n-max 2", mtp_rendered)
+        self.assertIn("--fit off", mtp_rendered)
+        self.assertNotIn("--spec-draft-p-min", mtp_rendered)
+        with mock.patch.object(cli, "llamacpp_image_valid", return_value=True):
+            mtp_plan = cli.profile_acquisition_plan(
+                self.config, self.catalog, mtp_profile,
+            )
+        self.assertEqual(
+            [entry["role"] for entry in mtp_plan["model"]["files"]],
+            ["main", "main", "main", "main", "mtp"],
+        )
+        self.assertEqual(
+            mtp_plan["selected_artifact_classes"],
+            ["model", "mtp-sidecar", "runtime"],
+        )
+        self.assertEqual(mtp_plan["runtime"]["release"], cli.LLAMACPP_RELEASE)
+        self.assertEqual(
+            mtp_plan["runtime"]["engine_archive_sha256"],
+            cli.LLAMACPP_ENGINE_SHA256,
+        )
+        self.assertEqual(
+            mtp_plan["runtime"]["source_commit"], cli.LLAMACPP_SOURCE_COMMIT,
+        )
+
+        mtp_q8_profile = self.catalog.profiles[
+            "qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-q8-n4"
+        ]
+        mtp_q8_rendered = __import__("shlex").join(
+            cli.render_container(self.config, self.catalog, mtp_q8_profile)
+        )
+        self.assertEqual(cli.required_roles(mtp_q8_profile), {"main", "mtp_q8"})
+        self.assertIn("mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf,ro", mtp_q8_rendered)
+        self.assertIn(
+            "--spec-draft-model /models/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf",
+            mtp_q8_rendered,
+        )
+        self.assertNotIn("shared-Q4_K_M.gguf", mtp_q8_rendered)
+        self.assertIn("--spec-draft-n-max 4", mtp_q8_rendered)
+
+    def test_llamacpp_mtp_recipe_pins_archive_source_and_base(self) -> None:
+        recipe = (ROOT / "lib/halo_ai/llamacpp/Containerfile").read_text(
+            encoding="utf-8",
+        )
+        self.assertIn(cli.LLAMACPP_ENGINE_SHA256, recipe)
+        self.assertIn(str(cli.LLAMACPP_ENGINE_BYTES), recipe.replace("_", ""))
+        self.assertIn(cli.LLAMACPP_BASE_IMAGE_DIGEST, recipe)
+        self.assertIn(cli.LLAMACPP_EXTRACTOR_DIGEST, recipe)
+        self.assertIn(cli.LLAMACPP_SOURCE_COMMIT, recipe)
+
+    def test_llamacpp_mtp_image_requires_every_provenance_label(self) -> None:
+        labels = cli.llamacpp_expected_labels()
+        with mock.patch.object(cli, "image_labels", return_value=labels):
+            self.assertTrue(cli.llamacpp_image_valid("fixture"))
+        labels.pop("org.opencontainers.image.revision")
+        with mock.patch.object(cli, "image_labels", return_value=labels):
+            self.assertFalse(cli.llamacpp_image_valid("fixture"))
 
     def test_live_reasoning_default_canary_matches_medium_and_differs_from_xhigh(self) -> None:
         profile = {"engine": "rocmfpx"}
@@ -513,7 +640,7 @@ class CatalogTests(unittest.TestCase):
     def test_catalog_matches_documented_expected_manifest(self) -> None:
         documented = {}
         for digest, size, relative in __import__("re").findall(
-            r"^([0-9a-f]{64}) ([0-9]+) ((?:antirez|unsloth|facebook|julianmb|incoai)/[^\n]+\.(?:gguf|jinja|json|safetensors|model))$",
+            r"^([0-9a-f]{64}) ([0-9]+) ((?:antirez|unsloth|facebook|julianmb|incoai|ilintar)/[^\n]+\.(?:gguf|jinja|json|safetensors|model))$",
             (ROOT / "docs/halo-ai.md").read_text(encoding="utf-8"),
             __import__("re").MULTILINE,
         ):
@@ -744,7 +871,9 @@ class CatalogTests(unittest.TestCase):
     def test_q6_lemonade_profile_reuses_q6_and_bf16_vision_artifacts(self) -> None:
         profile = self.catalog.profiles["qwen3.8-27b-q6xl-vision-lemonade"]
         model = self.catalog.models[profile["model"]]
-        self.assertEqual(model["engines"], ["lemonade", "strixvulkan"])
+        self.assertEqual(
+            model["engines"], ["lemonade", "strixvulkan", "strixvulkan075"],
+        )
         self.assertEqual(profile["context"], 262_144)
         self.assertEqual(profile["features"], ["vision"])
         self.assertFalse(profile["thinking"])
@@ -879,6 +1008,160 @@ class CatalogTests(unittest.TestCase):
             mock.patch.object(cli, "image_labels", return_value=labels),
         ):
             self.assertFalse(cli.strixvulkan_image_valid("fixture"))
+
+    def test_strixvulkan075_image_requires_digest_source_and_mesa_label(self) -> None:
+        labels = {
+            "org.opencontainers.image.source":
+                "https://github.com/Nathanw1014/strix-halo-llamacpp",
+            "org.opencontainers.image.title": "strix-halo-llamacpp-vulkan",
+            "org.opencontainers.image.description":
+                "llama.cpp Vulkan/RADV for Strix Halo, bundled Mesa 26.3",
+        }
+        with (
+            mock.patch.object(
+                cli, "image_identity", return_value=cli.STRIXVULKAN075_IMAGE_DIGEST,
+            ),
+            mock.patch.object(cli, "image_labels", return_value=labels),
+        ):
+            self.assertTrue(cli.strixvulkan075_image_valid("fixture"))
+        labels["org.opencontainers.image.description"] = "system Mesa"
+        with (
+            mock.patch.object(
+                cli, "image_identity", return_value=cli.STRIXVULKAN075_IMAGE_DIGEST,
+            ),
+            mock.patch.object(cli, "image_labels", return_value=labels),
+        ):
+            self.assertFalse(cli.strixvulkan075_image_valid("fixture"))
+
+    def test_strixvulkan075_advanced_profiles_render_auditable_guesses(self) -> None:
+        q6_baseline = self.catalog.profiles[
+            "qwen3.8-27b-q6xl-strix075-65k-vision-baseline"
+        ]
+        q6_advanced = self.catalog.profiles[
+            "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-advanced"
+        ]
+        flash_baseline = self.catalog.profiles[
+            "qwen3.8-flash-next-ud-q4-k-xl-strix075-baseline"
+        ]
+        flash_advanced = self.catalog.profiles[
+            "qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-advanced"
+        ]
+        rendered = {
+            profile["id"]: __import__("shlex").join(
+                cli.render_container(self.config, self.catalog, profile)
+            )
+            for profile in (q6_baseline, q6_advanced, flash_baseline, flash_advanced)
+        }
+        for command in rendered.values():
+            self.assertIn("--name halo-strixvulkan075", command)
+            self.assertIn(cli.STRIXVULKAN075_IMAGE, command)
+            self.assertIn("--device Vulkan0 --gpu-layers all --fit off", command)
+            self.assertIn("--reasoning-effort medium --reasoning-budget 2048", command)
+        self.assertEqual(q6_advanced["context"], 65_536)
+        self.assertIn("--mmproj /models/mmproj-BF16.gguf", rendered[q6_baseline["id"]])
+        self.assertIn("--spec-type none", rendered[q6_baseline["id"]])
+        q6_command = rendered[q6_advanced["id"]]
+        self.assertIn("--spec-type draft-dflash", q6_command)
+        self.assertIn("--spec-draft-n-max 6 --spec-draft-ngl all", q6_command)
+        self.assertIn("--spec-draft-n-min 0", q6_command)
+        self.assertIn("--spec-draft-p-min 0.1", q6_command)
+        self.assertIn(
+            "--spec-draft-type-k q8_0 --spec-draft-type-v q8_0", q6_command,
+        )
+        flash_command = rendered[flash_advanced["id"]]
+        self.assertIn("--cache-type-k q8_0 --cache-type-v q8_0", flash_command)
+        self.assertIn("--load-mode mmap --tensor-read-lazy auto", flash_command)
+        self.assertIn("--no-repack --no-host --jinja --reasoning-preserve", flash_command)
+        self.assertIn("--spec-type draft-mtp", flash_command)
+        self.assertIn("--spec-draft-n-max 3", flash_command)
+        self.assertNotIn("--spec-type none", flash_command)
+        self.assertIn("--spec-type none", rendered[flash_baseline["id"]])
+        self.assertEqual(
+            self.catalog.profiles[
+                "qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-n2"
+            ]["settings"]["spec_draft_n_max"],
+            2,
+        )
+        self.assertEqual(
+            self.catalog.profiles[
+                "qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-n4"
+            ]["settings"]["spec_draft_n_max"],
+            4,
+        )
+        draft_controls = {
+            "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-iq4-xs":
+                "Qwen3.8-27B-DFlash2-IQ4_XS.gguf",
+            "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-q8":
+                "Qwen3.8-27B-DFlash2-Q8_0.gguf",
+            "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-bf16":
+                "Qwen3.8-27B-DFlash2-BF16.gguf",
+        }
+        for profile_id, filename in draft_controls.items():
+            profile = self.catalog.profiles[profile_id]
+            command = __import__("shlex").join(
+                cli.render_container(self.config, self.catalog, profile)
+            )
+            self.assertIn(filename, command)
+            self.assertIn("--spec-draft-model /models/draft.gguf", command)
+            self.assertIn("--spec-draft-n-max 6", command)
+            self.assertIn("--spec-draft-p-min 0.1", command)
+
+        iq4_model = self.catalog.models["qwen3.8-27b-dflash2-iq4-xs-strix"]
+        self.assertEqual(iq4_model["revision"], "96c04f96a641f25e56deb3cadefe5399e6b7960b")
+        self.assertEqual(iq4_model["files"][0]["bytes"], 1_038_313_376)
+        self.assertEqual(
+            iq4_model["files"][0]["sha256"],
+            "11c7848014bd68040a42837b381bbefff5d0acc22cf20b6055a48d560c834445",
+        )
+
+    def test_strixvulkan075_acquisition_keeps_existing_aliases_and_artifacts(self) -> None:
+        q6_profile = self.catalog.profiles[
+            "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-advanced"
+        ]
+        flash_profile = self.catalog.profiles[
+            "qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-advanced"
+        ]
+        flash_q8_profile = self.catalog.profiles[
+            "qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-q8-n4"
+        ]
+        with mock.patch.object(cli, "strixvulkan075_image_valid", return_value=True):
+            q6_plan = cli.profile_acquisition_plan(
+                self.config, self.catalog, q6_profile,
+            )
+            flash_plan = cli.profile_acquisition_plan(
+                self.config, self.catalog, flash_profile,
+            )
+            flash_q8_plan = cli.profile_acquisition_plan(
+                self.config, self.catalog, flash_q8_profile,
+            )
+        self.assertEqual(q6_plan["runtime"]["release"], "v0.7.5")
+        self.assertEqual(
+            q6_plan["runtime"]["source_commit"], cli.STRIXVULKAN075_SOURCE_COMMIT,
+        )
+        self.assertEqual(
+            q6_plan["selected_artifact_classes"],
+            ["q6-xl", "vision", "dflash2", "strixvulkan-runtime"],
+        )
+        self.assertEqual(
+            flash_plan["selected_artifact_classes"],
+            ["model", "mtp-sidecar", "runtime"],
+        )
+        self.assertEqual(
+            [entry["role"] for entry in flash_q8_plan["model"]["files"]],
+            ["main", "main", "main", "main", "mtp_q8"],
+        )
+        self.assertEqual(
+            flash_q8_plan["model"]["files"][-1]["sha256"],
+            "5ff54097406a905cf3a724c709124ceb0e3e10235ee862298969e91c96fa96e6",
+        )
+        self.assertEqual(
+            self.catalog.profile_aliases["qwen3.8-27b"],
+            "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-q8",
+        )
+        self.assertEqual(
+            self.catalog.profile_aliases["qwen3.8df2"],
+            "qwen3.8-27b-q6xl-strix-vision-dflash2",
+        )
 
     def test_vision_dflash_profile_records_nmax5_qualification_policy(self) -> None:
         profile = self.catalog.profiles["qwen3.8-27b-q6xl-strix-vision-dflash2"]
@@ -1228,10 +1511,14 @@ class ModelTests(unittest.TestCase):
             model_root.mkdir(parents=True)
             (model_root / "main.gguf").write_bytes(gguf_fixture(b"payload"))
             (model_root / "mmproj-F32.gguf").write_bytes(gguf_fixture(b"projector"))
+            (model_root / "mtp-model.gguf").write_bytes(gguf_fixture(b"mtp"))
             (model_root / "dspark-model.gguf").write_bytes(gguf_fixture(b"draft"))
             (model_root / "._main.gguf").write_bytes(b"not a model")
             found = cli.scan_models(config)
-            self.assertEqual(sorted(item["role"] for item in found), ["dspark", "main", "mmproj"])
+            self.assertEqual(
+                sorted(item["role"] for item in found),
+                ["dspark", "main", "mmproj", "mtp"],
+            )
             self.assertNotIn("._main.gguf", {item["path"] for item in found})
 
     def test_fast_verification_checks_magic_and_exact_size(self) -> None:
@@ -1913,6 +2200,24 @@ class RocmFpxTuningTests(unittest.TestCase):
             [row["decode_speed_change_percent"] for row in result["contexts"]],
             [29.51, 59.08, 45.92],
         )
+
+    def test_quality_comparison_treats_dflash_as_speculative_candidate(self) -> None:
+        baseline = {
+            "kind": "halo-ai-rocmfpx-quality-benchmark",
+            "suite_sha256": "a" * 64,
+            "profile": "baseline",
+            "model": {"sha256": "b" * 64, "quantization": "Q6"},
+            "features": [],
+            "results": [
+                {"case_id": "case", "passed": True, "output_token_sha256": "c" * 64},
+            ],
+        }
+        dflash = json.loads(json.dumps(baseline))
+        dflash["profile"] = "dflash"
+        dflash["features"] = ["dflash"]
+        result = cli.rocmfpx_quality.compare_records([baseline, dflash])
+        self.assertEqual(result["strict_identity"]["dflash"]["matching_cases"], 1)
+        self.assertEqual(result["strict_identity"]["dflash"]["status"], "not-proven")
 
     def test_mtp_comparison_rejects_different_prompt_sets(self) -> None:
         baseline = {

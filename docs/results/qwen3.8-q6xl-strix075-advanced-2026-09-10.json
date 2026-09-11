@@ -1,0 +1,304 @@
+{
+  "schema_version": 1,
+  "kind": "halo-ai-strixvulkan075-q6-advanced-screen",
+  "recorded_at": "2026-09-11T01:16:14.517548+00:00",
+  "runtime": {
+    "engine": "strixvulkan075",
+    "release": "v0.7.5",
+    "engine_build": 10677,
+    "source_revision": "dff60048744f99cb0af68d02be2314456b3269dc",
+    "image_digest": "sha256:cdb88888ed5547e03c377ea0525f3f281bd6f159e77fc3faf810fe0f24d6a146",
+    "backend": "vulkan-radv-bundled-mesa-26.3",
+    "system_fingerprint": "b10677-dff60048"
+  },
+  "model": {
+    "id": "qwen3.8-27b-ud-q6-k-xl",
+    "quantization": "UD-Q6_K_XL",
+    "sha256": "701d8fa9ed214ab21bfc130cd2a7df19ca89bbef7713e2dfb19f3c63696aa917",
+    "draft_models": {
+      "q4_k_m": {
+        "id": "qwen3.8-27b-dflash2-q4-k-m",
+        "sha256": "18a380efc9b7ed8d88677fc895f5c11ae170653434ee378f7348f715c14d0594"
+      },
+      "q8_0": {
+        "id": "qwen3.8-27b-dflash2-q8-0",
+        "sha256": "7f1c9a31a6ed40044c69f6508b50fd63b87abd8e1fb7fe4290303df549153751"
+      },
+      "bf16": {
+        "id": "qwen3.8-27b-dflash2-bf16",
+        "sha256": "26af33a15b21475d668e4ee55639beea49932e7360b1144c6282721bcd127c14"
+      },
+      "iq4_xs": {
+        "id": "qwen3.8-27b-dflash2-iq4-xs-strix",
+        "sha256": "11c7848014bd68040a42837b381bbefff5d0acc22cf20b6055a48d560c834445"
+      }
+    }
+  },
+  "benchmark_method": {
+    "context": 65536,
+    "batch": 2048,
+    "selected_ubatch": 512,
+    "target_kv": "f16",
+    "draft_kv": "q8_0",
+    "draft_p_min": 0.1,
+    "prompt_tokens": [4095, 31998],
+    "completion_tokens": 64,
+    "repetitions": 1,
+    "prompt_pattern": "deterministic-unique",
+    "temperature": 0,
+    "seed": 1,
+    "prompt_cache": false,
+    "fresh_process_per_profile": true,
+    "memory_sample_interval_seconds": 0.05
+  },
+  "runs": {
+    "target_only_ubatch512": [
+      {
+        "prompt_tokens": 4095,
+        "prompt_sha256": "6207bc4193d88054b31bda7bc74103b21e321bcde4c1c0faaf4c0192b2a0d235",
+        "ttft_seconds": 20.676708,
+        "prompt_tokens_per_second": 198.048935,
+        "decode_tokens_per_second": 8.361303,
+        "wall_seconds": 28.315226,
+        "peak_gtt_bytes": 30308847616
+      },
+      {
+        "prompt_tokens": 31998,
+        "prompt_sha256": "7e57171d2b9a8d58246b968a49292a5cda760dfba5411d5c451cff3cec236a2b",
+        "ttft_seconds": 163.1471,
+        "prompt_tokens_per_second": 196.12975,
+        "decode_tokens_per_second": 7.687744,
+        "wall_seconds": 171.403819,
+        "peak_gtt_bytes": 30451957760
+      }
+    ],
+    "dflash_width3_ubatch512": [
+      {
+        "prompt_tokens": 4095,
+        "prompt_sha256": "6207bc4193d88054b31bda7bc74103b21e321bcde4c1c0faaf4c0192b2a0d235",
+        "ttft_seconds": 21.984353,
+        "prompt_tokens_per_second": 186.268843,
+        "decode_tokens_per_second": 18.034905,
+        "wall_seconds": 25.593121,
+        "drafted_tokens": 59,
+        "accepted_tokens": 43,
+        "acceptance_percent": 72.88,
+        "peak_gtt_bytes": 33000120320
+      },
+      {
+        "prompt_tokens": 31998,
+        "prompt_sha256": "7e57171d2b9a8d58246b968a49292a5cda760dfba5411d5c451cff3cec236a2b",
+        "ttft_seconds": 187.615674,
+        "prompt_tokens_per_second": 170.550782,
+        "decode_tokens_per_second": 16.616637,
+        "wall_seconds": 191.491668,
+        "drafted_tokens": 57,
+        "accepted_tokens": 44,
+        "acceptance_percent": 77.19,
+        "peak_gtt_bytes": 33095208960
+      }
+    ],
+    "dflash_width6_ubatch512": [
+      {
+        "prompt_tokens": 4095,
+        "prompt_sha256": "6207bc4193d88054b31bda7bc74103b21e321bcde4c1c0faaf4c0192b2a0d235",
+        "ttft_seconds": 21.804233,
+        "prompt_tokens_per_second": 187.807569,
+        "decode_tokens_per_second": 16.807117,
+        "wall_seconds": 25.630341,
+        "drafted_tokens": 85,
+        "accepted_tokens": 48,
+        "acceptance_percent": 56.47,
+        "peak_gtt_bytes": 33170718720
+      },
+      {
+        "prompt_tokens": 31998,
+        "prompt_sha256": "7e57171d2b9a8d58246b968a49292a5cda760dfba5411d5c451cff3cec236a2b",
+        "ttft_seconds": 184.007787,
+        "prompt_tokens_per_second": 173.894815,
+        "decode_tokens_per_second": 17.870596,
+        "wall_seconds": 187.615309,
+        "drafted_tokens": 80,
+        "accepted_tokens": 49,
+        "acceptance_percent": 61.25,
+        "peak_gtt_bytes": 33379016704
+      }
+    ],
+    "rejected_target_only_ubatch2048": [
+      {
+        "prompt_tokens": 4095,
+        "prompt_tokens_per_second": 189.454268,
+        "decode_tokens_per_second": 8.295858,
+        "wall_seconds": 29.281814
+      },
+      {
+        "prompt_tokens": 31998,
+        "prompt_tokens_per_second": 183.57392,
+        "decode_tokens_per_second": 7.778577,
+        "wall_seconds": 182.466118
+      }
+    ],
+    "dflash_q8_width6_ubatch512": [
+      {
+        "prompt_tokens": 4095,
+        "prompt_tokens_per_second": 195.888963,
+        "decode_tokens_per_second": 21.911527,
+        "wall_seconds": 23.895474,
+        "drafted_tokens": 79,
+        "accepted_tokens": 49,
+        "acceptance_percent": 62.03,
+        "peak_gtt_bytes": 34125017088
+      },
+      {
+        "prompt_tokens": 31998,
+        "prompt_tokens_per_second": 177.864516,
+        "decode_tokens_per_second": 17.373712,
+        "wall_seconds": 183.588351,
+        "drafted_tokens": 80,
+        "accepted_tokens": 49,
+        "acceptance_percent": 61.25,
+        "peak_gtt_bytes": 34272661504
+      }
+    ],
+    "dflash_iq4_xs_width6_ubatch512": [
+      {
+        "prompt_tokens": 4095,
+        "prompt_tokens_per_second": 193.528264,
+        "decode_tokens_per_second": 21.251318,
+        "wall_seconds": 24.214651,
+        "drafted_tokens": 79,
+        "accepted_tokens": 49,
+        "acceptance_percent": 62.03,
+        "peak_gtt_bytes": 33104760832
+      },
+      {
+        "prompt_tokens": 31998,
+        "prompt_tokens_per_second": 174.732036,
+        "decode_tokens_per_second": 16.797312,
+        "wall_seconds": 186.936829,
+        "drafted_tokens": 80,
+        "accepted_tokens": 49,
+        "acceptance_percent": 61.25,
+        "peak_gtt_bytes": 33307906048
+      }
+    ],
+    "dflash_bf16_width6_ubatch512": [
+      {
+        "prompt_tokens": 4095,
+        "prompt_tokens_per_second": 194.170826,
+        "decode_tokens_per_second": 20.045857,
+        "wall_seconds": 24.317637,
+        "drafted_tokens": 79,
+        "accepted_tokens": 49,
+        "acceptance_percent": 62.03,
+        "peak_gtt_bytes": 35960614912
+      },
+      {
+        "prompt_tokens": 31998,
+        "prompt_tokens_per_second": 171.307502,
+        "decode_tokens_per_second": 16.376061,
+        "wall_seconds": 190.714979,
+        "drafted_tokens": 80,
+        "accepted_tokens": 49,
+        "acceptance_percent": 61.25,
+        "peak_gtt_bytes": 36126662656
+      }
+    ]
+  },
+  "comparison": {
+    "width6_vs_target_only": {
+      "4095": {
+        "prompt_speed_change_percent": -5.17,
+        "decode_speed_change_percent": 101.01,
+        "wall_time_change_percent": -9.48,
+        "estimated_break_even_completion_tokens": 18.8
+      },
+      "31998": {
+        "prompt_speed_change_percent": -11.34,
+        "decode_speed_change_percent": 132.46,
+        "wall_time_change_percent": 9.46,
+        "estimated_break_even_completion_tokens": 281.4
+      }
+    },
+    "width6_vs_width3": {
+      "4095": {
+        "decode_speed_change_percent": -6.81,
+        "wall_time_change_percent": 0.15
+      },
+      "31998": {
+        "decode_speed_change_percent": 7.55,
+        "wall_time_change_percent": -2.02
+      }
+    },
+    "q8_vs_q4_width6": {
+      "4095": {
+        "decode_speed_change_percent": 30.37,
+        "wall_time_change_percent": -6.77
+      },
+      "31998": {
+        "decode_speed_change_percent": -2.78,
+        "wall_time_change_percent": -2.15
+      }
+    },
+    "q8_vs_iq4_xs_width6": {
+      "4095": {
+        "decode_speed_change_percent": 3.11,
+        "wall_time_change_percent": -1.32,
+        "additional_peak_gtt_bytes": 1020256256
+      },
+      "31998": {
+        "decode_speed_change_percent": 3.43,
+        "wall_time_change_percent": -1.79,
+        "additional_peak_gtt_bytes": 964755456
+      }
+    }
+  },
+  "smoke_canary": {
+    "target_only_output": "red",
+    "width3_output": "red",
+    "width6_output": "red",
+    "width3_drafted_tokens": 3,
+    "width3_accepted_tokens": 1,
+    "width6_drafted_tokens": 6,
+    "width6_accepted_tokens": 1,
+    "default_reasoning_matches_explicit_medium": true,
+    "xhigh_control_differs": true
+  },
+  "quality_screen": {
+    "suite_id": "halo-ai-rocmfpx-quality-v1",
+    "suite_sha256": "909ef8bc4f88d69c61e49e6816c81e7a1dbb3450babed7a4c70164392aa7bd8e",
+    "target_only_score": "10/13",
+    "advanced_score": "10/13",
+    "matching_output_token_hashes": "13/13",
+    "target_only_process_repetitions": 2,
+    "advanced_process_repetitions": 2,
+    "strict_identity_status": "proven",
+    "advanced_drafted_tokens_per_repetition": 108,
+    "advanced_accepted_tokens_per_repetition": 59,
+    "advanced_acceptance_percent": 54.63,
+    "q8_score": "10/13",
+    "q8_process_repetitions": 2,
+    "q8_matching_output_token_hashes": "13/13",
+    "q8_strict_identity_status": "proven",
+    "q8_drafted_tokens_per_repetition": 108,
+    "q8_accepted_tokens_per_repetition": 59,
+    "q8_acceptance_percent": 54.63
+  },
+  "decision": {
+    "advanced_profile": "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-advanced",
+    "advanced_draft_width": 6,
+    "optimized_profile": "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-q8",
+    "default_alias": "qwen3.8-27b",
+    "memory_optimized_profile": "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-iq4-xs",
+    "low_width_alternative": "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-n3",
+    "selected_ubatch": 512,
+    "status": "advanced-experimental",
+    "reason": "Width 6 tied width 3 at 4K wall time and won at 32K; Q8 then delivered the best end-to-end time at both prompt depths and proved strict identity, while IQ4_XS minimized GTT.",
+    "limitations": [
+      "one benchmark repetition per arm",
+      "64-token synthetic completion",
+      "the fixed suite is deliberately bounded to 13 deterministic cases",
+      "long-prompt short completions remain slower than target-only"
+    ]
+  }
+}

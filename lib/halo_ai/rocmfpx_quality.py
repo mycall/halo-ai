@@ -422,11 +422,11 @@ def compare_records(records: list[dict[str, Any]]) -> dict[str, Any]:
     for same_model_profiles in by_model.values():
         baselines = [
             profile for profile in same_model_profiles
-            if "mtp" not in profiles[profile]["features"]
+            if not {"mtp", "dflash"}.intersection(profiles[profile]["features"])
         ]
         candidates = [
             profile for profile in same_model_profiles
-            if "mtp" in profiles[profile]["features"]
+            if {"mtp", "dflash"}.intersection(profiles[profile]["features"])
         ]
         if len(baselines) != 1:
             continue

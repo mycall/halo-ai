@@ -357,7 +357,8 @@ while IFS=$'\t' read -r prior_seconds profile; do
         elif [[ "${engine[$profile]}" == llamacpp ||
                 "${engine[$profile]}" == rocmfpx ||
                 "${engine[$profile]}" == lemonade ||
-                "${engine[$profile]}" == strixvulkan ]]; then
+                "${engine[$profile]}" == strixvulkan ||
+                "${engine[$profile]}" == strixvulkan075 ]]; then
             "${halo_cmd[@]}" bench rocmfpx-context "$profile" \
                 --prompt-pattern unique \
                 --prompt-tokens "$prompt_tokens" \

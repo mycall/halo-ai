@@ -89,7 +89,7 @@ container images, named cache/config volumes, and downloaded runtime components
 are preserved so the next start does not reinstall them. Use `uninstall.sh`
 when the installed solution itself should be removed.
 
-## Qwen3.8 Flash Next UD-Q4_K_XL baseline
+## Qwen3.8 Flash Next UD-Q4_K_XL and MTP
 
 The experimental `qwen3.8-flash-next-ud-q4-k-xl-llamacpp` profile runs the
 four-shard Unsloth quant through Halo's standalone ROCm llama.cpp image at 32K
@@ -100,35 +100,110 @@ halo-ai profiles acquire qwen3.8-flash-next-ud-q4-k-xl-llamacpp --dry-run
 halo-ai models verify qwen3.8-flash-next-ud-q4-k-xl --full
 halo-ai start qwen3.8-flash-next-ud-q4-k-xl-llamacpp --switch
 halo-ai test qwen3.8-flash-next-ud-q4-k-xl-llamacpp
+
+# External-head MTP trial
+halo-ai profiles acquire qwen3.8-flash-next-ud-q4-k-xl-mtp-llamacpp --dry-run
+halo-ai profiles acquire qwen3.8-flash-next-ud-q4-k-xl-mtp-llamacpp
+halo-ai start qwen3.8-flash-next-ud-q4-k-xl-mtp-llamacpp --switch
+halo-ai test qwen3.8-flash-next-ud-q4-k-xl-mtp-llamacpp
 ```
 
 The pinned four-shard set is 111,334,654,784 bytes (103.69 GiB). All four
 local files were SHA-256 verified against Hugging Face revision
 `38bb39ee97821de2c9009abb7e93950eec396e66` on 2026-09-02. Acquisition keeps
 the repository's `UD-Q4_K_XL/` source subdirectory while preserving the
-existing flat local directory.
+existing flat local directory. The optional cataloged shared Q4_K_M MTP head
+adds 1,907,151,936 bytes (1.78 GiB), for a selected MTP closure of
+113,241,806,720 bytes (105.46 GiB). Its locally verified SHA-256 is
+`f521868a9e143718bef513772f6e04d9642551e362cf2439636d2abdbd149dfc`
+at the same pinned revision. A separately selectable shared Q8_0 head is also
+pinned; profiles never mount or account for both heads at once.
 
-No supplementary file is required for this text-only baseline: the tokenizer
-and chat template are embedded in shard 1. The repository's `mmproj-F16.gguf`
-and `mmproj-BF16.gguf` are optional vision projectors, and its `MTP/` files are
-optional speculative-decoding companions. They are deliberately outside this
-profile until the 32K target-only load and multi-message quality canaries pass.
+No supplementary file is required for the target-only profile: the tokenizer
+and chat template are embedded in shard 1. The MTP profile additionally mounts
+the exact shared Q4_K_M head, passes it explicitly with `--spec-draft-model`,
+uses `--spec-type draft-mtp --spec-draft-n-max 2`, and offloads the draft to the
+GPU. Both profiles allow 1,200 seconds for a cold 105 GiB-class load; a 503 with
+`Loading model` before then is readiness progress rather than a server failure.
 
 Do not route this profile through Halo's qualified Lemonade configuration yet.
 Lemonade Server 11.8.1 can register arbitrary GGUFs, but the pinned stable ROCm
 package `b10597` contains llama.cpp build 10594, which predates upstream
-`qwen4exp` support. The standalone image reports llama.cpp build 10711 at
-commit `9723942ad`, 51 commits after the architecture merge, so it is the
-compatible baseline already available on this host. The profile enables Q8
-K/V, mmap loading, one slot, explicit all-layer offload, the published
-gfx1151 attention-rotation workaround, and hipBLASLt.
+`qwen4exp` support. Halo therefore builds
+`localhost/halo-ai-llamacpp:b10715-mtp` from the immutable ROCm 10 gfx1151
+base plus Unsloth's hash-pinned build 10715 archive at source commit
+`92cedc8679d145902ead3f006258e8672eac11e6`. This is the first pinned release
+here with the qwen4exp MTP graph and shared-target tensor borrowing. The
+profiles enable Q8 K/V, mmap loading, one slot, explicit all-layer offload, the
+published gfx1151 attention-rotation workaround, and hipBLASLt. Automatic fit
+is disabled because all memory-sensitive settings are explicit; otherwise
+build 10715 performs an unnecessary target-only sizing load and cannot count
+the shared head correctly.
 
 This is an `experimental-lockup` profile because its weights alone occupy most
 of the 123.5 GiB CPU-visible memory. Start at 32K and monitor GTT, available
-memory, swap, and kernel errors. The Strix-specific EngramHalo.cpp fork is a
-promising later runtime candidate for SSD-resident PLE tables and long-context
-HIP performance, but it is moving, lacks a pinned Halo image, and must be
-qualified separately rather than substituted into this baseline.
+memory, swap, and kernel errors. Unsloth recommends the shared Q8_0 head for
+maximum speed; the locally available shared Q4_K_M head is smaller but measured
+about two acceptance points lower upstream. Keep `n=2` as the qualification
+baseline. Benchmark `n=3` and `n=4` with greedy code and prose separately before
+raising it; acceptance alone is not a speed result.
+
+EngramHalo.cpp's `draft-mtp,ngram-mod`, `n=4`, `p-min=0.75` recipe is promising
+for its own ROCm/HIP fork and Q8 head, but it also depends on Strix-specific QSA,
+lazy-read, and kernel patches. The ordinary build-10715 profile therefore stays
+at `n=2`; the isolated v0.7.5 lane below makes the wider settings explicit A/B
+candidates and requires decode throughput, acceptance, prompt depth, and exact
+output equality at temperature zero before promotion.
+
+### Advanced Strix Vulkan v0.7.5 candidates
+
+Halo also carries `strixvulkan075` as an isolated candidate engine. It pins
+Nathan's v0.7.5 amd64 image digest, build 10677, source commit
+`dff60048744f99cb0af68d02be2314456b3269dc`, and bundled Mesa 26.3. Installing
+it does not replace the build-10577 `strixvulkan` image or change any alias:
+
+```bash
+halo-ai install strixvulkan075
+
+# Smaller Q6 control and best-guess general assistant profile.
+halo-ai start qwen3.8-27b-q6xl-strix075-65k-vision-baseline --switch
+halo-ai start qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-advanced --switch
+# Measured speed winner and lower-memory community alternative.
+halo-ai start qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-q8 --switch
+halo-ai start qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-iq4-xs --switch
+
+# Existing 103.69 GiB Flash target: control, best guess, and width controls.
+halo-ai start qwen3.8-flash-next-ud-q4-k-xl-strix075-baseline --switch
+halo-ai start qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-advanced --switch
+halo-ai start qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-n2 --switch
+halo-ai start qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-n4 --switch
+halo-ai start qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-q8-n2 --switch
+halo-ai start qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-q8-n4 --switch
+```
+
+The first Q6 advanced guess uses the already-installed Q6 XL target, BF16 projector,
+and Q4_K_M DFlash2 sidecar at 65K context, 2048/512 batch sizes, draft width 6,
+probability floor 0.10, F16 target K/V, and Q8 draft K/V. A width-3 alternative
+is cataloged separately. The Flash advanced guess reuses the existing four
+target shards and Q4_K_M shared head at 32K, uses Q8 target/draft K/V, width 3,
+probability floor 0.75, mmap with lazy reads, no repacking, no host buffers, and
+a medium reasoning effort capped at 2,048 tokens. These are hypotheses, not
+qualified defaults; compare end-to-end latency and exact outputs against the
+matched baselines before promoting one. See
+[`docs/qwen3.8-flash-test-plan.md`](docs/qwen3.8-flash-test-plan.md).
+
+The initial same-host Q6 screen selected width 6 and rejected ubatch 2048. At
+4K+64 Q4 cut wall time 9.5% versus target-only; at 32K+64 it more than doubled
+decode but was 9.5% slower overall because of speculative prefill overhead. Its
+estimated 32K break-even is about 281 generated tokens. This is one repetition
+per performance arm. The follow-up draft-weight matrix found Q8_0 fastest
+end-to-end at both depths. IQ4_XS used about 1 GiB less peak GTT than Q8 but was
+1.3--1.8% slower; BF16 was slower and heavier than both. Two fresh baseline,
+Q4, and Q8 processes all scored 10/13 and matched all 13 output-token streams,
+proving strict identity for Q4 and Q8 under the fixed suite. No new target model
+was downloaded. `qwen3.8-27b` now selects the Q8 profile as the balanced Qwen3.8
+default; the existing native-262K `qwen3.8df2` alias remains unchanged. Exact measurements are in
+[`docs/results/qwen3.8-q6xl-strix075-advanced-2026-09-10.json`](docs/results/qwen3.8-q6xl-strix075-advanced-2026-09-10.json).
 
 ## Qwen3.8 ROCmFP4 baseline
 
@@ -271,10 +346,10 @@ llama.cpp backend are independent pins. Existing downloads and the large
 TheRock runtime are reused. Change the package or channel only for an explicit
 compatibility trial, then restore the qualified pin.
 
-Standalone llama.cpp now defaults to Kyuz0's supported `rocm-10.0` Strix Halo
-image, pinned at the qualified registry manifest digest. Explicit update trials
-may follow the rebuilt upstream tag, but normal installs and starts reuse the
-audited ROCm 10.0 / llama.cpp build 10711 artifact.
+Standalone llama.cpp now defaults to a locally built, provenance-labeled image
+containing Unsloth build 10715 with qwen4exp external-head MTP support. Its
+runtime base remains Kyuz0's immutable ROCm 10.0 Strix Halo image; both the
+base digest and Unsloth release archive SHA-256 are checked before use.
 
 Lemonade 11.8.1 also exposes an experimental native DS4 backend using the same
 `b0001` gfx1151 artifact Halo already pins. Halo keeps its direct DS4 engine as
@@ -311,13 +386,16 @@ halo-ai test ds4 --preset deepseek-v4-think-max
 The Qwen3.8 lanes have explicit short aliases:
 
 ```bash
+halo-ai start qwen3.8-27b --switch  # Balanced default: Q6 XL + vision + Q8 DFlash2, 65K
 halo-ai start qwen3.8df2 --switch  # Q6 XL vision + DFlash2, native 262K
 halo-ai start qwen3.8-27b-q6xl-vision-lemonade --switch  # Same Q6/BF16 target on ROCm/HIP
 halo-ai start qwen3.8fp4 --switch
 halo-ai start qwen3.8fp8 --switch
 ```
 
-`qwen3.8df2` uses the separately pinned Strix Vulkan llama.cpp fork, not
+`qwen3.8-27b` is the balanced family default. It resolves to the qualified
+v0.7.5 Q6 XL vision profile with Q8_0 DFlash2 at 65K. `qwen3.8df2` preserves
+the native-262K route and uses the separately pinned older Strix Vulkan fork, not
 ROCmFPX. It aliases the experimental vision+DFlash2 profile with the Q4_K_M
 drafter at `n-max=5`. A paired structured-image canary matched target-only in
 three fresh processes while decoding at 24.53 tok/s versus 8.43 target-only.
@@ -331,8 +409,8 @@ generally more faithful: the later block-size sweep identified verification
 batch shape as the important variable. The vision projector remains the
 official BF16 file in every profile.
 
-The checked-in OpenCode configuration exposes this alias as
-`halo-ai/qwen3.8df2`, alongside `ds4`, `qwen3.8fp4`, and `qwen3.8fp8` under one
+The checked-in OpenCode configuration exposes the default as
+`halo-ai/qwen3.8-27b`, alongside `qwen3.8df2`, `ds4`, `qwen3.8fp4`, and `qwen3.8fp8` under one
 provider. These mutually exclusive managed LLM runtimes share the loopback
 endpoint on port 8000, with text and image inputs enabled for DFlash2.
 All three Qwen3.8 entries default to `medium` reasoning and expose OpenCode

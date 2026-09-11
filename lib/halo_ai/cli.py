@@ -45,6 +45,7 @@ ENGINE_IMAGE_KEYS = {
     "llamacpp": "LLAMACPP_IMAGE",
     "rocmfpx": "ROCMFPX_IMAGE",
     "strixvulkan": "STRIXVULKAN_IMAGE",
+    "strixvulkan075": "STRIXVULKAN075_IMAGE",
     "ds4": "DS4_IMAGE",
     "speech": "SPEECH_IMAGE",
     "vllm": "VLLM_IMAGE",
@@ -54,6 +55,7 @@ ENGINE_PORT_KEYS = {
     "llamacpp": "LLAMACPP_PORT",
     "rocmfpx": "ROCMFPX_PORT",
     "strixvulkan": "STRIXVULKAN_PORT",
+    "strixvulkan075": "STRIXVULKAN_PORT",
     "ds4": "DS4_PORT",
     "speech": "SPEECH_PORT",
     "vllm": "VLLM_PORT",
@@ -63,6 +65,7 @@ ENGINE_CONTAINERS = {
     "llamacpp": "halo-llamacpp",
     "rocmfpx": "halo-rocmfpx",
     "strixvulkan": "halo-strixvulkan",
+    "strixvulkan075": "halo-strixvulkan075",
     "ds4": "halo-ds4",
     "speech": "halo-speech",
     "vllm": "halo-vllm",
@@ -83,8 +86,20 @@ REASONING_RELIABILITY_SUITE = SOURCE_CONFIG / "benchmarks" / "reasoning-reliabil
 LEMONADE_VERSION = "11.8.1"
 LEMONADE_IMAGE_DIGEST = "sha256:824359e8633d3cde4afb2c32609930758f4e71424d71ad58f26432a8bb1092cb"
 LEMONADE_IMAGE = f"ghcr.io/lemonade-sdk/lemonade-server@{LEMONADE_IMAGE_DIGEST}"
-LLAMACPP_IMAGE_DIGEST = "sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6"
-LLAMACPP_IMAGE = f"docker.io/kyuz0/amd-strix-halo-toolboxes@{LLAMACPP_IMAGE_DIGEST}"
+LLAMACPP_BASE_IMAGE_DIGEST = "sha256:65fcb5855f6186b8a6ddf56e89abf743fa0fa91ce76394ad2bd7ed7bc9cd10b6"
+LLAMACPP_BASE_IMAGE = (
+    f"docker.io/kyuz0/amd-strix-halo-toolboxes@{LLAMACPP_BASE_IMAGE_DIGEST}"
+)
+LLAMACPP_EXTRACTOR_DIGEST = "sha256:1e0a86e57d247923571b75e0aaf48a1449cf8c543d51fb3e07a4a7d7bfa79316"
+LLAMACPP_IMAGE = "localhost/halo-ai-llamacpp:b10715-mtp"
+LLAMACPP_RELEASE = "b10715-mix-86bd2d3"
+LLAMACPP_SOURCE_COMMIT = "92cedc8679d145902ead3f006258e8672eac11e6"
+LLAMACPP_ENGINE_URL = (
+    "https://github.com/unslothai/llama.cpp/releases/download/"
+    f"{LLAMACPP_RELEASE}/app-{LLAMACPP_RELEASE}-linux-x64-rocm-gfx1151.tar.gz"
+)
+LLAMACPP_ENGINE_BYTES = 351_903_376
+LLAMACPP_ENGINE_SHA256 = "e77e58a117db2c43b6435d7561aa7362288d2b7891b47e723136f90adc71d5d6"
 LEMONADE_VOLUME_MOUNTS = (
     ("halo-lemonade-huggingface", "lemonade-huggingface", "/opt/lemonade/.cache/huggingface"),
     ("halo-lemonade-llama", "lemonade-llama", "/opt/lemonade/llama"),
@@ -104,6 +119,14 @@ LEMONADE_LEGACY_JSON_FILES = (
 STRIXVULKAN_IMAGE_DIGEST = "sha256:a4a3dfe5813df1f0687e526bcba639bfd8b7cdb1d5e4c1c855abc240fb574d3a"
 STRIXVULKAN_SOURCE_COMMIT = "f25eefeaf0386c18499f23f4fc4f400397638d51"
 STRIXVULKAN_IMAGE = f"ghcr.io/nathanw1014/strix-halo-llamacpp@{STRIXVULKAN_IMAGE_DIGEST}"
+STRIXVULKAN075_RELEASE = "v0.7.5"
+STRIXVULKAN075_IMAGE_DIGEST = "sha256:cdb88888ed5547e03c377ea0525f3f281bd6f159e77fc3faf810fe0f24d6a146"
+STRIXVULKAN075_SOURCE_COMMIT = "dff60048744f99cb0af68d02be2314456b3269dc"
+STRIXVULKAN075_IMAGE = (
+    "ghcr.io/nathanw1014/strix-halo-llamacpp@"
+    f"{STRIXVULKAN075_IMAGE_DIGEST}"
+)
+STRIXVULKAN_ENGINES = frozenset({"strixvulkan", "strixvulkan075"})
 
 DS4_RELEASE_URL = (
     "https://github.com/lemonade-sdk/ds4-rocm/releases/download/b0001/"
@@ -246,6 +269,7 @@ DEFAULTS = {
     "ROCMFPX_IMAGE": "localhost/halo-ai-rocmfpx:v1.0.0",
     "ROCMFPX_PORT": "8000",
     "STRIXVULKAN_IMAGE": STRIXVULKAN_IMAGE,
+    "STRIXVULKAN075_IMAGE": STRIXVULKAN075_IMAGE,
     "STRIXVULKAN_PORT": "8000",
     "DS4_IMAGE": "localhost/halo-ai-ds4:b0001",
     "DS4_PORT": "8000",
@@ -435,7 +459,9 @@ def validate_catalog(
             fail(f"profile alias {alias} collides with a profile ID")
         if not isinstance(target, str) or target not in profiles:
             fail(f"profile alias {alias} references unknown profile {target!r}")
-    roles = {"main", "mmproj", "dspark", "chat_template", "weights", "processor"}
+    roles = {
+        "main", "mmproj", "mtp", "mtp_q8", "dspark", "chat_template", "weights", "processor",
+    }
     for identifier, model in models.items():
         engines = model.get("engines")
         files = model.get("files")
@@ -536,14 +562,45 @@ def validate_catalog(
         context = profile.get("context")
         if not isinstance(context, int) or (engine == "speech" and context != 0) or (engine != "speech" and context < 4096):
             fail(f"profile {identifier} has invalid context")
+        startup_timeout = profile.get("startup_timeout")
+        if (
+            startup_timeout is not None
+            and (
+                isinstance(startup_timeout, bool)
+                or not isinstance(startup_timeout, int)
+                or not 1 <= startup_timeout <= 3600
+            )
+        ):
+            fail(f"profile {identifier} has invalid startup timeout")
         features = set(profile.get("features", []))
         settings = profile.get("settings", {})
         if "thinking" in profile and not isinstance(profile["thinking"], bool):
             fail(f"profile {identifier} has an invalid thinking policy")
         if settings.get("load_mode", "mmap") not in {"none", "mmap", "dio"}:
             fail(f"profile {identifier} has invalid load mode")
+        if engine == "llamacpp" and "fit" in settings and settings["fit"] is not False:
+            fail(f"profile {identifier} must disable llama.cpp fit explicitly")
         if "mtp" in features and ("vision" in features or settings.get("parallel") != 1):
             fail(f"profile {identifier} violates MTP vision/parallel constraints")
+        mtp_role = settings.get("mtp_role", "mtp")
+        if mtp_role not in {"mtp", "mtp_q8"}:
+            fail(f"profile {identifier} has invalid MTP artifact role")
+        external_mtp = [
+            item for item in models[model_id]["files"] if item["role"] == mtp_role
+        ]
+        if "mtp" in features:
+            if models[model_id].get("architecture") == "qwen4exp" and len(external_mtp) != 1:
+                fail(f"profile {identifier} requires one selected external qwen4exp MTP head")
+            draft_n = settings.get("spec_draft_n_max")
+            draft_p = settings.get("spec_draft_p_min")
+            if not isinstance(draft_n, int) or isinstance(draft_n, bool) or not 1 <= draft_n <= 16:
+                fail(f"profile {identifier} has invalid MTP draft length")
+            if draft_p is not None and (
+                isinstance(draft_p, bool)
+                or not isinstance(draft_p, (int, float))
+                or not 0 <= draft_p <= 1
+            ):
+                fail(f"profile {identifier} has invalid MTP draft probability")
         if "ngram" in features:
             fail(f"profile {identifier} cannot combine ngram with strict Qwen MTP in ROCmFPX build 213")
         if "vision" in features and not any(item["role"] == "mmproj" for item in models[model_id]["files"]):
@@ -554,7 +611,7 @@ def validate_catalog(
             draft_id = profile.get("draft_model")
             draft = models.get(draft_id) if isinstance(draft_id, str) else None
             if (
-                engine not in {"lemonade", "strixvulkan"}
+                engine not in ({"lemonade"} | STRIXVULKAN_ENGINES)
                 or settings.get("parallel") != 1
                 or draft is None
                 or draft.get("architecture") != "dflash"
@@ -574,7 +631,7 @@ def validate_catalog(
                 or not 1 <= settings["prefill_chunk"] <= 8192
             ):
                 fail(f"profile {identifier} has an invalid Lemonade native DS4 policy")
-        if engine == "strixvulkan":
+        if engine in STRIXVULKAN_ENGINES:
             integer_settings = {
                 "parallel": (1, 1), "batch": (1, 8192), "ubatch": (1, 8192),
                 "threads": (1, 256), "threads_batch": (1, 256),
@@ -588,20 +645,74 @@ def validate_catalog(
                 or settings.get("gpu_layers") != "all"
                 or settings.get("fit") is not False
                 or settings.get("flash_attention") is not True
-                or settings.get("kv") != "f16"
+                or settings.get("kv") not in (
+                    {"f16"} if engine == "strixvulkan" else {"f16", "q8_0"}
+                )
             ):
                 fail(f"profile {identifier} violates the pinned Strix Vulkan policy")
             allowed = set(integer_settings) | {
                 "device", "gpu_layers", "fit", "flash_attention", "kv", "spec_draft_n_max",
             }
+            if engine == "strixvulkan075":
+                allowed |= {
+                    "load_mode", "tensor_read_lazy", "repack", "no_host",
+                    "jinja", "reasoning_preserve", "reasoning_effort",
+                    "reasoning_budget", "spec_draft_n_min", "spec_draft_p_min",
+                    "spec_draft_type_k", "spec_draft_type_v", "mtp_role",
+                }
             if set(settings) - allowed:
                 fail(f"profile {identifier} contains an unsupported Strix Vulkan setting")
-            if "dflash" in features:
+            if {"dflash", "mtp"}.intersection(features):
                 value = settings.get("spec_draft_n_max")
                 if not isinstance(value, int) or not 1 <= value <= 16:
-                    fail(f"profile {identifier} has invalid DFlash draft length")
-            elif "spec_draft_n_max" in settings:
-                fail(f"baseline profile {identifier} cannot contain DFlash settings")
+                    fail(f"profile {identifier} has invalid speculative draft length")
+                draft_min = settings.get("spec_draft_n_min")
+                if draft_min is not None and (
+                    isinstance(draft_min, bool)
+                    or not isinstance(draft_min, int)
+                    or not 0 <= draft_min <= value
+                ):
+                    fail(f"profile {identifier} has invalid minimum draft length")
+                draft_probability = settings.get("spec_draft_p_min")
+                if draft_probability is not None and (
+                    isinstance(draft_probability, bool)
+                    or not isinstance(draft_probability, (int, float))
+                    or not 0 <= draft_probability <= 1
+                ):
+                    fail(f"profile {identifier} has invalid draft probability")
+                draft_types = (
+                    settings.get("spec_draft_type_k"), settings.get("spec_draft_type_v"),
+                )
+                if (draft_types[0] is None) != (draft_types[1] is None) or any(
+                    item is not None and item not in {"f16", "q8_0"}
+                    for item in draft_types
+                ):
+                    fail(f"profile {identifier} has invalid Strix Vulkan draft KV types")
+            elif set(settings).intersection({
+                "spec_draft_n_max", "spec_draft_n_min", "spec_draft_p_min",
+                "spec_draft_type_k", "spec_draft_type_v", "mtp_role",
+            }):
+                fail(f"baseline profile {identifier} cannot contain speculation settings")
+            if engine == "strixvulkan075":
+                if settings.get("tensor_read_lazy", "auto") not in {"on", "auto", "off"}:
+                    fail(f"profile {identifier} has invalid lazy tensor-read policy")
+                for key in ("repack", "no_host"):
+                    if key in settings and not isinstance(settings[key], bool):
+                        fail(f"profile {identifier} has invalid {key} policy")
+                for key in ("jinja", "reasoning_preserve"):
+                    if key in settings and not isinstance(settings[key], bool):
+                        fail(f"profile {identifier} has invalid {key} policy")
+                if settings.get("reasoning_effort", "medium") not in {
+                    "minimal", "low", "medium", "high", "xhigh", "max",
+                }:
+                    fail(f"profile {identifier} has invalid reasoning effort")
+                reasoning_budget = settings.get("reasoning_budget")
+                if reasoning_budget is not None and (
+                    isinstance(reasoning_budget, bool)
+                    or not isinstance(reasoning_budget, int)
+                    or not 0 <= reasoning_budget <= 262144
+                ):
+                    fail(f"profile {identifier} has invalid reasoning budget")
         if engine == "lemonade" and "dflash" in features:
             value = settings.get("spec_draft_n_max")
             if not isinstance(value, int) or not 1 <= value <= 16:
@@ -951,6 +1062,8 @@ def scan_models(config: Config) -> list[dict[str, Any]]:
                 lowered = name.lower()
                 if lowered.startswith("mmproj"):
                     role = "mmproj"
+                elif lowered.startswith("mtp-"):
+                    role = "mtp_q8" if "shared-q8_0" in lowered else "mtp"
                 elif lowered.startswith("dspark"):
                     role = "dspark"
                 found.append({
@@ -1073,6 +1186,8 @@ def port_for(config: Config, engine: str) -> int:
 def required_roles(profile: dict[str, Any]) -> set[str]:
     roles = {"main"}
     features = set(profile.get("features", []))
+    if "mtp" in features:
+        roles.add(profile.get("settings", {}).get("mtp_role", "mtp"))
     if "vision" in features:
         roles.add("mmproj")
     if "dspark" in features:
@@ -1080,6 +1195,13 @@ def required_roles(profile: dict[str, Any]) -> set[str]:
     if profile.get("chat_template"):
         roles.add("chat_template")
     return roles
+
+
+def profile_startup_timeout(profile: dict[str, Any]) -> int:
+    configured = profile.get("startup_timeout")
+    if configured is not None:
+        return int(configured)
+    return 600 if profile["engine"] == "speech" else 180
 
 
 def selected_chat_template(model: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any] | None:
@@ -1301,7 +1423,7 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
         "--label", f"local.halo-ai.profile={profile['id']}",
         "-p", f"127.0.0.1:{port}:{port}",
     ]
-    if engine in {"rocmfpx", "strixvulkan"}:
+    if engine == "rocmfpx" or engine in STRIXVULKAN_ENGINES:
         command.extend(["--device=/dev/dri", "--group-add", "keep-groups"])
     else:
         command.extend(["--device=/dev/kfd", "--device=/dev/dri"])
@@ -1372,12 +1494,15 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
             "-e", "GRADIO_ANALYTICS_ENABLED=False",
             image_for(config, engine),
         ])
-    elif engine in {"llamacpp", "rocmfpx", "strixvulkan"}:
+    elif engine in ({"llamacpp", "rocmfpx"} | STRIXVULKAN_ENGINES):
         for index, (entry, path) in enumerate(selected):
             directory = "templates" if entry["role"] == "chat_template" else ""
             destination = f"/models/{directory + '/' if directory else ''}{path.name}"
             command.extend(["--mount", f"type=bind,src={path},dst={destination},ro"])
         main = next(path for entry, path in selected if entry["role"] == "main")
+        mtp_path = next(
+            (path for entry, path in selected if entry["role"] in {"mtp", "mtp_q8"}), None,
+        )
         settings = profile["settings"]
         executable = "/opt/rocmfpx/bin/llama-server" if engine == "rocmfpx" else "llama-server"
         draft_path: Path | None = None
@@ -1397,8 +1522,11 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
                 command.extend(["-e", "ROCBLAS_USE_HIPBLASLT=1"])
         command.append(image_for(config, engine))
         command.extend(llama_server_common_arguments(executable, profile, f"/models/{main.name}", port))
+        reasoning_effort = settings.get("reasoning_effort")
         default_reasoning_effort = model.get("default_reasoning_effort")
-        if default_reasoning_effort:
+        if reasoning_effort:
+            command.extend(["--reasoning-effort", reasoning_effort])
+        elif default_reasoning_effort:
             command.extend([
                 "--chat-template-kwargs",
                 json.dumps(
@@ -1406,6 +1534,8 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
                     separators=(",", ":"),
                 ),
             ])
+        if settings.get("reasoning_budget") is not None:
+            command.extend(["--reasoning-budget", str(settings["reasoning_budget"])])
         if engine == "rocmfpx":
             command.extend([
                 "--device", settings["device"], "--gpu-layers", str(settings["gpu_layers"]),
@@ -1416,17 +1546,31 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
                 "--cache-type-k", settings["cache_type_k"],
                 "--cache-type-v", settings["cache_type_v"],
             ])
-        elif engine == "strixvulkan":
+        elif engine in STRIXVULKAN_ENGINES:
             command.extend([
                 "--device", settings["device"], "--gpu-layers", settings["gpu_layers"],
                 "--fit", "off", "--threads", str(settings["threads"]),
                 "--threads-batch", str(settings["threads_batch"]),
                 "--cache-type-k", settings["kv"], "--cache-type-v", settings["kv"],
             ])
+            if settings.get("load_mode"):
+                command.extend(["--load-mode", settings["load_mode"]])
+            if settings.get("tensor_read_lazy"):
+                command.extend(["--tensor-read-lazy", settings["tensor_read_lazy"]])
+            if settings.get("repack") is False:
+                command.append("--no-repack")
+            if settings.get("no_host") is True:
+                command.append("--no-host")
+            if settings.get("jinja"):
+                command.append("--jinja")
+            if settings.get("reasoning_preserve"):
+                command.append("--reasoning-preserve")
         else:
             command.extend(["--cache-type-k", settings["kv"], "--cache-type-v", settings["kv"]])
             if settings.get("load_mode"):
                 command.extend(["--load-mode", settings["load_mode"]])
+            if settings.get("fit") is False:
+                command.extend(["--fit", "off"])
             if settings.get("gpu_layers") is not None:
                 command.extend(["--gpu-layers", str(settings["gpu_layers"])])
             if settings.get("threads") is not None:
@@ -1442,6 +1586,11 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
             command.extend(["--mmproj", f"/models/{projector.name}"])
         if "mtp" in profile.get("features", []):
             command.extend(["--spec-type", "draft-mtp"])
+            if mtp_path is not None:
+                command.extend([
+                    "--spec-draft-model", f"/models/{mtp_path.name}",
+                    "--spec-draft-ngl", "all",
+                ])
             if engine == "rocmfpx":
                 command.extend([
                     "--spec-mtp-strict-qwen",
@@ -1455,6 +1604,19 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
                     ])
             else:
                 command.extend(["--spec-draft-n-max", str(settings["spec_draft_n_max"])])
+                if settings.get("spec_draft_p_min") is not None:
+                    command.extend([
+                        "--spec-draft-p-min", str(settings["spec_draft_p_min"]),
+                    ])
+                if settings.get("spec_draft_n_min") is not None:
+                    command.extend([
+                        "--spec-draft-n-min", str(settings["spec_draft_n_min"]),
+                    ])
+                if settings.get("spec_draft_type_k"):
+                    command.extend([
+                        "--spec-draft-type-k", settings["spec_draft_type_k"],
+                        "--spec-draft-type-v", settings["spec_draft_type_v"],
+                    ])
         if "dspark" in profile.get("features", []):
             companion = next(path for entry, path in selected if entry["role"] == "dspark")
             command.extend(["--spec-type", "draft-dspark", "--model-draft", f"/models/{companion.name}"])
@@ -1464,12 +1626,28 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
                 "--spec-draft-n-max", str(settings["spec_draft_n_max"]),
                 "--spec-draft-ngl", "all",
             ])
+            if settings.get("spec_draft_n_min") is not None:
+                command.extend([
+                    "--spec-draft-n-min", str(settings["spec_draft_n_min"]),
+                ])
+            if settings.get("spec_draft_p_min") is not None:
+                command.extend([
+                    "--spec-draft-p-min", str(settings["spec_draft_p_min"]),
+                ])
+            if settings.get("spec_draft_type_k"):
+                command.extend([
+                    "--spec-draft-type-k", settings["spec_draft_type_k"],
+                    "--spec-draft-type-v", settings["spec_draft_type_v"],
+                ])
         template_path = container_template_path(model, profile)
         if template_path:
             command.extend(["--chat-template-file", template_path])
         if engine == "rocmfpx" and "mtp" not in profile.get("features", []):
             command.extend(["--spec-type", "none"])
-        if engine == "strixvulkan" and "dflash" not in profile.get("features", []):
+        if (
+            engine in STRIXVULKAN_ENGINES
+            and not {"dflash", "mtp", "dspark"}.intersection(profile.get("features", []))
+        ):
             command.extend(["--spec-type", "none"])
     else:
         fail("vLLM profiles are deferred and cannot be rendered implicitly")
@@ -2224,8 +2402,9 @@ def profile_availability(config: Config, catalog: Catalog, profile: dict[str, An
         return False, f"unsupported engine: {profile['engine']}"
     if not config.get(key):
         return False, f"{key} is empty"
+    model = catalog.models[profile["model"]]
     result = verify_model(
-        config, catalog.models[profile["model"]], False, required_roles(profile),
+        config, model, False, required_roles(profile),
     )
     if not result["valid"]:
         return False, "model verification failed"
@@ -2236,8 +2415,16 @@ def profile_availability(config: Config, catalog: Catalog, profile: dict[str, An
             return False, "DFlash companion verification failed"
     if profile["engine"] == "rocmfpx" and not rocmfpx_image_valid(config.get(key)):
         return False, "pinned ROCmFPX image is not installed or failed provenance checks"
+    if (
+        profile["engine"] == "llamacpp"
+        and "mtp" in profile.get("features", [])
+        and not llamacpp_image_valid(config.get(key))
+    ):
+        return False, "MTP requires the pinned Unsloth llama.cpp image"
     if profile["engine"] == "strixvulkan" and not strixvulkan_image_valid(config.get(key)):
         return False, "pinned Strix Vulkan image is not installed or failed provenance checks"
+    if profile["engine"] == "strixvulkan075" and not strixvulkan075_image_valid(config.get(key)):
+        return False, "pinned Strix Vulkan v0.7.5 image is not installed or failed provenance checks"
     if profile["engine"] == "ds4" and not ds4_image_valid(config.get(key)):
         return False, "pinned DS4 image is not installed or failed provenance checks"
     if (
@@ -2246,8 +2433,9 @@ def profile_availability(config: Config, catalog: Catalog, profile: dict[str, An
         and not lemonade_image_valid(config.get(key))
     ):
         return False, f"Lemonade DFlash requires the pinned {LEMONADE_VERSION} image"
-    model = catalog.models[profile["model"]]
     memory_roles = {"weights"} if model.get("format") == "transformers" else {"main"}
+    if "mtp" in profile.get("features", []):
+        memory_roles.add(profile.get("settings", {}).get("mtp_role", "mtp"))
     main_bytes = sum(int(entry["bytes"]) for entry in model["files"] if entry["role"] in memory_roles)
     if draft_model is not None:
         main_bytes += sum(
@@ -2309,13 +2497,18 @@ def command_profiles(config: Config, catalog: Catalog, args: argparse.Namespace)
 
 def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str, Any]) -> dict[str, Any]:
     model = catalog.models[profile["model"]]
+    external_mtp = any(entry["role"] in {"mtp", "mtp_q8"} for entry in model["files"])
     model_plan = model_acquisition_plan(config, model, required_roles(profile))
     engine = profile["engine"]
     image = image_for(config, engine)
-    if engine == "rocmfpx":
+    if engine == "llamacpp":
+        installed = llamacpp_image_valid(image)
+    elif engine == "rocmfpx":
         installed = rocmfpx_image_valid(image)
     elif engine == "strixvulkan":
         installed = strixvulkan_image_valid(image)
+    elif engine == "strixvulkan075":
+        installed = strixvulkan075_image_valid(image)
     elif engine == "ds4":
         installed = ds4_image_valid(image)
     else:
@@ -2326,7 +2519,18 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
         "status": "installed" if installed else "install-required",
         "additional_download_bytes": 0,
     }
-    if engine == "rocmfpx":
+    if engine == "llamacpp":
+        runtime.update({
+            "release": LLAMACPP_RELEASE,
+            "source_commit": LLAMACPP_SOURCE_COMMIT,
+            "engine_archive": LLAMACPP_ENGINE_URL,
+            "engine_archive_bytes": LLAMACPP_ENGINE_BYTES,
+            "engine_archive_sha256": LLAMACPP_ENGINE_SHA256,
+            "base_digest": LLAMACPP_BASE_IMAGE_DIGEST,
+            "extractor_digest": LLAMACPP_EXTRACTOR_DIGEST,
+            "additional_download_bytes": 0 if installed else LLAMACPP_ENGINE_BYTES,
+        })
+    elif engine == "rocmfpx":
         runtime.update({
             "q38rocm_commit": ROCMFPX_Q38ROCM_COMMIT,
             "engine_archive": ROCMFPX_ENGINE_URL,
@@ -2343,6 +2547,14 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
             "source_commit": STRIXVULKAN_SOURCE_COMMIT,
             "image_digest": STRIXVULKAN_IMAGE_DIGEST,
             "upstream_dflash_pr": "https://github.com/ggml-org/llama.cpp/pull/27342",
+        })
+    elif engine == "strixvulkan075":
+        runtime.update({
+            "release": STRIXVULKAN075_RELEASE,
+            "source_repository": "https://github.com/Nathanw1014/strix-halo-llamacpp",
+            "source_commit": STRIXVULKAN075_SOURCE_COMMIT,
+            "image_digest": STRIXVULKAN075_IMAGE_DIGEST,
+            "backend": "vulkan-radv-bundled-mesa-26.3",
         })
     elif engine == "ds4":
         runtime.update({
@@ -2385,12 +2597,13 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
                 ["q6-xl"]
                 + (["vision"] if "vision" in profile.get("features", []) else [])
                 + ["dflash2", "strixvulkan-runtime"]
-                if engine == "strixvulkan" and draft_plan else
+                if engine in STRIXVULKAN_ENGINES and draft_plan else
                 ["q6-xl", "vision", "strixvulkan-runtime"]
-                if engine == "strixvulkan" and "vision" in profile.get("features", []) else
+                if engine in STRIXVULKAN_ENGINES and "vision" in profile.get("features", []) else
                 ["q6-xl", "strixvulkan-runtime"]
-                if engine == "strixvulkan" else
+                if engine in STRIXVULKAN_ENGINES and model["id"] == "qwen3.8-27b-ud-q6-k-xl" else
                 ["model"]
+                + (["mtp-sidecar"] if "mtp" in profile.get("features", []) and external_mtp else [])
                 + (["vision"] if "vision" in profile.get("features", []) else [])
                 + (["dflash2"] if draft_plan else [])
                 + ["runtime"]
@@ -2400,7 +2613,7 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
             [excluded_quantization, "npu", "vision", "bf16", "reference"]
             if engine == "rocmfpx" else
             ["fp8", "npu", "vision", "bf16", "reference"]
-            if engine == "strixvulkan" else
+            if engine in STRIXVULKAN_ENGINES else
             ["npu"]
             + ([] if "vision" in profile.get("features", []) else ["vision"])
             + ["reference"]
@@ -2523,6 +2736,8 @@ def command_runtime_install(config: Config, engines: Iterable[str]) -> int:
             print(f"Building {engine}: {image} from {context}")
             podman(["build", "--pull=missing", "-t", image, "-f", str(context / "Containerfile"), str(context)])
             ensure_speech_test_audio(config)
+        elif engine == "llamacpp":
+            build_llamacpp_image(image)
         elif engine == "rocmfpx":
             build_rocmfpx_image(image)
         elif engine == "ds4":
@@ -2530,6 +2745,8 @@ def command_runtime_install(config: Config, engines: Iterable[str]) -> int:
         else:
             print(f"Pulling {engine}: {image}")
             podman(["pull", image])
+        if engine == "strixvulkan075":
+            validate_strixvulkan075_image(image)
         if engine == "lemonade":
             prepare_lemonade_storage(config)
         digest = image_identity(image)
@@ -2549,12 +2766,16 @@ def command_update(config: Config, engines: Iterable[str]) -> int:
             context = PROJECT_ROOT / "lib/halo_ai/speech"
             podman(["build", "--pull=always", "-t", image, "-f", str(context / "Containerfile"), str(context)])
             ensure_speech_test_audio(config)
+        elif engine == "llamacpp":
+            build_llamacpp_image(image, force=True)
         elif engine == "rocmfpx":
             build_rocmfpx_image(image, force=True)
         elif engine == "ds4":
             build_ds4_image(image, force=True)
         else:
             podman(["pull", image])
+        if engine == "strixvulkan075":
+            validate_strixvulkan075_image(image)
         if engine == "lemonade":
             prepare_lemonade_storage(config)
         new = image_identity(image)
@@ -2583,6 +2804,92 @@ def image_labels(image: str) -> dict[str, str]:
     except json.JSONDecodeError:
         return {}
     return labels if isinstance(labels, dict) else {}
+
+
+def llamacpp_expected_labels() -> dict[str, str]:
+    return {
+        "local.halo-ai.engine": "llamacpp",
+        "local.halo-ai.engine-archive-sha256": LLAMACPP_ENGINE_SHA256,
+        "local.halo-ai.base": LLAMACPP_BASE_IMAGE_DIGEST,
+        "local.halo-ai.extractor": LLAMACPP_EXTRACTOR_DIGEST,
+        "org.opencontainers.image.source": "https://github.com/unslothai/llama.cpp",
+        "org.opencontainers.image.revision": LLAMACPP_SOURCE_COMMIT,
+        "org.opencontainers.image.version": LLAMACPP_RELEASE,
+    }
+
+
+def llamacpp_image_valid(image: str) -> bool:
+    return llamacpp_expected_labels().items() <= image_labels(image).items()
+
+
+def build_llamacpp_image(image: str, *, force: bool = False) -> None:
+    if not force and llamacpp_image_valid(image):
+        print(f"Reusing verified llama.cpp image: {image}")
+        return
+    context = PROJECT_ROOT / "lib/halo_ai/llamacpp"
+    containerfile = context / "Containerfile"
+    if not containerfile.is_file():
+        fail(f"llama.cpp build recipe is missing: {containerfile}")
+    print(
+        f"Building llama.cpp: {image} from an immutable Strix Halo base "
+        f"and Unsloth {LLAMACPP_RELEASE} gfx1151 archive"
+    )
+    podman([
+        "build", "--pull=missing", "--timestamp", "0", "--layers=false",
+        "-t", image, "-f", str(containerfile), str(context),
+    ])
+    if not llamacpp_image_valid(image):
+        fail("built llama.cpp image failed its immutable provenance checks")
+    version = podman([
+        "run", "--rm", "--entrypoint", "/opt/halo-llamacpp/llama-server",
+        image, "--version",
+    ], capture=True)
+    combined = f"{version.stdout}\n{version.stderr}"
+    if "build 10715" not in combined or "commit 92cedc867" not in combined:
+        fail("built llama.cpp image did not report the pinned MTP engine build")
+    help_result = podman([
+        "run", "--rm", "--entrypoint", "/opt/halo-llamacpp/llama-server",
+        image, "--help",
+    ], capture=True)
+    help_text = f"{help_result.stdout}\n{help_result.stderr}"
+    required = (
+        "--spec-type", "draft-mtp", "--spec-draft-model",
+        "--spec-draft-n-max", "--spec-draft-p-min", "--spec-draft-ngl",
+    )
+    if not all(option in help_text for option in required):
+        fail("built llama.cpp image does not expose the required external-MTP interface")
+
+
+def llamacpp_backend_info(
+    container: str, image: str, profile: dict[str, Any], model: dict[str, Any],
+) -> dict[str, Any]:
+    if not llamacpp_image_valid(image):
+        fail("active llama.cpp image failed immutable provenance checks")
+    version = podman(["exec", container, "llama-server", "--version"], capture=True)
+    combined = f"{version.stdout}\n{version.stderr}"
+    if "build 10715" not in combined or "commit 92cedc867" not in combined:
+        fail("active llama.cpp backend does not match the pinned MTP engine build")
+    processes = podman(["top", container, "args"], capture=True).stdout
+    mtp = "mtp" in profile.get("features", [])
+    external_mtp = any(item["role"] in {"mtp", "mtp_q8"} for item in model["files"])
+    required = ["llama-server"]
+    if mtp:
+        required.extend(["--spec-type draft-mtp", "--spec-draft-n-max"])
+    if mtp and external_mtp:
+        required.extend(["--spec-draft-model /models/", "--spec-draft-ngl all"])
+    if any(item not in processes for item in required):
+        fail("active llama.cpp process does not match the selected MTP policy")
+    return {
+        "engine_build": 10715,
+        "source_revision": LLAMACPP_SOURCE_COMMIT,
+        "archive_sha256": LLAMACPP_ENGINE_SHA256,
+        "base_digest": LLAMACPP_BASE_IMAGE_DIGEST,
+        "extractor_digest": LLAMACPP_EXTRACTOR_DIGEST,
+        "backend": "rocm",
+        "device": "ROCm0",
+        "speculation": "draft-mtp" if mtp else "none",
+        "external_mtp": mtp and external_mtp,
+    }
 
 
 def speech_candidate_expected_labels() -> dict[str, str]:
@@ -2743,34 +3050,92 @@ def strixvulkan_image_valid(image: str) -> bool:
     )
 
 
+def strixvulkan075_image_valid(image: str) -> bool:
+    if image_identity(image, required=False) != STRIXVULKAN075_IMAGE_DIGEST:
+        return False
+    labels = image_labels(image)
+    return (
+        labels.get("org.opencontainers.image.source")
+        == "https://github.com/Nathanw1014/strix-halo-llamacpp"
+        and labels.get("org.opencontainers.image.title") == "strix-halo-llamacpp-vulkan"
+        and "bundled Mesa 26.3" in labels.get("org.opencontainers.image.description", "")
+    )
+
+
+def validate_strixvulkan075_image(image: str) -> None:
+    if not strixvulkan075_image_valid(image):
+        fail("Strix Vulkan v0.7.5 image failed immutable digest/label checks")
+    version = podman([
+        "run", "--rm", "--entrypoint", "llama-server", image, "--version",
+    ], capture=True)
+    combined = f"{version.stdout}\n{version.stderr}"
+    if "commit dff60048" not in combined or "build 10677" not in combined:
+        fail("Strix Vulkan v0.7.5 image did not report the pinned source build")
+    devices = podman([
+        "run", "--rm", "--device=/dev/dri", "--group-add", "keep-groups",
+        "--entrypoint", "llama-server", image, "--list-devices",
+    ], capture=True)
+    device_output = f"{devices.stdout}\n{devices.stderr}"
+    if "Vulkan0" not in device_output or "RADV STRIX_HALO" not in device_output:
+        fail("Strix Vulkan v0.7.5 image did not expose Vulkan0 on RADV STRIX_HALO")
+
+
 def strixvulkan_backend_info(
     container: str, image: str, profile: dict[str, Any],
 ) -> dict[str, Any]:
-    if not strixvulkan_image_valid(image):
+    engine = profile["engine"]
+    if engine == "strixvulkan":
+        valid = strixvulkan_image_valid(image)
+        expected_version = ("commit f25eefea", "build 10577")
+        engine_build = 10577
+        source_revision = STRIXVULKAN_SOURCE_COMMIT
+        image_digest = STRIXVULKAN_IMAGE_DIGEST
+        release = None
+    elif engine == "strixvulkan075":
+        valid = strixvulkan075_image_valid(image)
+        expected_version = ("commit dff60048", "build 10677")
+        engine_build = 10677
+        source_revision = STRIXVULKAN075_SOURCE_COMMIT
+        image_digest = STRIXVULKAN075_IMAGE_DIGEST
+        release = STRIXVULKAN075_RELEASE
+    else:
+        fail(f"unsupported Strix Vulkan engine: {engine}")
+    if not valid:
         fail("active Strix Vulkan image failed immutable digest checks")
     version = podman(["exec", container, "llama-server", "--version"], capture=True)
     combined = f"{version.stdout}\n{version.stderr}"
-    if "commit f25eefea" not in combined or "build 10577" not in combined:
+    if any(item not in combined for item in expected_version):
         fail("active Strix Vulkan binary does not match the pinned source build")
     processes = podman(["top", container, "args"], capture=True).stdout
     dflash = "dflash" in profile.get("features", [])
+    mtp = "mtp" in profile.get("features", [])
     required = ["--device Vulkan0", "--gpu-layers all", "--fit off"]
     if dflash:
         required.extend([
             "--spec-type draft-dflash", "--spec-draft-model /models/draft.gguf",
             "--spec-draft-ngl all",
         ])
+    elif mtp:
+        required.extend(["--spec-type draft-mtp", "--spec-draft-ngl all"])
     else:
         required.append("--spec-type none")
+    settings = profile["settings"]
+    if settings.get("reasoning_budget") is not None:
+        required.append(f"--reasoning-budget {settings['reasoning_budget']}")
+    if settings.get("spec_draft_n_min") is not None:
+        required.append(f"--spec-draft-n-min {settings['spec_draft_n_min']}")
+    if settings.get("spec_draft_p_min") is not None:
+        required.append(f"--spec-draft-p-min {settings['spec_draft_p_min']}")
     if "llama-server" not in processes or any(item not in processes for item in required):
         fail("active Strix Vulkan process does not match the selected profile policy")
     return {
-        "engine_build": 10577,
-        "source_revision": STRIXVULKAN_SOURCE_COMMIT,
-        "image_digest": STRIXVULKAN_IMAGE_DIGEST,
+        "engine_build": engine_build,
+        "source_revision": source_revision,
+        "image_digest": image_digest,
+        "release": release,
         "backend": "vulkan-radv",
         "device": "Vulkan0",
-        "speculation": "dflash2" if dflash else "none",
+        "speculation": "dflash2" if dflash else "mtp" if mtp else "none",
     }
 
 
@@ -3175,13 +3540,13 @@ def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) ->
             # selected `latest`; persistent volumes make this a cached check.
             unload_active_lemonade(config, catalog, port, target_name)
             podman(["restart", "--time", "120", target_name])
-            wait_http(health, 600 if profile["engine"] == "speech" else 180)
+            wait_http(health, profile_startup_timeout(profile))
         elif reuse_lemonade:
             unload_active_lemonade(config, catalog, port, target_name)
         else:
             command = render_container(config, catalog, profile)
             run(command)
-            wait_http(health, 600 if profile["engine"] == "speech" else 180)
+            wait_http(health, profile_startup_timeout(profile))
         trial["cgroup_oom_kill_before"] = container_oom_kill_count(target_name)
         atomic_json(state_path(config, "active-trial.json"), trial)
         if profile["engine"] == "lemonade" and not reuse_lemonade:
@@ -3221,13 +3586,20 @@ def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) ->
             trial["backend"] = rocmfpx_backend_info(
                 target_name, image_for(config, profile["engine"]), profile,
             )
-        elif profile["engine"] == "strixvulkan":
+        elif profile["engine"] in STRIXVULKAN_ENGINES:
             trial["backend"] = strixvulkan_backend_info(
                 target_name, image_for(config, profile["engine"]), profile,
             )
         elif profile["engine"] == "ds4":
             trial["backend"] = ds4_backend_info(
                 target_name, image_for(config, profile["engine"]), profile,
+            )
+        elif profile["engine"] == "llamacpp" and "mtp" in profile.get("features", []):
+            trial["backend"] = llamacpp_backend_info(
+                target_name,
+                image_for(config, profile["engine"]),
+                profile,
+                catalog.models[profile["model"]],
             )
         trial["container"] = target_name
         trial["image"] = image_for(config, profile["engine"])
@@ -3325,10 +3697,19 @@ def command_status(config: Config, _catalog: Catalog, _args: argparse.Namespace)
                     )
                 except HaloError as exc:
                     backend_info = {"valid": False, "error": str(exc)}
-            elif profile["engine"] == "strixvulkan":
+            elif profile["engine"] in STRIXVULKAN_ENGINES:
                 try:
                     backend_info = strixvulkan_backend_info(
-                        container_name("strixvulkan"), image_for(config, "strixvulkan"), profile,
+                        container_name(profile["engine"]),
+                        image_for(config, profile["engine"]), profile,
+                    )
+                except HaloError as exc:
+                    backend_info = {"valid": False, "error": str(exc)}
+            elif profile["engine"] == "llamacpp" and "mtp" in profile.get("features", []):
+                try:
+                    backend_info = llamacpp_backend_info(
+                        container_name("llamacpp"), image_for(config, "llamacpp"),
+                        profile, _catalog.models[profile["model"]],
                     )
                 except HaloError as exc:
                     backend_info = {"valid": False, "error": str(exc)}
@@ -3662,7 +4043,7 @@ def command_test(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
         payload["chat_template_kwargs"] = {"enable_thinking": False}
     elif profile.get("chat_template") == "nonthinking" or profile["engine"] == "ds4":
         payload["reasoning_effort"] = "none"
-    if profile["engine"] == "rocmfpx" or (
+    if "mtp" in profile.get("features", []) or profile["engine"] == "rocmfpx" or (
         profile["engine"] == "ds4" and "dspark" in profile.get("features", [])
     ):
         payload.update({"temperature": 0, "seed": 1})
@@ -4265,7 +4646,7 @@ def command_bench_rocmfpx_context(
     profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
-    if profile["engine"] not in {"lemonade", "llamacpp", "rocmfpx", "strixvulkan"}:
+    if profile["engine"] not in ({"lemonade", "llamacpp", "rocmfpx"} | STRIXVULKAN_ENGINES):
         fail("context benchmark requires a Lemonade, llama.cpp, ROCmFPX, or Strix Vulkan profile")
     try:
         contexts = [int(value) for value in args.prompt_tokens.split(",")]
@@ -4483,7 +4864,7 @@ def command_bench_rocmfpx_quality(
     profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
-    if profile["engine"] not in {"lemonade", "llamacpp", "rocmfpx", "strixvulkan"}:
+    if profile["engine"] not in ({"lemonade", "llamacpp", "rocmfpx"} | STRIXVULKAN_ENGINES):
         fail("fixed quality benchmark requires a Lemonade, llama.cpp, ROCmFPX, or Strix Vulkan profile")
     suite_path = (
         Path(args.suite).expanduser().resolve()
@@ -4678,7 +5059,7 @@ def command_bench_reasoning_reliability(
     profile = resolve_profile(catalog, args.profile_id)
     if not profile:
         fail(f"unknown profile: {args.profile_id}")
-    if profile["engine"] not in {"lemonade", "llamacpp", "rocmfpx", "strixvulkan"}:
+    if profile["engine"] not in ({"lemonade", "llamacpp", "rocmfpx"} | STRIXVULKAN_ENGINES):
         fail("reasoning reliability benchmark requires a llama.cpp-compatible profile")
     model = catalog.models[profile["model"]]
     if model.get("default_reasoning_effort") != "medium":
@@ -5143,7 +5524,7 @@ def build_parser() -> argparse.ArgumentParser:
     presets.add_parser("list")
     show_preset = presets.add_parser("show"); show_preset.add_argument("preset_id")
     render_preset = presets.add_parser("render"); render_preset.add_argument("preset_id")
-    install = sub.add_parser("install"); install.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "strixvulkan", "ds4", "speech", "vllm", "all"], nargs="?", default="all")
+    install = sub.add_parser("install"); install.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "strixvulkan", "strixvulkan075", "ds4", "speech", "vllm", "all"], nargs="?", default="all")
     start = sub.add_parser("start", help="start one catalog profile")
     start.add_argument("profile_id")
     start.add_argument(
@@ -5224,7 +5605,7 @@ def build_parser() -> argparse.ArgumentParser:
     reasoning_reliability.add_argument("--seed", type=int, default=1)
     reasoning_reliability.add_argument("--timeout", type=int, default=900)
     reasoning_reliability.add_argument("--output", help="resumable atomic JSON report path")
-    update = sub.add_parser("update"); update.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "strixvulkan", "ds4", "speech", "vllm", "all"])
+    update = sub.add_parser("update"); update.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "strixvulkan", "strixvulkan075", "ds4", "speech", "vllm", "all"])
     speech_candidate = sub.add_parser(
         "speech-candidate",
         help="build and validate the isolated Python 3.14 / ROCm 10 speech candidate",
