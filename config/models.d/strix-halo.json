@@ -540,7 +540,7 @@
       "risk": "experimental-lockup",
       "features": ["mtp"],
       "thinking": false,
-      "proposal_policy": "educated-best-guess-width-3-q4-shared-head-q8-draft-kv",
+      "proposal_policy": "measured-width-3-q4-head-slower-than-width-4-diagnostic",
       "settings": {
         "device": "Vulkan0",
         "gpu_layers": "all",
@@ -576,7 +576,7 @@
       "risk": "experimental-lockup",
       "features": ["mtp"],
       "thinking": false,
-      "proposal_policy": "fixed-width-4-throughput-challenger-q4-shared-head-q8-draft-kv",
+      "proposal_policy": "measured-width-4-q4-head-performance-only-strict-identity-not-proven",
       "settings": {
         "device": "Vulkan0",
         "gpu_layers": "all",
@@ -612,7 +612,7 @@
       "risk": "experimental-lockup",
       "features": ["mtp"],
       "thinking": false,
-      "proposal_policy": "fixed-width-2-q8-shared-head-q8-draft-kv",
+      "proposal_policy": "measured-width-2-q8-head-slower-than-q4-diagnostic",
       "settings": {
         "device": "Vulkan0",
         "gpu_layers": "all",
@@ -649,7 +649,7 @@
       "risk": "experimental-lockup",
       "features": ["mtp"],
       "thinking": false,
-      "proposal_policy": "fixed-width-4-q8-shared-head-q8-draft-kv",
+      "proposal_policy": "measured-width-4-q8-head-slower-than-q4-diagnostic",
       "settings": {
         "device": "Vulkan0",
         "gpu_layers": "all",

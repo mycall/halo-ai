@@ -116,8 +116,10 @@ existing flat local directory. The optional cataloged shared Q4_K_M MTP head
 adds 1,907,151,936 bytes (1.78 GiB), for a selected MTP closure of
 113,241,806,720 bytes (105.46 GiB). Its locally verified SHA-256 is
 `f521868a9e143718bef513772f6e04d9642551e362cf2439636d2abdbd149dfc`
-at the same pinned revision. A separately selectable shared Q8_0 head is also
-pinned; profiles never mount or account for both heads at once.
+at the same pinned revision. A separately selectable 2,786,568,256-byte shared
+Q8_0 head is locally verified as
+`5ff54097406a905cf3a724c709124ceb0e3e10235ee862298969e91c96fa96e6`;
+profiles never mount or account for both heads at once.
 
 No supplementary file is required for the target-only profile: the tokenizer
 and chat template are embedded in shard 1. The MTP profile additionally mounts
@@ -184,12 +186,10 @@ halo-ai start qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-q8-n4 --switch
 The first Q6 advanced guess uses the already-installed Q6 XL target, BF16 projector,
 and Q4_K_M DFlash2 sidecar at 65K context, 2048/512 batch sizes, draft width 6,
 probability floor 0.10, F16 target K/V, and Q8 draft K/V. A width-3 alternative
-is cataloged separately. The Flash advanced guess reuses the existing four
-target shards and Q4_K_M shared head at 32K, uses Q8 target/draft K/V, width 3,
-probability floor 0.75, mmap with lazy reads, no repacking, no host buffers, and
-a medium reasoning effort capped at 2,048 tokens. These are hypotheses, not
-qualified defaults; compare end-to-end latency and exact outputs against the
-matched baselines before promoting one. See
+is cataloged separately. The Flash candidates reuse the existing four target
+shards and a selectable Q4_K_M or Q8_0 shared head at 32K, with Q8 target/draft
+K/V, widths 2--4, probability floor 0.75, mmap with lazy reads, no repacking,
+no host buffers, and a medium reasoning effort capped at 2,048 tokens. See
 [`docs/qwen3.8-flash-test-plan.md`](docs/qwen3.8-flash-test-plan.md).
 
 The initial same-host Q6 screen selected width 6 and rejected ubatch 2048. At
@@ -204,6 +204,18 @@ proving strict identity for Q4 and Q8 under the fixed suite. No new target model
 was downloaded. `qwen3.8-27b` now selects the Q8 profile as the balanced Qwen3.8
 default; the existing native-262K `qwen3.8df2` alias remains unchanged. Exact measurements are in
 [`docs/results/qwen3.8-q6xl-strix075-advanced-2026-09-10.json`](docs/results/qwen3.8-q6xl-strix075-advanced-2026-09-10.json).
+
+The Flash-Next screen selected Q4-head width 4 as a performance-only option,
+not a default. It decoded 59.4% faster at 4K+64 and 87.0% faster at 32K+64,
+but speculative prefill made the 32K short request 15.1% slower end-to-end. At
+4K+1,024 it was 35.8% faster end-to-end; at 31,743+1,024 it was still 0.94%
+slower, with a crossover beyond the remaining context budget. Two fresh Q4 and
+two fresh Q8 quality processes were internally consistent but each matched
+only 12/13 target token streams. Q8 width 4 was also 4.5--4.8% slower than Q4
+by two-pass wall-time median and used about 0.8--0.9 GiB more GTT. Therefore
+target-only remains the strict/general Flash route, Q4 width 4 is for long
+generation after shallower prompts, and Q8 remains a verified diagnostic. See
+[`docs/results/qwen3.8-flash-next-strix075-advanced-2026-09-10.json`](docs/results/qwen3.8-flash-next-strix075-advanced-2026-09-10.json).
 
 ## Qwen3.8 ROCmFP4 baseline
 

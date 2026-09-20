@@ -382,10 +382,10 @@ accept an incomplete shard set.
 ### Expected-file manifest
 
 The following SHA-256 values are the **published expected hashes** observed from
-the upstream repositories through 2026-09-02. They become locally verified only after
+the upstream repositories through 2026-09-10. They become locally verified only after
 `halo-ai models verify --full` hashes the installed bytes and records the result.
-The four Flash Next UD-Q4_K_XL shards were also independently hashed locally on
-2026-09-02 and matched these values exactly.
+The four Flash Next UD-Q4_K_XL shards were independently hashed locally on
+2026-09-02, and its shared Q8_0 head on 2026-09-10; all matched these values.
 Each manifest entry is `sha256 bytes relative-path`:
 
 ```text
@@ -1587,10 +1587,10 @@ without changing `qwen3.8df2` or any other alias:
 | `qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-bf16` | Same target/projector + BF16 DFlash2, width 6 | Precision diagnostic; slower and heavier here |
 | `qwen3.8-flash-next-ud-q4-k-xl-strix075-baseline` | Existing four-shard Flash target, 32K, no MTP | Matched control |
 | `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-n2` | Existing Q4_K_M shared head, width 2 | Conservative control |
-| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-advanced` | Same head, width 3, p-min 0.75, Q8 target/draft K/V | Educated Flash guess |
-| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-n4` | Same head, width 4 | Throughput challenger |
-| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-q8-n2` | Shared Q8_0 head, width 2 | Upstream-precision control |
-| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-q8-n4` | Shared Q8_0 head, width 4 | Upstream-precision throughput challenger |
+| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-advanced` | Same head, width 3, p-min 0.75, Q8 target/draft K/V | Measured width diagnostic |
+| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-n4` | Same head, width 4 | Measured performance-only choice; strict identity not proven |
+| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-q8-n2` | Shared Q8_0 head, width 2 | Verified slower diagnostic |
+| `qwen3.8-flash-next-ud-q4-k-xl-strix075-mtp-q8-n4` | Shared Q8_0 head, width 4 | Verified slower diagnostic |
 
 The advanced settings are deliberately first-class catalog data rather than
 unreviewed extra arguments. Halo validates and renders the separate draft K/V,
@@ -1620,6 +1620,23 @@ streams. Strict identity is therefore proven for both Q4 and Q8 under this
 bounded suite. The Q8 profile is the measured optimized choice, while IQ4_XS
 is the lower-memory option. The build-10577 alias remains unchanged. See
 `docs/results/qwen3.8-q6xl-strix075-advanced-2026-09-10.json`.
+
+The separate Flash-Next matrix selected the Q4_K_M shared head at width 4 as a
+performance-only option. It decoded 59.4% faster than target-only at 4K+64 and
+87.0% faster at 32K+64, but prompt processing was slower. It tied end-to-end at
+4K+64 and lost by 15.1% at 32K+64. At 4K+1,024 it won end-to-end by 35.8%; at
+31,743+1,024 it still lost by 0.94%, with a measured crossover of about 1,093
+generated tokens beyond the available context budget.
+
+The fully verified Q8_0 shared head did not improve this result. Across two
+fresh width-4 timing passes its median wall time was 4.8% slower than Q4 at 4K
+and 4.5% slower at 32K, with about 0.8--0.9 GiB more peak GTT. Two fresh
+target-only, Q4-width-4, and Q8-width-4 quality processes were each internally
+consistent and scored 10/13. Both MTP heads matched only 12/13 target token
+streams, deterministically returning `e` instead of target-only `eul` in
+`code-slice-semantics`. Neither MTP profile is promoted as a strict or general
+default. See
+`docs/results/qwen3.8-flash-next-strix075-advanced-2026-09-10.json`.
 
 Vision+DFlash2 was tested on pinned build 10577. At `n-max=7` the combined
 runtime returned the correct red-image canary and reported real drafting. On a

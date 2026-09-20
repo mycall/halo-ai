@@ -11,14 +11,15 @@ Current preparation state (2026-09-10):
    `f521868a9e143718bef513772f6e04d9642551e362cf2439636d2abdbd149dfc`;
    both match the pinned Hugging Face LFS object. The combined base-and-draft
    closure is 113,241,806,720 bytes (105.46 GiB).
-   The upstream shared Q8_0 head is independently cataloged at 2,786,568,256
-   bytes with SHA-256
+   The upstream shared Q8_0 head is also present and independently cataloged at
+   2,786,568,256 bytes with locally verified SHA-256
    `5ff54097406a905cf3a724c709124ceb0e3e10235ee862298969e91c96fa96e6`;
    Q4 and Q8 profiles select only their own head.
 3. The catalog provides separate target-only and external-head MTP profiles at
-   32,768 context. Both use explicit all-layer offload, Q8 K/V, mmap, one slot,
-   batch 8192, ubatch 2048, four decode threads, 32 batch threads, Flash
-   Attention, hipBLASLt, disabled automatic fitting, and the gfx1151
+   32,768 context. The standalone build-10715 pair uses batch/ubatch 8192/2048;
+   the v0.7.5 matrix uses the measured 2048/512 pair. Both lanes use explicit
+   all-layer offload, Q8 K/V, mmap, one slot, four decode threads, 32 batch
+   threads, Flash Attention, disabled automatic fitting, and the gfx1151
    attention-rotation workaround.
 4. Lemonade Server 11.8.1 stable remains unsuitable: its pinned ROCm backend is
    llama.cpp build 10594, before `qwen4exp` support. The old standalone build
@@ -164,8 +165,16 @@ prompt depth produced:
 
 Width 4 is the Q4 decode winner: 59.4% faster than target-only at 4K and 87.0%
 faster at 32K. For a 64-token completion, however, its speculative-prefill
-cost leaves 4K wall time effectively tied and 32K wall time 15.1% slower. The
-estimated end-to-end break-even is about 64 output tokens at 4K and 883 at 32K.
+cost leaves 4K wall time effectively tied and 32K wall time 15.1% slower.
+
+A matched 1,024-output-token follow-up measured the crossover directly. At 4K,
+width 4 completed in 37.63 seconds versus 58.60 seconds target-only, a 35.8%
+end-to-end win with 99.13% acceptance. At 31,743 prompt tokens it completed in
+165.11 seconds versus 163.58 seconds target-only, still 0.94% slower despite
+96.37% acceptance. The observed crossover there is about 1,093 generated
+tokens, beyond the remaining 32K context budget. Thus Q4 width 4 is useful for
+long generations after shallow/moderate prompts, while target-only was
+preferable near this profile's context ceiling in this screen.
 
 Two fresh target-only processes and two fresh width-4 processes each scored
 10/13 and were internally consistent on all 13 fixed-quality cases. Width 4
@@ -175,6 +184,28 @@ width-1 diagnostic), versus target-only `eul`. Both answers fail that case, so
 the bounded score is unchanged, but strict identity is not proven. The Q4 MTP
 arms therefore remain performance-only experimental profiles and are not a
 default route.
+
+### Same-host Q8-head result
+
+The pinned shared Q8_0 head passed full local SHA-256 verification and both
+widths loaded, generated, and stopped cleanly. It did not reproduce the
+upstream Q8 speed advantage under this target/runtime:
+
+| Arm | 4K+64 PP / decode tok/s | 4K wall | 32K+64 PP / decode tok/s | 32K wall | Peak GTT |
+| --- | --- | ---: | --- | ---: | ---: |
+| Q8 head, width 2 | 268.52 / 32.06 | 17.27 s | 226.85 / 32.64 | 143.05 s | 80.0 GiB |
+| Q8 head, width 4 | 266.90 / 35.77 | 17.18 s | 220.13 / 38.41 | 147.06 s | 80.1 GiB |
+
+Against its matched Q4 width, Q8 was 3.1% slower end-to-end for width 2 at both
+depths. A second fresh Q8-width-4 timing pass measured 17.63 seconds at 4K and
+142.98 seconds at 32K; the two-pass medians are 17.41 and 145.02 seconds, 4.8%
+and 4.5% slower than Q4 width 4. Draft acceptance was identical for these
+deterministic prompts, while peak GTT was about 0.8--0.9 GiB higher. Two fresh
+Q8-width-4 quality processes scored 10/13, were internally consistent on all
+13 cases, and matched only 12/13 target token streams, with the same
+`code-slice-semantics` divergence as Q4. Q8 therefore remains a verified
+diagnostic profile; Q4 width 4 is the measured MTP speed choice, and target-only
+remains the strict/general default.
 
 The smaller Q6 control pair lets the same runtime policy be screened without a
 105 GiB model load:
