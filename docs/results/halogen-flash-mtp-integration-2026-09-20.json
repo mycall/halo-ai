@@ -1,0 +1,1285 @@
+{
+  "schema_version": 1,
+  "kind": "halogen-mtp-integration-check",
+  "recorded_at": "2026-09-20T23:59:08.646607+00:00",
+  "health": {
+    "status": "ok",
+    "model": "halogen-qwen3.8-flash-next",
+    "endpoints": [
+      "/v1/chat/completions",
+      "/v1/completions",
+      "/v1/models",
+      "/v1/responses"
+    ],
+    "cache_counters": "/cache",
+    "metrics": "/metrics",
+    "context": 32768,
+    "rope_scaling": null,
+    "indexer_budget": 2048,
+    "vision": {
+      "enabled": false,
+      "endpoints": [
+        "/v1/chat/completions",
+        "/v1/responses"
+      ],
+      "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+      "max_pixels": 3686400,
+      "size_multiple": 32,
+      "disabled_because": [
+        "the engine was started without a vision tower (HALOGEN_VISION_TOWER)"
+      ]
+    },
+    "version": {
+      "api": "0.12.2",
+      "engine": "0.12.2",
+      "match": true
+    },
+    "checkpoint_format": "hgn",
+    "chat_template": {
+      "path": "/models/tokenizer/chat_template.jinja",
+      "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+      "probe": "passed",
+      "thinking_control": true
+    },
+    "engine": {
+      "responds": true,
+      "probe_s": 1.001
+    },
+    "busy": false,
+    "slots": 1,
+    "slot_ctx": 32768,
+    "kv_pool_positions": 32768,
+    "in_flight": 0,
+    "busy_for_s": 0,
+    "queued": 0,
+    "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+    "drafters_available": [
+      "serial",
+      "mtp"
+    ],
+    "drafter_default": "mtp",
+    "prompt_lookup": "off",
+    "shortlist_draft_head": false,
+    "drafter_weights_loaded": true,
+    "prompt_cache": {
+      "enabled": false,
+      "cap_mb": 0,
+      "mode": 0,
+      "snapshot_align": 0,
+      "bitwise_identical_to_cold": false
+    },
+    "composable_context": {
+      "enabled": false
+    },
+    "tool_calls": {
+      "wire_format": "qwen-xml (<function=>/<parameter=>)",
+      "streaming": true,
+      "tool_choice": [
+        "auto",
+        "none",
+        "required",
+        "{type: function, function: {name}}"
+      ],
+      "forced_call_is_a_prefill": true,
+      "required_is_exact": "named tool_choice, or one tool",
+      "parallel_tool_calls": true,
+      "constrained_decoding": false,
+      "forced_call_disables_thinking": true,
+      "argument_types_need_schema": true
+    },
+    "supported": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking",
+      "max_thinking_tokens",
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning",
+      "thinking",
+      "tools",
+      "tool_choice",
+      "parallel_tool_calls",
+      "stop",
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens",
+      "stream",
+      "stream_options"
+    ],
+    "token_budget_aliases": [
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens"
+    ],
+    "max_tokens_default": 8192,
+    "reasoning_effort_default": "medium",
+    "reasoning_effort_values": [
+      "high",
+      "low",
+      "medium",
+      "minimal",
+      "none",
+      "xhigh"
+    ],
+    "token_budget_covers_reasoning": true,
+    "max_thinking_tokens_default": null,
+    "thinking_answer_room": "max(1024, 15% of max_tokens)",
+    "thinking_control_aliases": [
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning.{enabled,effort,max_tokens}",
+      "thinking.{type,budget_tokens}"
+    ],
+    "server_defaults": {
+      "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+      "HALOGEN_TEMPERATURE": 1.0,
+      "HALOGEN_TOP_P": 0.95,
+      "HALOGEN_TOP_K": 20,
+      "HALOGEN_REASONING_EFFORT": "medium"
+    },
+    "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+    "chat_template_kwargs": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking"
+    ],
+    "error_format": "openai",
+    "accepted_but_ignored": [
+      "n"
+    ],
+    "not_implemented": [],
+    "structured_output": {
+      "enabled": true,
+      "reason": null,
+      "response_format": [
+        "json_schema",
+        "json_object"
+      ],
+      "text.format": [
+        "json_schema",
+        "json_object"
+      ],
+      "routes": [
+        "/v1/chat/completions",
+        "/v1/completions",
+        "/v1/responses"
+      ],
+      "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+      "images": "a schema with images is a 400",
+      "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+      "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+      "keys": "object keys are emitted in schema order",
+      "enforced": [
+        "type",
+        "properties",
+        "required",
+        "additionalProperties",
+        "items",
+        "minItems",
+        "maxItems",
+        "minLength",
+        "maxLength",
+        "enum",
+        "const",
+        "anyOf",
+        "oneOf (as anyOf)",
+        "type: [..., \"null\"]",
+        "$ref",
+        "$defs"
+      ],
+      "accepted_not_enforced": [
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "title",
+        "description",
+        "default",
+        "examples"
+      ],
+      "refused": [
+        "pattern",
+        "format",
+        "allOf",
+        "not",
+        "if",
+        "then",
+        "else",
+        "patternProperties",
+        "dependentRequired",
+        "dependentSchemas",
+        "uniqueItems",
+        "contains",
+        "propertyNames",
+        "unevaluatedProperties",
+        "unevaluatedItems",
+        "minProperties",
+        "maxProperties",
+        "prefixItems"
+      ]
+    },
+    "sampling": {
+      "implemented": [
+        "temperature",
+        "top_p",
+        "top_k",
+        "min_p",
+        "seed",
+        "presence_penalty",
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs"
+      ],
+      "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+      "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter",
+      "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+      "penalties": "presence and frequency count GENERATED tokens only; applied on both drafters",
+      "not_implemented": [
+        "top_logprobs",
+        "logprobs with stream=true",
+        "n > 1"
+      ]
+    },
+    "max_tokens_cap": 65536,
+    "max_tokens_over_cap": "400"
+  },
+  "suite_sha256": "909ef8bc4f88d69c61e49e6816c81e7a1dbb3450babed7a4c70164392aa7bd8e",
+  "method": "Sequential serial versus MTP requests in one process; temperature 0, seed 1, thinking off, cache off, prompt lookup off. Equality compares returned content bytes, not hidden engine token IDs. This is a bounded integration check, not general qualification.",
+  "cases": [
+    {
+      "case_id": "code-trace-alternating",
+      "expected": "12",
+      "serial": {
+        "output": "2",
+        "sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "wall_seconds": 1.410499,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 111,
+          "completion_tokens": 2,
+          "total_tokens": 113,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 111,
+          "predicted_n": 2,
+          "prompt_ms": 1372.2,
+          "predicted_ms": 33.6,
+          "prompt_per_second": 80.892,
+          "predicted_per_second": 59.524,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": false
+      },
+      "mtp": {
+        "output": "2",
+        "sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "wall_seconds": 1.320907,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 111,
+          "completion_tokens": 2,
+          "total_tokens": 113,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 111,
+          "predicted_n": 2,
+          "prompt_ms": 1276.5,
+          "predicted_ms": 40.7,
+          "prompt_per_second": 86.957,
+          "predicted_per_second": 49.14,
+          "cache_n": 0,
+          "draft_n": 1,
+          "draft_n_accepted": 0
+        },
+        "passed": false
+      },
+      "identical_text": true
+    },
+    {
+      "case_id": "code-slice-semantics",
+      "expected": "put",
+      "mtp": {
+        "output": "p",
+        "sha256": "148de9c5a7a44d19e56cd9ae1a554bf67847afb0c58f6e12fa29ac7ddfca9940",
+        "wall_seconds": 1.108984,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 67,
+          "completion_tokens": 2,
+          "total_tokens": 69,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 67,
+          "predicted_n": 2,
+          "prompt_ms": 1061.1,
+          "predicted_ms": 43.7,
+          "prompt_per_second": 63.142,
+          "predicted_per_second": 45.767,
+          "cache_n": 0,
+          "draft_n": 1,
+          "draft_n_accepted": 1
+        },
+        "passed": false
+      },
+      "serial": {
+        "output": "p",
+        "sha256": "148de9c5a7a44d19e56cd9ae1a554bf67847afb0c58f6e12fa29ac7ddfca9940",
+        "wall_seconds": 1.018839,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 67,
+          "completion_tokens": 2,
+          "total_tokens": 69,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 67,
+          "predicted_n": 2,
+          "prompt_ms": 984.6,
+          "predicted_ms": 30.0,
+          "prompt_per_second": 68.048,
+          "predicted_per_second": 66.667,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": false
+      },
+      "identical_text": true
+    },
+    {
+      "case_id": "reasoning-crt",
+      "expected": "38",
+      "serial": {
+        "output": "31",
+        "sha256": "eb1e33e8a81b697b75855af6bfcdbcbf7cbbde9f94962ceaec1ed8af21f5a50f",
+        "wall_seconds": 1.044134,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 63,
+          "completion_tokens": 3,
+          "total_tokens": 66,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 63,
+          "predicted_n": 3,
+          "prompt_ms": 975.8,
+          "predicted_ms": 64.9,
+          "prompt_per_second": 64.562,
+          "predicted_per_second": 46.225,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": false
+      },
+      "mtp": {
+        "output": "31",
+        "sha256": "eb1e33e8a81b697b75855af6bfcdbcbf7cbbde9f94962ceaec1ed8af21f5a50f",
+        "wall_seconds": 1.017489,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 63,
+          "completion_tokens": 3,
+          "total_tokens": 66,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 63,
+          "predicted_n": 3,
+          "prompt_ms": 975.9,
+          "predicted_ms": 37.8,
+          "prompt_per_second": 64.556,
+          "predicted_per_second": 79.365,
+          "cache_n": 0,
+          "draft_n": 1,
+          "draft_n_accepted": 1
+        },
+        "passed": false
+      },
+      "identical_text": true
+    },
+    {
+      "case_id": "reasoning-probability",
+      "expected": "3/10",
+      "mtp": {
+        "output": "3/10",
+        "sha256": "088ae5cc7815cf98be130c0421b8ba0cb92125b5a50045e0aff058e5e04bfe94",
+        "wall_seconds": 1.172519,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 69,
+          "completion_tokens": 5,
+          "total_tokens": 74,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 69,
+          "predicted_n": 5,
+          "prompt_ms": 1085.0,
+          "predicted_ms": 83.2,
+          "prompt_per_second": 63.594,
+          "predicted_per_second": 60.096,
+          "cache_n": 0,
+          "draft_n": 2,
+          "draft_n_accepted": 2
+        },
+        "passed": true
+      },
+      "serial": {
+        "output": "3/10",
+        "sha256": "088ae5cc7815cf98be130c0421b8ba0cb92125b5a50045e0aff058e5e04bfe94",
+        "wall_seconds": 1.151844,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 69,
+          "completion_tokens": 5,
+          "total_tokens": 74,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 69,
+          "predicted_n": 5,
+          "prompt_ms": 1027.3,
+          "predicted_ms": 120.5,
+          "prompt_per_second": 67.166,
+          "predicted_per_second": 41.494,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": true
+      },
+      "identical_text": true
+    },
+    {
+      "case_id": "logic-ordering",
+      "expected": "De,Ada,Bo,Cy",
+      "serial": {
+        "output": "De,Ada,Bo,Cy",
+        "sha256": "e5a37483d6170212361600e0d048fa82bbbd128f78bad5f3bca084df391ca481",
+        "wall_seconds": 1.272992,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 71,
+          "completion_tokens": 8,
+          "total_tokens": 79,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 71,
+          "predicted_n": 8,
+          "prompt_ms": 1047.8,
+          "predicted_ms": 220.5,
+          "prompt_per_second": 67.761,
+          "predicted_per_second": 36.281,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": true
+      },
+      "mtp": {
+        "output": "De,Ada,Bo,Cy",
+        "sha256": "e5a37483d6170212361600e0d048fa82bbbd128f78bad5f3bca084df391ca481",
+        "wall_seconds": 1.226759,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 71,
+          "completion_tokens": 8,
+          "total_tokens": 79,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 71,
+          "predicted_n": 8,
+          "prompt_ms": 1058.7,
+          "predicted_ms": 164.1,
+          "prompt_per_second": 67.063,
+          "predicted_per_second": 48.751,
+          "cache_n": 0,
+          "draft_n": 4,
+          "draft_n_accepted": 4
+        },
+        "passed": true
+      },
+      "identical_text": true
+    },
+    {
+      "case_id": "instruction-exact-format",
+      "expected": "amber|7|BLUE",
+      "mtp": {
+        "output": "amber|7|BLUE",
+        "sha256": "46fd60a30989ef8b1dddc06bbba26c3735e60bf64f5e975df8c6917ab9d82695",
+        "wall_seconds": 1.102278,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 65,
+          "completion_tokens": 6,
+          "total_tokens": 71,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 65,
+          "predicted_n": 6,
+          "prompt_ms": 971.1,
+          "predicted_ms": 127.0,
+          "prompt_per_second": 66.934,
+          "predicted_per_second": 47.244,
+          "cache_n": 0,
+          "draft_n": 3,
+          "draft_n_accepted": 2
+        },
+        "passed": true
+      },
+      "serial": {
+        "output": "amber|7|BLUE",
+        "sha256": "46fd60a30989ef8b1dddc06bbba26c3735e60bf64f5e975df8c6917ab9d82695",
+        "wall_seconds": 1.064745,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 65,
+          "completion_tokens": 6,
+          "total_tokens": 71,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 65,
+          "predicted_n": 6,
+          "prompt_ms": 913.0,
+          "predicted_ms": 147.8,
+          "prompt_per_second": 71.194,
+          "predicted_per_second": 40.595,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": true
+      },
+      "identical_text": true
+    },
+    {
+      "case_id": "tool-arguments-json",
+      "expected": {
+        "city": "Kyiv",
+        "units": "metric",
+        "days": 3
+      },
+      "serial": {
+        "output": "{\"city\": \"Kyiv\", \"units\": \"metric\", \"days\": 3}",
+        "sha256": "5c5e757cc58812caad3dd88e399ad6fcf239927e311098f40f4b43237432cf91",
+        "wall_seconds": 1.762136,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 82,
+          "completion_tokens": 20,
+          "total_tokens": 102,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 82,
+          "predicted_n": 20,
+          "prompt_ms": 1163.1,
+          "predicted_ms": 594.7,
+          "prompt_per_second": 70.501,
+          "predicted_per_second": 33.63,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": true
+      },
+      "mtp": {
+        "output": "{\"city\": \"Kyiv\", \"units\": \"metric\", \"days\": 3}",
+        "sha256": "5c5e757cc58812caad3dd88e399ad6fcf239927e311098f40f4b43237432cf91",
+        "wall_seconds": 1.563452,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 82,
+          "completion_tokens": 20,
+          "total_tokens": 102,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 82,
+          "predicted_n": 20,
+          "prompt_ms": 1151.1,
+          "predicted_ms": 408.3,
+          "prompt_per_second": 71.236,
+          "predicted_per_second": 48.984,
+          "cache_n": 0,
+          "draft_n": 10,
+          "draft_n_accepted": 10
+        },
+        "passed": true
+      },
+      "identical_text": true
+    },
+    {
+      "case_id": "json-filter-sort",
+      "expected": [
+        2,
+        3
+      ],
+      "mtp": {
+        "output": "[2,3]",
+        "sha256": "18b058689d010062a25cd7fb949b2abfea1757d2de45ca3abdda17db956e506b",
+        "wall_seconds": 1.309057,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 88,
+          "completion_tokens": 6,
+          "total_tokens": 94,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 88,
+          "predicted_n": 6,
+          "prompt_ms": 1177.6,
+          "predicted_ms": 127.2,
+          "prompt_per_second": 74.728,
+          "predicted_per_second": 47.17,
+          "cache_n": 0,
+          "draft_n": 3,
+          "draft_n_accepted": 2
+        },
+        "passed": true
+      },
+      "serial": {
+        "output": "[2,3]",
+        "sha256": "18b058689d010062a25cd7fb949b2abfea1757d2de45ca3abdda17db956e506b",
+        "wall_seconds": 1.255038,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 88,
+          "completion_tokens": 6,
+          "total_tokens": 94,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 88,
+          "predicted_n": 6,
+          "prompt_ms": 1100.7,
+          "predicted_ms": 150.2,
+          "prompt_per_second": 79.949,
+          "predicted_per_second": 39.947,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": true
+      },
+      "identical_text": true
+    },
+    {
+      "case_id": "multilingual-literal-retrieval",
+      "expected": "\u041a\u0418\u0407\u0412-482",
+      "serial": {
+        "output": "\u041a\u0418\u0407\u0412-482",
+        "sha256": "72d9a7ed748c5981ba430fe4672ba8c1f44d95dbaeea31a3a77208ac6bf0f21d",
+        "wall_seconds": 1.390845,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 81,
+          "completion_tokens": 9,
+          "total_tokens": 90,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 81,
+          "predicted_n": 9,
+          "prompt_ms": 1143.7,
+          "predicted_ms": 243.1,
+          "prompt_per_second": 70.823,
+          "predicted_per_second": 37.022,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": true
+      },
+      "mtp": {
+        "output": "\u041a\u0418\u0407\u0412-482",
+        "sha256": "72d9a7ed748c5981ba430fe4672ba8c1f44d95dbaeea31a3a77208ac6bf0f21d",
+        "wall_seconds": 1.283727,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 81,
+          "completion_tokens": 9,
+          "total_tokens": 90,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 81,
+          "predicted_n": 9,
+          "prompt_ms": 1120.1,
+          "predicted_ms": 159.5,
+          "prompt_per_second": 72.315,
+          "predicted_per_second": 56.426,
+          "cache_n": 0,
+          "draft_n": 4,
+          "draft_n_accepted": 4
+        },
+        "passed": true
+      },
+      "identical_text": true
+    },
+    {
+      "case_id": "special-token-literals",
+      "expected": "2",
+      "mtp": {
+        "output": "2",
+        "sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "wall_seconds": 1.146616,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 77,
+          "completion_tokens": 2,
+          "total_tokens": 79,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 77,
+          "predicted_n": 2,
+          "prompt_ms": 1100.3,
+          "predicted_ms": 42.0,
+          "prompt_per_second": 69.981,
+          "predicted_per_second": 47.619,
+          "cache_n": 0,
+          "draft_n": 1,
+          "draft_n_accepted": 1
+        },
+        "passed": true
+      },
+      "serial": {
+        "output": "2",
+        "sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "wall_seconds": 1.069715,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 77,
+          "completion_tokens": 2,
+          "total_tokens": 79,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 77,
+          "predicted_n": 2,
+          "prompt_ms": 1035.4,
+          "predicted_ms": 30.0,
+          "prompt_per_second": 74.367,
+          "predicted_per_second": 66.667,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": true
+      },
+      "identical_text": true
+    },
+    {
+      "case_id": "short-distractor-retrieval",
+      "expected": "violet-731",
+      "serial": {
+        "output": "violet-731",
+        "sha256": "9acd7f3e9fb81b79350788cd9858cdedf27bf34f59861380acdb1ea8fe6ddacd",
+        "wall_seconds": 1.306261,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 82,
+          "completion_tokens": 7,
+          "total_tokens": 89,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 82,
+          "predicted_n": 7,
+          "prompt_ms": 1116.9,
+          "predicted_ms": 185.3,
+          "prompt_per_second": 73.417,
+          "predicted_per_second": 37.777,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": true
+      },
+      "mtp": {
+        "output": "violet-731",
+        "sha256": "9acd7f3e9fb81b79350788cd9858cdedf27bf34f59861380acdb1ea8fe6ddacd",
+        "wall_seconds": 1.224701,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 82,
+          "completion_tokens": 7,
+          "total_tokens": 89,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 82,
+          "predicted_n": 7,
+          "prompt_ms": 1102.1,
+          "predicted_ms": 118.4,
+          "prompt_per_second": 74.403,
+          "predicted_per_second": 59.122,
+          "cache_n": 0,
+          "draft_n": 3,
+          "draft_n_accepted": 3
+        },
+        "passed": true
+      },
+      "identical_text": true
+    },
+    {
+      "case_id": "multi-turn-resynchronization",
+      "expected": "cedar-29",
+      "mtp": {
+        "output": "cedar-29",
+        "sha256": "290be6d57755515fdea8e835e7eba19f6f141898b4416d36ecd6224a3ca94a41",
+        "wall_seconds": 1.168255,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 77,
+          "completion_tokens": 6,
+          "total_tokens": 83,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 77,
+          "predicted_n": 6,
+          "prompt_ms": 1035.7,
+          "predicted_ms": 128.3,
+          "prompt_per_second": 74.346,
+          "predicted_per_second": 46.765,
+          "cache_n": 0,
+          "draft_n": 3,
+          "draft_n_accepted": 3
+        },
+        "passed": true
+      },
+      "serial": {
+        "output": "cedar-29",
+        "sha256": "290be6d57755515fdea8e835e7eba19f6f141898b4416d36ecd6224a3ca94a41",
+        "wall_seconds": 1.130614,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 77,
+          "completion_tokens": 6,
+          "total_tokens": 83,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 77,
+          "predicted_n": 6,
+          "prompt_ms": 977.8,
+          "predicted_ms": 148.7,
+          "prompt_per_second": 78.748,
+          "predicted_per_second": 40.35,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": true
+      },
+      "identical_text": true
+    },
+    {
+      "case_id": "long-context-needle",
+      "expected": "quartz-8142",
+      "serial": {
+        "output": "quartz-8142",
+        "sha256": "710f88d2146bc618e333e0ea23016587dd9adce443455c4ac5c70f5f38d19c30",
+        "wall_seconds": 20.647204,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 16949,
+          "completion_tokens": 8,
+          "total_tokens": 16957,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 16949,
+          "predicted_n": 8,
+          "prompt_ms": 20409.5,
+          "predicted_ms": 218.5,
+          "prompt_per_second": 830.447,
+          "predicted_per_second": 36.613,
+          "cache_n": 0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "passed": true
+      },
+      "mtp": {
+        "output": "quartz-8142",
+        "sha256": "710f88d2146bc618e333e0ea23016587dd9adce443455c4ac5c70f5f38d19c30",
+        "wall_seconds": 21.112191,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 16949,
+          "completion_tokens": 8,
+          "total_tokens": 16957,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 16949,
+          "predicted_n": 8,
+          "prompt_ms": 20925.9,
+          "predicted_ms": 167.6,
+          "prompt_per_second": 809.953,
+          "predicted_per_second": 47.733,
+          "cache_n": 0,
+          "draft_n": 4,
+          "draft_n_accepted": 4
+        },
+        "passed": true
+      },
+      "identical_text": true
+    }
+  ],
+  "generation_probe": {
+    "serial": {
+      "output": "```python\nfrom __future__ import annotations\nfrom typing import Any, Optional, Iterator, TypeVar\n\nT = TypeVar('T')\n\n\nclass Node:\n    \"\"\"A node in a singly linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional[Node[T]] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the linked list.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList:\n    \"\"\"A singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Add an element to the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node: Node[T] = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Remove and return the element from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data: T = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node: Optional[Node[T]] = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The size of the linked",
+      "sha256": "af93fef9d11f41fed9f8f64dafbc55cd1f517494972dacb16b583d04f0ae37c1",
+      "wall_seconds": 16.395795,
+      "finish_reason": "length",
+      "usage": {
+        "prompt_tokens": 38,
+        "completion_tokens": 512,
+        "total_tokens": 550,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "timings": {
+        "prompt_n": 38,
+        "predicted_n": 512,
+        "prompt_ms": 779.8,
+        "predicted_ms": 15611.5,
+        "prompt_per_second": 48.73,
+        "predicted_per_second": 32.796,
+        "cache_n": 0,
+        "draft_n": 0,
+        "draft_n_accepted": 0
+      }
+    },
+    "default_mtp": {
+      "output": "```python\nfrom __future__ import annotations\nfrom typing import Any, Optional, Iterator, TypeVar\n\nT = TypeVar('T')\n\n\nclass Node:\n    \"\"\"A node in a singly linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional[Node[T]] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the linked list.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList:\n    \"\"\"A singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Add an element to the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node: Node[T] = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Remove and return the element from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data: T = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node: Optional[Node[T]] = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The size of the linked",
+      "sha256": "af93fef9d11f41fed9f8f64dafbc55cd1f517494972dacb16b583d04f0ae37c1",
+      "wall_seconds": 11.737286,
+      "finish_reason": "length",
+      "usage": {
+        "prompt_tokens": 38,
+        "completion_tokens": 512,
+        "total_tokens": 550,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "timings": {
+        "prompt_n": 38,
+        "predicted_n": 512,
+        "prompt_ms": 621.1,
+        "predicted_ms": 11112.3,
+        "prompt_per_second": 61.182,
+        "predicted_per_second": 46.075,
+        "cache_n": 0,
+        "draft_n": 271,
+        "draft_n_accepted": 239
+      }
+    }
+  },
+  "summary": {
+    "cases": 13,
+    "serial_passed": 10,
+    "mtp_passed": 10,
+    "identical_cases": 13,
+    "probe_identical_text": true,
+    "speculative_totals": {
+      "serial": {
+        "draft_n": 0,
+        "draft_n_accepted": 0
+      },
+      "mtp": {
+        "draft_n": 311,
+        "draft_n_accepted": 276
+      }
+    },
+    "mtp_working": true
+  },
+  "runtime": {
+    "release": "0.12.2",
+    "image_digest": "sha256:8f4c75fc15a0e2f2c023241389c4c946a60fa4fb4cd6d350dfcea17e22d119f9",
+    "image_source_revision_label": "5cfb323bea4e",
+    "model_revision": "e238ffde1a89531743505349dd16ca35a1e09b15"
+  },
+  "model_verification": {
+    "full": true,
+    "valid": true,
+    "checked_at": "2026-09-20T23:56:15.811516+00:00",
+    "files": [
+      {
+        "name": "qwen38-flash-next-mtp.hgn",
+        "bytes": 1523566720,
+        "sha256": "0f50e9626df98168e7c6e0cc264e2a92b5184dd885a175a06628d979b5edceeb",
+        "digest_valid": true
+      },
+      {
+        "name": "qwen38-flash-next-vision.hgn",
+        "bytes": 897916416,
+        "sha256": "d62e0ae553fe88afd3833733d4a4c669f34d20fd8dfce4b9610525bed2134b10",
+        "digest_valid": true
+      },
+      {
+        "name": "qwen38-flash-next-w4b.hgn",
+        "bytes": 124068083904,
+        "sha256": "9c116bbc01f77b7a15464c1a124eb3325b286089b8a2a6f2856c9b246a235bd6",
+        "digest_valid": true
+      },
+      {
+        "name": "qwen38-flash-next-w4b.overlay-speed.hgn",
+        "bytes": 2478095488,
+        "sha256": "f49c8d14fa972c1db5115c714981e399585a6a98106a1a055d9e77026bb6de4c",
+        "digest_valid": true
+      },
+      {
+        "name": "qwen38-flash-next-w4b.overlay.hgn",
+        "bytes": 2572466560,
+        "sha256": "1cdfc3a9f988955bfe9a71bb808d393030abbf9f99d34ffa1ef93815a49b39ab",
+        "digest_valid": true
+      },
+      {
+        "name": "chat_template.jinja",
+        "bytes": 8952,
+        "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+        "digest_valid": true
+      },
+      {
+        "name": "generation_config.json",
+        "bytes": 202,
+        "sha256": "e70c136c1b78ddc1fb0905bac8e733a4dc448d4f852a5dd75143fffc70be550e",
+        "digest_valid": true
+      },
+      {
+        "name": "merges.txt",
+        "bytes": 3353259,
+        "sha256": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d",
+        "digest_valid": true
+      },
+      {
+        "name": "tokenizer.json",
+        "bytes": 12809320,
+        "sha256": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3",
+        "digest_valid": true
+      },
+      {
+        "name": "tokenizer_config.json",
+        "bytes": 17928,
+        "sha256": "b11349aafa7cdc6a320767cf7ceb29ed82f7eda5d65e8e0819e76f0ce947bf27",
+        "digest_valid": true
+      },
+      {
+        "name": "vocab.json",
+        "bytes": 6722759,
+        "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003",
+        "digest_valid": true
+      }
+    ]
+  },
+  "serving_validation": {
+    "profile": "qwen3.8-flash-next-halogen-262k-vision",
+    "api_base_url": "http://127.0.0.1:8731/v1",
+    "context": 262144,
+    "vision_enabled": true,
+    "chat_template_probe": "passed",
+    "version": {
+      "api": "0.12.2",
+      "engine": "0.12.2",
+      "match": true
+    },
+    "vision_smoke": {
+      "id": "chatcmpl-1b0c1d5856534cafa501c711",
+      "created": 1789948869,
+      "model": "halogen-qwen3.8-flash-next",
+      "object": "chat.completion",
+      "choices": [
+        {
+          "index": 0,
+          "finish_reason": "stop",
+          "message": {
+            "role": "assistant",
+            "content": "red",
+            "reasoning_content": "The user\n\nConsidering the limited time by the user, I have to give the solution based on the thinking directly now."
+          }
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 90,
+        "completion_tokens": 29,
+        "total_tokens": 119,
+        "completion_tokens_details": {
+          "reasoning_tokens": 26,
+          "reasoning_closed_at": 1,
+          "reasoning_closed_by": "answer_room"
+        }
+      },
+      "timings": {
+        "prompt_n": 90,
+        "predicted_n": 29,
+        "prompt_ms": 1405.2,
+        "predicted_ms": 848.6,
+        "prompt_per_second": 64.048,
+        "predicted_per_second": 34.174,
+        "cache_n": 0,
+        "draft_n": 1,
+        "draft_n_accepted": 1
+      }
+    },
+    "responses_smoke": {
+      "id": "resp_18bed566e35e4fc1bc8e7477",
+      "object": "response",
+      "created_at": 1789948920,
+      "status": "completed",
+      "model": "halogen-qwen3.8-flash-next",
+      "output": [
+        {
+          "id": "msg_18bed566e35e4fc1bc8e7477",
+          "type": "message",
+          "role": "assistant",
+          "status": "completed",
+          "content": [
+            {
+              "type": "output_text",
+              "text": "halo-ready",
+              "annotations": []
+            }
+          ]
+        }
+      ],
+      "parallel_tool_calls": true,
+      "max_output_tokens": 128,
+      "usage": {
+        "input_tokens": 18,
+        "output_tokens": 4,
+        "total_tokens": 22,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "timings": {
+        "prompt_n": 18,
+        "predicted_n": 4,
+        "prompt_ms": 448.2,
+        "predicted_ms": 87.2,
+        "prompt_per_second": 40.161,
+        "predicted_per_second": 45.872,
+        "cache_n": 0,
+        "draft_n": 2,
+        "draft_n_accepted": 2
+      }
+    },
+    "structured_output_smoke": {
+      "id": "chatcmpl-5272c89cf4124a53aae3872c",
+      "created": 1789948920,
+      "model": "halogen-qwen3.8-flash-next",
+      "object": "chat.completion",
+      "choices": [
+        {
+          "index": 0,
+          "finish_reason": "stop",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"status\": \"ready\"\n}"
+          }
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 22,
+        "completion_tokens": 12,
+        "total_tokens": 34,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "timings": {
+        "prompt_n": 22,
+        "predicted_n": 12,
+        "prompt_ms": 495.7,
+        "predicted_ms": 257.5,
+        "prompt_per_second": 44.382,
+        "predicted_per_second": 46.602,
+        "cache_n": 0,
+        "draft_n": 6,
+        "draft_n_accepted": 6
+      }
+    },
+    "memory_startup_gib": {
+      "pinned_weights": 68.0,
+      "kv_pool": 7.2,
+      "working_memory": 12.2,
+      "total": 87.4,
+      "host_remaining": 21.6
+    }
+  }
+}

@@ -354,12 +354,13 @@ class CatalogTests(unittest.TestCase):
             self.catalog = cli.load_catalog(self.config)
 
     def test_checked_in_catalog_validates(self) -> None:
-        self.assertEqual(len(self.catalog.models), 13)
-        self.assertEqual(len(self.catalog.profiles), 51)
+        self.assertEqual(len(self.catalog.models), 14)
+        self.assertEqual(len(self.catalog.profiles), 54)
         self.assertEqual(
             self.catalog.profile_aliases,
             {
                 "ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max",
+                "qwen3.8-halogen": "qwen3.8-flash-next-halogen-262k-vision",
                 "qwen3.8-27b": "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-q8",
                 "qwen3.8df2": "qwen3.8-27b-q6xl-strix-vision-dflash2",
                 "qwen3.8fp4": "qwen3.8-27b-rocmfp4-baseline",
@@ -640,7 +641,7 @@ class CatalogTests(unittest.TestCase):
     def test_catalog_matches_documented_expected_manifest(self) -> None:
         documented = {}
         for digest, size, relative in __import__("re").findall(
-            r"^([0-9a-f]{64}) ([0-9]+) ((?:antirez|unsloth|facebook|julianmb|incoai|ilintar)/[^\n]+\.(?:gguf|jinja|json|safetensors|model))$",
+            r"^([0-9a-f]{64}) ([0-9]+) ((?:antirez|unsloth|facebook|julianmb|incoai|ilintar|peonist-ai)/[^\n]+\.(?:gguf|jinja|json|safetensors|model|hgn|txt))$",
             (ROOT / "docs/halo-ai.md").read_text(encoding="utf-8"),
             __import__("re").MULTILINE,
         ):

@@ -1,0 +1,716 @@
+{
+  "schema_version": 1,
+  "kind": "halogen-native-serving-check",
+  "recorded_at": "2026-09-21T00:16:37.679858+00:00",
+  "checks": [
+    {
+      "name": "streaming-chat",
+      "passed": true,
+      "output": "streaming-ready"
+    },
+    {
+      "name": "tool-call",
+      "passed": true,
+      "response": {
+        "id": "chatcmpl-1b1fcf3e07c14f5cac4e45f6",
+        "created": 1789949799,
+        "model": "halogen-qwen3.8-flash-next",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_649b60059a0c4efc83b20e0f",
+                  "type": "function",
+                  "function": {
+                    "name": "lookup_city",
+                    "arguments": "{\"city\": \"Paris\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 297,
+          "completion_tokens": 18,
+          "total_tokens": 315,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 297,
+          "predicted_n": 18,
+          "prompt_ms": 1962.9,
+          "predicted_ms": 309.3,
+          "prompt_per_second": 151.307,
+          "predicted_per_second": 58.196,
+          "cache_n": 0,
+          "draft_n": 12,
+          "draft_n_accepted": 11
+        }
+      }
+    },
+    {
+      "name": "tool-result-round-trip",
+      "passed": true,
+      "response": {
+        "id": "chatcmpl-5cf24f8dd77f4b3f92d99dff",
+        "created": 1789949801,
+        "model": "halogen-qwen3.8-flash-next",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "France"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 74,
+          "completion_tokens": 2,
+          "total_tokens": 76,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 74,
+          "predicted_n": 2,
+          "prompt_ms": 1022.7,
+          "predicted_ms": 45.6,
+          "prompt_per_second": 72.357,
+          "predicted_per_second": 43.86,
+          "cache_n": 0,
+          "draft_n": 1,
+          "draft_n_accepted": 1
+        }
+      }
+    },
+    {
+      "name": "default-reasoning",
+      "passed": true,
+      "response": {
+        "id": "chatcmpl-3fbf6b65f59c4874a2f4775b",
+        "created": 1789949802,
+        "model": "halogen-qwen3.8-flash-next",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "391",
+              "reasoning_content": "The user wants me to calculate 17 * 23 and reply with only the integer.\n\n17 * 23 = 17 * 20 + 17 * 3 = 340 + 51 = 391"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 25,
+          "completion_tokens": 63,
+          "total_tokens": 88,
+          "completion_tokens_details": {
+            "reasoning_tokens": 58
+          }
+        },
+        "timings": {
+          "prompt_n": 25,
+          "predicted_n": 63,
+          "prompt_ms": 567.7,
+          "predicted_ms": 1387.0,
+          "prompt_per_second": 44.037,
+          "predicted_per_second": 45.422,
+          "cache_n": 0,
+          "draft_n": 39,
+          "draft_n_accepted": 34
+        }
+      }
+    },
+    {
+      "name": "retrieval-32768",
+      "passed": true,
+      "records": 959,
+      "expected": "delta-57034,delta-97930,delta-38826",
+      "rendered_prompt_tokens": 31724,
+      "prompt_sha256": "acfc166777ce7365a515105a020c6ab72fe5094965c998599455642eaa2ec429",
+      "wall_seconds": 38.34289553299999,
+      "response": {
+        "id": "chatcmpl-aaa824753f964554b9bd5084",
+        "created": 1789949847,
+        "model": "halogen-qwen3.8-flash-next",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "delta-57034,delta-97930,delta-38826"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 31724,
+          "completion_tokens": 24,
+          "total_tokens": 31748,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 31724,
+          "predicted_n": 24,
+          "prompt_ms": 37810.9,
+          "predicted_ms": 493.8,
+          "prompt_per_second": 839.017,
+          "predicted_per_second": 48.603,
+          "cache_n": 0,
+          "draft_n": 13,
+          "draft_n_accepted": 12
+        }
+      },
+      "correct_codes": 3,
+      "total_codes": 3
+    },
+    {
+      "name": "retrieval-131072",
+      "passed": true,
+      "records": 3938,
+      "expected": "delta-16896,delta-97240,delta-69665",
+      "rendered_prompt_tokens": 130031,
+      "prompt_sha256": "26d18dd970f963d03a949cf1387b7cd59f23b3da5da319d721ffd4d0a3798bd0",
+      "wall_seconds": 142.956711628,
+      "response": {
+        "id": "chatcmpl-9e715f83dbd948e7bf06d7e6",
+        "created": 1789949887,
+        "model": "halogen-qwen3.8-flash-next",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "delta-16896,delta-97240,delta-69665"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 130031,
+          "completion_tokens": 24,
+          "total_tokens": 130055,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 130031,
+          "predicted_n": 24,
+          "prompt_ms": 142278.9,
+          "predicted_ms": 542.6,
+          "prompt_per_second": 913.916,
+          "predicted_per_second": 44.231,
+          "cache_n": 0,
+          "draft_n": 12,
+          "draft_n_accepted": 12
+        }
+      },
+      "correct_codes": 3,
+      "total_codes": 3
+    },
+    {
+      "name": "retrieval-262144",
+      "passed": false,
+      "records": 7910,
+      "expected": "delta-68658,delta-24374,delta-80090",
+      "rendered_prompt_tokens": 261107,
+      "prompt_sha256": "fc24c93372327c21e6d0cb69b95d226058201249c6e99bb625b8db96d8ae0536",
+      "wall_seconds": 155.08762193799998,
+      "response": {
+        "id": "chatcmpl-79bc4ba2dbb8476482449999",
+        "created": 1789950033,
+        "model": "halogen-qwen3.8-flash-next",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "delta-16172,delta-24374,delta-80090"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 261107,
+          "completion_tokens": 24,
+          "total_tokens": 261131,
+          "prompt_tokens_details": {
+            "cached_tokens": 129984
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 131123,
+          "predicted_n": 24,
+          "prompt_ms": 154252.1,
+          "predicted_ms": 506.7,
+          "prompt_per_second": 850.056,
+          "predicted_per_second": 47.365,
+          "cache_n": 129984,
+          "draft_n": 12,
+          "draft_n_accepted": 11
+        }
+      },
+      "correct_codes": 2,
+      "total_codes": 3
+    },
+    {
+      "name": "retrieval-262144-fresh-process",
+      "passed": false,
+      "records": 7910,
+      "expected": "delta-68658,delta-24374,delta-80090",
+      "rendered_prompt_tokens": 261107,
+      "prompt_sha256": "fc24c93372327c21e6d0cb69b95d226058201249c6e99bb625b8db96d8ae0536",
+      "wall_seconds": 288.8756044879999,
+      "response": {
+        "id": "chatcmpl-574b72697bab43eba58cb2f6",
+        "created": 1789950257,
+        "model": "halogen-qwen3.8-flash-next",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "delta-92415,delta-24374,delta-80090"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 261107,
+          "completion_tokens": 24,
+          "total_tokens": 261131,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 261107,
+          "predicted_n": 24,
+          "prompt_ms": 287984.2,
+          "predicted_ms": 553.2,
+          "prompt_per_second": 906.671,
+          "predicted_per_second": 43.384,
+          "cache_n": 0,
+          "draft_n": 14,
+          "draft_n_accepted": 11
+        }
+      },
+      "correct_codes": 2,
+      "total_codes": 3
+    },
+    {
+      "name": "retrieval-warm-repeat",
+      "passed": false,
+      "records": 7910,
+      "requested_record_indices": [
+        791,
+        3955,
+        7119
+      ],
+      "expected": "delta-68658,delta-24374,delta-80090",
+      "rendered_prompt_tokens": 261107,
+      "prompt_sha256": "fc24c93372327c21e6d0cb69b95d226058201249c6e99bb625b8db96d8ae0536",
+      "request_policy": {
+        "max_tokens": 1024,
+        "reasoning_effort": "none"
+      },
+      "wall_seconds": 0.8324997720001193,
+      "response": {
+        "id": "chatcmpl-5c2757e58ff9467ca39438d3",
+        "created": 1789950623,
+        "model": "halogen-qwen3.8-flash-next",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "delta-92415,delta-24374,delta-80090"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 261107,
+          "completion_tokens": 24,
+          "total_tokens": 261131,
+          "prompt_tokens_details": {
+            "cached_tokens": 261107
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 0,
+          "predicted_n": 24,
+          "prompt_ms": 0.1,
+          "predicted_ms": 538.6,
+          "prompt_per_second": 0.0,
+          "predicted_per_second": 44.56,
+          "cache_n": 261107,
+          "draft_n": 14,
+          "draft_n_accepted": 11
+        }
+      },
+      "correct_codes": 2,
+      "total_codes": 3
+    },
+    {
+      "name": "retrieval-medium-budget",
+      "passed": false,
+      "records": 7693,
+      "requested_record_indices": [
+        791,
+        3955,
+        7119
+      ],
+      "expected": "delta-68658,delta-24374,delta-80090",
+      "rendered_prompt_tokens": 253944,
+      "prompt_sha256": "217f73d6bb8d8e7e6ced3fae92f5ad87a9dd47d893d177b4570a8b7965ebeb0c",
+      "request_policy": {
+        "max_tokens": 8192,
+        "reasoning_effort": "medium",
+        "max_thinking_tokens": 2048
+      },
+      "wall_seconds": 296.71016989099985,
+      "response": {
+        "id": "chatcmpl-201e856142004ebe926f1986",
+        "created": 1789950626,
+        "model": "halogen-qwen3.8-flash-next",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "delta-30330,delta-24374,delta-80090",
+              "reasoning_content": "The user wants me to find the retrieval_code values for three specific archive records: 000791, 003955, and 007119.\n\nLet me look up each one:\n\nRecord 000791: owner=team-95; state=closed; retrieval_code=delta-30330.\nWait, let me re-read. Record 000791: owner=team-79; state=closed; retrieval_code=delta-30330.\n\nActually, let me look more carefully at the records.\n\nRecord 000791: owner=team-79; state=closed; retrieval_code=delta-30330.\n\nWait, I need to find record 000791. Let me look at the pattern. The records go from 000000 to 007692. Let me find 000791.\n\nLooking at the data around record 791:\nArchive record 000790: owner=team-78; state=closed; retrieval_code=delta-22411.\nArchive record 000791: owner=team-79; state=closed; retrieval_code=delta-30330.\n\nWait, let me re-check. Looking at the sequence:\n- 000788: owner=team-76; state=closed; retrieval_code=delta-06573.\n- 000789: owner=team-77; state=closed; retrieval_code=delta-14492.\n- 000790: owner=team-78; state=closed; retrieval_code=delta-22411.\n- 000791: owner=team-79; state=closed; retrieval_code=delta-30330.\n\nSo record 000791 has retrieval_code=delta-30330.\n\nNow record 003955:\nLooking at the data around 3955:\n- 003954: owner=team-74; state=closed; retrieval_code=delta-16455.\n- 003955: owner=team-75; state=closed; retrieval_code=delta-24374.\n\nSo record 003955 has retrieval_code=delta-24374.\n\nNow record 007119:\nLooking at the data around 7119:\n- 007118: owner=team-37; state=closed; retrieval_code=delta-72171.\n- 007119: owner=team-38; state=closed; retrieval_code=delta-80090.\n\nSo record 007119 has retrieval_code=delta-80090.\n\nThe answer is: delta-30330,delta-24374,delta-80090"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 253944,
+          "completion_tokens": 732,
+          "total_tokens": 254676,
+          "completion_tokens_details": {
+            "reasoning_tokens": 707
+          }
+        },
+        "timings": {
+          "prompt_n": 253944,
+          "predicted_n": 732,
+          "prompt_ms": 280986.4,
+          "predicted_ms": 15415.9,
+          "prompt_per_second": 903.759,
+          "predicted_per_second": 47.483,
+          "cache_n": 0,
+          "draft_n": 561,
+          "draft_n_accepted": 436
+        }
+      },
+      "correct_codes": 2,
+      "total_codes": 3
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "model": "halogen-qwen3.8-flash-next",
+    "endpoints": [
+      "/v1/chat/completions",
+      "/v1/completions",
+      "/v1/models",
+      "/v1/responses"
+    ],
+    "cache_counters": "/cache",
+    "metrics": "/metrics",
+    "context": 262144,
+    "rope_scaling": null,
+    "indexer_budget": 2048,
+    "vision": {
+      "enabled": true,
+      "endpoints": [
+        "/v1/chat/completions",
+        "/v1/responses"
+      ],
+      "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+      "max_pixels": 3686400,
+      "size_multiple": 32
+    },
+    "version": {
+      "api": "0.12.2",
+      "engine": "0.12.2",
+      "match": true
+    },
+    "checkpoint_format": "hgn",
+    "chat_template": {
+      "path": "/models/tokenizer/chat_template.jinja",
+      "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+      "probe": "passed",
+      "thinking_control": true
+    },
+    "engine": {
+      "responds": true,
+      "probe_s": 1.001
+    },
+    "busy": false,
+    "slots": 1,
+    "slot_ctx": 262144,
+    "kv_pool_positions": 262144,
+    "in_flight": 0,
+    "busy_for_s": 0,
+    "queued": 0,
+    "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+    "drafters_available": [
+      "serial",
+      "mtp"
+    ],
+    "drafter_default": "mtp",
+    "prompt_lookup": {
+      "ngram": 3,
+      "chain": 3,
+      "applies_to": "greedy requests with the mtp drafter"
+    },
+    "shortlist_draft_head": false,
+    "drafter_weights_loaded": true,
+    "prompt_cache": {
+      "enabled": true,
+      "cap_mb": 110,
+      "mode": 2,
+      "snapshot_align": 64,
+      "bitwise_identical_to_cold": false
+    },
+    "composable_context": {
+      "enabled": false
+    },
+    "tool_calls": {
+      "wire_format": "qwen-xml (<function=>/<parameter=>)",
+      "streaming": true,
+      "tool_choice": [
+        "auto",
+        "none",
+        "required",
+        "{type: function, function: {name}}"
+      ],
+      "forced_call_is_a_prefill": true,
+      "required_is_exact": "named tool_choice, or one tool",
+      "parallel_tool_calls": true,
+      "constrained_decoding": false,
+      "forced_call_disables_thinking": true,
+      "argument_types_need_schema": true
+    },
+    "supported": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking",
+      "max_thinking_tokens",
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning",
+      "thinking",
+      "tools",
+      "tool_choice",
+      "parallel_tool_calls",
+      "stop",
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens",
+      "stream",
+      "stream_options"
+    ],
+    "token_budget_aliases": [
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens"
+    ],
+    "max_tokens_default": 8192,
+    "reasoning_effort_default": "medium",
+    "reasoning_effort_values": [
+      "high",
+      "low",
+      "medium",
+      "minimal",
+      "none",
+      "xhigh"
+    ],
+    "token_budget_covers_reasoning": true,
+    "max_thinking_tokens_default": null,
+    "thinking_answer_room": "max(1024, 15% of max_tokens)",
+    "thinking_control_aliases": [
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning.{enabled,effort,max_tokens}",
+      "thinking.{type,budget_tokens}"
+    ],
+    "server_defaults": {
+      "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+      "HALOGEN_TEMPERATURE": 1.0,
+      "HALOGEN_TOP_P": 0.95,
+      "HALOGEN_TOP_K": 20,
+      "HALOGEN_REASONING_EFFORT": "medium"
+    },
+    "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+    "chat_template_kwargs": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking"
+    ],
+    "error_format": "openai",
+    "accepted_but_ignored": [
+      "n"
+    ],
+    "not_implemented": [],
+    "structured_output": {
+      "enabled": true,
+      "reason": null,
+      "response_format": [
+        "json_schema",
+        "json_object"
+      ],
+      "text.format": [
+        "json_schema",
+        "json_object"
+      ],
+      "routes": [
+        "/v1/chat/completions",
+        "/v1/completions",
+        "/v1/responses"
+      ],
+      "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+      "images": "a schema with images is a 400",
+      "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+      "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+      "keys": "object keys are emitted in schema order",
+      "enforced": [
+        "type",
+        "properties",
+        "required",
+        "additionalProperties",
+        "items",
+        "minItems",
+        "maxItems",
+        "minLength",
+        "maxLength",
+        "enum",
+        "const",
+        "anyOf",
+        "oneOf (as anyOf)",
+        "type: [..., \"null\"]",
+        "$ref",
+        "$defs"
+      ],
+      "accepted_not_enforced": [
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "title",
+        "description",
+        "default",
+        "examples"
+      ],
+      "refused": [
+        "pattern",
+        "format",
+        "allOf",
+        "not",
+        "if",
+        "then",
+        "else",
+        "patternProperties",
+        "dependentRequired",
+        "dependentSchemas",
+        "uniqueItems",
+        "contains",
+        "propertyNames",
+        "unevaluatedProperties",
+        "unevaluatedItems",
+        "minProperties",
+        "maxProperties",
+        "prefixItems"
+      ]
+    },
+    "sampling": {
+      "implemented": [
+        "temperature",
+        "top_p",
+        "top_k",
+        "min_p",
+        "seed",
+        "presence_penalty",
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs"
+      ],
+      "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+      "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter",
+      "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+      "penalties": "presence and frequency count GENERATED tokens only; applied on both drafters",
+      "not_implemented": [
+        "top_logprobs",
+        "logprobs with stream=true",
+        "n > 1"
+      ]
+    },
+    "max_tokens_cap": 65536,
+    "max_tokens_over_cap": "400"
+  },
+  "passed": false,
+  "method": {
+    "sampling": {
+      "temperature": 0,
+      "reasoning_effort": "none",
+      "max_tokens": 1024
+    },
+    "context_checks": "Three deterministic retrieval codes planted implicitly in archive records at 10%, 50%, and 90% of the document. Session cache mode 2; each response records cached tokens. A fresh-process repeat isolates the near-limit result from prior prefix reuse. These are smoke checks, not a general long-context benchmark.",
+    "generator": {
+      "system_prompt": "Retrieve the requested records exactly. Reply with only the three retrieval codes in order, separated by commas and no spaces.",
+      "record_line": "Archive record {i:06d}: owner=team-{i%97:02d}; state=closed; retrieval_code=delta-{(i*7919+104729)%100000:05d}.",
+      "query": "Return the retrieval_code values for archive records {n//10:06d}, {n//2:06d}, and {9*n//10:06d}, in that order.",
+      "join": "newline; query appended after final newline",
+      "prompt_token_count": "Bundled tokenizer with apply_chat_template(tokenize=False, add_generation_prompt=True, enable_thinking=False), then encode(add_special_tokens=False).",
+      "prompt_sha256": "SHA-256 of json.dumps(messages, sort_keys=True).encode()"
+    },
+    "retry_policy": "Fresh-process and warm repeats use the identical 261107-token prompt. The medium-budget retry removes only trailing distractor records (7910 -> 7693), retains target indices 791, 3955, 7119 and the same expected codes, and requests medium reasoning, max_tokens=8192, max_thinking_tokens=2048. Both prompt length and reasoning differ; this is not a single-variable comparison."
+  },
+  "runtime": {
+    "release": "0.12.2",
+    "image_digest": "sha256:8f4c75fc15a0e2f2c023241389c4c946a60fa4fb4cd6d350dfcea17e22d119f9",
+    "profile": "qwen3.8-flash-next-halogen-262k-vision",
+    "installed_release": "0.1.0-c5a7acece0f8c9fd"
+  },
+  "decision": {
+    "recommendation": "experimental-candidate-only",
+    "promoted": false,
+    "reason": "API integration and MTP passed; three-code retrieval passed at 31724 and 130031 prompt tokens but returned only 2/3 codes across three 261107-token attempts and a 253944-token medium-reasoning retry. These bounded synthetic checks do not qualify general long-context accuracy."
+  }
+}

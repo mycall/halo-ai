@@ -382,13 +382,25 @@ accept an incomplete shard set.
 ### Expected-file manifest
 
 The following SHA-256 values are the **published expected hashes** observed from
-the upstream repositories through 2026-09-10. They become locally verified only after
+the upstream repositories through 2026-09-20. They become locally verified only after
 `halo-ai models verify --full` hashes the installed bytes and records the result.
 The four Flash Next UD-Q4_K_XL shards were independently hashed locally on
 2026-09-02, and its shared Q8_0 head on 2026-09-10; all matched these values.
+The Halogen HGN files and tokenizer were fully hashed and matched on 2026-09-20.
 Each manifest entry is `sha256 bytes relative-path`:
 
 ```text
+0f50e9626df98168e7c6e0cc264e2a92b5184dd885a175a06628d979b5edceeb 1523566720 peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-mtp.hgn
+d62e0ae553fe88afd3833733d4a4c669f34d20fd8dfce4b9610525bed2134b10 897916416 peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-vision.hgn
+9c116bbc01f77b7a15464c1a124eb3325b286089b8a2a6f2856c9b246a235bd6 124068083904 peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.hgn
+f49c8d14fa972c1db5115c714981e399585a6a98106a1a055d9e77026bb6de4c 2478095488 peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.overlay-speed.hgn
+1cdfc3a9f988955bfe9a71bb808d393030abbf9f99d34ffa1ef93815a49b39ab 2572466560 peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.overlay.hgn
+c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041 8952 peonist-ai/halogen-qwen3.8-flash-next/tokenizer/chat_template.jinja
+e70c136c1b78ddc1fb0905bac8e733a4dc448d4f852a5dd75143fffc70be550e 202 peonist-ai/halogen-qwen3.8-flash-next/tokenizer/generation_config.json
+a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d 3353259 peonist-ai/halogen-qwen3.8-flash-next/tokenizer/merges.txt
+0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3 12809320 peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer.json
+b11349aafa7cdc6a320767cf7ceb29ed82f7eda5d65e8e0819e76f0ce947bf27 17928 peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer_config.json
+ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003 6722759 peonist-ai/halogen-qwen3.8-flash-next/tokenizer/vocab.json
 659e22fbd01c9e13ea37a57c8d9c41e0a8819dffa3473d3c5286ee44b2d3398f 97591747456 antirez/deepseek-v4-gguf/DeepSeek-V4-Flash-Layers37-42Q4KExperts-OtherExpertLayersIQ2XXSGateUp-Q2KDown-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-fixed-0731.gguf
 7e319924541db3f7a163ed7e11d7532a70d48228ab59d36cb81e1d4511885360 5989114272 antirez/deepseek-v4-gguf/DeepSeek-V4-Flash-DSpark-support-0731.gguf
 dec1cee704800267d9d836d5a61aefc33705be939bbb3058fa9006d98191576d 5257696 unsloth/DeepSeek-V4-Flash-0731-GGUF/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00001-of-00004.gguf
@@ -2861,3 +2873,11 @@ memory cost; both remain available as comparison and recovery paths.
 - AMD XDNA: [Linux driver](https://github.com/amd/xdna-driver)
 - Community field report: [burrellka/MyStrixHaloSetup](https://github.com/burrellka/MyStrixHaloSetup)
 - Strix Halo GPU tuning: [kyuz0/amd-strix-halo-toolboxes](https://github.com/kyuz0/amd-strix-halo-toolboxes)
+
+### Halogen Flash candidate
+
+The `halogen` engine and `qwen3.8-halogen` alias are described in
+[the Halogen setup and validation runbook](halogen-flash.md). Native HGN
+weights use a demand-paged lookup table, so their disk size is not a resident
+RAM estimate. Halo budgets locked weights, arena, KV pool, vision, and host
+headroom separately for these bounded profiles. They remain candidates.

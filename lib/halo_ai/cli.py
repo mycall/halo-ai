@@ -46,6 +46,7 @@ ENGINE_IMAGE_KEYS = {
     "rocmfpx": "ROCMFPX_IMAGE",
     "strixvulkan": "STRIXVULKAN_IMAGE",
     "strixvulkan075": "STRIXVULKAN075_IMAGE",
+    "halogen": "HALOGEN_IMAGE",
     "ds4": "DS4_IMAGE",
     "speech": "SPEECH_IMAGE",
     "vllm": "VLLM_IMAGE",
@@ -56,6 +57,7 @@ ENGINE_PORT_KEYS = {
     "rocmfpx": "ROCMFPX_PORT",
     "strixvulkan": "STRIXVULKAN_PORT",
     "strixvulkan075": "STRIXVULKAN_PORT",
+    "halogen": "HALOGEN_API_PORT",
     "ds4": "DS4_PORT",
     "speech": "SPEECH_PORT",
     "vllm": "VLLM_PORT",
@@ -66,6 +68,7 @@ ENGINE_CONTAINERS = {
     "rocmfpx": "halo-rocmfpx",
     "strixvulkan": "halo-strixvulkan",
     "strixvulkan075": "halo-strixvulkan075",
+    "halogen": "halo-halogen",
     "ds4": "halo-ds4",
     "speech": "halo-speech",
     "vllm": "halo-vllm",
@@ -126,6 +129,10 @@ STRIXVULKAN075_IMAGE = (
     "ghcr.io/nathanw1014/strix-halo-llamacpp@"
     f"{STRIXVULKAN075_IMAGE_DIGEST}"
 )
+HALOGEN_RELEASE = "0.12.2"
+HALOGEN_IMAGE_DIGEST = "sha256:8f4c75fc15a0e2f2c023241389c4c946a60fa4fb4cd6d350dfcea17e22d119f9"
+HALOGEN_IMAGE = f"ghcr.io/peonist-ai/halogen-flash-server@{HALOGEN_IMAGE_DIGEST}"
+
 STRIXVULKAN_ENGINES = frozenset({"strixvulkan", "strixvulkan075"})
 
 DS4_RELEASE_URL = (
@@ -271,6 +278,8 @@ DEFAULTS = {
     "STRIXVULKAN_IMAGE": STRIXVULKAN_IMAGE,
     "STRIXVULKAN075_IMAGE": STRIXVULKAN075_IMAGE,
     "STRIXVULKAN_PORT": "8000",
+    "HALOGEN_IMAGE": HALOGEN_IMAGE,
+    "HALOGEN_API_PORT": "8731",
     "DS4_IMAGE": "localhost/halo-ai-ds4:b0001",
     "DS4_PORT": "8000",
     "DS4_KV_CACHE_ENABLED": "0",
@@ -461,12 +470,13 @@ def validate_catalog(
             fail(f"profile alias {alias} references unknown profile {target!r}")
     roles = {
         "main", "mmproj", "mtp", "mtp_q8", "dspark", "chat_template", "weights", "processor",
+        "overlay", "overlay_speed",
     }
     for identifier, model in models.items():
         engines = model.get("engines")
         files = model.get("files")
         model_format = model.get("format", "gguf")
-        if model_format not in {"gguf", "transformers"}:
+        if model_format not in {"gguf", "transformers", "hgn"}:
             fail(f"model {identifier} has unsupported format {model_format!r}")
         default_reasoning_effort = model.get("default_reasoning_effort")
         if default_reasoning_effort is not None and default_reasoning_effort not in {
@@ -479,6 +489,8 @@ def validate_catalog(
             fail(f"model {identifier} names an unsupported engine")
         if model_format == "transformers" and engines != ["speech"]:
             fail(f"Transformers model {identifier} is only approved for the speech engine")
+        if model_format == "hgn" and engines != ["halogen"]:
+            fail(f"HGN model {identifier} requires the Halogen engine")
         main_files = 0
         shard_numbers: list[int] = []
         for entry in files:
@@ -529,7 +541,10 @@ def validate_catalog(
             if (
                 model.get("repository") != download["repository"]
                 or model.get("revision") != download["revision"]
-                or any(path.parent != repository_path for path in catalog_paths)
+                or any(
+                    (path != repository_path / source if model_format == "hgn" else path.parent != repository_path)
+                    for path, source in zip(catalog_paths, source_paths)
+                )
                 or any(
                     not isinstance(pattern, str)
                     or Path(pattern).is_absolute()
@@ -580,7 +595,7 @@ def validate_catalog(
             fail(f"profile {identifier} has invalid load mode")
         if engine == "llamacpp" and "fit" in settings and settings["fit"] is not False:
             fail(f"profile {identifier} must disable llama.cpp fit explicitly")
-        if "mtp" in features and ("vision" in features or settings.get("parallel") != 1):
+        if engine != "halogen" and "mtp" in features and ("vision" in features or settings.get("parallel") != 1):
             fail(f"profile {identifier} violates MTP vision/parallel constraints")
         mtp_role = settings.get("mtp_role", "mtp")
         if mtp_role not in {"mtp", "mtp_q8"}:
@@ -588,7 +603,7 @@ def validate_catalog(
         external_mtp = [
             item for item in models[model_id]["files"] if item["role"] == mtp_role
         ]
-        if "mtp" in features:
+        if "mtp" in features and engine != "halogen":
             if models[model_id].get("architecture") == "qwen4exp" and len(external_mtp) != 1:
                 fail(f"profile {identifier} requires one selected external qwen4exp MTP head")
             draft_n = settings.get("spec_draft_n_max")
@@ -631,6 +646,30 @@ def validate_catalog(
                 or not 1 <= settings["prefill_chunk"] <= 8192
             ):
                 fail(f"profile {identifier} has an invalid Lemonade native DS4 policy")
+        if engine == "halogen":
+            integers = {
+                "kv_pool_positions": (context, 262144), "parallel": (1, 2),
+                "prefill_chunk": (1024, 16384), "prompt_cache": (0, 2),
+                "drafter": (0, 1), "prompt_lookup": (0, 1), "max_tokens_default": (1, min(context, 65536)),
+            }
+            for key, (minimum, maximum) in integers.items():
+                value = settings.get(key)
+                if type(value) is not int or not minimum <= value <= maximum:
+                    fail(f"profile {identifier} has invalid Halogen setting {key}")
+            if (
+                models[model_id].get("format") != "hgn"
+                or context > 262144
+                or settings["prefill_chunk"] > context
+                or settings.get("reasoning_effort") not in {"low", "medium", "xhigh"}
+                or set(settings) != set(integers) | {"reasoning_effort"}
+                or not features <= {"mtp", "vision"}
+                or ("mtp" in features) != bool(settings["drafter"])
+                or (settings["prompt_lookup"] and not settings["drafter"])
+                or len([f for f in models[model_id]["files"] if f["role"] == "overlay"]) != 1
+                or len([f for f in models[model_id]["files"] if f["role"] == "main"]) != 1
+                or not any(f["role"] == "processor" for f in models[model_id]["files"])
+            ):
+                fail(f"profile {identifier} violates the Halogen candidate policy")
         if engine in STRIXVULKAN_ENGINES:
             integer_settings = {
                 "parallel": (1, 1), "batch": (1, 8192), "ubatch": (1, 8192),
@@ -974,6 +1013,24 @@ def verify_model(
                 )
                 record["jinja_sanity"] = template_valid
                 valid = valid and template_valid
+            elif model.get("format") == "hgn":
+                if path.suffix == ".hgn":
+                    with path.open("rb") as stream:
+                        header = stream.read(16)
+                    format_valid = (
+                        len(header) == 16 and header[:4] == b"HGN1"
+                        and struct.unpack("<I", header[4:8])[0] == 2
+                        and 0 < struct.unpack("<Q", header[8:16])[0] < 10_000_000
+                    )
+                    record["hgn_header_valid"] = format_valid
+                elif path.suffix == ".json":
+                    format_valid = isinstance(json.loads(path.read_text()), dict)
+                elif path.suffix == ".jinja":
+                    template = path.read_text()
+                    format_valid = "messages" in template and "enable_thinking" in template
+                else:
+                    format_valid = path.name == "merges.txt" and info.st_size > 0
+                valid = valid and format_valid
             elif model.get("format", "gguf") == "transformers":
                 if path.suffix == ".json":
                     try:
@@ -1186,6 +1243,8 @@ def port_for(config: Config, engine: str) -> int:
 def required_roles(profile: dict[str, Any]) -> set[str]:
     roles = {"main"}
     features = set(profile.get("features", []))
+    if profile["engine"] == "halogen":
+        return {"main", "overlay", "processor"} | ({"mmproj"} if "vision" in features else set())
     if "mtp" in features:
         roles.add(profile.get("settings", {}).get("mtp_role", "mtp"))
     if "vision" in features:
@@ -1482,6 +1541,37 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
                 "--kv-cache-boundary-align-tokens", "2048",
                 "--kv-cache-reject-different-quant",
             ])
+    elif engine == "halogen":
+        command.extend(["--group-add", "keep-groups", "--ipc=host", "--ulimit", "memlock=-1:-1"])
+        settings = profile["settings"]
+        for entry, path in selected:
+            relative = Path(entry["path"]).relative_to(model["repository"])
+            command.extend(["--mount", f"type=bind,src={path},dst=/models/{relative},ro"])
+        artifact_paths = {
+            entry["role"]: f"/models/{Path(entry['path']).relative_to(model['repository'])}"
+            for entry, _path in selected
+        }
+        environment = {
+            "HALOGEN_API_PORT": port, "HALOGEN_BIND": "127.0.0.1",
+            "HALOGEN_CHECKPOINT": artifact_paths["main"],
+            "HALOGEN_CK_OVERLAY": artifact_paths["overlay"],
+            "HALOGEN_TOKENIZER": "/models/tokenizer",
+            "HALOGEN_MODEL_ID": model["id"], "HALOGEN_CTX": profile["context"],
+            "HALOGEN_KV_POOL_POSITIONS": settings["kv_pool_positions"],
+            "HALOGEN_KV_SLOTS": settings["parallel"],
+            "HALOGEN_MAX_TOK": settings["prefill_chunk"],
+            "HALOGEN_PROMPT_CACHE": settings["prompt_cache"],
+            "HALOGEN_DRAFTER_DEFAULT": settings["drafter"],
+            "HALOGEN_PLD": "3,3" if settings["prompt_lookup"] else "0",
+            "HALOGEN_REASONING_EFFORT": settings["reasoning_effort"],
+            "HALOGEN_MAX_TOKENS_DEFAULT": settings["max_tokens_default"],
+            "HALOGEN_TEMPERATURE": "1.0", "HALOGEN_TOP_P": "0.95", "HALOGEN_TOP_K": "20",
+        }
+        if "vision" in profile.get("features", []):
+            environment["HALOGEN_VISION_TOWER"] = artifact_paths["mmproj"]
+        for key, value in sorted(environment.items()):
+            command.extend(["-e", f"{key}={value}"])
+        command.append(image_for(config, engine))
     elif engine == "speech":
         command.extend(["--group-add", "keep-groups", "--ipc=host"])
         main = next(path for entry, path in selected if entry["role"] == "main")
@@ -1798,7 +1888,7 @@ def wait_http(url: str, seconds: int = 120) -> None:
 
 def service_health_url(config: Config, engine: str) -> str:
     port = port_for(config, engine)
-    path = "/live" if engine == "lemonade" else "/healthz" if engine == "speech" else "/v1/models"
+    path = "/live" if engine == "lemonade" else "/healthz" if engine == "speech" else "/health" if engine == "halogen" else "/v1/models"
     return f"http://127.0.0.1:{port}{path}"
 
 
@@ -2425,6 +2515,8 @@ def profile_availability(config: Config, catalog: Catalog, profile: dict[str, An
         return False, "pinned Strix Vulkan image is not installed or failed provenance checks"
     if profile["engine"] == "strixvulkan075" and not strixvulkan075_image_valid(config.get(key)):
         return False, "pinned Strix Vulkan v0.7.5 image is not installed or failed provenance checks"
+    if profile["engine"] == "halogen" and not halogen_image_valid(config.get(key)):
+        return False, "pinned Halogen image is not installed or failed provenance checks"
     if profile["engine"] == "ds4" and not ds4_image_valid(config.get(key)):
         return False, "pinned DS4 image is not installed or failed provenance checks"
     if (
@@ -2443,6 +2535,12 @@ def profile_availability(config: Config, catalog: Catalog, profile: dict[str, An
         )
     reserve = config.integer("HALO_AI_OS_RESERVE_GIB", 4, 64) * 1024**3
     cpu_total = meminfo_bytes("MemTotal")
+    if profile["engine"] == "halogen":
+        # HGN's on-disk n-gram table is demand-paged; file size is not resident
+        # weight size. Budget pinned weights plus arena, KV pool and headroom.
+        main_bytes = (68 + 14 + (2 if "vision" in profile.get("features", []) else 0)) * 1024**3
+        main_bytes += profile["settings"]["kv_pool_positions"] * 32 * 1024
+        reserve = max(reserve, 10 * 1024**3)
     if main_bytes + reserve > cpu_total:
         return False, (
             f"unsafe memory topology: {main_bytes / 1024**3:.1f} GiB weights + "
@@ -2509,6 +2607,8 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
         installed = strixvulkan_image_valid(image)
     elif engine == "strixvulkan075":
         installed = strixvulkan075_image_valid(image)
+    elif engine == "halogen":
+        installed = halogen_image_valid(image)
     elif engine == "ds4":
         installed = ds4_image_valid(image)
     else:
@@ -2556,6 +2656,12 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
             "image_digest": STRIXVULKAN075_IMAGE_DIGEST,
             "backend": "vulkan-radv-bundled-mesa-26.3",
         })
+    elif engine == "halogen":
+        runtime.update({
+            "release": HALOGEN_RELEASE, "image_digest": HALOGEN_IMAGE_DIGEST,
+            "source_repository": "https://github.com/peonist-ai/halogen-flash-server",
+            "source_provenance": "closed-source engine; public deployment repository",
+        })
     elif engine == "ds4":
         runtime.update({
             "release": "b0001",
@@ -2591,6 +2697,10 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
         "model": model_plan,
         "draft_model": draft_plan,
         "selected_artifact_classes": (
+            ["hgn", "quality-overlay", "tokenizer", "halogen-runtime"]
+            + (["embedded-mtp"] if "mtp" in profile.get("features", []) else [])
+            + (["vision"] if "vision" in profile.get("features", []) else [])
+            if engine == "halogen" else
             [rocmfpx_artifact_class, "rocmfpx-runtime"]
             + (["in-gguf-mtp"] if "mtp" in profile.get("features", []) else [])
             if engine == "rocmfpx" else (
@@ -2603,7 +2713,7 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
                 ["q6-xl", "strixvulkan-runtime"]
                 if engine in STRIXVULKAN_ENGINES and model["id"] == "qwen3.8-27b-ud-q6-k-xl" else
                 ["model"]
-                + (["mtp-sidecar"] if "mtp" in profile.get("features", []) and external_mtp else [])
+                + (["mtp-sidecar"] if "mtp" in profile.get("features", []) and external_mtp and engine != "halogen" else [])
                 + (["vision"] if "vision" in profile.get("features", []) else [])
                 + (["dflash2"] if draft_plan else [])
                 + ["runtime"]
@@ -2745,6 +2855,8 @@ def command_runtime_install(config: Config, engines: Iterable[str]) -> int:
         else:
             print(f"Pulling {engine}: {image}")
             podman(["pull", image])
+        if engine == "halogen" and not halogen_image_valid(image):
+            fail("Halogen image failed immutable digest checks")
         if engine == "strixvulkan075":
             validate_strixvulkan075_image(image)
         if engine == "lemonade":
@@ -2774,6 +2886,8 @@ def command_update(config: Config, engines: Iterable[str]) -> int:
             build_ds4_image(image, force=True)
         else:
             podman(["pull", image])
+        if engine == "halogen" and not halogen_image_valid(image):
+            fail("Halogen image failed immutable digest checks")
         if engine == "strixvulkan075":
             validate_strixvulkan075_image(image)
         if engine == "lemonade":
@@ -3033,6 +3147,34 @@ def rocmfpx_image_valid(image: str) -> bool:
         "local.halo-ai.rocm-base": ROCMFPX_ROCM_BASE,
     }
     return expected.items() <= labels.items()
+
+
+def halogen_backend_info(config: Config, profile: dict[str, Any]) -> dict[str, Any]:
+    health = http_json(service_health_url(config, "halogen"), timeout=10)
+    settings = profile["settings"]
+    expected = {
+        "context": profile["context"], "slots": settings["parallel"],
+        "kv_pool_positions": settings["kv_pool_positions"],
+        "drafter_default": "mtp" if settings["drafter"] else "serial",
+        "checkpoint_format": "hgn",
+        "reasoning_effort_default": settings["reasoning_effort"],
+    }
+    if (
+        not isinstance(health, dict)
+        or any(health.get(key) != value for key, value in expected.items())
+        or health.get("version") != {"api": HALOGEN_RELEASE, "engine": HALOGEN_RELEASE, "match": True}
+        or not health.get("engine", {}).get("responds")
+        or not health.get("drafter_weights_loaded")
+        or health.get("chat_template", {}).get("probe") != "passed"
+        or health.get("prompt_cache", {}).get("mode") != settings["prompt_cache"]
+        or health.get("vision", {}).get("enabled") != ("vision" in profile.get("features", []))
+    ):
+        fail("Halogen health does not match the selected runtime/profile policy")
+    return health
+
+
+def halogen_image_valid(image: str) -> bool:
+    return image_identity(image, required=False) == HALOGEN_IMAGE_DIGEST
 
 
 def lemonade_image_valid(image: str) -> bool:
@@ -3582,6 +3724,8 @@ def command_start(config: Config, catalog: Catalog, args: argparse.Namespace) ->
                 ),
                 "gpu_max_hw_queues": config.get("LEMONADE_GPU_MAX_HW_QUEUES") or None,
             })
+        elif profile["engine"] == "halogen":
+            trial["backend"] = halogen_backend_info(config, profile)
         elif profile["engine"] == "rocmfpx":
             trial["backend"] = rocmfpx_backend_info(
                 target_name, image_for(config, profile["engine"]), profile,
@@ -3690,6 +3834,11 @@ def command_status(config: Config, _catalog: Catalog, _args: argparse.Namespace)
             if profile["engine"] == "lemonade":
                 with contextlib.suppress(HaloError):
                     backend_info = http_json(f"http://127.0.0.1:{port}/api/v1/system-info", timeout=2)
+            elif profile["engine"] == "halogen":
+                try:
+                    backend_info = halogen_backend_info(config, profile)
+                except HaloError as exc:
+                    backend_info = {"valid": False, "error": str(exc)}
             elif profile["engine"] == "rocmfpx":
                 try:
                     backend_info = rocmfpx_backend_info(
@@ -5524,7 +5673,7 @@ def build_parser() -> argparse.ArgumentParser:
     presets.add_parser("list")
     show_preset = presets.add_parser("show"); show_preset.add_argument("preset_id")
     render_preset = presets.add_parser("render"); render_preset.add_argument("preset_id")
-    install = sub.add_parser("install"); install.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "strixvulkan", "strixvulkan075", "ds4", "speech", "vllm", "all"], nargs="?", default="all")
+    install = sub.add_parser("install"); install.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "strixvulkan", "strixvulkan075", "halogen", "ds4", "speech", "vllm", "all"], nargs="?", default="all")
     start = sub.add_parser("start", help="start one catalog profile")
     start.add_argument("profile_id")
     start.add_argument(
@@ -5605,7 +5754,7 @@ def build_parser() -> argparse.ArgumentParser:
     reasoning_reliability.add_argument("--seed", type=int, default=1)
     reasoning_reliability.add_argument("--timeout", type=int, default=900)
     reasoning_reliability.add_argument("--output", help="resumable atomic JSON report path")
-    update = sub.add_parser("update"); update.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "strixvulkan", "strixvulkan075", "ds4", "speech", "vllm", "all"])
+    update = sub.add_parser("update"); update.add_argument("engine", choices=["lemonade", "llamacpp", "rocmfpx", "strixvulkan", "strixvulkan075", "halogen", "ds4", "speech", "vllm", "all"])
     speech_candidate = sub.add_parser(
         "speech-candidate",
         help="build and validate the isolated Python 3.14 / ROCm 10 speech candidate",

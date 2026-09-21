@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "models": [
+    {
+      "id": "halogen-qwen3.8-flash-next",
+      "format": "hgn",
+      "repository": "peonist-ai/halogen-qwen3.8-flash-next",
+      "revision": "e238ffde1a89531743505349dd16ca35a1e09b15",
+      "architecture": "qwen4exp",
+      "engines": [
+        "halogen"
+      ],
+      "quantization": "HGN-W4B-quality-overlay",
+      "files": [
+        {
+          "role": "mtp",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-mtp.hgn",
+          "source_path": "qwen38-flash-next-mtp.hgn",
+          "bytes": 1523566720,
+          "sha256": "0f50e9626df98168e7c6e0cc264e2a92b5184dd885a175a06628d979b5edceeb"
+        },
+        {
+          "role": "mmproj",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-vision.hgn",
+          "source_path": "qwen38-flash-next-vision.hgn",
+          "bytes": 897916416,
+          "sha256": "d62e0ae553fe88afd3833733d4a4c669f34d20fd8dfce4b9610525bed2134b10"
+        },
+        {
+          "role": "main",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.hgn",
+          "source_path": "qwen38-flash-next-w4b.hgn",
+          "bytes": 124068083904,
+          "sha256": "9c116bbc01f77b7a15464c1a124eb3325b286089b8a2a6f2856c9b246a235bd6"
+        },
+        {
+          "role": "overlay_speed",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.overlay-speed.hgn",
+          "source_path": "qwen38-flash-next-w4b.overlay-speed.hgn",
+          "bytes": 2478095488,
+          "sha256": "f49c8d14fa972c1db5115c714981e399585a6a98106a1a055d9e77026bb6de4c"
+        },
+        {
+          "role": "overlay",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.overlay.hgn",
+          "source_path": "qwen38-flash-next-w4b.overlay.hgn",
+          "bytes": 2572466560,
+          "sha256": "1cdfc3a9f988955bfe9a71bb808d393030abbf9f99d34ffa1ef93815a49b39ab"
+        },
+        {
+          "role": "processor",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/chat_template.jinja",
+          "source_path": "tokenizer/chat_template.jinja",
+          "bytes": 8952,
+          "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041"
+        },
+        {
+          "role": "processor",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/generation_config.json",
+          "source_path": "tokenizer/generation_config.json",
+          "bytes": 202,
+          "sha256": "e70c136c1b78ddc1fb0905bac8e733a4dc448d4f852a5dd75143fffc70be550e"
+        },
+        {
+          "role": "processor",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/merges.txt",
+          "source_path": "tokenizer/merges.txt",
+          "bytes": 3353259,
+          "sha256": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d"
+        },
+        {
+          "role": "processor",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer.json",
+          "source_path": "tokenizer/tokenizer.json",
+          "bytes": 12809320,
+          "sha256": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3"
+        },
+        {
+          "role": "processor",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer_config.json",
+          "source_path": "tokenizer/tokenizer_config.json",
+          "bytes": 17928,
+          "sha256": "b11349aafa7cdc6a320767cf7ceb29ed82f7eda5d65e8e0819e76f0ce947bf27"
+        },
+        {
+          "role": "processor",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/vocab.json",
+          "source_path": "tokenizer/vocab.json",
+          "bytes": 6722759,
+          "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
+        }
+      ],
+      "download": {
+        "provider": "huggingface",
+        "repository": "peonist-ai/halogen-qwen3.8-flash-next",
+        "revision": "e238ffde1a89531743505349dd16ca35a1e09b15",
+        "allow_patterns": [
+          "qwen38-flash-next-mtp.hgn",
+          "qwen38-flash-next-vision.hgn",
+          "qwen38-flash-next-w4b.hgn",
+          "qwen38-flash-next-w4b.overlay-speed.hgn",
+          "qwen38-flash-next-w4b.overlay.hgn",
+          "tokenizer/chat_template.jinja",
+          "tokenizer/generation_config.json",
+          "tokenizer/merges.txt",
+          "tokenizer/tokenizer.json",
+          "tokenizer/tokenizer_config.json",
+          "tokenizer/vocab.json"
+        ]
+      }
+    }
+  ],
+  "profiles": [
+    {
+      "id": "qwen3.8-flash-next-halogen-32k-baseline",
+      "model": "halogen-qwen3.8-flash-next",
+      "engine": "halogen",
+      "context": 32768,
+      "startup_timeout": 1200,
+      "risk": "experimental",
+      "features": [],
+      "thinking": true,
+      "proposal_policy": "candidate-not-qualified-as-default",
+      "settings": {
+        "kv_pool_positions": 32768,
+        "parallel": 1,
+        "prefill_chunk": 16384,
+        "prompt_cache": 0,
+        "drafter": 0,
+        "reasoning_effort": "medium",
+        "max_tokens_default": 8192,
+        "prompt_lookup": 0
+      }
+    },
+    {
+      "id": "qwen3.8-flash-next-halogen-32k-mtp",
+      "model": "halogen-qwen3.8-flash-next",
+      "engine": "halogen",
+      "context": 32768,
+      "startup_timeout": 1200,
+      "risk": "experimental",
+      "features": [
+        "mtp"
+      ],
+      "thinking": true,
+      "proposal_policy": "candidate-not-qualified-as-default",
+      "settings": {
+        "kv_pool_positions": 32768,
+        "parallel": 1,
+        "prefill_chunk": 16384,
+        "prompt_cache": 0,
+        "drafter": 1,
+        "reasoning_effort": "medium",
+        "max_tokens_default": 8192,
+        "prompt_lookup": 0
+      }
+    },
+    {
+      "id": "qwen3.8-flash-next-halogen-262k-vision",
+      "model": "halogen-qwen3.8-flash-next",
+      "engine": "halogen",
+      "context": 262144,
+      "startup_timeout": 1200,
+      "risk": "experimental",
+      "features": [
+        "mtp",
+        "vision"
+      ],
+      "thinking": true,
+      "proposal_policy": "candidate-not-qualified-as-default",
+      "settings": {
+        "kv_pool_positions": 262144,
+        "parallel": 1,
+        "prefill_chunk": 16384,
+        "prompt_cache": 2,
+        "drafter": 1,
+        "reasoning_effort": "medium",
+        "max_tokens_default": 8192,
+        "prompt_lookup": 1
+      }
+    }
+  ],
+  "profile_aliases": {
+    "qwen3.8-halogen": "qwen3.8-flash-next-halogen-262k-vision"
+  }
+}

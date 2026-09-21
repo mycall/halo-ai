@@ -217,6 +217,16 @@ target-only remains the strict/general Flash route, Q4 width 4 is for long
 generation after shallower prompts, and Q8 remains a verified diagnostic. See
 [`docs/results/qwen3.8-flash-next-strix075-advanced-2026-09-10.json`](docs/results/qwen3.8-flash-next-strix075-advanced-2026-09-10.json).
 
+## Halogen Flash candidate
+
+The separately selectable `qwen3.8-halogen` profile runs the installed native
+Halogen Flash checkpoint with its quality overlay, MTP, and vision at 262K
+context. Halogen 0.12.2 is digest-pinned and exposes its API on localhost:8731.
+Matched 32K serial/MTP profiles support evaluation before any recommendation
+changes. Local MTP checks passed, but near-262K retrieval repeatedly returned
+only two of three requested codes, including a medium-reasoning retry. It
+remains experimental. See [setup and validation](docs/halogen-flash.md).
+
 ## Qwen3.8 ROCmFP4 baseline
 
 The Stage 1 Qwen3.8 profile is text-only and uses a dedicated q38rocm ROCmFPX

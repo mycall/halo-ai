@@ -90,7 +90,7 @@ if ! "$dry_run" && ((EUID != 0)); then
     die "run as root (normally: sudo ./install.sh --run-user $run_user)"
 fi
 
-for required in python3 install cp mv ln readlink findmnt; do
+for required in python3 install cp mv ln readlink findmnt cmp; do
     command -v "$required" >/dev/null || die "required command is missing: $required"
 done
 
@@ -106,7 +106,7 @@ import sys
 
 root = pathlib.Path(sys.argv[1])
 digest = hashlib.sha256()
-for relative in ("bin", "lib", "config", "docs"):
+for relative in ("bin", "lib", "config", "docs", "tools"):
     for path in sorted((root / relative).rglob("*")):
         if not path.is_file() or "__pycache__" in path.parts or path.suffix == ".pyc":
             continue
@@ -239,7 +239,7 @@ action_release() {
     run_action install -d -m 0755 -o root -g root "$partial"
     if ! "$dry_run"; then
         cp -a -- "$source_root/bin" "$source_root/lib" "$source_root/config" \
-            "$source_root/docs" "$source_root/install.sh" "$source_root/uninstall.sh" "$partial/"
+            "$source_root/docs" "$source_root/tools" "$source_root/install.sh" "$source_root/uninstall.sh" "$partial/"
         find "$partial" -type d -name __pycache__ -prune -exec rm -rf -- {} +
         find "$partial" -type f -name '*.pyc' -delete
         printf '%s\n' "$release_hash" >"$partial/.source-hash"
@@ -250,7 +250,33 @@ action_release() {
     fi
 }
 
+catalog_destination_name() {
+    local name=${1##*/}
+    if [[ "$name" == strix-halo.json ]]; then
+        printf '00-strix-halo.json'
+    else
+        printf '10-%s' "$name"
+    fi
+}
+
+verify_catalogs() {
+    local catalog destination
+    for catalog in "$source_root"/config/models.d/*.json; do
+        destination="$CONFIG_ROOT/models.d/$(catalog_destination_name "$catalog")"
+        cmp -s -- "$catalog" "$destination" || return 1
+    done
+}
+
+install_catalogs() {
+    local catalog destination
+    for catalog in "$source_root"/config/models.d/*.json; do
+        destination="$CONFIG_ROOT/models.d/$(catalog_destination_name "$catalog")"
+        run_action install -m 0644 -o root -g root "$catalog" "$destination"
+    done
+}
+
 verify_config() {
+    verify_catalogs || return 1
     [[ -r "$CONFIG_ROOT/config.env" && -r "$CONFIG_ROOT/models.d/00-strix-halo.json" &&
        -r "$CONFIG_ROOT/request-presets.d/qwen3.6-planner-coding.json" &&
        -r "$CONFIG_ROOT/request-presets.d/qwen3.6-implementer.json" ]] || return 1
@@ -410,8 +436,7 @@ action_config() {
     fi
     run_action chown root:"$run_gid" "$CONFIG_ROOT/config.env"
     run_action chmod 0640 "$CONFIG_ROOT/config.env"
-    run_action install -m 0644 -o root -g root \
-        "$source_root/config/models.d/strix-halo.json" "$CONFIG_ROOT/models.d/00-strix-halo.json"
+    install_catalogs
     for preset in "$source_root"/config/request-presets.d/*.json; do
         run_action install -m 0644 -o root -g root "$preset" "$CONFIG_ROOT/request-presets.d/${preset##*/}"
     done
