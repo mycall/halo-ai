@@ -193,3 +193,7 @@ no default aliases or shipped profile settings were changed by the retest.
 [Full serial retest results](results/qwen3.8-flash-next-serial-retest-2026-09-20.json)
 include both effective diagnostic profiles, image pins, model artifacts,
 request options, prompt hashes, outputs, timings, and speculation evidence.
+
+The [upstream review](halogen-upstream-review.md) follows the author's recent
+Reddit discussions into the dated issue resolutions and distinguishes
+attention-budget experiments from already-fixed bugs and speed tuning.
