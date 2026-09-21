@@ -167,7 +167,7 @@
         "vision"
       ],
       "thinking": true,
-      "proposal_policy": "candidate-not-qualified-as-default",
+      "proposal_policy": "recommended-flash-next-with-known-near-limit-retrieval-misses",
       "settings": {
         "kv_pool_positions": 262144,
         "parallel": 1,
@@ -181,6 +181,7 @@
     }
   ],
   "profile_aliases": {
+    "qwen3.8-fn": "qwen3.8-flash-next-halogen-262k-vision",
     "qwen3.8-halogen": "qwen3.8-flash-next-halogen-262k-vision"
   }
 }

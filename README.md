@@ -212,20 +212,22 @@ but speculative prefill made the 32K short request 15.1% slower end-to-end. At
 slower, with a crossover beyond the remaining context budget. Two fresh Q4 and
 two fresh Q8 quality processes were internally consistent but each matched
 only 12/13 target token streams. Q8 width 4 was also 4.5--4.8% slower than Q4
-by two-pass wall-time median and used about 0.8--0.9 GiB more GTT. Therefore
-target-only remains the strict/general Flash route, Q4 width 4 is for long
-generation after shallower prompts, and Q8 remains a verified diagnostic. See
+by two-pass wall-time median and used about 0.8--0.9 GiB more GTT. Within the
+Strix Vulkan lane, target-only remains the reference/fallback, Q4 width 4 is
+for long generation after shallower prompts, and Q8 remains a verified diagnostic. See
 [`docs/results/qwen3.8-flash-next-strix075-advanced-2026-09-10.json`](docs/results/qwen3.8-flash-next-strix075-advanced-2026-09-10.json).
 
-## Halogen Flash candidate
+## Recommended Flash-Next: Halogen
 
-The separately selectable `qwen3.8-halogen` profile runs the installed native
+`qwen3.8-fn` selects `qwen3.8-flash-next-halogen-262k-vision`, using the native
 Halogen Flash checkpoint with its quality overlay, MTP, and vision at 262K
-context. Halogen 0.12.2 is digest-pinned and exposes its API on localhost:8731.
-Matched 32K serial/MTP profiles support evaluation before any recommendation
-changes. Local MTP checks passed, but near-262K retrieval repeatedly returned
-only two of three requested codes, including a medium-reasoning retry. It
-remains experimental. See [setup and validation](docs/halogen-flash.md).
+context. The existing `qwen3.8-halogen` alias selects the same profile.
+Halogen 0.12.2 is digest-pinned and exposes its API on localhost:8731.
+Local MTP checks passed, and the matched serial comparison showed faster
+long-prompt processing with no accuracy advantage for UD-Q4_K_XL in these
+checks. Near-262K retrieval still returned only two of three requested codes
+in both runtimes with MTP off, so the profile retains its experimental risk
+label. See [setup and validation](docs/halogen-flash.md).
 
 ## Qwen3.8 ROCmFP4 baseline
 
@@ -408,14 +410,15 @@ halo-ai test ds4 --preset deepseek-v4-think-max
 The Qwen3.8 lanes have explicit short aliases:
 
 ```bash
-halo-ai start qwen3.8-27b --switch  # Balanced default: Q6 XL + vision + Q8 DFlash2, 65K
+halo-ai start qwen3.8-fn --switch  # Recommended Flash-Next: Halogen + MTP + vision, 262K
+halo-ai start qwen3.8-27b --switch  # Balanced 27B default: Q6 XL + vision + Q8 DFlash2, 65K
 halo-ai start qwen3.8df2 --switch  # Q6 XL vision + DFlash2, native 262K
 halo-ai start qwen3.8-27b-q6xl-vision-lemonade --switch  # Same Q6/BF16 target on ROCm/HIP
 halo-ai start qwen3.8fp4 --switch
 halo-ai start qwen3.8fp8 --switch
 ```
 
-`qwen3.8-27b` is the balanced family default. It resolves to the qualified
+`qwen3.8-27b` is the balanced 27B family default. It resolves to the qualified
 v0.7.5 Q6 XL vision profile with Q8_0 DFlash2 at 65K. `qwen3.8df2` preserves
 the native-262K route and uses the separately pinned older Strix Vulkan fork, not
 ROCmFPX. It aliases the experimental vision+DFlash2 profile with the Q4_K_M

@@ -1,4 +1,4 @@
-# Halogen Flash candidate
+# Recommended Flash-Next: Halogen
 
 [Halogen Flash Server](https://github.com/peonist-ai/halogen-flash-server)
 0.12.2 is integrated as a separate, experimental Qwen3.8-Flash-Next runtime.
@@ -20,12 +20,17 @@ mounted by these native profiles.
 | --- | ---: | --- | --- | --- |
 | `qwen3.8-flash-next-halogen-32k-baseline` | 32,768 | Serial, prompt lookup off | Off | Off |
 | `qwen3.8-flash-next-halogen-32k-mtp` | 32,768 | MTP only, prompt lookup off | Off | Off |
-| `qwen3.8-halogen` | 262,144 | MTP plus prompt lookup | Session reuse (mode 2) | On |
+| `qwen3.8-fn` / `qwen3.8-halogen` | 262,144 | MTP plus prompt lookup | Session reuse (mode 2) | On |
 
-`qwen3.8-halogen` aliases `qwen3.8-flash-next-halogen-262k-vision`.
-The existing recommended Qwen aliases are unchanged. The serving profile
-uses one slot, a 262,144-position shared KV pool, and 16,384-token prefill
-chunks. The smaller prefill arena leaves more room for the desktop. Context
+`qwen3.8-fn` is the recommended Flash-Next alias and resolves to
+`qwen3.8-flash-next-halogen-262k-vision`; `qwen3.8-halogen` remains an alias
+for the same profile. This selects the native HGN model, not UD-Q4_K_XL.
+The recommendation reflects the local performance and correctness comparisons
+below. The profile retains its experimental risk label: neither runtime
+reliably retrieved all three codes near 262K, including with MTP disabled.
+
+The serving profile uses one slot, a 262,144-position shared KV pool, and
+16,384-token prefill chunks. The smaller prefill arena leaves more room for the desktop. Context
 size and prefill chunk size are separate settings. The startup log reports
 actual locked weights and remaining host memory; `MemAvailable` includes
 locked file pages and overstates what another process can use.
@@ -45,9 +50,9 @@ workspace configuration:
 ```bash
 ./bin/halo-ai --config .halo-ai-workspace.env install halogen
 ./bin/halo-ai --config .halo-ai-workspace.env models verify halogen-qwen3.8-flash-next --full
-./bin/halo-ai --config .halo-ai-workspace.env start qwen3.8-halogen --switch
-./bin/halo-ai --config .halo-ai-workspace.env test qwen3.8-halogen
-./bin/halo-ai --config .halo-ai-workspace.env stop qwen3.8-halogen
+./bin/halo-ai --config .halo-ai-workspace.env start qwen3.8-fn --switch
+./bin/halo-ai --config .halo-ai-workspace.env test qwen3.8-fn
+./bin/halo-ai --config .halo-ai-workspace.env stop qwen3.8-fn
 ```
 
 The OpenAI-compatible endpoint is `http://127.0.0.1:8731/v1`; the served model
@@ -58,18 +63,18 @@ published, on loopback. The internal engine port remains private.
 
 Model mounts are read-only, downloads are disabled in the container, and
 Halo's normal single-runtime switching, stop, status, and trial records apply.
-Starting the candidate is explicit; it does not start automatically at boot.
+Starting the runtime is explicit; it does not start automatically at boot.
 
 To update the root-owned system CLI and catalog after reviewing the changes,
 run `./reload.sh` from this checkout (requires your sudo password). Then the
-same commands work as `halo-ai start qwen3.8-halogen --switch`, etc.
+same commands work as `halo-ai start qwen3.8-fn --switch`, etc.
 
 ## Verify MTP
 
 ```bash
 ./bin/halo-ai --config .halo-ai-workspace.env start qwen3.8-flash-next-halogen-32k-mtp --switch
 python3 tools/halogen_validate.py --output /tmp/halogen-mtp-check.json
-./bin/halo-ai --config .halo-ai-workspace.env start qwen3.8-halogen --switch
+./bin/halo-ai --config .halo-ai-workspace.env start qwen3.8-fn --switch
 ```
 
 The validator requires cache mode 0 and prompt lookup off to isolate MTP.
@@ -143,7 +148,6 @@ These initial results keep the 262K serving profile experimental. They do not
 establish that UD-Q4_K_XL is more accurate at the same length; the matched
 serial comparison below addresses that question. The smaller-context
 successes are bounded smoke checks, not a broad quality qualification.
-Existing recommended aliases remain unchanged.
 
 [Full serving results and retry records](results/halogen-flash-native-serving-2026-09-20.json)
 include the request policies, prompt hashes, timing/cache counters, and outputs.
@@ -183,12 +187,13 @@ UD's 13 answers matched its earlier target-only baseline. All 15 Halogen
 requests drafted zero tokens, and all 30 requests across both runtimes used
 zero cached tokens.
 
-For ordinary Flash-Next use initially limited to 32K, **Halogen remains the
-provisional performance choice**, with UD target-only as a reference/fallback.
-These screens show no accuracy advantage for UD, and Halogen processes the
-long prompts faster. Neither pair is qualified for reliable retrieval near
-262K. This is a bounded comparison, not a broad model-quality recommendation;
-no default aliases or shipped profile settings were changed by the retest.
+**Halogen is the recommended Flash-Next runtime through `qwen3.8-fn`**, with
+UD target-only as a reference/fallback. These screens show no accuracy
+advantage for UD, and Halogen processes the long prompts faster. The alias
+selects the existing 262K serving profile with MTP and vision; the 32K
+profiles remain diagnostics. Neither pair is qualified for reliable retrieval
+near 262K. The recommendation does not establish broad model-quality
+superiority, and selecting the alias does not change the tested runtime settings.
 
 [Full serial retest results](results/qwen3.8-flash-next-serial-retest-2026-09-20.json)
 include both effective diagnostic profiles, image pins, model artifacts,

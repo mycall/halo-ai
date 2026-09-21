@@ -15,7 +15,7 @@ class HalogenTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.config = make_config(Path(self.tmp.name))
         self.catalog = cli.load_catalog(self.config)
-        self.profile = cli.resolve_profile(self.catalog, 'qwen3.8-halogen')
+        self.profile = cli.resolve_profile(self.catalog, 'qwen3.8-fn')
 
     def test_native_checkpoint_closure_excludes_external_head_and_speed_overlay(self):
         roles = cli.required_roles(self.profile)

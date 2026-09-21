@@ -2874,10 +2874,13 @@ memory cost; both remain available as comparison and recovery paths.
 - Community field report: [burrellka/MyStrixHaloSetup](https://github.com/burrellka/MyStrixHaloSetup)
 - Strix Halo GPU tuning: [kyuz0/amd-strix-halo-toolboxes](https://github.com/kyuz0/amd-strix-halo-toolboxes)
 
-### Halogen Flash candidate
+### Recommended Flash-Next: Halogen
 
-The `halogen` engine and `qwen3.8-halogen` alias are described in
+The `halogen` engine and recommended Flash-Next alias `qwen3.8-fn` are described in
 [the Halogen setup and validation runbook](halogen-flash.md). Native HGN
 weights use a demand-paged lookup table, so their disk size is not a resident
 RAM estimate. Halo budgets locked weights, arena, KV pool, vision, and host
-headroom separately for these bounded profiles. They remain candidates.
+headroom separately for these bounded profiles. `qwen3.8-fn` and the existing
+`qwen3.8-halogen` alias both select `qwen3.8-flash-next-halogen-262k-vision`
+with the quality overlay, MTP, and vision. The profile retains its experimental
+risk label because near-262K retrieval misses persist with MTP disabled.
