@@ -1,0 +1,2887 @@
+{
+  "schema_version": 1,
+  "kind": "flash-next-serial-retest",
+  "recorded_at": "2026-09-21T01:27:10.044846+00:00",
+  "method": {
+    "order": "Fresh Halogen process: 7910-record retrieval, 959-record control, fixed 13-case suite. Stop Halogen. Fresh Strix Vulkan 0.7.5 process: same sequence. One GPU runtime active at a time.",
+    "controls": "262144 context, one slot, temperature 0, seed 1, thinking off. Halogen drafter serial, PLD off, cache mode 0. Strix --spec-type none, no draft model mount, cache_prompt false; live slot confirms speculative false. Missing draft counters are recorded as null, not measured zero.",
+    "retrieval_generator": {
+      "record_counts": [
+        7910,
+        959
+      ],
+      "indices": "[n//10,n//2,9*n//10]",
+      "record": "Archive record {i:06d}: owner=team-{i%97:02d}; state=closed; retrieval_code=delta-{(i*7919+104729)%100000:05d}.",
+      "system": "Retrieve the requested records exactly. Reply with only the three retrieval codes in order, separated by commas and no spaces.",
+      "user": "Records joined with newline, then newline + Return the retrieval_code values for archive records {indices[0]:06d}, {indices[1]:06d}, and {indices[2]:06d}, in that order.",
+      "messages_sha256_encoding": "sha256(json.dumps(messages,sort_keys=True).encode())",
+      "max_tokens": 1024
+    },
+    "scope": "Compares model/runtime pairs, not quantizations isolated within one engine. One process per pair. These are bounded retrieval and quality screens, not general qualification.",
+    "script_location": "/var/opt/halo-ai/state/benchmarks/flash-serial-2026-09-20/retest.py"
+  },
+  "runs": {
+    "halogen": {
+      "schema_version": 1,
+      "recorded_at": "2026-09-21T00:48:11.730041+00:00",
+      "engine": "halogen",
+      "model": "halogen-qwen3.8-flash-next",
+      "profile": {
+        "id": "diagnostic-halogen-262k-serial",
+        "model": "halogen-qwen3.8-flash-next",
+        "engine": "halogen",
+        "context": 262144,
+        "startup_timeout": 1200,
+        "risk": "experimental",
+        "features": [
+          "vision"
+        ],
+        "thinking": true,
+        "proposal_policy": "candidate-not-qualified-as-default",
+        "settings": {
+          "kv_pool_positions": 262144,
+          "parallel": 1,
+          "prefill_chunk": 16384,
+          "prompt_cache": 0,
+          "drafter": 0,
+          "reasoning_effort": "medium",
+          "max_tokens_default": 8192,
+          "prompt_lookup": 0
+        }
+      },
+      "health_before": {
+        "status": "ok",
+        "model": "halogen-qwen3.8-flash-next",
+        "endpoints": [
+          "/v1/chat/completions",
+          "/v1/completions",
+          "/v1/models",
+          "/v1/responses"
+        ],
+        "cache_counters": "/cache",
+        "metrics": "/metrics",
+        "context": 262144,
+        "rope_scaling": null,
+        "indexer_budget": 2048,
+        "vision": {
+          "enabled": true,
+          "endpoints": [
+            "/v1/chat/completions",
+            "/v1/responses"
+          ],
+          "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+          "max_pixels": 3686400,
+          "size_multiple": 32
+        },
+        "version": {
+          "api": "0.12.2",
+          "engine": "0.12.2",
+          "match": true
+        },
+        "checkpoint_format": "hgn",
+        "chat_template": {
+          "path": "/models/tokenizer/chat_template.jinja",
+          "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+          "probe": "passed",
+          "thinking_control": true
+        },
+        "engine": {
+          "responds": true,
+          "probe_s": 1.001
+        },
+        "busy": false,
+        "slots": 1,
+        "slot_ctx": 262144,
+        "kv_pool_positions": 262144,
+        "in_flight": 0,
+        "busy_for_s": 0,
+        "queued": 0,
+        "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+        "drafters_available": [
+          "serial",
+          "mtp"
+        ],
+        "drafter_default": "serial",
+        "prompt_lookup": "off",
+        "shortlist_draft_head": false,
+        "drafter_weights_loaded": true,
+        "prompt_cache": {
+          "enabled": false,
+          "cap_mb": 0,
+          "mode": 0,
+          "snapshot_align": 0,
+          "bitwise_identical_to_cold": false
+        },
+        "composable_context": {
+          "enabled": false
+        },
+        "tool_calls": {
+          "wire_format": "qwen-xml (<function=>/<parameter=>)",
+          "streaming": true,
+          "tool_choice": [
+            "auto",
+            "none",
+            "required",
+            "{type: function, function: {name}}"
+          ],
+          "forced_call_is_a_prefill": true,
+          "required_is_exact": "named tool_choice, or one tool",
+          "parallel_tool_calls": true,
+          "constrained_decoding": false,
+          "forced_call_disables_thinking": true,
+          "argument_types_need_schema": true
+        },
+        "supported": [
+          "reasoning_effort",
+          "enable_thinking",
+          "preserve_thinking",
+          "max_thinking_tokens",
+          "thinking_budget_tokens",
+          "thinking_budget",
+          "thinking_token_budget",
+          "reasoning",
+          "thinking",
+          "tools",
+          "tool_choice",
+          "parallel_tool_calls",
+          "stop",
+          "max_tokens",
+          "max_completion_tokens",
+          "max_output_tokens",
+          "stream",
+          "stream_options"
+        ],
+        "token_budget_aliases": [
+          "max_tokens",
+          "max_completion_tokens",
+          "max_output_tokens"
+        ],
+        "max_tokens_default": 8192,
+        "reasoning_effort_default": "medium",
+        "reasoning_effort_values": [
+          "high",
+          "low",
+          "medium",
+          "minimal",
+          "none",
+          "xhigh"
+        ],
+        "token_budget_covers_reasoning": true,
+        "max_thinking_tokens_default": null,
+        "thinking_answer_room": "max(1024, 15% of max_tokens)",
+        "thinking_control_aliases": [
+          "thinking_budget_tokens",
+          "thinking_budget",
+          "thinking_token_budget",
+          "reasoning.{enabled,effort,max_tokens}",
+          "thinking.{type,budget_tokens}"
+        ],
+        "server_defaults": {
+          "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+          "HALOGEN_TEMPERATURE": 1.0,
+          "HALOGEN_TOP_P": 0.95,
+          "HALOGEN_TOP_K": 20,
+          "HALOGEN_REASONING_EFFORT": "medium"
+        },
+        "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+        "chat_template_kwargs": [
+          "reasoning_effort",
+          "enable_thinking",
+          "preserve_thinking"
+        ],
+        "error_format": "openai",
+        "accepted_but_ignored": [
+          "n"
+        ],
+        "not_implemented": [],
+        "structured_output": {
+          "enabled": true,
+          "reason": null,
+          "response_format": [
+            "json_schema",
+            "json_object"
+          ],
+          "text.format": [
+            "json_schema",
+            "json_object"
+          ],
+          "routes": [
+            "/v1/chat/completions",
+            "/v1/completions",
+            "/v1/responses"
+          ],
+          "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+          "images": "a schema with images is a 400",
+          "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+          "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+          "keys": "object keys are emitted in schema order",
+          "enforced": [
+            "type",
+            "properties",
+            "required",
+            "additionalProperties",
+            "items",
+            "minItems",
+            "maxItems",
+            "minLength",
+            "maxLength",
+            "enum",
+            "const",
+            "anyOf",
+            "oneOf (as anyOf)",
+            "type: [..., \"null\"]",
+            "$ref",
+            "$defs"
+          ],
+          "accepted_not_enforced": [
+            "minimum",
+            "maximum",
+            "exclusiveMinimum",
+            "exclusiveMaximum",
+            "multipleOf",
+            "title",
+            "description",
+            "default",
+            "examples"
+          ],
+          "refused": [
+            "pattern",
+            "format",
+            "allOf",
+            "not",
+            "if",
+            "then",
+            "else",
+            "patternProperties",
+            "dependentRequired",
+            "dependentSchemas",
+            "uniqueItems",
+            "contains",
+            "propertyNames",
+            "unevaluatedProperties",
+            "unevaluatedItems",
+            "minProperties",
+            "maxProperties",
+            "prefixItems"
+          ]
+        },
+        "sampling": {
+          "implemented": [
+            "temperature",
+            "top_p",
+            "top_k",
+            "min_p",
+            "seed",
+            "presence_penalty",
+            "frequency_penalty",
+            "logit_bias",
+            "logprobs"
+          ],
+          "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+          "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter",
+          "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+          "penalties": "presence and frequency count GENERATED tokens only; applied on both drafters",
+          "not_implemented": [
+            "top_logprobs",
+            "logprobs with stream=true",
+            "n > 1"
+          ]
+        },
+        "max_tokens_cap": 65536,
+        "max_tokens_over_cap": "400"
+      },
+      "image": "ghcr.io/peonist-ai/halogen-flash-server@sha256:8f4c75fc15a0e2f2c023241389c4c946a60fa4fb4cd6d350dfcea17e22d119f9",
+      "command": [
+        "all"
+      ],
+      "environment": {
+        "HALOGEN_MATMUL_ALGOS": "1",
+        "HALOGEN_TOKENIZER": "/models/tokenizer",
+        "HALOGEN_MATMUL_TUNING_FILE": "/opt/halogen/flash-tune.plan",
+        "HALOGEN_QUEUE_TIMEOUT": "3600",
+        "HALOGEN_PORT": "8730",
+        "HALOGEN_API_PORT": "8731",
+        "HALOGEN_MAX_TOK": "16384",
+        "HALOGEN_IMAGE_VERSION": "0.12.2",
+        "HALOGEN_ATTN_FA": "64",
+        "HALOGEN_CK_OVERLAY": "/models/qwen38-flash-next-w4b.overlay.hgn",
+        "HALOGEN_PROMPT_CACHE": "0",
+        "HALOGEN_KV_POOL_POSITIONS": "262144",
+        "HALOGEN_DRAFTER_DEFAULT": "0",
+        "HALOGEN_MAX_TOKENS_DEFAULT": "8192",
+        "HALOGEN_TEMPERATURE": "1.0",
+        "HALOGEN_PREFILL_CHUNK": "32768",
+        "HALOGEN_ARCH": "gfx1151",
+        "HALOGEN_MAX_TOKENS_CAP": "65536",
+        "HALOGEN_CTX": "262144",
+        "HALOGEN_REASONING_EFFORT": "medium",
+        "HALOGEN_VISION_TOWER": "/models/qwen38-flash-next-vision.hgn",
+        "HALOGEN_KV_SLOTS": "1",
+        "HALOGEN_CHECKPOINT": "/models/qwen38-flash-next-w4b.hgn",
+        "HALOGEN_MATMUL_BUCKET": "1",
+        "HALOGEN_TOP_P": "0.95",
+        "HALOGEN_TOP_K": "20",
+        "HALOGEN_PLD": "0",
+        "HALOGEN_MODEL_ID": "halogen-qwen3.8-flash-next",
+        "HALOGEN_BIND": "127.0.0.1"
+      },
+      "checks": [
+        {
+          "name": "retrieval-7910-records",
+          "expected": "delta-68658,delta-24374,delta-80090",
+          "messages_sha256": "fc24c93372327c21e6d0cb69b95d226058201249c6e99bb625b8db96d8ae0536",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 1024,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-2372f8582a3d4c0b91f4b9f3",
+            "created": 1789951692,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "delta-92415,delta-24374,delta-80090"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 261107,
+              "completion_tokens": 24,
+              "total_tokens": 261131,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 261107,
+              "predicted_n": 24,
+              "prompt_ms": 278711.9,
+              "predicted_ms": 688.1,
+              "prompt_per_second": 936.835,
+              "predicted_per_second": 34.879,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": false,
+          "zero_drafts": true,
+          "wall_seconds": 279.73624583499986
+        },
+        {
+          "name": "retrieval-959-records",
+          "expected": "delta-57034,delta-97930,delta-38826",
+          "messages_sha256": "acfc166777ce7365a515105a020c6ab72fe5094965c998599455642eaa2ec429",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 1024,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-90ff709670c04dabb69438c4",
+            "created": 1789951971,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "delta-57034,delta-97930,delta-38826"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 31724,
+              "completion_tokens": 24,
+              "total_tokens": 31748,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 31724,
+              "predicted_n": 24,
+              "prompt_ms": 35747.9,
+              "predicted_ms": 655.6,
+              "prompt_per_second": 887.437,
+              "predicted_per_second": 36.608,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": true,
+          "zero_drafts": true,
+          "wall_seconds": 36.45851407800001
+        },
+        {
+          "name": "code-trace-alternating",
+          "expected": "12",
+          "messages_sha256": "b569c0dc095975a912e5f333b08e21174e3870d5635c87e95c59556704ce28fb",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-d7cedf03ed584519b6e85816",
+            "created": 1789952007,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "2"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 111,
+              "completion_tokens": 2,
+              "total_tokens": 113,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 111,
+              "predicted_n": 2,
+              "prompt_ms": 1381.9,
+              "predicted_ms": 33.4,
+              "prompt_per_second": 80.324,
+              "predicted_per_second": 59.88,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": false,
+          "zero_drafts": true,
+          "wall_seconds": 1.4192308979995687
+        },
+        {
+          "name": "code-slice-semantics",
+          "expected": "put",
+          "messages_sha256": "44d5787060ec9b2645ca024d04e248197084c2e8baea1990666cfe7ec34afd55",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-f8dd7cdd34cb4e7c86e4aae7",
+            "created": 1789952009,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "p"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 67,
+              "completion_tokens": 2,
+              "total_tokens": 69,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 67,
+              "predicted_n": 2,
+              "prompt_ms": 1030.1,
+              "predicted_ms": 33.6,
+              "prompt_per_second": 65.042,
+              "predicted_per_second": 59.524,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": false,
+          "zero_drafts": true,
+          "wall_seconds": 1.067769750000025
+        },
+        {
+          "name": "reasoning-crt",
+          "expected": "38",
+          "messages_sha256": "4b11d014ec36ee19ee47a75f572c2e0e5dd7d23600c8d5a7c439e34ab6d036c0",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-e32e46c8b7e04c5cbf51bf6a",
+            "created": 1789952010,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "31"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 63,
+              "completion_tokens": 3,
+              "total_tokens": 66,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 63,
+              "predicted_n": 3,
+              "prompt_ms": 971.8,
+              "predicted_ms": 61.7,
+              "prompt_per_second": 64.828,
+              "predicted_per_second": 48.622,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": false,
+          "zero_drafts": true,
+          "wall_seconds": 1.037538854000104
+        },
+        {
+          "name": "reasoning-probability",
+          "expected": "3/10",
+          "messages_sha256": "39d1f58e2bcecee459e4026d36a29606545906fe34176fac00f9c1efb636efb7",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-da6124bb0ad94d2ba6ea7e41",
+            "created": 1789952011,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "3/10"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 69,
+              "completion_tokens": 5,
+              "total_tokens": 74,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 69,
+              "predicted_n": 5,
+              "prompt_ms": 1064.1,
+              "predicted_ms": 125.2,
+              "prompt_per_second": 64.844,
+              "predicted_per_second": 39.936,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": true,
+          "zero_drafts": true,
+          "wall_seconds": 1.192831871999715
+        },
+        {
+          "name": "logic-ordering",
+          "expected": "De,Ada,Bo,Cy",
+          "messages_sha256": "110459c6704060c88876aa9d31f80d328a69d50f526c8a9355346dcf4aa2b5c5",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-5c90d8bf756b4903958dd80c",
+            "created": 1789952012,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "De,Ada,Bo,Cy"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 71,
+              "completion_tokens": 8,
+              "total_tokens": 79,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 71,
+              "predicted_n": 8,
+              "prompt_ms": 1067.1,
+              "predicted_ms": 222.7,
+              "prompt_per_second": 66.535,
+              "predicted_per_second": 35.923,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": true,
+          "zero_drafts": true,
+          "wall_seconds": 1.293407666999883
+        },
+        {
+          "name": "instruction-exact-format",
+          "expected": "amber|7|BLUE",
+          "messages_sha256": "bdf0f17ef6bb7201bbe681dce9af18c221140de7254dbb039c6396498d15d996",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-503ecc3ee9e541e888354710",
+            "created": 1789952013,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "amber|7|BLUE"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 65,
+              "completion_tokens": 6,
+              "total_tokens": 71,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 65,
+              "predicted_n": 6,
+              "prompt_ms": 943.0,
+              "predicted_ms": 159.6,
+              "prompt_per_second": 68.929,
+              "predicted_per_second": 37.594,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": true,
+          "zero_drafts": true,
+          "wall_seconds": 1.1068520750000062
+        },
+        {
+          "name": "tool-arguments-json",
+          "expected": {
+            "city": "Kyiv",
+            "units": "metric",
+            "days": 3
+          },
+          "messages_sha256": "d1f8e6e4b9ac1a42f9533d6dcfcdcc8b4635a88c9cf45ffd378edf52dafa46fb",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 64,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-267dfe2548c04a86b6dfc2e4",
+            "created": 1789952015,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "{\"city\": \"Kyiv\", \"units\": \"metric\", \"days\": 3}"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 82,
+              "completion_tokens": 20,
+              "total_tokens": 102,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 82,
+              "predicted_n": 20,
+              "prompt_ms": 1165.1,
+              "predicted_ms": 594.3,
+              "prompt_per_second": 70.38,
+              "predicted_per_second": 33.653,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": true,
+          "zero_drafts": true,
+          "wall_seconds": 1.7638425420000203
+        },
+        {
+          "name": "json-filter-sort",
+          "expected": [
+            2,
+            3
+          ],
+          "messages_sha256": "6de5a88008406dcedd50df5e620ae7d3453c25641a428ce06baa47de1699b778",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 64,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-46bc7e626ac1415ab282e3ab",
+            "created": 1789952016,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "[2,3]"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 88,
+              "completion_tokens": 6,
+              "total_tokens": 94,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 88,
+              "predicted_n": 6,
+              "prompt_ms": 1164.9,
+              "predicted_ms": 159.3,
+              "prompt_per_second": 75.543,
+              "predicted_per_second": 37.665,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": true,
+          "zero_drafts": true,
+          "wall_seconds": 1.328253198999846
+        },
+        {
+          "name": "multilingual-literal-retrieval",
+          "expected": "\u041a\u0418\u0407\u0412-482",
+          "messages_sha256": "286b00e85d8afcfadc78d3e41f99aa56b3cdba192198062b3053799e1e037ca8",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-595d87a533154096a8583406",
+            "created": 1789952018,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "\u041a\u0418\u0407\u0412-482"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 81,
+              "completion_tokens": 9,
+              "total_tokens": 90,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 81,
+              "predicted_n": 9,
+              "prompt_ms": 1164.2,
+              "predicted_ms": 241.3,
+              "prompt_per_second": 69.576,
+              "predicted_per_second": 37.298,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": true,
+          "zero_drafts": true,
+          "wall_seconds": 1.4098442240001532
+        },
+        {
+          "name": "special-token-literals",
+          "expected": "2",
+          "messages_sha256": "bcb4972dab9ee02cfe3208aabd698f8cbf0dbefc03d6e142b77d76c90cc1a930",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-5f61a490394d42d286bbafc5",
+            "created": 1789952019,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "2"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 77,
+              "completion_tokens": 2,
+              "total_tokens": 79,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 77,
+              "predicted_n": 2,
+              "prompt_ms": 1081.8,
+              "predicted_ms": 29.7,
+              "prompt_per_second": 71.178,
+              "predicted_per_second": 67.34,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": true,
+          "zero_drafts": true,
+          "wall_seconds": 1.1158761750002668
+        },
+        {
+          "name": "short-distractor-retrieval",
+          "expected": "violet-731",
+          "messages_sha256": "6451601da275f4182861c4737c4be5675cbd8c85ad6a47c66e2e3e60ec9a817e",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-ac0d9f7835e54d23b78a0139",
+            "created": 1789952020,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "violet-731"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 82,
+              "completion_tokens": 7,
+              "total_tokens": 89,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 82,
+              "predicted_n": 7,
+              "prompt_ms": 1104.8,
+              "predicted_ms": 185.7,
+              "prompt_per_second": 74.222,
+              "predicted_per_second": 37.695,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": true,
+          "zero_drafts": true,
+          "wall_seconds": 1.2946820120000666
+        },
+        {
+          "name": "multi-turn-resynchronization",
+          "expected": "cedar-29",
+          "messages_sha256": "3b55b47dae9aa34c3b50e8b8c102327bdc2975fc6c7fa08007a78236d6f2fb0a",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-d73777dce649442a9e7b277f",
+            "created": 1789952021,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "cedar-29"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 77,
+              "completion_tokens": 6,
+              "total_tokens": 83,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 77,
+              "predicted_n": 6,
+              "prompt_ms": 989.2,
+              "predicted_ms": 157.1,
+              "prompt_per_second": 77.841,
+              "predicted_per_second": 38.192,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": true,
+          "zero_drafts": true,
+          "wall_seconds": 1.150765835999664
+        },
+        {
+          "name": "long-context-needle",
+          "expected": "quartz-8142",
+          "messages_sha256": "79fd6935a622624834c39e8b0fe6e63b3044785740ebd45aabbaa32c73428207",
+          "request_options": {
+            "model": "halogen-qwen3.8-flash-next",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "drafter": "serial"
+          },
+          "response": {
+            "id": "chatcmpl-271afe1967b0421e9236a78b",
+            "created": 1789952023,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "stop",
+                "message": {
+                  "role": "assistant",
+                  "content": "quartz-8142"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 16949,
+              "completion_tokens": 8,
+              "total_tokens": 16957,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 16949,
+              "predicted_n": 8,
+              "prompt_ms": 19628.1,
+              "predicted_ms": 218.2,
+              "prompt_per_second": 863.507,
+              "predicted_per_second": 36.664,
+              "cache_n": 0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          },
+          "passed": true,
+          "zero_drafts": true,
+          "wall_seconds": 19.86594837599978
+        }
+      ],
+      "suite_sha256": "909ef8bc4f88d69c61e49e6816c81e7a1dbb3450babed7a4c70164392aa7bd8e",
+      "health_after": {
+        "status": "ok",
+        "model": "halogen-qwen3.8-flash-next",
+        "endpoints": [
+          "/v1/chat/completions",
+          "/v1/completions",
+          "/v1/models",
+          "/v1/responses"
+        ],
+        "cache_counters": "/cache",
+        "metrics": "/metrics",
+        "context": 262144,
+        "rope_scaling": null,
+        "indexer_budget": 2048,
+        "vision": {
+          "enabled": true,
+          "endpoints": [
+            "/v1/chat/completions",
+            "/v1/responses"
+          ],
+          "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+          "max_pixels": 3686400,
+          "size_multiple": 32
+        },
+        "version": {
+          "api": "0.12.2",
+          "engine": "0.12.2",
+          "match": true
+        },
+        "checkpoint_format": "hgn",
+        "chat_template": {
+          "path": "/models/tokenizer/chat_template.jinja",
+          "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+          "probe": "passed",
+          "thinking_control": true
+        },
+        "engine": {
+          "responds": true,
+          "probe_s": 1.001
+        },
+        "busy": false,
+        "slots": 1,
+        "slot_ctx": 262144,
+        "kv_pool_positions": 262144,
+        "in_flight": 0,
+        "busy_for_s": 0,
+        "queued": 0,
+        "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+        "drafters_available": [
+          "serial",
+          "mtp"
+        ],
+        "drafter_default": "serial",
+        "prompt_lookup": "off",
+        "shortlist_draft_head": false,
+        "drafter_weights_loaded": true,
+        "prompt_cache": {
+          "enabled": false,
+          "cap_mb": 0,
+          "mode": 0,
+          "snapshot_align": 0,
+          "bitwise_identical_to_cold": false
+        },
+        "composable_context": {
+          "enabled": false
+        },
+        "tool_calls": {
+          "wire_format": "qwen-xml (<function=>/<parameter=>)",
+          "streaming": true,
+          "tool_choice": [
+            "auto",
+            "none",
+            "required",
+            "{type: function, function: {name}}"
+          ],
+          "forced_call_is_a_prefill": true,
+          "required_is_exact": "named tool_choice, or one tool",
+          "parallel_tool_calls": true,
+          "constrained_decoding": false,
+          "forced_call_disables_thinking": true,
+          "argument_types_need_schema": true
+        },
+        "supported": [
+          "reasoning_effort",
+          "enable_thinking",
+          "preserve_thinking",
+          "max_thinking_tokens",
+          "thinking_budget_tokens",
+          "thinking_budget",
+          "thinking_token_budget",
+          "reasoning",
+          "thinking",
+          "tools",
+          "tool_choice",
+          "parallel_tool_calls",
+          "stop",
+          "max_tokens",
+          "max_completion_tokens",
+          "max_output_tokens",
+          "stream",
+          "stream_options"
+        ],
+        "token_budget_aliases": [
+          "max_tokens",
+          "max_completion_tokens",
+          "max_output_tokens"
+        ],
+        "max_tokens_default": 8192,
+        "reasoning_effort_default": "medium",
+        "reasoning_effort_values": [
+          "high",
+          "low",
+          "medium",
+          "minimal",
+          "none",
+          "xhigh"
+        ],
+        "token_budget_covers_reasoning": true,
+        "max_thinking_tokens_default": null,
+        "thinking_answer_room": "max(1024, 15% of max_tokens)",
+        "thinking_control_aliases": [
+          "thinking_budget_tokens",
+          "thinking_budget",
+          "thinking_token_budget",
+          "reasoning.{enabled,effort,max_tokens}",
+          "thinking.{type,budget_tokens}"
+        ],
+        "server_defaults": {
+          "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+          "HALOGEN_TEMPERATURE": 1.0,
+          "HALOGEN_TOP_P": 0.95,
+          "HALOGEN_TOP_K": 20,
+          "HALOGEN_REASONING_EFFORT": "medium"
+        },
+        "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+        "chat_template_kwargs": [
+          "reasoning_effort",
+          "enable_thinking",
+          "preserve_thinking"
+        ],
+        "error_format": "openai",
+        "accepted_but_ignored": [
+          "n"
+        ],
+        "not_implemented": [],
+        "structured_output": {
+          "enabled": true,
+          "reason": null,
+          "response_format": [
+            "json_schema",
+            "json_object"
+          ],
+          "text.format": [
+            "json_schema",
+            "json_object"
+          ],
+          "routes": [
+            "/v1/chat/completions",
+            "/v1/completions",
+            "/v1/responses"
+          ],
+          "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+          "images": "a schema with images is a 400",
+          "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+          "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+          "keys": "object keys are emitted in schema order",
+          "enforced": [
+            "type",
+            "properties",
+            "required",
+            "additionalProperties",
+            "items",
+            "minItems",
+            "maxItems",
+            "minLength",
+            "maxLength",
+            "enum",
+            "const",
+            "anyOf",
+            "oneOf (as anyOf)",
+            "type: [..., \"null\"]",
+            "$ref",
+            "$defs"
+          ],
+          "accepted_not_enforced": [
+            "minimum",
+            "maximum",
+            "exclusiveMinimum",
+            "exclusiveMaximum",
+            "multipleOf",
+            "title",
+            "description",
+            "default",
+            "examples"
+          ],
+          "refused": [
+            "pattern",
+            "format",
+            "allOf",
+            "not",
+            "if",
+            "then",
+            "else",
+            "patternProperties",
+            "dependentRequired",
+            "dependentSchemas",
+            "uniqueItems",
+            "contains",
+            "propertyNames",
+            "unevaluatedProperties",
+            "unevaluatedItems",
+            "minProperties",
+            "maxProperties",
+            "prefixItems"
+          ]
+        },
+        "sampling": {
+          "implemented": [
+            "temperature",
+            "top_p",
+            "top_k",
+            "min_p",
+            "seed",
+            "presence_penalty",
+            "frequency_penalty",
+            "logit_bias",
+            "logprobs"
+          ],
+          "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+          "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter",
+          "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+          "penalties": "presence and frequency count GENERATED tokens only; applied on both drafters",
+          "not_implemented": [
+            "top_logprobs",
+            "logprobs with stream=true",
+            "n > 1"
+          ]
+        },
+        "max_tokens_cap": 65536,
+        "max_tokens_over_cap": "400"
+      },
+      "complete": true,
+      "model_artifacts": {
+        "id": "halogen-qwen3.8-flash-next",
+        "format": "hgn",
+        "repository": "peonist-ai/halogen-qwen3.8-flash-next",
+        "revision": "e238ffde1a89531743505349dd16ca35a1e09b15",
+        "architecture": "qwen4exp",
+        "engines": [
+          "halogen"
+        ],
+        "quantization": "HGN-W4B-quality-overlay",
+        "files": [
+          {
+            "role": "mtp",
+            "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-mtp.hgn",
+            "source_path": "qwen38-flash-next-mtp.hgn",
+            "bytes": 1523566720,
+            "sha256": "0f50e9626df98168e7c6e0cc264e2a92b5184dd885a175a06628d979b5edceeb"
+          },
+          {
+            "role": "mmproj",
+            "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-vision.hgn",
+            "source_path": "qwen38-flash-next-vision.hgn",
+            "bytes": 897916416,
+            "sha256": "d62e0ae553fe88afd3833733d4a4c669f34d20fd8dfce4b9610525bed2134b10"
+          },
+          {
+            "role": "main",
+            "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.hgn",
+            "source_path": "qwen38-flash-next-w4b.hgn",
+            "bytes": 124068083904,
+            "sha256": "9c116bbc01f77b7a15464c1a124eb3325b286089b8a2a6f2856c9b246a235bd6"
+          },
+          {
+            "role": "overlay_speed",
+            "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.overlay-speed.hgn",
+            "source_path": "qwen38-flash-next-w4b.overlay-speed.hgn",
+            "bytes": 2478095488,
+            "sha256": "f49c8d14fa972c1db5115c714981e399585a6a98106a1a055d9e77026bb6de4c"
+          },
+          {
+            "role": "overlay",
+            "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.overlay.hgn",
+            "source_path": "qwen38-flash-next-w4b.overlay.hgn",
+            "bytes": 2572466560,
+            "sha256": "1cdfc3a9f988955bfe9a71bb808d393030abbf9f99d34ffa1ef93815a49b39ab"
+          },
+          {
+            "role": "processor",
+            "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/chat_template.jinja",
+            "source_path": "tokenizer/chat_template.jinja",
+            "bytes": 8952,
+            "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041"
+          },
+          {
+            "role": "processor",
+            "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/generation_config.json",
+            "source_path": "tokenizer/generation_config.json",
+            "bytes": 202,
+            "sha256": "e70c136c1b78ddc1fb0905bac8e733a4dc448d4f852a5dd75143fffc70be550e"
+          },
+          {
+            "role": "processor",
+            "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/merges.txt",
+            "source_path": "tokenizer/merges.txt",
+            "bytes": 3353259,
+            "sha256": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d"
+          },
+          {
+            "role": "processor",
+            "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer.json",
+            "source_path": "tokenizer/tokenizer.json",
+            "bytes": 12809320,
+            "sha256": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3"
+          },
+          {
+            "role": "processor",
+            "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer_config.json",
+            "source_path": "tokenizer/tokenizer_config.json",
+            "bytes": 17928,
+            "sha256": "b11349aafa7cdc6a320767cf7ceb29ed82f7eda5d65e8e0819e76f0ce947bf27"
+          },
+          {
+            "role": "processor",
+            "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/vocab.json",
+            "source_path": "tokenizer/vocab.json",
+            "bytes": 6722759,
+            "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
+          }
+        ],
+        "download": {
+          "provider": "huggingface",
+          "repository": "peonist-ai/halogen-qwen3.8-flash-next",
+          "revision": "e238ffde1a89531743505349dd16ca35a1e09b15",
+          "allow_patterns": [
+            "qwen38-flash-next-mtp.hgn",
+            "qwen38-flash-next-vision.hgn",
+            "qwen38-flash-next-w4b.hgn",
+            "qwen38-flash-next-w4b.overlay-speed.hgn",
+            "qwen38-flash-next-w4b.overlay.hgn",
+            "tokenizer/chat_template.jinja",
+            "tokenizer/generation_config.json",
+            "tokenizer/merges.txt",
+            "tokenizer/tokenizer.json",
+            "tokenizer/tokenizer_config.json",
+            "tokenizer/vocab.json"
+          ]
+        }
+      },
+      "summary": {
+        "retrieval_262k_passed": false,
+        "retrieval_32k_passed": true,
+        "fixed_suite_passed": 10,
+        "fixed_suite_cases": 13
+      }
+    },
+    "ud": {
+      "schema_version": 1,
+      "recorded_at": "2026-09-21T00:54:59.672915+00:00",
+      "engine": "ud",
+      "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+      "profile": {
+        "id": "diagnostic-ud-262k-serial",
+        "model": "qwen3.8-flash-next-ud-q4-k-xl",
+        "engine": "strixvulkan075",
+        "context": 262144,
+        "startup_timeout": 1200,
+        "risk": "experimental-lockup",
+        "features": [],
+        "thinking": false,
+        "settings": {
+          "device": "Vulkan0",
+          "gpu_layers": "all",
+          "fit": false,
+          "parallel": 1,
+          "batch": 2048,
+          "ubatch": 512,
+          "flash_attention": true,
+          "kv": "q8_0",
+          "load_mode": "mmap",
+          "tensor_read_lazy": "auto",
+          "repack": false,
+          "no_host": true,
+          "threads": 4,
+          "threads_batch": 32,
+          "jinja": true,
+          "reasoning_preserve": true,
+          "reasoning_effort": "medium",
+          "reasoning_budget": 2048
+        }
+      },
+      "health_before": {
+        "status": "ok"
+      },
+      "image": "ghcr.io/nathanw1014/strix-halo-llamacpp@sha256:cdb88888ed5547e03c377ea0525f3f281bd6f159e77fc3faf810fe0f24d6a146",
+      "command": [
+        "llama-server",
+        "-m",
+        "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "-c",
+        "262144",
+        "-np",
+        "1",
+        "--batch-size",
+        "2048",
+        "--ubatch-size",
+        "512",
+        "--flash-attn",
+        "on",
+        "--metrics",
+        "--reasoning-effort",
+        "medium",
+        "--reasoning-budget",
+        "2048",
+        "--device",
+        "Vulkan0",
+        "--gpu-layers",
+        "all",
+        "--fit",
+        "off",
+        "--threads",
+        "4",
+        "--threads-batch",
+        "32",
+        "--cache-type-k",
+        "q8_0",
+        "--cache-type-v",
+        "q8_0",
+        "--load-mode",
+        "mmap",
+        "--tensor-read-lazy",
+        "auto",
+        "--no-repack",
+        "--no-host",
+        "--jinja",
+        "--reasoning-preserve",
+        "--spec-type",
+        "none"
+      ],
+      "environment": {},
+      "checks": [
+        {
+          "name": "retrieval-7910-records",
+          "expected": "delta-68658,delta-24374,delta-80090",
+          "messages_sha256": "fc24c93372327c21e6d0cb69b95d226058201249c6e99bb625b8db96d8ae0536",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 1024,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 261107,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "delta-33577,delta-24374,delta-80090"
+                }
+              }
+            ],
+            "created": 1789953842,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 24,
+              "prompt_tokens": 261107,
+              "total_tokens": 261131,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-U0cnEJnrBWWCjSJjNNHLnIVeFgzRxjtD",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 261107,
+              "prompt_ms": 1740757.255,
+              "prompt_per_token_ms": 6.666834879953429,
+              "prompt_per_second": 149.99621529654345,
+              "predicted_n": 24,
+              "predicted_ms": 1600.316,
+              "predicted_per_token_ms": 69.57895652173913,
+              "predicted_per_second": 14.372161498104123
+            }
+          },
+          "passed": false,
+          "zero_drafts": null,
+          "wall_seconds": 1742.4580893779994
+        },
+        {
+          "name": "retrieval-959-records",
+          "expected": "delta-57034,delta-97930,delta-38826",
+          "messages_sha256": "acfc166777ce7365a515105a020c6ab72fe5094965c998599455642eaa2ec429",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 1024,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 31724,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "delta-57034,delta-97930,delta-38826"
+                }
+              }
+            ],
+            "created": 1789953951,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 24,
+              "prompt_tokens": 31724,
+              "total_tokens": 31748,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-7JfZjZNdY6NJCZh1U2InKXFLPsliZuWy",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 31724,
+              "prompt_ms": 107697.306,
+              "prompt_per_token_ms": 3.394821144874543,
+              "prompt_per_second": 294.5663283350839,
+              "predicted_n": 24,
+              "predicted_ms": 1130.739,
+              "predicted_per_token_ms": 49.162565217391304,
+              "predicted_per_second": 20.340679856270988
+            }
+          },
+          "passed": true,
+          "zero_drafts": null,
+          "wall_seconds": 109.22429759999977
+        },
+        {
+          "name": "code-trace-alternating",
+          "expected": "12",
+          "messages_sha256": "b569c0dc095975a912e5f333b08e21174e3870d5635c87e95c59556704ce28fb",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 111,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "18"
+                }
+              }
+            ],
+            "created": 1789953952,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 3,
+              "prompt_tokens": 111,
+              "total_tokens": 114,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-DDzVHKXmC4i8IhCcBX7jWOhVuU3ZdKHN",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 111,
+              "prompt_ms": 1164.863,
+              "prompt_per_token_ms": 10.494261261261261,
+              "prompt_per_second": 95.29017575457371,
+              "predicted_n": 3,
+              "predicted_ms": 98.4,
+              "predicted_per_token_ms": 49.2,
+              "predicted_per_second": 20.32520325203252
+            }
+          },
+          "passed": false,
+          "zero_drafts": null,
+          "wall_seconds": 1.3685361110001395
+        },
+        {
+          "name": "code-slice-semantics",
+          "expected": "put",
+          "messages_sha256": "44d5787060ec9b2645ca024d04e248197084c2e8baea1990666cfe7ec34afd55",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 67,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "eul"
+                }
+              }
+            ],
+            "created": 1789953953,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 3,
+              "prompt_tokens": 67,
+              "total_tokens": 70,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-FJgCiWyJLTlv3s8cm3MSzTG9ffzTVMNM",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 67,
+              "prompt_ms": 958.275,
+              "prompt_per_token_ms": 14.302611940298506,
+              "prompt_per_second": 69.91729931387128,
+              "predicted_n": 3,
+              "predicted_ms": 95.897,
+              "predicted_per_token_ms": 47.9485,
+              "predicted_per_second": 20.855709771942813
+            }
+          },
+          "passed": false,
+          "zero_drafts": null,
+          "wall_seconds": 1.0897036110000045
+        },
+        {
+          "name": "reasoning-crt",
+          "expected": "38",
+          "messages_sha256": "4b11d014ec36ee19ee47a75f572c2e0e5dd7d23600c8d5a7c439e34ab6d036c0",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 63,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "31"
+                }
+              }
+            ],
+            "created": 1789953955,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 3,
+              "prompt_tokens": 63,
+              "total_tokens": 66,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-tcX2r0khjwcQydomcjGt1cQDXNIkNJoV",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 63,
+              "prompt_ms": 893.482,
+              "prompt_per_token_ms": 14.182253968253967,
+              "prompt_per_second": 70.51065382402778,
+              "predicted_n": 3,
+              "predicted_ms": 96.078,
+              "predicted_per_token_ms": 48.039,
+              "predicted_per_second": 20.81641999208976
+            }
+          },
+          "passed": false,
+          "zero_drafts": null,
+          "wall_seconds": 1.022599266000725
+        },
+        {
+          "name": "reasoning-probability",
+          "expected": "3/10",
+          "messages_sha256": "39d1f58e2bcecee459e4026d36a29606545906fe34176fac00f9c1efb636efb7",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 69,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "3/10"
+                }
+              }
+            ],
+            "created": 1789953956,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 69,
+              "total_tokens": 74,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-3ez1yqSRkjU9QnFUhZekW1neFwTmRqwS",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 69,
+              "prompt_ms": 925.888,
+              "prompt_per_token_ms": 13.418666666666667,
+              "prompt_per_second": 74.52305246422893,
+              "predicted_n": 5,
+              "predicted_ms": 186.34,
+              "predicted_per_token_ms": 46.585,
+              "predicted_per_second": 21.466137168616505
+            }
+          },
+          "passed": true,
+          "zero_drafts": null,
+          "wall_seconds": 1.1464947950007627
+        },
+        {
+          "name": "logic-ordering",
+          "expected": "De,Ada,Bo,Cy",
+          "messages_sha256": "110459c6704060c88876aa9d31f80d328a69d50f526c8a9355346dcf4aa2b5c5",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 71,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "De,Ada,Bo,Cy"
+                }
+              }
+            ],
+            "created": 1789953957,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 71,
+              "total_tokens": 79,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-psVAR8w0XrJFYtwqyndvGBgCY2GaGCgP",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 71,
+              "prompt_ms": 947.576,
+              "prompt_per_token_ms": 13.346140845070423,
+              "prompt_per_second": 74.92802688122114,
+              "predicted_n": 8,
+              "predicted_ms": 318.959,
+              "predicted_per_token_ms": 45.56557142857143,
+              "predicted_per_second": 21.946394364165926
+            }
+          },
+          "passed": true,
+          "zero_drafts": null,
+          "wall_seconds": 1.299919174999559
+        },
+        {
+          "name": "instruction-exact-format",
+          "expected": "amber|7|BLUE",
+          "messages_sha256": "bdf0f17ef6bb7201bbe681dce9af18c221140de7254dbb039c6396498d15d996",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 65,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "amber|7|BLUE"
+                }
+              }
+            ],
+            "created": 1789953958,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 6,
+              "prompt_tokens": 65,
+              "total_tokens": 71,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-YVqt5mOAe3e3pFOfjDRzQBbp1ZjmSaPg",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 65,
+              "prompt_ms": 886.54,
+              "prompt_per_token_ms": 13.639076923076923,
+              "prompt_per_second": 73.31874478308931,
+              "predicted_n": 6,
+              "predicted_ms": 228.617,
+              "predicted_per_token_ms": 45.7234,
+              "predicted_per_second": 21.870639541241466
+            }
+          },
+          "passed": true,
+          "zero_drafts": null,
+          "wall_seconds": 1.148121268000068
+        },
+        {
+          "name": "tool-arguments-json",
+          "expected": {
+            "city": "Kyiv",
+            "units": "metric",
+            "days": 3
+          },
+          "messages_sha256": "d1f8e6e4b9ac1a42f9533d6dcfcdcc8b4635a88c9cf45ffd378edf52dafa46fb",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 64,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 82,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "{\"city\": \"Kyiv\", \"units\": \"metric\", \"days\": 3}"
+                }
+              }
+            ],
+            "created": 1789953960,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 20,
+              "prompt_tokens": 82,
+              "total_tokens": 102,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-iWImW1OYuld2MXTe6N25I7ZaXfngrAZw",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 82,
+              "prompt_ms": 985.79,
+              "prompt_per_token_ms": 12.021829268292683,
+              "prompt_per_second": 83.18201645380861,
+              "predicted_n": 20,
+              "predicted_ms": 839.813,
+              "predicted_per_token_ms": 44.20068421052631,
+              "predicted_per_second": 22.624084171119048
+            }
+          },
+          "passed": true,
+          "zero_drafts": null,
+          "wall_seconds": 1.8654804170000716
+        },
+        {
+          "name": "json-filter-sort",
+          "expected": [
+            2,
+            3
+          ],
+          "messages_sha256": "6de5a88008406dcedd50df5e620ae7d3453c25641a428ce06baa47de1699b778",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 64,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 88,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "[2,3]"
+                }
+              }
+            ],
+            "created": 1789953961,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 6,
+              "prompt_tokens": 88,
+              "total_tokens": 94,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-6vRtIR0sfBWbBUKjZKI2MS3wMO1bglo2",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 88,
+              "prompt_ms": 991.976,
+              "prompt_per_token_ms": 11.272454545454545,
+              "prompt_per_second": 88.71182367315339,
+              "predicted_n": 6,
+              "predicted_ms": 228.812,
+              "predicted_per_token_ms": 45.7624,
+              "predicted_per_second": 21.852000769190425
+            }
+          },
+          "passed": true,
+          "zero_drafts": null,
+          "wall_seconds": 1.2537321780000639
+        },
+        {
+          "name": "multilingual-literal-retrieval",
+          "expected": "\u041a\u0418\u0407\u0412-482",
+          "messages_sha256": "286b00e85d8afcfadc78d3e41f99aa56b3cdba192198062b3053799e1e037ca8",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 81,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "\u041a\u0418\u0407\u0412-482"
+                }
+              }
+            ],
+            "created": 1789953963,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 9,
+              "prompt_tokens": 81,
+              "total_tokens": 90,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-bxWBBrqckGwwT28HuV65SSHEo2RcnghZ",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 81,
+              "prompt_ms": 985.829,
+              "prompt_per_token_ms": 12.170728395061728,
+              "prompt_per_second": 82.16435101828004,
+              "predicted_n": 9,
+              "predicted_ms": 356.324,
+              "predicted_per_token_ms": 44.5405,
+              "predicted_per_second": 22.45147674588296
+            }
+          },
+          "passed": true,
+          "zero_drafts": null,
+          "wall_seconds": 1.3749647250006092
+        },
+        {
+          "name": "special-token-literals",
+          "expected": "2",
+          "messages_sha256": "bcb4972dab9ee02cfe3208aabd698f8cbf0dbefc03d6e142b77d76c90cc1a930",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 77,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "2"
+                }
+              }
+            ],
+            "created": 1789953964,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 2,
+              "prompt_tokens": 77,
+              "total_tokens": 79,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-JTkeaITLa1OkeMwqSkccxLi1HBnSK2MQ",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 77,
+              "prompt_ms": 952.266,
+              "prompt_per_token_ms": 12.367090909090908,
+              "prompt_per_second": 80.8597597730046,
+              "predicted_n": 2,
+              "predicted_ms": 55.363,
+              "predicted_per_token_ms": 55.363,
+              "predicted_per_second": 18.062604988891497
+            }
+          },
+          "passed": true,
+          "zero_drafts": null,
+          "wall_seconds": 1.041559261000657
+        },
+        {
+          "name": "short-distractor-retrieval",
+          "expected": "violet-731",
+          "messages_sha256": "6451601da275f4182861c4737c4be5675cbd8c85ad6a47c66e2e3e60ec9a817e",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 82,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "violet-731"
+                }
+              }
+            ],
+            "created": 1789953965,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 7,
+              "prompt_tokens": 82,
+              "total_tokens": 89,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-6L8vlWt6DgcdS2wGnssxV4V1NbUxCGxw",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 82,
+              "prompt_ms": 1026.198,
+              "prompt_per_token_ms": 12.514609756097562,
+              "prompt_per_second": 79.9066067172222,
+              "predicted_n": 7,
+              "predicted_ms": 280.477,
+              "predicted_per_token_ms": 46.74616666666666,
+              "predicted_per_second": 21.392128409816138
+            }
+          },
+          "passed": true,
+          "zero_drafts": null,
+          "wall_seconds": 1.3413589850006247
+        },
+        {
+          "name": "multi-turn-resynchronization",
+          "expected": "cedar-29",
+          "messages_sha256": "3b55b47dae9aa34c3b50e8b8c102327bdc2975fc6c7fa08007a78236d6f2fb0a",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 77,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "cedar-29"
+                }
+              }
+            ],
+            "created": 1789953967,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 6,
+              "prompt_tokens": 77,
+              "total_tokens": 83,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-pNSnpMttMlKTTH8M8fed3VObpj0RKFDM",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 77,
+              "prompt_ms": 1217.481,
+              "prompt_per_token_ms": 15.811441558441558,
+              "prompt_per_second": 63.245340173686486,
+              "predicted_n": 6,
+              "predicted_ms": 244.218,
+              "predicted_per_token_ms": 48.843599999999995,
+              "predicted_per_second": 20.473511370988216
+            }
+          },
+          "passed": true,
+          "zero_drafts": null,
+          "wall_seconds": 1.5014999929999249
+        },
+        {
+          "name": "long-context-needle",
+          "expected": "quartz-8142",
+          "messages_sha256": "79fd6935a622624834c39e8b0fe6e63b3044785740ebd45aabbaa32c73428207",
+          "request_options": {
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "temperature": 0,
+            "seed": 1,
+            "reasoning_effort": "none",
+            "max_tokens": 32,
+            "stream": false,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "cache_prompt": false
+          },
+          "preflight_prompt_tokens": 16949,
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "quartz-8142"
+                }
+              }
+            ],
+            "created": 1789954020,
+            "model": "/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "system_fingerprint": "b10677-dff60048",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 16949,
+              "total_tokens": 16957,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "id": "chatcmpl-6pncsRZCDTrny17GY1PSlsNiu3iAsp7u",
+            "timings": {
+              "cache_n": 0,
+              "prompt_n": 16949,
+              "prompt_ms": 52877.881,
+              "prompt_per_token_ms": 3.1198230574075168,
+              "prompt_per_second": 320.5309985852119,
+              "predicted_n": 8,
+              "predicted_ms": 339.967,
+              "predicted_per_token_ms": 48.56671428571428,
+              "predicted_per_second": 20.590233757982393
+            }
+          },
+          "passed": true,
+          "zero_drafts": null,
+          "wall_seconds": 53.263603929000055
+        }
+      ],
+      "suite_sha256": "909ef8bc4f88d69c61e49e6816c81e7a1dbb3450babed7a4c70164392aa7bd8e",
+      "health_after": {
+        "status": "ok"
+      },
+      "complete": true,
+      "model_artifacts": {
+        "id": "qwen3.8-flash-next-ud-q4-k-xl",
+        "repository": "unsloth/Qwen3.8-Flash-Next-GGUF",
+        "revision": "38bb39ee97821de2c9009abb7e93950eec396e66",
+        "architecture": "qwen4exp",
+        "quantization": "UD-Q4_K_XL",
+        "default_reasoning_effort": "medium",
+        "modalities": [
+          "text"
+        ],
+        "engines": [
+          "llamacpp",
+          "strixvulkan075"
+        ],
+        "download": {
+          "provider": "huggingface",
+          "repository": "unsloth/Qwen3.8-Flash-Next-GGUF",
+          "revision": "38bb39ee97821de2c9009abb7e93950eec396e66",
+          "allow_patterns": [
+            "UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf",
+            "UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf",
+            "UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf",
+            "MTP/mtp-Qwen3.8-Flash-Next-shared-Q4_K_M.gguf",
+            "MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf"
+          ]
+        },
+        "files": [
+          {
+            "role": "main",
+            "shard": 1,
+            "shards": 4,
+            "source_path": "UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "path": "unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+            "bytes": 10946624,
+            "sha256": "4448186216b3af4cc558bbce2c3213f01608f8f8b2e5267a9767971dd3ec8082"
+          },
+          {
+            "role": "main",
+            "shard": 2,
+            "shards": 4,
+            "source_path": "UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf",
+            "path": "unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf",
+            "bytes": 49859583136,
+            "sha256": "3f342f1c1580473f1ee94ddd5b28206e8c07a70fa1a366f59d1d6c922919a6c9"
+          },
+          {
+            "role": "main",
+            "shard": 3,
+            "shards": 4,
+            "source_path": "UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf",
+            "path": "unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf",
+            "bytes": 49376141504,
+            "sha256": "56758f40269cad5cd9b0d3d6fbae0f40f6d5be6de49e4ab392dbe83157d9cbd3"
+          },
+          {
+            "role": "main",
+            "shard": 4,
+            "shards": 4,
+            "source_path": "UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf",
+            "path": "unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf",
+            "bytes": 12087983520,
+            "sha256": "753bda48b98ba4f1636134a90a967de1b2d3908a236c026e464777342e53510a"
+          },
+          {
+            "role": "mtp",
+            "source_path": "MTP/mtp-Qwen3.8-Flash-Next-shared-Q4_K_M.gguf",
+            "path": "unsloth/Qwen3.8-Flash-Next-GGUF/mtp-Qwen3.8-Flash-Next-shared-Q4_K_M.gguf",
+            "bytes": 1907151936,
+            "sha256": "f521868a9e143718bef513772f6e04d9642551e362cf2439636d2abdbd149dfc"
+          },
+          {
+            "role": "mtp_q8",
+            "source_path": "MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf",
+            "path": "unsloth/Qwen3.8-Flash-Next-GGUF/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf",
+            "bytes": 2786568256,
+            "sha256": "5ff54097406a905cf3a724c709124ceb0e3e10235ee862298969e91c96fa96e6"
+          }
+        ]
+      },
+      "summary": {
+        "retrieval_262k_passed": false,
+        "retrieval_32k_passed": true,
+        "fixed_suite_passed": 10,
+        "fixed_suite_cases": 13
+      },
+      "active_slot_during_long_request": {
+        "id": 0,
+        "n_ctx": 262144,
+        "speculative": false,
+        "is_processing": true,
+        "id_task": 0,
+        "n_prompt_tokens": 26652,
+        "n_prompt_tokens_processed": 24604,
+        "n_prompt_tokens_cache": 0,
+        "params": {
+          "seed": 1,
+          "temperature": 0.0,
+          "dynatemp_range": 0.0,
+          "dynatemp_exponent": 1.0,
+          "top_k": 20,
+          "top_p": 0.949999988079071,
+          "min_p": 0.05000000074505806,
+          "top_n_sigma": -1.0,
+          "xtc_probability": 0.0,
+          "xtc_threshold": 0.10000000149011612,
+          "typical_p": 1.0,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "frequency_penalty": 0.0,
+          "dry_multiplier": 0.0,
+          "dry_base": 1.75,
+          "dry_allowed_length": 2,
+          "dry_penalty_last_n": 64,
+          "mirostat": 0,
+          "mirostat_tau": 5.0,
+          "mirostat_eta": 0.10000000149011612,
+          "adaptive_target": -1.0,
+          "adaptive_decay": 0.8999999761581421,
+          "max_tokens": 1024,
+          "n_predict": 1024,
+          "n_keep": 0,
+          "n_discard": 0,
+          "ignore_eos": false,
+          "stream": false,
+          "n_probs": 0,
+          "min_keep": 0,
+          "chat_format": "peg-native",
+          "reasoning_format": "deepseek",
+          "reasoning_in_content": false,
+          "generation_prompt": "<|im_start|>assistant\n<think>\n\n</think>\n\n",
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "speculative.types": "none,none",
+          "timings_per_token": false,
+          "post_sampling_probs": false,
+          "backend_sampling": false,
+          "lora": []
+        },
+        "next_token": [
+          {
+            "has_next_token": true,
+            "has_new_line": false,
+            "n_remain": 1024,
+            "n_decoded": 0
+          }
+        ]
+      },
+      "long_request_log_evidence": [
+        "29.44.790.635 I slot      release: id  0 | task 0 | stop processing: n_tokens = 261130, truncated = 0"
+      ]
+    }
+  },
+  "conclusion": {
+    "mtp_off_fixes_near_limit_retrieval": false,
+    "ordinary_32k_choice": "Halogen, provisionally for performance; no demonstrated accuracy advantage for UD in these bounded screens.",
+    "near_262k_retrieval": "Neither model/runtime pair qualified by this test.",
+    "causal_limit": "Failure persists without speculation; this comparison does not isolate model, conversion, quantization, KV representation, or runtime as the underlying cause."
+  },
+  "restoration": {
+    "profile": "qwen3.8-flash-next-halogen-262k-vision",
+    "health": {
+      "status": "ok",
+      "model": "halogen-qwen3.8-flash-next",
+      "endpoints": [
+        "/v1/chat/completions",
+        "/v1/completions",
+        "/v1/models",
+        "/v1/responses"
+      ],
+      "cache_counters": "/cache",
+      "metrics": "/metrics",
+      "context": 262144,
+      "rope_scaling": null,
+      "indexer_budget": 2048,
+      "vision": {
+        "enabled": true,
+        "endpoints": [
+          "/v1/chat/completions",
+          "/v1/responses"
+        ],
+        "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+        "max_pixels": 3686400,
+        "size_multiple": 32
+      },
+      "version": {
+        "api": "0.12.2",
+        "engine": "0.12.2",
+        "match": true
+      },
+      "checkpoint_format": "hgn",
+      "chat_template": {
+        "path": "/models/tokenizer/chat_template.jinja",
+        "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+        "probe": "passed",
+        "thinking_control": true
+      },
+      "engine": {
+        "responds": true,
+        "probe_s": 1.001
+      },
+      "busy": false,
+      "slots": 1,
+      "slot_ctx": 262144,
+      "kv_pool_positions": 262144,
+      "in_flight": 0,
+      "busy_for_s": 0,
+      "queued": 0,
+      "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+      "drafters_available": [
+        "serial",
+        "mtp"
+      ],
+      "drafter_default": "mtp",
+      "prompt_lookup": {
+        "ngram": 3,
+        "chain": 3,
+        "applies_to": "greedy requests with the mtp drafter"
+      },
+      "shortlist_draft_head": false,
+      "drafter_weights_loaded": true,
+      "prompt_cache": {
+        "enabled": true,
+        "cap_mb": 110,
+        "mode": 2,
+        "snapshot_align": 64,
+        "bitwise_identical_to_cold": false
+      },
+      "composable_context": {
+        "enabled": false
+      },
+      "tool_calls": {
+        "wire_format": "qwen-xml (<function=>/<parameter=>)",
+        "streaming": true,
+        "tool_choice": [
+          "auto",
+          "none",
+          "required",
+          "{type: function, function: {name}}"
+        ],
+        "forced_call_is_a_prefill": true,
+        "required_is_exact": "named tool_choice, or one tool",
+        "parallel_tool_calls": true,
+        "constrained_decoding": false,
+        "forced_call_disables_thinking": true,
+        "argument_types_need_schema": true
+      },
+      "supported": [
+        "reasoning_effort",
+        "enable_thinking",
+        "preserve_thinking",
+        "max_thinking_tokens",
+        "thinking_budget_tokens",
+        "thinking_budget",
+        "thinking_token_budget",
+        "reasoning",
+        "thinking",
+        "tools",
+        "tool_choice",
+        "parallel_tool_calls",
+        "stop",
+        "max_tokens",
+        "max_completion_tokens",
+        "max_output_tokens",
+        "stream",
+        "stream_options"
+      ],
+      "token_budget_aliases": [
+        "max_tokens",
+        "max_completion_tokens",
+        "max_output_tokens"
+      ],
+      "max_tokens_default": 8192,
+      "reasoning_effort_default": "medium",
+      "reasoning_effort_values": [
+        "high",
+        "low",
+        "medium",
+        "minimal",
+        "none",
+        "xhigh"
+      ],
+      "token_budget_covers_reasoning": true,
+      "max_thinking_tokens_default": null,
+      "thinking_answer_room": "max(1024, 15% of max_tokens)",
+      "thinking_control_aliases": [
+        "thinking_budget_tokens",
+        "thinking_budget",
+        "thinking_token_budget",
+        "reasoning.{enabled,effort,max_tokens}",
+        "thinking.{type,budget_tokens}"
+      ],
+      "server_defaults": {
+        "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+        "HALOGEN_TEMPERATURE": 1.0,
+        "HALOGEN_TOP_P": 0.95,
+        "HALOGEN_TOP_K": 20,
+        "HALOGEN_REASONING_EFFORT": "medium"
+      },
+      "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+      "chat_template_kwargs": [
+        "reasoning_effort",
+        "enable_thinking",
+        "preserve_thinking"
+      ],
+      "error_format": "openai",
+      "accepted_but_ignored": [
+        "n"
+      ],
+      "not_implemented": [],
+      "structured_output": {
+        "enabled": true,
+        "reason": null,
+        "response_format": [
+          "json_schema",
+          "json_object"
+        ],
+        "text.format": [
+          "json_schema",
+          "json_object"
+        ],
+        "routes": [
+          "/v1/chat/completions",
+          "/v1/completions",
+          "/v1/responses"
+        ],
+        "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+        "images": "a schema with images is a 400",
+        "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+        "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+        "keys": "object keys are emitted in schema order",
+        "enforced": [
+          "type",
+          "properties",
+          "required",
+          "additionalProperties",
+          "items",
+          "minItems",
+          "maxItems",
+          "minLength",
+          "maxLength",
+          "enum",
+          "const",
+          "anyOf",
+          "oneOf (as anyOf)",
+          "type: [..., \"null\"]",
+          "$ref",
+          "$defs"
+        ],
+        "accepted_not_enforced": [
+          "minimum",
+          "maximum",
+          "exclusiveMinimum",
+          "exclusiveMaximum",
+          "multipleOf",
+          "title",
+          "description",
+          "default",
+          "examples"
+        ],
+        "refused": [
+          "pattern",
+          "format",
+          "allOf",
+          "not",
+          "if",
+          "then",
+          "else",
+          "patternProperties",
+          "dependentRequired",
+          "dependentSchemas",
+          "uniqueItems",
+          "contains",
+          "propertyNames",
+          "unevaluatedProperties",
+          "unevaluatedItems",
+          "minProperties",
+          "maxProperties",
+          "prefixItems"
+        ]
+      },
+      "sampling": {
+        "implemented": [
+          "temperature",
+          "top_p",
+          "top_k",
+          "min_p",
+          "seed",
+          "presence_penalty",
+          "frequency_penalty",
+          "logit_bias",
+          "logprobs"
+        ],
+        "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+        "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter",
+        "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+        "penalties": "presence and frequency count GENERATED tokens only; applied on both drafters",
+        "not_implemented": [
+          "top_logprobs",
+          "logprobs with stream=true",
+          "n > 1"
+        ]
+      },
+      "max_tokens_cap": 65536,
+      "max_tokens_over_cap": "400"
+    },
+    "vision_smoke": {
+      "id": "chatcmpl-9b6575c49ac04a61bdad0892",
+      "created": 1789954094,
+      "model": "halogen-qwen3.8-flash-next",
+      "object": "chat.completion",
+      "choices": [
+        {
+          "index": 0,
+          "finish_reason": "stop",
+          "message": {
+            "role": "assistant",
+            "content": "red",
+            "reasoning_content": "The user\n\nConsidering the limited time by the user, I have to give the solution based on the thinking directly now."
+          }
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 90,
+        "completion_tokens": 29,
+        "total_tokens": 119,
+        "completion_tokens_details": {
+          "reasoning_tokens": 26,
+          "reasoning_closed_at": 1,
+          "reasoning_closed_by": "answer_room"
+        }
+      },
+      "timings": {
+        "prompt_n": 90,
+        "predicted_n": 29,
+        "prompt_ms": 2131.8,
+        "predicted_ms": 1342.8,
+        "prompt_per_second": 42.218,
+        "predicted_per_second": 21.597,
+        "cache_n": 0,
+        "draft_n": 1,
+        "draft_n_accepted": 1
+      }
+    }
+  }
+}

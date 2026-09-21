@@ -133,11 +133,63 @@ Changing both the reasoning policy and the prompt length did not resolve the
 miss in this test. The cached and fresh attempts returned different wrong
 first codes, so cache reuse alone does not explain the failure.
 
-**Recommendation: keep Halogen as an experimental option.** MTP is active,
-and the serving integration works, but these results do not support promoting
-it to the general Qwen route or claiming reliable retrieval across the entire
-262K context. The smaller-context successes are bounded smoke checks, not a
-broad quality qualification. Existing recommended aliases remain unchanged.
+The requested first record was `000791`, whose code is `delta-68658`.
+The wrong codes correspond to other records in the supplied document:
+`delta-92415` belongs to `000794`, `delta-16172` to `000797`, and
+`delta-30330` to `000079`. These were incorrect record selections rather
+than codes absent from the source.
+
+These initial results keep the 262K serving profile experimental. They do not
+establish that UD-Q4_K_XL is more accurate at the same length; the matched
+serial comparison below addresses that question. The smaller-context
+successes are bounded smoke checks, not a broad quality qualification.
+Existing recommended aliases remain unchanged.
 
 [Full serving results and retry records](results/halogen-flash-native-serving-2026-09-20.json)
 include the request policies, prompt hashes, timing/cache counters, and outputs.
+
+## Serial retest against UD-Q4_K_XL
+
+A fresh process for each runtime received the identical 261,107-token
+three-code request with greedy decoding, seed 1, thinking off, and a
+1,024-token answer budget. Both used 262,144 context positions and one slot.
+Halogen used serial decoding with prompt lookup and prompt caching disabled.
+The UD-Q4_K_XL model used Strix Vulkan 0.7.5 with `--spec-type none`, no
+draft-model mount, and `cache_prompt: false`; its live slot reported
+`speculative: false`. Both processed the full prompt with zero cached tokens
+and finished normally after 24 completion tokens.
+
+| Model/runtime, MTP off | First code returned | Correct codes | Request time |
+| --- | --- | ---: | ---: |
+| Halogen native HGN | `delta-92415` (record `000794`) | 2/3 | 279.74 s |
+| UD-Q4_K_XL / Strix Vulkan 0.7.5 | `delta-33577` (record `003792`) | 2/3 | 1,742.46 s |
+
+The expected first code was `delta-68658` from record `000791`. Both returned
+the correct middle and final codes. Halogen's answer matched its earlier
+cold MTP run exactly, despite drafting zero tokens. The UD runtime does not
+expose draft counters in these responses; disabling speculation is verified
+by its command line and active slot, rather than treating absent counters
+as measured zero.
+
+**Disabling MTP did not fix this retrieval failure in either model/runtime
+pair.** This does not establish the underlying cause: model conversion,
+quantization, KV representation, and runtime differ between the two pairs.
+
+Both serial runs subsequently retrieved all three codes from the 31,724-token
+control and scored **10/13** on the fixed quality suite. Both failed
+`code-trace-alternating`, `code-slice-semantics`, and `reasoning-crt`.
+Halogen's 13 answers matched its earlier serial and MTP answers byte for byte;
+UD's 13 answers matched its earlier target-only baseline. All 15 Halogen
+requests drafted zero tokens, and all 30 requests across both runtimes used
+zero cached tokens.
+
+For ordinary Flash-Next use initially limited to 32K, **Halogen remains the
+provisional performance choice**, with UD target-only as a reference/fallback.
+These screens show no accuracy advantage for UD, and Halogen processes the
+long prompts faster. Neither pair is qualified for reliable retrieval near
+262K. This is a bounded comparison, not a broad model-quality recommendation;
+no default aliases or shipped profile settings were changed by the retest.
+
+[Full serial retest results](results/qwen3.8-flash-next-serial-retest-2026-09-20.json)
+include both effective diagnostic profiles, image pins, model artifacts,
+request options, prompt hashes, outputs, timings, and speculation evidence.
