@@ -222,7 +222,7 @@ for long generation after shallower prompts, and Q8 remains a verified diagnosti
 `qwen3.8-fn` selects `qwen3.8-flash-next-halogen-262k-vision`, using the native
 Halogen Flash checkpoint with its quality overlay, MTP, and vision at 262K
 context. The existing `qwen3.8-halogen` alias selects the same profile.
-Halogen 0.12.2 is digest-pinned and exposes its API on localhost:8731.
+Halogen 0.16.2 is digest-pinned and exposes its API on localhost:8731.
 Local MTP checks passed, and the matched serial comparison showed faster
 long-prompt processing with no accuracy advantage for UD-Q4_K_XL in these
 checks. Near-262K retrieval still returned only two of three requested codes

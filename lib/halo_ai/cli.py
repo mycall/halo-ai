@@ -25,12 +25,17 @@ import tempfile
 import threading
 import time
 import urllib.error
-import urllib.parse
 import urllib.request
 from pathlib import Path
-from typing import Any, Iterable, NoReturn
+from typing import Any, Iterable
 
 import host_profile
+import artifact_store
+import engine_halogen
+import engines as engine_registry
+import profile_artifacts
+from errors import HaloError, fail
+import halogen_npu
 import longbench
 import rocmfpx_quality
 import rocmfpx_tune
@@ -40,39 +45,10 @@ VERSION = "0.1.0"
 MANAGED_LABEL = "local.halo-ai.managed=true"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SOURCE_CONFIG = PROJECT_ROOT / "config"
-ENGINE_IMAGE_KEYS = {
-    "lemonade": "LEMONADE_IMAGE",
-    "llamacpp": "LLAMACPP_IMAGE",
-    "rocmfpx": "ROCMFPX_IMAGE",
-    "strixvulkan": "STRIXVULKAN_IMAGE",
-    "strixvulkan075": "STRIXVULKAN075_IMAGE",
-    "halogen": "HALOGEN_IMAGE",
-    "ds4": "DS4_IMAGE",
-    "speech": "SPEECH_IMAGE",
-    "vllm": "VLLM_IMAGE",
-}
-ENGINE_PORT_KEYS = {
-    "lemonade": "LEMONADE_PORT",
-    "llamacpp": "LLAMACPP_PORT",
-    "rocmfpx": "ROCMFPX_PORT",
-    "strixvulkan": "STRIXVULKAN_PORT",
-    "strixvulkan075": "STRIXVULKAN_PORT",
-    "halogen": "HALOGEN_API_PORT",
-    "ds4": "DS4_PORT",
-    "speech": "SPEECH_PORT",
-    "vllm": "VLLM_PORT",
-}
-ENGINE_CONTAINERS = {
-    "lemonade": "halo-lemonade",
-    "llamacpp": "halo-llamacpp",
-    "rocmfpx": "halo-rocmfpx",
-    "strixvulkan": "halo-strixvulkan",
-    "strixvulkan075": "halo-strixvulkan075",
-    "halogen": "halo-halogen",
-    "ds4": "halo-ds4",
-    "speech": "halo-speech",
-    "vllm": "halo-vllm",
-}
+ENGINE_IMAGE_KEYS = {name: spec.image_key for name, spec in engine_registry.REGISTRY.items()}
+ENGINE_PORT_KEYS = {name: spec.port_key for name, spec in engine_registry.REGISTRY.items()}
+ENGINE_CONTAINERS = {name: spec.container for name, spec in engine_registry.REGISTRY.items()}
+
 
 ROCMFPX_ENGINE_URL = (
     "https://github.com/julianmb/q38rocm/releases/download/v1.0.0/"
@@ -129,9 +105,9 @@ STRIXVULKAN075_IMAGE = (
     "ghcr.io/nathanw1014/strix-halo-llamacpp@"
     f"{STRIXVULKAN075_IMAGE_DIGEST}"
 )
-HALOGEN_RELEASE = "0.12.2"
-HALOGEN_IMAGE_DIGEST = "sha256:8f4c75fc15a0e2f2c023241389c4c946a60fa4fb4cd6d350dfcea17e22d119f9"
-HALOGEN_IMAGE = f"ghcr.io/peonist-ai/halogen-flash-server@{HALOGEN_IMAGE_DIGEST}"
+HALOGEN_RELEASE = engine_halogen.RELEASE
+HALOGEN_IMAGE_DIGEST = engine_halogen.IMAGE_DIGEST
+HALOGEN_IMAGE = engine_halogen.IMAGE
 
 STRIXVULKAN_ENGINES = frozenset({"strixvulkan", "strixvulkan075"})
 
@@ -169,14 +145,6 @@ SPEECH_CANDIDATE_BUILD_FILES = (
     "speech_languages.py",
     "speech_server.py",
 )
-
-
-class HaloError(RuntimeError):
-    """A user-facing, fail-closed error."""
-
-
-def fail(message: str) -> NoReturn:
-    raise HaloError(message)
 
 
 def eprint(*values: object) -> None:
@@ -280,6 +248,7 @@ DEFAULTS = {
     "STRIXVULKAN_PORT": "8000",
     "HALOGEN_IMAGE": HALOGEN_IMAGE,
     "HALOGEN_API_PORT": "8731",
+    "HALOGEN_XRT_LIB_DIR": "/usr/lib",
     "DS4_IMAGE": "localhost/halo-ai-ds4:b0001",
     "DS4_PORT": "8000",
     "DS4_KV_CACHE_ENABLED": "0",
@@ -367,7 +336,7 @@ def validate_config(config: Config) -> None:
         "DS4_KV_CACHE_DIR", "SPEECH_TEST_AUDIO_PATH",
     ):
         config.path(key)
-    for key in ("LEMONADE_PORT", "LLAMACPP_PORT", "ROCMFPX_PORT", "STRIXVULKAN_PORT", "DS4_PORT", "SPEECH_PORT", "VLLM_PORT"):
+    for key in set(ENGINE_PORT_KEYS.values()):
         config.integer(key, 1, 65535)
     config.integer("DS4_KV_CACHE_MB", 1024, 1024 * 1024)
     for key in ("HALO_AI_MODELS_REQUIRE_MOUNT", "DS4_KV_CACHE_ENABLED", "VLLM_GGUF_EXPERIMENTAL"):
@@ -470,7 +439,7 @@ def validate_catalog(
             fail(f"profile alias {alias} references unknown profile {target!r}")
     roles = {
         "main", "mmproj", "mtp", "mtp_q8", "dspark", "chat_template", "weights", "processor",
-        "overlay", "overlay_speed",
+        "overlay", "overlay_speed", "ngram",
     }
     for identifier, model in models.items():
         engines = model.get("engines")
@@ -646,30 +615,9 @@ def validate_catalog(
                 or not 1 <= settings["prefill_chunk"] <= 8192
             ):
                 fail(f"profile {identifier} has an invalid Lemonade native DS4 policy")
-        if engine == "halogen":
-            integers = {
-                "kv_pool_positions": (context, 262144), "parallel": (1, 2),
-                "prefill_chunk": (1024, 16384), "prompt_cache": (0, 2),
-                "drafter": (0, 1), "prompt_lookup": (0, 1), "max_tokens_default": (1, min(context, 65536)),
-            }
-            for key, (minimum, maximum) in integers.items():
-                value = settings.get(key)
-                if type(value) is not int or not minimum <= value <= maximum:
-                    fail(f"profile {identifier} has invalid Halogen setting {key}")
-            if (
-                models[model_id].get("format") != "hgn"
-                or context > 262144
-                or settings["prefill_chunk"] > context
-                or settings.get("reasoning_effort") not in {"low", "medium", "xhigh"}
-                or set(settings) != set(integers) | {"reasoning_effort"}
-                or not features <= {"mtp", "vision"}
-                or ("mtp" in features) != bool(settings["drafter"])
-                or (settings["prompt_lookup"] and not settings["drafter"])
-                or len([f for f in models[model_id]["files"] if f["role"] == "overlay"]) != 1
-                or len([f for f in models[model_id]["files"] if f["role"] == "main"]) != 1
-                or not any(f["role"] == "processor" for f in models[model_id]["files"])
-            ):
-                fail(f"profile {identifier} violates the Halogen candidate policy")
+        policy = engine_registry.REGISTRY[engine].validate_profile
+        if policy is not None:
+            policy(profile, models[model_id])
         if engine in STRIXVULKAN_ENGINES:
             integer_settings = {
                 "parallel": (1, 1), "batch": (1, 8192), "ubatch": (1, 8192),
@@ -847,18 +795,11 @@ def load_presets(config: Config) -> dict[str, dict[str, Any]]:
 
 
 def model_paths(config: Config, model: dict[str, Any], roles: set[str] | None = None) -> list[tuple[dict[str, Any], Path]]:
-    root = config.path("HALO_AI_MODELS_ROOT").resolve()
-    result = []
-    for entry in model["files"]:
-        if roles is not None and entry["role"] not in roles:
-            continue
-        path = root / entry["path"]
-        try:
-            path.resolve().relative_to(root)
-        except ValueError:
-            fail(f"catalog path escapes model root: {entry['path']}")
-        result.append((entry, path))
-    return result
+    return profile_artifacts.model_paths(config.path("HALO_AI_MODELS_ROOT"), model, roles)
+
+
+def resolve_artifacts(config: Config, catalog: Catalog, profile: dict[str, Any]) -> profile_artifacts.ProfileArtifacts:
+    return profile_artifacts.resolve(config.path("HALO_AI_MODELS_ROOT"), catalog.models, profile)
 
 
 def gguf_header(path: Path) -> dict[str, Any]:
@@ -1240,20 +1181,7 @@ def port_for(config: Config, engine: str) -> int:
     return config.integer(key, 1, 65535)
 
 
-def required_roles(profile: dict[str, Any]) -> set[str]:
-    roles = {"main"}
-    features = set(profile.get("features", []))
-    if profile["engine"] == "halogen":
-        return {"main", "overlay", "processor"} | ({"mmproj"} if "vision" in features else set())
-    if "mtp" in features:
-        roles.add(profile.get("settings", {}).get("mtp_role", "mtp"))
-    if "vision" in features:
-        roles.add("mmproj")
-    if "dspark" in features:
-        roles.add("dspark")
-    if profile.get("chat_template"):
-        roles.add("chat_template")
-    return roles
+required_roles = engine_registry.required_roles
 
 
 def profile_startup_timeout(profile: dict[str, Any]) -> int:
@@ -1491,7 +1419,8 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
             # world-readable. Preserve the rootless operator's supplementary
             # groups so Lemonade's fixed container UID can read bind mounts.
             command.extend(["--group-add", "keep-groups"])
-    selected = model_paths(config, model, required_roles(profile))
+    closure = resolve_artifacts(config, catalog, profile)
+    selected = list(closure.primary.files)
     if engine == "lemonade":
         command.extend(["--label", f"local.halo-ai.runtime-spec={lemonade_runtime_spec(config, catalog)}"])
         for key, value in sorted(lemonade_runtime_environment(config).items()):
@@ -1542,36 +1471,16 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
                 "--kv-cache-reject-different-quant",
             ])
     elif engine == "halogen":
-        command.extend(["--group-add", "keep-groups", "--ipc=host", "--ulimit", "memlock=-1:-1"])
-        settings = profile["settings"]
-        for entry, path in selected:
-            relative = Path(entry["path"]).relative_to(model["repository"])
-            command.extend(["--mount", f"type=bind,src={path},dst=/models/{relative},ro"])
-        artifact_paths = {
-            entry["role"]: f"/models/{Path(entry['path']).relative_to(model['repository'])}"
-            for entry, _path in selected
-        }
-        environment = {
-            "HALOGEN_API_PORT": port, "HALOGEN_BIND": "127.0.0.1",
-            "HALOGEN_CHECKPOINT": artifact_paths["main"],
-            "HALOGEN_CK_OVERLAY": artifact_paths["overlay"],
-            "HALOGEN_TOKENIZER": "/models/tokenizer",
-            "HALOGEN_MODEL_ID": model["id"], "HALOGEN_CTX": profile["context"],
-            "HALOGEN_KV_POOL_POSITIONS": settings["kv_pool_positions"],
-            "HALOGEN_KV_SLOTS": settings["parallel"],
-            "HALOGEN_MAX_TOK": settings["prefill_chunk"],
-            "HALOGEN_PROMPT_CACHE": settings["prompt_cache"],
-            "HALOGEN_DRAFTER_DEFAULT": settings["drafter"],
-            "HALOGEN_PLD": "3,3" if settings["prompt_lookup"] else "0",
-            "HALOGEN_REASONING_EFFORT": settings["reasoning_effort"],
-            "HALOGEN_MAX_TOKENS_DEFAULT": settings["max_tokens_default"],
-            "HALOGEN_TEMPERATURE": "1.0", "HALOGEN_TOP_P": "0.95", "HALOGEN_TOP_K": "20",
-        }
-        if "vision" in profile.get("features", []):
-            environment["HALOGEN_VISION_TOWER"] = artifact_paths["mmproj"]
-        for key, value in sorted(environment.items()):
-            command.extend(["-e", f"{key}={value}"])
-        command.append(image_for(config, engine))
+        mounts = []
+        if closure.auxiliary:
+            try:
+                mounts = halogen_npu.xrt_mounts(config.path("HALOGEN_XRT_LIB_DIR"))
+            except (OSError, ValueError) as exc:
+                fail(f"Halogen NPU requires host XRT libraries: {exc}")
+        command.extend(engine_halogen.render_arguments(
+            profile, model, selected, port=port, image=image_for(config, engine),
+            auxiliary=closure.auxiliary, npu_root=closure.auxiliary_root, mounts=mounts,
+        ))
     elif engine == "speech":
         command.extend(["--group-add", "keep-groups", "--ipc=host"])
         main = next(path for entry, path in selected if entry["role"] == "main")
@@ -1596,10 +1505,9 @@ def render_container(config: Config, catalog: Catalog, profile: dict[str, Any]) 
         settings = profile["settings"]
         executable = "/opt/rocmfpx/bin/llama-server" if engine == "rocmfpx" else "llama-server"
         draft_path: Path | None = None
-        if "dflash" in profile.get("features", []):
-            draft_model = catalog.models[profile["draft_model"]]
+        if closure.draft is not None:
             draft_path = next(
-                path for entry, path in model_paths(config, draft_model, {"main"})
+                path for entry, path in closure.draft.files
                 if entry["role"] == "main"
             )
             command.extend([
@@ -1888,7 +1796,7 @@ def wait_http(url: str, seconds: int = 120) -> None:
 
 def service_health_url(config: Config, engine: str) -> str:
     port = port_for(config, engine)
-    path = "/live" if engine == "lemonade" else "/healthz" if engine == "speech" else "/health" if engine == "halogen" else "/v1/models"
+    path = engine_registry.REGISTRY[engine].health_path
     return f"http://127.0.0.1:{port}{path}"
 
 
@@ -2316,153 +2224,32 @@ def command_models(config: Config, catalog: Catalog, args: argparse.Namespace) -
     return 0 if all(item["valid"] for item in results) else 1
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb", buffering=4 * 1024 * 1024) as stream:
-        for chunk in iter(lambda: stream.read(4 * 1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def file_matches(entry: dict[str, Any], path: Path) -> bool:
-    try:
-        info = path.stat(follow_symlinks=False)
-        return (
-            stat.S_ISREG(info.st_mode)
-            and info.st_size == entry["bytes"]
-            and sha256_file(path) == entry["sha256"]
-        )
-    except OSError:
-        return False
+# Compatibility exports for callers of the original CLI helpers.
+sha256_file = artifact_store.sha256_file
+file_matches = artifact_store.file_matches
 
 
 def approved_download_entries(
     config: Config, model: dict[str, Any], roles: set[str] | None = None,
 ) -> list[tuple[dict[str, Any], Path]]:
-    download = model.get("download")
-    if not isinstance(download, dict) or download.get("provider") != "huggingface":
-        fail(f"model {model['id']} has no approved pinned downloader")
-    selected_roles = None if model.get("format") == "transformers" else roles
-    selected = model_paths(config, model, selected_roles)
-    allowed = set(download["allow_patterns"])
-    if any(
-        str(entry.get("source_path", path.name)) not in allowed
-        for entry, path in selected
-    ):
-        fail(f"model {model['id']} selected a file outside its download allowlist")
-    return selected
+    selection = profile_artifacts.select_model(config.path("HALO_AI_MODELS_ROOT"), model, roles)
+    selection.downloads()  # Enforce the pinned source and allowlist before any mutation.
+    return list(selection.files)
 
 
 def model_acquisition_plan(
     config: Config, model: dict[str, Any], roles: set[str] | None = None,
 ) -> dict[str, Any]:
-    download = model.get("download")
-    selected = approved_download_entries(config, model, roles)
-    files = []
-    additional = 0
-    for entry, path in selected:
-        verified = file_matches(entry, path)
-        source_path = str(entry.get("source_path", path.name))
-        encoded_source_path = urllib.parse.quote(source_path, safe="/")
-        if not verified:
-            additional += entry["bytes"]
-        files.append({
-            "role": entry["role"],
-            "source": (
-                f"https://huggingface.co/{download['repository']}/resolve/"
-                f"{download['revision']}/{encoded_source_path}"
-            ),
-            "repository": download["repository"],
-            "revision": download["revision"],
-            "bytes": entry["bytes"],
-            "sha256": entry["sha256"],
-            "destination": str(path),
-            "status": "verified-present" if verified else "download-required",
-        })
-    return {
-        "model": model["id"],
-        "files": files,
-        "additional_download_bytes": additional,
-    }
+    selection = profile_artifacts.select_model(config.path("HALO_AI_MODELS_ROOT"), model, roles)
+    return artifact_store.acquisition_plan(model["id"], selection.downloads())
 
 
 def download_huggingface_file(
     config: Config, repository: str, revision: str, entry: dict[str, Any], destination: Path,
 ) -> None:
-    if file_matches(entry, destination):
-        print(f"Reusing verified artifact: {destination}")
-        return
-    root = config.path("HALO_AI_MODELS_ROOT").resolve()
-    try:
-        destination.resolve().relative_to(root)
-    except ValueError:
-        fail(f"model download path escapes external model root: {destination}")
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    partial = destination.with_name(f".{destination.name}.partial")
-    lock_path = destination.with_name(f".{destination.name}.lock")
-    source_path = str(entry.get("source_path", destination.name))
-    encoded_source_path = urllib.parse.quote(source_path, safe="/")
-    url = f"https://huggingface.co/{repository}/resolve/{revision}/{encoded_source_path}"
-    try:
-        lock_fd = os.open(
-            lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600,
-        )
-    except OSError as exc:
-        fail(f"cannot create safe model download lock {lock_path}: {exc}")
-    with os.fdopen(lock_fd, "a+b") as lock:
-        os.fchmod(lock.fileno(), 0o600)
-        fcntl.flock(lock, fcntl.LOCK_EX)
-        if file_matches(entry, destination):
-            print(f"Reusing verified artifact: {destination}")
-            return
-        if partial.exists() and not stat.S_ISREG(partial.stat(follow_symlinks=False).st_mode):
-            fail(f"refusing unsafe partial download path: {partial}")
-        offset = partial.stat().st_size if partial.exists() else 0
-        if offset > entry["bytes"]:
-            partial.unlink()
-            offset = 0
-        if offset < entry["bytes"]:
-            headers = {"User-Agent": f"halo-ai/{VERSION}"}
-            if offset:
-                headers["Range"] = f"bytes={offset}-"
-            request = urllib.request.Request(url, headers=headers)
-            try:
-                response = urllib.request.urlopen(request, timeout=120)
-            except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as exc:
-                fail(f"download failed for {url}: {exc}")
-            status_code = getattr(response, "status", response.getcode())
-            append = offset > 0 and status_code == 206
-            if offset and not append:
-                offset = 0
-            flags = os.O_WRONLY | os.O_CREAT | os.O_NOFOLLOW | os.O_CLOEXEC
-            flags |= os.O_APPEND if append else os.O_TRUNC
-            print(f"Downloading {repository}@{revision}/{destination.name} from byte {offset}")
-            try:
-                partial_fd = os.open(partial, flags, 0o640)
-            except OSError as exc:
-                response.close()
-                fail(f"cannot create safe partial download {partial}: {exc}")
-            with response, os.fdopen(partial_fd, "ab" if append else "wb") as stream:
-                os.fchmod(stream.fileno(), 0o640)
-                for chunk in iter(lambda: response.read(4 * 1024 * 1024), b""):
-                    stream.write(chunk)
-                stream.flush()
-                os.fsync(stream.fileno())
-        actual_size = partial.stat().st_size if partial.exists() else 0
-        actual_sha = sha256_file(partial) if actual_size == entry["bytes"] else ""
-        if actual_size != entry["bytes"] or actual_sha != entry["sha256"]:
-            with contextlib.suppress(FileNotFoundError):
-                partial.unlink()
-            fail(
-                f"download verification failed for {destination.name}: "
-                f"expected {entry['bytes']} bytes/{entry['sha256']}, got {actual_size} bytes/{actual_sha or 'not hashed'}"
-            )
-        os.replace(partial, destination)
-        directory_fd = os.open(destination.parent, os.O_RDONLY | os.O_DIRECTORY)
-        try:
-            os.fsync(directory_fd)
-        finally:
-            os.close(directory_fd)
+    artifact_store.download_huggingface_file(
+        config.path("HALO_AI_MODELS_ROOT"), repository, revision, entry, destination,
+    )
 
 
 def download_catalog_model(
@@ -2492,17 +2279,11 @@ def profile_availability(config: Config, catalog: Catalog, profile: dict[str, An
         return False, f"unsupported engine: {profile['engine']}"
     if not config.get(key):
         return False, f"{key} is empty"
-    model = catalog.models[profile["model"]]
-    result = verify_model(
-        config, model, False, required_roles(profile),
-    )
-    if not result["valid"]:
-        return False, "model verification failed"
-    draft_model = None
-    if "dflash" in profile.get("features", []):
-        draft_model = catalog.models[profile["draft_model"]]
-        if not verify_model(config, draft_model, False, {"main"})["valid"]:
-            return False, "DFlash companion verification failed"
+    closure = resolve_artifacts(config, catalog, profile)
+    for index, selection in enumerate(closure.models):
+        result = verify_model(config, selection.model, False, selection.roles)
+        if not result["valid"]:
+            return False, "model verification failed" if index == 0 else "DFlash companion verification failed"
     if profile["engine"] == "rocmfpx" and not rocmfpx_image_valid(config.get(key)):
         return False, "pinned ROCmFPX image is not installed or failed provenance checks"
     if (
@@ -2525,21 +2306,17 @@ def profile_availability(config: Config, catalog: Catalog, profile: dict[str, An
         and not lemonade_image_valid(config.get(key))
     ):
         return False, f"Lemonade DFlash requires the pinned {LEMONADE_VERSION} image"
-    memory_roles = {"weights"} if model.get("format") == "transformers" else {"main"}
-    if "mtp" in profile.get("features", []):
-        memory_roles.add(profile.get("settings", {}).get("mtp_role", "mtp"))
-    main_bytes = sum(int(entry["bytes"]) for entry in model["files"] if entry["role"] in memory_roles)
-    if draft_model is not None:
-        main_bytes += sum(
-            int(entry["bytes"]) for entry in draft_model["files"] if entry["role"] == "main"
-        )
+    main_bytes = closure.weight_bytes
     reserve = config.integer("HALO_AI_OS_RESERVE_GIB", 4, 64) * 1024**3
     cpu_total = meminfo_bytes("MemTotal")
     if profile["engine"] == "halogen":
-        # HGN's on-disk n-gram table is demand-paged; file size is not resident
-        # weight size. Budget pinned weights plus arena, KV pool and headroom.
-        main_bytes = (68 + 14 + (2 if "vision" in profile.get("features", []) else 0)) * 1024**3
-        main_bytes += profile["settings"]["kv_pool_positions"] * 32 * 1024
+        main_bytes = engine_halogen.resident_bytes(profile, closure.auxiliary)
+        if closure.auxiliary:
+            npu_bytes = engine_halogen.npu_memory_bytes(closure.auxiliary)
+            errors = halogen_npu.host_errors(config.path("HALOGEN_XRT_LIB_DIR"), required_memlock=npu_bytes)
+            errors += artifact_store.verify(closure.auxiliary)
+            if errors:
+                return False, "; ".join(errors)
         reserve = max(reserve, 10 * 1024**3)
     if main_bytes + reserve > cpu_total:
         return False, (
@@ -2593,10 +2370,10 @@ def command_profiles(config: Config, catalog: Catalog, args: argparse.Namespace)
     return 0
 
 
-def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str, Any]) -> dict[str, Any]:
-    model = catalog.models[profile["model"]]
-    external_mtp = any(entry["role"] in {"mtp", "mtp_q8"} for entry in model["files"])
-    model_plan = model_acquisition_plan(config, model, required_roles(profile))
+def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str, Any], *, closure: profile_artifacts.ProfileArtifacts | None = None) -> dict[str, Any]:
+    closure = closure or resolve_artifacts(config, catalog, profile)
+    model = closure.primary.model
+    model_plan = artifact_store.acquisition_plan(model["id"], closure.primary.downloads())
     engine = profile["engine"]
     image = image_for(config, engine)
     if engine == "llamacpp":
@@ -2681,56 +2458,24 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
             "rocm_package": config.get("LEMONADE_LLAMACPP_ROCM_BIN"),
             "gpu_max_hw_queues": config.get("LEMONADE_GPU_MAX_HW_QUEUES") or None,
         })
-    rocmfpx_artifact_class = (
-        "fp8" if model.get("quantization") == "Q8_0_ROCMFPX" else "fp4"
-    )
-    excluded_quantization = "fp4" if rocmfpx_artifact_class == "fp8" else "fp8"
-    draft_plan = None
-    if "dflash" in profile.get("features", []):
-        draft_plan = model_acquisition_plan(
-            config, catalog.models[profile["draft_model"]], {"main"},
-        )
+    selected_classes, excluded_classes = profile_artifacts.artifact_classes(profile, closure)
+    draft_plan = (artifact_store.acquisition_plan(closure.draft.model["id"], closure.draft.downloads())
+                  if closure.draft else None)
+    auxiliary_plan = (artifact_store.acquisition_plan("halogen-npu", closure.auxiliary)
+                      if closure.auxiliary else None)
     return {
         "schema_version": 1,
         "profile": profile["id"],
         "runtime": runtime,
         "model": model_plan,
         "draft_model": draft_plan,
-        "selected_artifact_classes": (
-            ["hgn", "quality-overlay", "tokenizer", "halogen-runtime"]
-            + (["embedded-mtp"] if "mtp" in profile.get("features", []) else [])
-            + (["vision"] if "vision" in profile.get("features", []) else [])
-            if engine == "halogen" else
-            [rocmfpx_artifact_class, "rocmfpx-runtime"]
-            + (["in-gguf-mtp"] if "mtp" in profile.get("features", []) else [])
-            if engine == "rocmfpx" else (
-                ["q6-xl"]
-                + (["vision"] if "vision" in profile.get("features", []) else [])
-                + ["dflash2", "strixvulkan-runtime"]
-                if engine in STRIXVULKAN_ENGINES and draft_plan else
-                ["q6-xl", "vision", "strixvulkan-runtime"]
-                if engine in STRIXVULKAN_ENGINES and "vision" in profile.get("features", []) else
-                ["q6-xl", "strixvulkan-runtime"]
-                if engine in STRIXVULKAN_ENGINES and model["id"] == "qwen3.8-27b-ud-q6-k-xl" else
-                ["model"]
-                + (["mtp-sidecar"] if "mtp" in profile.get("features", []) and external_mtp and engine != "halogen" else [])
-                + (["vision"] if "vision" in profile.get("features", []) else [])
-                + (["dflash2"] if draft_plan else [])
-                + ["runtime"]
-            )
-        ),
-        "excluded_artifact_classes": (
-            [excluded_quantization, "npu", "vision", "bf16", "reference"]
-            if engine == "rocmfpx" else
-            ["fp8", "npu", "vision", "bf16", "reference"]
-            if engine in STRIXVULKAN_ENGINES else
-            ["npu"]
-            + ([] if "vision" in profile.get("features", []) else ["vision"])
-            + ["reference"]
-        ),
+        "auxiliary": auxiliary_plan,
+        "selected_artifact_classes": selected_classes,
+        "excluded_artifact_classes": excluded_classes,
         "total_additional_download_bytes": (
             model_plan["additional_download_bytes"] + runtime["additional_download_bytes"]
             + (draft_plan["additional_download_bytes"] if draft_plan else 0)
+            + (auxiliary_plan["additional_download_bytes"] if auxiliary_plan else 0)
         ),
     }
 
@@ -2738,20 +2483,23 @@ def profile_acquisition_plan(config: Config, catalog: Catalog, profile: dict[str
 def command_profile_acquire(
     config: Config, catalog: Catalog, profile: dict[str, Any], *, dry_run: bool,
 ) -> int:
-    plan = profile_acquisition_plan(config, catalog, profile)
+    closure = resolve_artifacts(config, catalog, profile)
+    plan = profile_acquisition_plan(config, catalog, profile, closure=closure)
     print(json.dumps(plan, indent=2))
     if dry_run:
         return 0
-    model = catalog.models[profile["model"]]
-    result = download_catalog_model(config, model, roles=required_roles(profile))
-    if result != 0:
-        return result
-    if "dflash" in profile.get("features", []):
-        result = download_catalog_model(
-            config, catalog.models[profile["draft_model"]], roles={"main"},
-        )
-        if result != 0:
-            return result
+    ensure_model_mount(config)
+    root = config.path("HALO_AI_MODELS_ROOT")
+    for selection in closure.models:
+        artifact_store.acquire(root, selection.downloads())
+        result = verify_model(config, selection.model, True, selection.roles)
+        print(json.dumps(result, indent=2))
+        if not result["valid"]:
+            return 1
+    artifact_store.acquire(root, closure.auxiliary)
+    errors = artifact_store.verify(closure.auxiliary, full=True)
+    if errors:
+        fail("; ".join(errors))
     return command_runtime_install(config, [profile["engine"]])
 
 
@@ -3151,25 +2899,10 @@ def rocmfpx_image_valid(image: str) -> bool:
 
 def halogen_backend_info(config: Config, profile: dict[str, Any]) -> dict[str, Any]:
     health = http_json(service_health_url(config, "halogen"), timeout=10)
-    settings = profile["settings"]
-    expected = {
-        "context": profile["context"], "slots": settings["parallel"],
-        "kv_pool_positions": settings["kv_pool_positions"],
-        "drafter_default": "mtp" if settings["drafter"] else "serial",
-        "checkpoint_format": "hgn",
-        "reasoning_effort_default": settings["reasoning_effort"],
-    }
-    if (
-        not isinstance(health, dict)
-        or any(health.get(key) != value for key, value in expected.items())
-        or health.get("version") != {"api": HALOGEN_RELEASE, "engine": HALOGEN_RELEASE, "match": True}
-        or not health.get("engine", {}).get("responds")
-        or not health.get("drafter_weights_loaded")
-        or health.get("chat_template", {}).get("probe") != "passed"
-        or health.get("prompt_cache", {}).get("mode") != settings["prompt_cache"]
-        or health.get("vision", {}).get("enabled") != ("vision" in profile.get("features", []))
-    ):
-        fail("Halogen health does not match the selected runtime/profile policy")
+    engine_halogen.validate_health(profile, health)
+    if "npu" in profile.get("features", []):
+        advertised = http_json(f"http://127.0.0.1:{port_for(config, 'halogen')}/v1/models", timeout=10)
+        engine_halogen.validate_advertised_models(profile, advertised)
     return health
 
 
@@ -4151,6 +3884,9 @@ def command_test(config: Config, catalog: Catalog, args: argparse.Namespace) -> 
         if not candidates:
             fail("service returned no models")
         model_name = (candidates[0].get("id") or candidates[0].get("name")) if isinstance(candidates[0], dict) else str(candidates[0])
+        if profile["engine"] == "halogen":
+            # Optional NPU models share this list; the vision smoke targets Flash.
+            model_name = profile["model"]
     is_vision = "vision" in profile.get("features", [])
     expected = "red" if is_vision else "halo-ai smoke test passed"
     model = catalog.models[profile["model"]]

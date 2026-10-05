@@ -83,12 +83,82 @@ class HalogenTests(unittest.TestCase):
             'reasoning_effort_default': 'medium',
             'version': {'api': cli.HALOGEN_RELEASE, 'engine': cli.HALOGEN_RELEASE, 'match': True},
             'engine': {'responds': True}, 'drafter_weights_loaded': True,
+            'capability_probe': 'ok',
             'chat_template': {'probe': 'passed'}, 'prompt_cache': {'mode': 2},
             'vision': {'enabled': True},
         }
         with mock.patch.object(cli, 'http_json', return_value=health):
             self.assertEqual(cli.halogen_backend_info(self.config, self.profile), health)
-        for key, value in [('drafter_default', 'serial'), ('drafter_weights_loaded', False), ('version', {'api': 'old'}), ('vision', {'enabled': False})]:
+        for key, value in [('drafter_default', 'serial'), ('drafter_weights_loaded', False), ('version', {'api': 'old'}), ('vision', {'enabled': False}), ('capability_probe', 'fallback')]:
             with self.subTest(key=key), mock.patch.object(cli, 'http_json', return_value={**health, key: value}):
                 with self.assertRaises(cli.HaloError):
                     cli.halogen_backend_info(self.config, self.profile)
+        npu_profile = cli.resolve_profile(self.catalog, 'qwen3.8-halogen-npu')
+        names = npu_profile['settings']['npu_models']
+        healthy_npu = {**health, 'npu': {'status': 'ok', 'models': names}}
+        advertised = {'data': [{'id': name} for name in names]}
+        with mock.patch.object(cli, 'http_json', side_effect=[healthy_npu, advertised]):
+            self.assertEqual(cli.halogen_backend_info(self.config, npu_profile), healthy_npu)
+        for npu in [{}, {'status': 'error', 'models': names}, {'status': 'ok', 'models': names[:1]}]:
+            with mock.patch.object(cli, 'http_json', return_value={**health, 'npu': npu}):
+                with self.assertRaises(cli.HaloError):
+                    cli.halogen_backend_info(self.config, npu_profile)
+        with mock.patch.object(cli, 'http_json', side_effect=[healthy_npu, {'data': []}]):
+            with self.assertRaises(cli.HaloError):
+                cli.halogen_backend_info(self.config, npu_profile)
+
+    def test_v2_requires_external_table_and_never_mounts_w4b_overlay(self):
+        profile = cli.resolve_profile(self.catalog, 'qwen3.8-halogen-v2')
+        self.assertEqual(cli.required_roles(profile), {'main', 'processor', 'ngram', 'mmproj'})
+        command = cli.render_container(self.config, self.catalog, profile)
+        self.assertIn('HALOGEN_NGRAM_TABLE=/models/qwen38-flash-next-ngram.hgn', command)
+        self.assertFalse(any('OVERLAY=' in value or 'w4b' in value for value in command))
+        models = copy.deepcopy(self.catalog.models)
+        models[profile['model']]['files'] = [f for f in models[profile['model']]['files'] if f['role'] != 'ngram']
+        with self.assertRaises(cli.HaloError):
+            cli.validate_catalog(models, {profile['id']: profile})
+
+    def test_npu_is_explicit_and_does_not_enable_downloads_or_host_sysfs_writes(self):
+        profile = cli.resolve_profile(self.catalog, 'qwen3.8-halogen-npu')
+        with mock.patch.object(cli.halogen_npu, 'xrt_mounts', return_value=[(Path('/usr/lib/libxrt.so.2.21'), '/usr/lib/libxrt.so.2')]):
+            command = cli.render_container(self.config, self.catalog, profile)
+        self.assertIn('/dev/accel/accel0', command)
+        self.assertIn('HALOGEN_NPU_MODELS=qwen3-embedding-0.6b,qwen3-reranker-0.6b', command)
+        self.assertFalse(any('HALOGEN_DOWNLOAD' in s or '/host/sys' in s or 'NPU_WITH_GPU' in s for s in command))
+        self.assertTrue(all(command[i+1].endswith(',ro') for i,s in enumerate(command) if s == '--mount'))
+        for names in [[], ['unknown'], ['qwen3-reranker-0.6b'] * 2]:
+            invalid = copy.deepcopy(profile)
+            invalid['settings']['npu_models'] = names
+            with self.assertRaises(cli.HaloError):
+                cli.validate_catalog(self.catalog.models, {invalid['id']: invalid})
+
+    def test_npu_reranker_includes_shared_program_without_embedder_weights(self):
+        paths = [str(path) for path, _, _ in cli.halogen_npu.artifacts(Path('/models/npu'), ['qwen3-reranker-0.6b'])]
+        self.assertTrue(any('qwen3-embedding-0.6b/devices/' in p for p in paths))
+        self.assertFalse(any(p.endswith('qwen3-embedding-0.6b.hnpw') for p in paths))
+        self.assertTrue(any(p.endswith('qwen3-reranker-0.6b.hnpw') for p in paths))
+
+    def test_npu_fabric_clock_requires_only_the_top_level_selected(self):
+        root = Path(self.tmp.name)
+        device = root / 'sys/class/drm/card1/device'
+        device.mkdir(parents=True)
+        perf = device / 'power_dpm_force_performance_level'
+        fclk = device / 'pp_dpm_fclk'
+        accel = root / 'accel0'
+        accel.touch()
+        perf.write_text('manual\n')
+        fclk.write_text('0: 800Mhz *\n1: 1800Mhz\n')
+        with mock.patch.object(cli.halogen_npu, 'xrt_mounts', return_value=[]):
+            self.assertTrue(cli.halogen_npu.host_errors(root, root / 'sys', accel))
+            fclk.write_text('0: 800Mhz\n1: 1800Mhz *\n')
+            self.assertEqual(cli.halogen_npu.host_errors(root, root / 'sys', accel), [])
+            perf.write_text('auto\n')
+            self.assertTrue(cli.halogen_npu.host_errors(root, root / 'sys', accel))
+
+    def test_npu_host_check_catches_rootless_memlock_limit(self):
+        with mock.patch.object(cli.halogen_npu.resource, 'getrlimit', return_value=(8388608, 8388608)):
+            errors = cli.halogen_npu.host_errors(Path('/usr/lib'), required_memlock=4 * 1024**3)
+            self.assertTrue(any('memlock limit' in error for error in errors))
+        with mock.patch.object(cli.halogen_npu.resource, 'getrlimit', return_value=(-1, -1)):
+            errors = cli.halogen_npu.host_errors(Path('/usr/lib'), required_memlock=4 * 1024**3)
+            self.assertFalse(any('memlock limit' in error for error in errors))

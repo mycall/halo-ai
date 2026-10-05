@@ -354,14 +354,17 @@ class CatalogTests(unittest.TestCase):
             self.catalog = cli.load_catalog(self.config)
 
     def test_checked_in_catalog_validates(self) -> None:
-        self.assertEqual(len(self.catalog.models), 14)
-        self.assertEqual(len(self.catalog.profiles), 54)
+        self.assertEqual(len(self.catalog.models), 15)
+        self.assertEqual(len(self.catalog.profiles), 59)
         self.assertEqual(
             self.catalog.profile_aliases,
             {
                 "ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max",
                 "qwen3.8-fn": "qwen3.8-flash-next-halogen-262k-vision",
                 "qwen3.8-halogen": "qwen3.8-flash-next-halogen-262k-vision",
+                "qwen3.8-halogen-v2": "qwen3.8-flash-next-halogen-v2-262k-vision",
+                "qwen3.8-halogen-npu": "qwen3.8-flash-next-halogen-262k-vision-npu",
+                "qwen3.8-halogen-v2-npu": "qwen3.8-flash-next-halogen-v2-262k-vision-npu",
                 "qwen3.8-27b": "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-q8",
                 "qwen3.8df2": "qwen3.8-27b-q6xl-strix-vision-dflash2",
                 "qwen3.8fp4": "qwen3.8-27b-rocmfp4-baseline",

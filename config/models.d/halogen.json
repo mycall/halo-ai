@@ -108,6 +108,98 @@
           "tokenizer/vocab.json"
         ]
       }
+    },
+    {
+      "id": "halogen-qwen3.8-flash-next-v2",
+      "format": "hgn",
+      "repository": "peonist-ai/halogen-qwen3.8-flash-next",
+      "revision": "3648cf1e6a3143e8946d52301570f26003c0bdb0",
+      "architecture": "qwen4exp",
+      "engines": [
+        "halogen"
+      ],
+      "quantization": "HGN-v2",
+      "files": [
+        {
+          "role": "mmproj",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-vision.hgn",
+          "source_path": "qwen38-flash-next-vision.hgn",
+          "bytes": 897916416,
+          "sha256": "d62e0ae553fe88afd3833733d4a4c669f34d20fd8dfce4b9610525bed2134b10"
+        },
+        {
+          "role": "processor",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/chat_template.jinja",
+          "source_path": "tokenizer/chat_template.jinja",
+          "bytes": 8952,
+          "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041"
+        },
+        {
+          "role": "processor",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/generation_config.json",
+          "source_path": "tokenizer/generation_config.json",
+          "bytes": 202,
+          "sha256": "e70c136c1b78ddc1fb0905bac8e733a4dc448d4f852a5dd75143fffc70be550e"
+        },
+        {
+          "role": "processor",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/merges.txt",
+          "source_path": "tokenizer/merges.txt",
+          "bytes": 3353259,
+          "sha256": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d"
+        },
+        {
+          "role": "processor",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer.json",
+          "source_path": "tokenizer/tokenizer.json",
+          "bytes": 12809320,
+          "sha256": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3"
+        },
+        {
+          "role": "processor",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer_config.json",
+          "source_path": "tokenizer/tokenizer_config.json",
+          "bytes": 17928,
+          "sha256": "b11349aafa7cdc6a320767cf7ceb29ed82f7eda5d65e8e0819e76f0ce947bf27"
+        },
+        {
+          "role": "processor",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/vocab.json",
+          "source_path": "tokenizer/vocab.json",
+          "bytes": 6722759,
+          "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
+        },
+        {
+          "role": "main",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-v2.hgn",
+          "source_path": "qwen38-flash-next-v2.hgn",
+          "bytes": 66687678432,
+          "sha256": "71246c6ab3fc1de2cf06326f18e275fe9c2a18366d646ed3357d194c884fc687"
+        },
+        {
+          "role": "ngram",
+          "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-ngram.hgn",
+          "source_path": "qwen38-flash-next-ngram.hgn",
+          "bytes": 51200246144,
+          "sha256": "3450acada94e19aabad88bd49b45eb70304820949c2240fc178067b20ae5dffe"
+        }
+      ],
+      "download": {
+        "provider": "huggingface",
+        "repository": "peonist-ai/halogen-qwen3.8-flash-next",
+        "revision": "3648cf1e6a3143e8946d52301570f26003c0bdb0",
+        "allow_patterns": [
+          "qwen38-flash-next-vision.hgn",
+          "tokenizer/chat_template.jinja",
+          "tokenizer/generation_config.json",
+          "tokenizer/merges.txt",
+          "tokenizer/tokenizer.json",
+          "tokenizer/tokenizer_config.json",
+          "tokenizer/vocab.json",
+          "qwen38-flash-next-v2.hgn",
+          "qwen38-flash-next-ngram.hgn"
+        ]
+      }
     }
   ],
   "profiles": [
@@ -178,10 +270,144 @@
         "max_tokens_default": 8192,
         "prompt_lookup": 1
       }
+    },
+    {
+      "id": "qwen3.8-flash-next-halogen-v2-32k-baseline",
+      "model": "halogen-qwen3.8-flash-next-v2",
+      "engine": "halogen",
+      "context": 32768,
+      "startup_timeout": 1200,
+      "risk": "experimental",
+      "features": [
+        "external-ngram"
+      ],
+      "thinking": true,
+      "proposal_policy": "candidate-not-qualified-as-default",
+      "settings": {
+        "kv_pool_positions": 32768,
+        "parallel": 1,
+        "prefill_chunk": 16384,
+        "prompt_cache": 0,
+        "drafter": 0,
+        "reasoning_effort": "medium",
+        "max_tokens_default": 8192,
+        "prompt_lookup": 0
+      }
+    },
+    {
+      "id": "qwen3.8-flash-next-halogen-v2-32k-mtp",
+      "model": "halogen-qwen3.8-flash-next-v2",
+      "engine": "halogen",
+      "context": 32768,
+      "startup_timeout": 1200,
+      "risk": "experimental",
+      "features": [
+        "mtp",
+        "external-ngram"
+      ],
+      "thinking": true,
+      "proposal_policy": "candidate-not-qualified-as-default",
+      "settings": {
+        "kv_pool_positions": 32768,
+        "parallel": 1,
+        "prefill_chunk": 16384,
+        "prompt_cache": 0,
+        "drafter": 1,
+        "reasoning_effort": "medium",
+        "max_tokens_default": 8192,
+        "prompt_lookup": 0
+      }
+    },
+    {
+      "id": "qwen3.8-flash-next-halogen-v2-262k-vision",
+      "model": "halogen-qwen3.8-flash-next-v2",
+      "engine": "halogen",
+      "context": 262144,
+      "startup_timeout": 1200,
+      "risk": "experimental",
+      "features": [
+        "mtp",
+        "vision",
+        "external-ngram"
+      ],
+      "thinking": true,
+      "proposal_policy": "recommended-flash-next-with-known-near-limit-retrieval-misses",
+      "settings": {
+        "kv_pool_positions": 262144,
+        "parallel": 1,
+        "prefill_chunk": 16384,
+        "prompt_cache": 2,
+        "drafter": 1,
+        "reasoning_effort": "medium",
+        "max_tokens_default": 8192,
+        "prompt_lookup": 1
+      }
+    },
+    {
+      "id": "qwen3.8-flash-next-halogen-262k-vision-npu",
+      "model": "halogen-qwen3.8-flash-next",
+      "engine": "halogen",
+      "context": 262144,
+      "startup_timeout": 1200,
+      "risk": "experimental",
+      "features": [
+        "mtp",
+        "vision",
+        "npu"
+      ],
+      "thinking": true,
+      "proposal_policy": "recommended-flash-next-with-known-near-limit-retrieval-misses",
+      "settings": {
+        "kv_pool_positions": 262144,
+        "parallel": 1,
+        "prefill_chunk": 16384,
+        "prompt_cache": 2,
+        "drafter": 1,
+        "reasoning_effort": "medium",
+        "max_tokens_default": 8192,
+        "prompt_lookup": 1,
+        "npu_models": [
+          "qwen3-embedding-0.6b",
+          "qwen3-reranker-0.6b"
+        ]
+      }
+    },
+    {
+      "id": "qwen3.8-flash-next-halogen-v2-262k-vision-npu",
+      "model": "halogen-qwen3.8-flash-next-v2",
+      "engine": "halogen",
+      "context": 262144,
+      "startup_timeout": 1200,
+      "risk": "experimental",
+      "features": [
+        "mtp",
+        "vision",
+        "external-ngram",
+        "npu"
+      ],
+      "thinking": true,
+      "proposal_policy": "recommended-flash-next-with-known-near-limit-retrieval-misses",
+      "settings": {
+        "kv_pool_positions": 262144,
+        "parallel": 1,
+        "prefill_chunk": 16384,
+        "prompt_cache": 2,
+        "drafter": 1,
+        "reasoning_effort": "medium",
+        "max_tokens_default": 8192,
+        "prompt_lookup": 1,
+        "npu_models": [
+          "qwen3-embedding-0.6b",
+          "qwen3-reranker-0.6b"
+        ]
+      }
     }
   ],
   "profile_aliases": {
     "qwen3.8-fn": "qwen3.8-flash-next-halogen-262k-vision",
-    "qwen3.8-halogen": "qwen3.8-flash-next-halogen-262k-vision"
+    "qwen3.8-halogen": "qwen3.8-flash-next-halogen-262k-vision",
+    "qwen3.8-halogen-v2": "qwen3.8-flash-next-halogen-v2-262k-vision",
+    "qwen3.8-halogen-npu": "qwen3.8-flash-next-halogen-262k-vision-npu",
+    "qwen3.8-halogen-v2-npu": "qwen3.8-flash-next-halogen-v2-262k-vision-npu"
   }
 }

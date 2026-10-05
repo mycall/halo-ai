@@ -1,3 +1,54 @@
+# Halogen upstream review, 2026-10-04
+
+Reviewed the public deployment changes from `v0.12.2` through `v0.16.2`,
+pinned to [7f31bbd4021f217a1be9776bdb7304bcf8eca62d](https://github.com/peonist-ai/halogen-flash-server/commit/7f31bbd4021f217a1be9776bdb7304bcf8eca62d).
+The engine/API implementation is private; mechanisms described in its changelog
+are upstream claims, with our bounded validation recorded separately.
+
+The strongest upgrade reasons for this project are agent-serving fixes:
+0.13.4 handles end-of-turn markers and tool calls inside reasoning;
+0.13.5/0.13.6 combine split assistant text/tool calls when replaying history;
+0.14.0 emits the initial streaming role; and 0.14.2 handles images in Responses
+tool results. Our new serving screen exercises the latter three behaviors.
+0.13.1 also fixes capability-probe fallback; Halo now rejects a health response
+unless that probe succeeded, rather than trusting potentially fallback limits.
+
+0.14.0 rewires the MTP head and proposes two tokens per round. 0.16.0 fixes its
+proposal counters, so acceptance must use the corrected counters. Serial/MTP
+equality is a within-build property: later prefill kernels change rounding and
+sampled seeds are not an across-version equivalence test. Our 0.16.2 screen
+keeps greedy decoding, no cache and no prompt lookup for this comparison.
+
+0.15 changes the default to v2 with a separate n-gram table. Explicit W4B
+selection remains supported, so we upgraded the runtime using our verified old
+weights. Separate v2 profiles and pinned artifact records are ready, but their
+local evaluation awaits the two downloads. The optional ht43 checkpoint trades
+precision/memory and speed differently; it is not selected for this upgrade.
+
+0.16.1 fixes disk-cache restoration and queue handling; 0.16.2 changes cache
+eviction. Our profile uses RAM cache mode 2, with no persistent cache directory.
+The API smokes do not qualify multi-conversation cache pressure or cancellation
+latency. We retain one slot and the existing 262K pool / 16K prefill allocation.
+
+0.16 introduces NPU side models, and 0.16.2 adds moderation and small generation.
+The first integrated NPU profile selects embeddings plus reranking. Its files
+and shared device program are pinned to the image's manifest. Host XRT library
+loading passed in the image. After reboot, both NPU routes and bounded
+concurrent GPU/NPU tests passed; the rootless login also needed a raised
+memlock limit, now checked and included in host preparation. The rootless setup requires the upstream fabric-clock service; silently
+bypassing the clock guard is not part of the integration. This also means GPU
+performance must be remeasured after the host-profile change.
+
+The previous near-262K retrieval finding remains evidence about the old test
+conditions, not a general explanation of model quality. Updated measurements
+and exact limitations belong in [the current runbook](halogen-flash.md).
+
+Sources: [release changes](https://github.com/peonist-ai/halogen-flash-server/compare/v0.12.2...v0.16.2),
+[pinned changelog](https://github.com/peonist-ai/halogen-flash-server/blob/7f31bbd4021f217a1be9776bdb7304bcf8eca62d/CHANGELOG.md),
+[pinned NPU guide](https://github.com/peonist-ai/halogen-flash-server/blob/7f31bbd4021f217a1be9776bdb7304bcf8eca62d/docs/NPU.md).
+
+---
+
 # Halogen upstream review, 2026-09-20
 
 Reviewed peonist-ai's recent public Reddit post/comment feeds and followed

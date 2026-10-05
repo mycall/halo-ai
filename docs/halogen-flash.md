@@ -1,204 +1,195 @@
-# Recommended Flash-Next: Halogen
+# Halogen Flash-Next: current decision and runbook
 
-[Halogen Flash Server](https://github.com/peonist-ai/halogen-flash-server)
-0.12.2 is integrated as a separate, experimental Qwen3.8-Flash-Next runtime.
-The engine is closed source; the public repository contains its deployment
-surface. The image is pinned to
-`sha256:8f4c75fc15a0e2f2c023241389c4c946a60fa4fb4cd6d350dfcea17e22d119f9`.
+## Conclusion — 2026-10-05
 
-The catalog reuses the files under
-`/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next`, pinned to
-Hugging Face revision `e238ffde1a89531743505349dd16ca35a1e09b15`.
-It verifies HGN headers, expected sizes, tokenizer files, and full SHA-256
-hashes through `models verify --full`. The checkpoint and **quality** overlay
-are both required. The speed overlay is cataloged for verification but is
-not selected. The native checkpoint contains its own MTP head; the separate
-`qwen38-flash-next-mtp.hgn` is for upstream's GGUF loading path and is not
-mounted by these native profiles.
+**Keep v2 as the current serving checkpoint for its lower memory use. Our local
+comparison found no meaningful generation-speed gain. Overall model quality
+is still unproven by the tests we have run.**
 
-| Profile | Context | Drafting | Prompt cache | Vision |
-| --- | ---: | --- | --- | --- |
-| `qwen3.8-flash-next-halogen-32k-baseline` | 32,768 | Serial, prompt lookup off | Off | Off |
-| `qwen3.8-flash-next-halogen-32k-mtp` | 32,768 | MTP only, prompt lookup off | Off | Off |
-| `qwen3.8-fn` / `qwen3.8-halogen` | 262,144 | MTP plus prompt lookup | Session reuse (mode 2) | On |
+- **Memory:** v2 held 8.7 GiB less engine memory at the matched 32k setup.
+- **Speed:** serial generation was effectively unchanged; MTP was about 2% slower
+  in this small sample, with overlapping run ranges.
+- **Quality:** v2 answered one more of our 13 fixed questions correctly. That is
+  a regression-screen result, not evidence of a general coding/reasoning gain.
+- **Long context:** both checkpoints missed one of three codes near 262k tokens.
+  A configured 262k context does not establish reliable retrieval at that length.
+- **Last validated service:** v2, 262k context, vision, NPU embeddings and
+  reranking. All restored-service checks passed.
 
-`qwen3.8-fn` is the recommended Flash-Next alias and resolves to
-`qwen3.8-flash-next-halogen-262k-vision`; `qwen3.8-halogen` remains an alias
-for the same profile. This selects the native HGN model, not UD-Q4_K_XL.
-The recommendation reflects the local performance and correctness comparisons
-below. The profile retains its experimental risk label: neither runtime
-reliably retrieved all three codes near 262K, including with MTP disabled.
+The current choice is a practical memory decision. Keep W4B available as a
+reference until broader quality tests are complete.
 
-The serving profile uses one slot, a 262,144-position shared KV pool, and
-16,384-token prefill chunks. The smaller prefill arena leaves more room for the desktop. Context
-size and prefill chunk size are separate settings. The startup log reports
-actual locked weights and remaining host memory; `MemAvailable` includes
-locked file pages and overstates what another process can use.
+[Measured comparison](#measured-comparison) · [Better tests](#better-tests-to-run-next) ·
+[Run and select a profile](#run-and-select-a-profile) ·
+[Evidence and reproduction](#evidence-and-reproduction) ·
+[Historical test/setup notes](halogen-flash-history.md)
 
-The request defaults are medium reasoning, an 8,192-token completion budget,
-and temperature 1.0 / top-p 0.95 / top-k 20. Clients can override them;
-`temperature: 0` explicitly selects greedy decoding. Thinking consumes part
-of the completion budget. Mode 2 cache reuse is intended for interactive
-serving and is not guaranteed byte-identical to a cold request; use the
-32K profiles for the integration comparison.
+## Measured comparison
 
-## Run from this checkout
+Same pinned Halogen 0.16.2 engine and host; W4B with the quality overlay versus
+v2. NPU and vision were disabled during comparison. Requests used greedy
+decoding, seed 1, thinking off, cache off, and prompt lookup off.
 
-Until the system installation is reloaded, use the repository CLI and its
-workspace configuration:
+| Measurement | W4B + quality overlay | V2 | Interpretation |
+| --- | ---: | ---: | --- |
+| Serial generation, median of 3 | 35.6 tok/s | 35.6 tok/s | No measured gain |
+| MTP generation, median of 3 | 58.6 tok/s | 57.5 tok/s | No clear advantage |
+| Locked weights | 68.0 GiB | 62.1 GiB | V2 saves 5.9 GiB |
+| Total engine memory at 32k | 79.5 GiB | 70.8 GiB | V2 saves 8.7 GiB |
+| Local 13-question screen | 10/13 | 11/13 | Too small for a quality ranking |
+| Retrieval, 31,724 prompt tokens | 3/3 codes | 3/3 codes | Both pass this fixture |
+| Retrieval, 261,107 prompt tokens | 2/3 codes | 2/3 codes | Known miss persists |
+
+V2 fixed the modular-arithmetic question; both code questions still failed.
+Within each checkpoint, serial and MTP returned identical text on all 13 cases
+and the 512-token generation probe. That supports MTP integration correctness
+on these inputs; it does not prove fidelity to the original model.
+
+**Limits of this comparison:** one generation prompt, three timed runs per
+mode, one retrieval document per length, and W4B always tested first. The first
+timed run was slower for both checkpoints. Generated code differed between
+checkpoints despite the same 512-token budget. Memory figures are reported by
+the engine at 32k, excluding the demand-paged lookup table and other processes;
+they are not total system RAM use for the 262k + NPU serving profile.
+
+## Better tests to run next
+
+**The existing suite is useful for quick regression checks, but insufficient
+for choosing the better model.** Prioritize a larger coding evaluation and a
+multi-task long-context evaluation before making a quality recommendation.
+
+### What the Reddit discussion actually suggests
+
+In the visible comments of the [linked 0.16.0 announcement](https://www.reddit.com/r/StrixHalo/comments/1wvfrj0/halogenflashserver_0160_strix_halo_npu_now_serves/),
+I found no named evaluation-suite recommendation. Related Halogen discussions
+provide more concrete leads:
+
+- A [comment on inference fidelity](https://www.reddit.com/r/StrixHalo/comments/1w7gu6f/comment/p7xgnd9/)
+  asks for **perplexity and KL divergence against BF16**. A
+  [follow-up](https://www.reddit.com/r/StrixHalo/comments/1w7gu6f/comment/p84izmg/)
+  asks for **top-1 token agreement on the same corpus**. These measure deviation
+  from a reference model; they are not task-success benchmarks.
+- A [related 12-quantization benchmark post](https://www.reddit.com/r/StrixHalo/comments/1wl3weh/i_benchmarked_12_quantizations_of_qwen38flashnext/)
+  uses **HumanEval+**, 164 coding problems, and reports base and extended-test
+  pass@1. This is a benchmark used in a related post, not a suggestion in the
+  original announcement's comments. Its historical engine/settings results
+  should not be carried over to our 0.16.2 installation.
+
+### Proposed evaluation order — not yet run locally
+
+| Priority | Evaluation | What it would add |
+| --- | --- | --- |
+| 1 | [EvalPlus: HumanEval+ and MBPP+](https://github.com/evalplus/evalplus) | Executable tests of generated code across many problems |
+| 2 | [RULER](https://github.com/NVIDIA/RULER), then [LongBench v2](https://github.com/THUDM/LongBench) | Multiple long-context tasks and documents, beyond our repeated-record fixture |
+| 3 | BF16-reference perplexity, KL divergence, top-1 agreement | Direct quantization/runtime fidelity evidence, if compatible reference outputs and scoring access are available |
+| Separate NPU track | [MTEB](https://github.com/embeddings-benchmark/mteb) retrieval/reranking tasks | Dataset-level relevance quality beyond vector shape and one obvious ranking |
+
+EvalPlus is the concrete community benchmark lead. RULER, LongBench v2, and
+MTEB are our proposed follow-ups based on the gaps in the local tests, not
+claims about what the linked commenters recommended.
+
+For a fair comparison, pin datasets and evaluator versions, use identical
+prompts and token budgets, verify reasoning settings, and report truncations
+separately. Test thinking off and the actual serving reasoning policy as
+separate conditions. For coding, score generated code in an isolated runner.
+Report task success and time per completed task alongside tokens/s. Fidelity
+against BF16 needs a suitable reference; agreement between two quantized runs
+alone is not that measurement.
+
+## Run and select a profile
+
+**Use the explicit v2 alias.** `qwen3.8-fn` still selects W4B; switching the
+running server did not change aliases.
+
+| Alias | Checkpoint | Context | Vision | NPU services |
+| --- | --- | ---: | --- | --- |
+| `qwen3.8-halogen-v2-npu` | V2 | 262,144 | Yes | Embeddings + reranking |
+| `qwen3.8-halogen-v2` | V2 | 262,144 | Yes | Off |
+| `qwen3.8-halogen-npu` | W4B + quality overlay | 262,144 | Yes | Embeddings + reranking |
+| `qwen3.8-fn` / `qwen3.8-halogen` | W4B + quality overlay | 262,144 | Yes | Off |
 
 ```bash
-./bin/halo-ai --config .halo-ai-workspace.env install halogen
-./bin/halo-ai --config .halo-ai-workspace.env models verify halogen-qwen3.8-flash-next --full
-./bin/halo-ai --config .halo-ai-workspace.env start qwen3.8-fn --switch
-./bin/halo-ai --config .halo-ai-workspace.env test qwen3.8-fn
-./bin/halo-ai --config .halo-ai-workspace.env stop qwen3.8-fn
+# Preview the full checkpoint, vision, and NPU dependency selection.
+halo-ai profiles acquire qwen3.8-halogen-v2-npu --dry-run
+# Download and verify missing artifacts, then install the pinned runtime.
+halo-ai profiles acquire qwen3.8-halogen-v2-npu
+halo-ai start qwen3.8-halogen-v2-npu --switch
+halo-ai test qwen3.8-halogen-v2-npu
 ```
 
-The OpenAI-compatible endpoint is `http://127.0.0.1:8731/v1`; the served model
-ID is `halogen-qwen3.8-flash-next`. Chat Completions and Responses are both
-available. `/health` reports the engine and API versions, MTP readiness,
-vision support, and the verified chat template. Only the API port is
-published, on loopback. The internal engine port remains private.
+Acquisition includes selected embedding/reranker weights and their shared device
+programs. The plan lists these under `auxiliary`; v2 selects the external n-gram
+table, while W4B selects the quality overlay. Host NPU setup remains a separate
+prerequisite described below.
 
-Model mounts are read-only, downloads are disabled in the container, and
-Halo's normal single-runtime switching, stop, status, and trial records apply.
-Starting the runtime is explicit; it does not start automatically at boot.
+- OpenAI-compatible base URL: `http://127.0.0.1:8731/v1`
+- V2 model ID: `halogen-qwen3.8-flash-next-v2`
+- Embedding model: `qwen3-embedding-0.6b`, route `/v1/embeddings`
+- Reranker: `qwen3-reranker-0.6b`, route `/v1/rerank`
 
-To update the root-owned system CLI and catalog after reviewing the changes,
-run `./reload.sh` from this checkout (requires your sudo password). Then the
-same commands work as `halo-ai start qwen3.8-fn --switch`, etc.
+Serving uses one slot, MTP plus prompt lookup, session cache mode 2, and
+16,384-token prefill chunks. Defaults are medium reasoning, 8,192 completion
+tokens, temperature 1.0, top-p 0.95, and top-k 20; explicit request fields win.
+Reasoning consumes the completion budget. Diagnostic profiles disable cache
+and prompt lookup. Runtime startup is explicit, not automatic at boot.
 
-## Verify MTP
+## NPU and host constraints
+
+The last validated host has IOMMU enabled, the `amdxdna` driver, XRT libraries,
+an unlimited operator memlock limit, and a 118 GiB GTT aperture. The upstream
+fabric-clock helper holds FCLK at 2000 MHz. Its oneshot service may show
+`inactive (dead)` after success; check `halogen-fabric-clock status`.
+
+**NPU work shares resources with GPU generation.** In the earlier W4B test,
+continuous embedding/reranking load reduced median GPU decode from 54.1 to
+39.9 tok/s (about 26%). That percentage has not been remeasured on v2.
+Synthetic short-input batches reached about 9,232 embedding tokens/s and
+18.74 rerank pairs/s; longer inputs crossed a much slower execution bucket.
+These are throughput observations, not retrieval-quality scores.
+
+Embeddings and reranking passed API and concurrent correctness checks. Gaming,
+suspend/resume, and extended stability have not been qualified. IOMMU was
+changed for NPU compatibility; no gaming benefit was measured.
+[Host setup, memlock repair, and detailed NPU results](halogen-flash-history.md#optional-npu-embeddings-and-reranking)
+are retained in the history.
+
+## Artifacts and runtime pin
+
+Model directory: `/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/`.
+Both v2 files are downloaded and fully SHA-256 verified:
+
+| File | Size |
+| --- | ---: |
+| `qwen38-flash-next-v2.hgn` | 66,687,678,432 bytes |
+| `qwen38-flash-next-ngram.hgn` | 51,200,246,144 bytes |
+
+V2 uses the external n-gram table and reuses the verified tokenizer and vision
+files. It does not mount the W4B quality overlay. Both native checkpoint
+formats supply their own MTP head; the separate MTP HGN is for the GGUF path.
+
+- Runtime: Halogen **0.16.2**, closed-source engine with public deployment code.
+- Image digest: `sha256:0c61bf84ac22308a53f5d1ca6b86806702d7039e5ebc51cae4c66621b92fe04a`.
+- V2 source revision: `3648cf1e6a3143e8946d52301570f26003c0bdb0`.
+- W4B source revision: `e238ffde1a89531743505349dd16ca35a1e09b15`.
+- [Pinned download links](halogen-flash-history.md#download-v2-separately) and
+  [full verification](results/halogen-0162-v2-verification-2026-10-05.json).
+
+## Evidence and reproduction
+
+| Evidence | Record |
+| --- | --- |
+| Comparison, settings, timings, and outputs | [Comparison JSON](results/halogen-0162-checkpoint-comparison-2026-10-05/comparison.json) |
+| Fixed correctness suite | [W4B](results/halogen-0162-checkpoint-comparison-2026-10-05/w4b-quality.json), [v2](results/halogen-0162-checkpoint-comparison-2026-10-05/v2-quality.json) |
+| Retrieval prompts and answers | [W4B](results/halogen-0162-checkpoint-comparison-2026-10-05/w4b-retrieval.json), [v2](results/halogen-0162-checkpoint-comparison-2026-10-05/v2-retrieval.json) |
+| Restored service checks | [Vision](results/halogen-0162-checkpoint-comparison-2026-10-05/restored-smoke.json), [NPU](results/halogen-0162-checkpoint-comparison-2026-10-05/restored-npu.json) |
+| Earlier NPU load and throughput | [Paired GPU/NPU load](results/halogen-0162-npu-2026-10-04.json), [NPU throughput](results/halogen-0162-npu-throughput-2026-10-04.json) |
+| Dated setup, previous comparisons, and troubleshooting | [History](halogen-flash-history.md), [upstream review](halogen-upstream-review.md) |
+
+To repeat the **small diagnostic comparison** from this checkout (temporarily
+switches models, then restores v2 with NPU services):
 
 ```bash
-./bin/halo-ai --config .halo-ai-workspace.env start qwen3.8-flash-next-halogen-32k-mtp --switch
-python3 tools/halogen_validate.py --output /tmp/halogen-mtp-check.json
-./bin/halo-ai --config .halo-ai-workspace.env start qwen3.8-fn --switch
+python3 tools/halogen_checkpoint_compare.py --output-dir /tmp/halogen-checkpoint-comparison
 ```
 
-The validator requires cache mode 0 and prompt lookup off to isolate MTP.
-It compares serial and MTP greedy responses in the same process, using a
-512-token code probe and the repository's 13-case quality suite. The code
-probe omits `drafter` for the candidate request to exercise the configured
-MTP default. It records `draft_n`, `draft_n_accepted`, timings, content hashes,
-and quality scores. Serial requests must have zero drafts, MTP must have
-accepted drafts, and the returned content must match. These checks compare
-returned text bytes, not hidden engine token IDs, and do not constitute a
-broad quality or long-context qualification.
-
-Upstream's `shortlist_draft_head: false` health field describes a different
-optimization, not MTP availability. Use `drafter_weights_loaded`,
-`drafters_available`, and actual request counters to determine whether MTP
-is active. See the [upstream flags](https://github.com/peonist-ai/halogen-flash-server/blob/main/docs/FLAGS.md).
-
-## Local setup result (2026-09-20)
-
-All 11 cataloged model/tokenizer files passed full SHA-256 verification.
-The cache-off, prompt-lookup-off MTP check accepted 276 of 311 draft tokens;
-serial requests drafted zero. All 13 fixed-suite outputs and the 512-token
-code probe matched byte-for-byte between serial and MTP. Both scored 10/13;
-the code-trace, code-slice, and CRT cases failed in both modes.
-
-The single code probe decoded at 32.796 tok/s serial and 46.075 tok/s MTP
-(40.5% higher throughput). This is a same-process, short-prompt observation,
-not a throughput qualification across workloads. The full-context vision
-profile then passed the red-image smoke, Responses API, and structured JSON
-checks. Its startup reported 68.0 GiB pinned weights, 7.2 GiB KV, and 12.2 GiB
-working memory (87.4 GiB total), leaving 21.6 GiB for the host at startup.
-The subsequent near-limit retrieval checks below exercised the loaded 262K
-profile and found an accuracy limitation.
-
-See [the recorded results](results/halogen-flash-mtp-integration-2026-09-20.json).
-
-## Post-reload serving and retrieval checks
-
-The installer now deploys and verifies every shipped catalog, including
-Halogen, and includes the MTP validator in the installed release. The system
-CLI recognizes `qwen3.8-halogen`; streaming chat, a tool-call/result round
-trip, and the configured medium-reasoning default passed live checks.
-
-Three-code retrieval produced the following results. The 32K and 128K
-screens use targets at 10%, 50%, and 90% of their respective documents. All
-four near-limit attempts target the same three records and expected codes.
-
-| Attempt | Prompt tokens | Cached prompt tokens | Reasoning | Correct codes |
-| --- | ---: | ---: | --- | ---: |
-| 32K screen | 31,724 | 0 | Off | 3/3 |
-| 128K screen | 130,031 | 0 | Off | 3/3 |
-| Near-limit, prefix reuse | 261,107 | 129,984 | Off | 2/3 |
-| Identical prompt, fresh process | 261,107 | 0 | Off | 2/3 |
-| Identical prompt, warm repeat | 261,107 | 261,107 | Off | 2/3 |
-| Same targets, trailing distractors removed | 253,944 | 0 | Medium | 2/3 |
-
-The medium retry reserved 8,192 output tokens and capped thinking at 2,048;
-it used 707 reasoning tokens and finished normally. Every near-limit attempt
-missed the first requested record and retrieved the other two correctly.
-Changing both the reasoning policy and the prompt length did not resolve the
-miss in this test. The cached and fresh attempts returned different wrong
-first codes, so cache reuse alone does not explain the failure.
-
-The requested first record was `000791`, whose code is `delta-68658`.
-The wrong codes correspond to other records in the supplied document:
-`delta-92415` belongs to `000794`, `delta-16172` to `000797`, and
-`delta-30330` to `000079`. These were incorrect record selections rather
-than codes absent from the source.
-
-These initial results keep the 262K serving profile experimental. They do not
-establish that UD-Q4_K_XL is more accurate at the same length; the matched
-serial comparison below addresses that question. The smaller-context
-successes are bounded smoke checks, not a broad quality qualification.
-
-[Full serving results and retry records](results/halogen-flash-native-serving-2026-09-20.json)
-include the request policies, prompt hashes, timing/cache counters, and outputs.
-
-## Serial retest against UD-Q4_K_XL
-
-A fresh process for each runtime received the identical 261,107-token
-three-code request with greedy decoding, seed 1, thinking off, and a
-1,024-token answer budget. Both used 262,144 context positions and one slot.
-Halogen used serial decoding with prompt lookup and prompt caching disabled.
-The UD-Q4_K_XL model used Strix Vulkan 0.7.5 with `--spec-type none`, no
-draft-model mount, and `cache_prompt: false`; its live slot reported
-`speculative: false`. Both processed the full prompt with zero cached tokens
-and finished normally after 24 completion tokens.
-
-| Model/runtime, MTP off | First code returned | Correct codes | Request time |
-| --- | --- | ---: | ---: |
-| Halogen native HGN | `delta-92415` (record `000794`) | 2/3 | 279.74 s |
-| UD-Q4_K_XL / Strix Vulkan 0.7.5 | `delta-33577` (record `003792`) | 2/3 | 1,742.46 s |
-
-The expected first code was `delta-68658` from record `000791`. Both returned
-the correct middle and final codes. Halogen's answer matched its earlier
-cold MTP run exactly, despite drafting zero tokens. The UD runtime does not
-expose draft counters in these responses; disabling speculation is verified
-by its command line and active slot, rather than treating absent counters
-as measured zero.
-
-**Disabling MTP did not fix this retrieval failure in either model/runtime
-pair.** This does not establish the underlying cause: model conversion,
-quantization, KV representation, and runtime differ between the two pairs.
-
-Both serial runs subsequently retrieved all three codes from the 31,724-token
-control and scored **10/13** on the fixed quality suite. Both failed
-`code-trace-alternating`, `code-slice-semantics`, and `reasoning-crt`.
-Halogen's 13 answers matched its earlier serial and MTP answers byte for byte;
-UD's 13 answers matched its earlier target-only baseline. All 15 Halogen
-requests drafted zero tokens, and all 30 requests across both runtimes used
-zero cached tokens.
-
-**Halogen is the recommended Flash-Next runtime through `qwen3.8-fn`**, with
-UD target-only as a reference/fallback. These screens show no accuracy
-advantage for UD, and Halogen processes the long prompts faster. The alias
-selects the existing 262K serving profile with MTP and vision; the 32K
-profiles remain diagnostics. Neither pair is qualified for reliable retrieval
-near 262K. The recommendation does not establish broad model-quality
-superiority, and selecting the alias does not change the tested runtime settings.
-
-[Full serial retest results](results/qwen3.8-flash-next-serial-retest-2026-09-20.json)
-include both effective diagnostic profiles, image pins, model artifacts,
-request options, prompt hashes, outputs, timings, and speculation evidence.
-
-The [upstream review](halogen-upstream-review.md) follows the author's recent
-Reddit discussions into the dated issue resolutions and distinguishes
-attention-budget experiments from already-fixed bugs and speed tuning.
+The broader evaluations proposed above have not been run by this command.

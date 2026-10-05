@@ -1,0 +1,34 @@
+{
+  "release": "0.16.2",
+  "image_digest": "sha256:0c61bf84ac22308a53f5d1ca6b86806702d7039e5ebc51cae4c66621b92fe04a",
+  "upstream_revision": "7f31bbd4021f217a1be9776bdb7304bcf8eca62d",
+  "npu_models": [
+    "qwen3-embedding-0.6b",
+    "qwen3-reranker-0.6b"
+  ],
+  "verified_files": 17,
+  "file_errors": [],
+  "packages": [
+    "xrt 1:2.21.75-14.1",
+    "xrt-plugin-amdxdna 1:2.21.75-2.1"
+  ],
+  "xrt_container_dlopen": "All three XRT libraries loaded successfully in the pinned image",
+  "host_profile": {
+    "running_profile": "gpu",
+    "persistent_profile": "npu",
+    "reboot_pending": true,
+    "running_gtt_gib": 118,
+    "persistent_gtt_gib": 118,
+    "npu_device": false
+  },
+  "boot_backup": "20261004T235133Z",
+  "snapper_pair": [
+    137,
+    138
+  ],
+  "fabric_clock_service": "enabled for next boot and resume; not started during GPU checks",
+  "npu_inference_validated": false,
+  "v2_downloaded": false,
+  "unit_tests_passed": 161,
+  "smoke_script_passed": true
+}

@@ -1,0 +1,1671 @@
+{
+  "recorded_at": "2026-10-05T11:22:15.191140+00:00",
+  "method": "Fresh W4B then v2, same pinned engine and host. NPU/vision disabled during comparison. Cache and prompt lookup off; temperature 0, seed 1, thinking off. Existing quality suite warms each runtime before repeated 512-token probes; serial/MTP order alternates. Retrieval has one run per length/checkpoint. Model order is not randomized; timings are a bounded local comparison, not broad quality or performance qualification.",
+  "rounds": 3,
+  "image": "ghcr.io/peonist-ai/halogen-flash-server@sha256:0c61bf84ac22308a53f5d1ca6b86806702d7039e5ebc51cae4c66621b92fe04a",
+  "restore_profile": "qwen3.8-halogen-v2-npu",
+  "models": {
+    "w4b": {
+      "profile": {
+        "id": "qwen3.8-flash-next-halogen-32k-mtp",
+        "model": "halogen-qwen3.8-flash-next",
+        "engine": "halogen",
+        "context": 32768,
+        "startup_timeout": 1200,
+        "risk": "experimental",
+        "features": [
+          "mtp"
+        ],
+        "thinking": true,
+        "proposal_policy": "candidate-not-qualified-as-default",
+        "settings": {
+          "kv_pool_positions": 32768,
+          "parallel": 1,
+          "prefill_chunk": 16384,
+          "prompt_cache": 0,
+          "drafter": 1,
+          "reasoning_effort": "medium",
+          "max_tokens_default": 8192,
+          "prompt_lookup": 0
+        }
+      },
+      "health": {
+        "status": "ok",
+        "model": "halogen-qwen3.8-flash-next",
+        "endpoints": [
+          "/v1/chat/completions",
+          "/v1/completions",
+          "/v1/messages",
+          "/v1/messages/count_tokens",
+          "/v1/models",
+          "/v1/responses"
+        ],
+        "cache_counters": "/cache",
+        "metrics": "/metrics",
+        "context": 32768,
+        "capability_probe": "ok",
+        "rope_scaling": null,
+        "indexer_budget": 2048,
+        "vision": {
+          "enabled": false,
+          "endpoints": [
+            "/v1/chat/completions",
+            "/v1/messages",
+            "/v1/responses"
+          ],
+          "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+          "max_pixels": 3686400,
+          "size_multiple": 32,
+          "disabled_because": [
+            "the engine was started without a vision tower (HALOGEN_VISION_TOWER)"
+          ]
+        },
+        "version": {
+          "api": "0.16.2",
+          "engine": "0.16.2",
+          "match": true
+        },
+        "modes": [
+          "all",
+          "engine",
+          "api",
+          "bench",
+          "sweep",
+          "convert",
+          "inspect",
+          "verify",
+          "ppl",
+          "niah"
+        ],
+        "checkpoint_format": "hgn",
+        "chat_template": {
+          "path": "/models/tokenizer/chat_template.jinja",
+          "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+          "probe": "passed",
+          "thinking_control": true
+        },
+        "engine": {
+          "responds": true,
+          "probe_s": 1.001
+        },
+        "busy": false,
+        "slots": 1,
+        "slot_ctx": 32768,
+        "kv_pool_positions": 32768,
+        "in_flight": 0,
+        "busy_for_s": 0,
+        "queued": 0,
+        "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+        "drafters_available": [
+          "serial",
+          "mtp"
+        ],
+        "drafter_default": "mtp",
+        "prompt_lookup": "off",
+        "shortlist_draft_head": false,
+        "drafter_weights_loaded": true,
+        "prompt_cache": {
+          "enabled": false,
+          "cap_mb": 0,
+          "mode": 0,
+          "snapshot_align": 0,
+          "bitwise_identical_to_cold": false
+        },
+        "composable_context": {
+          "enabled": false
+        },
+        "tool_calls": {
+          "wire_format": "qwen-xml (<function=>/<parameter=>)",
+          "streaming": true,
+          "tool_choice": [
+            "auto",
+            "none",
+            "required",
+            "{type: function, function: {name}}"
+          ],
+          "forced_call_is_a_prefill": true,
+          "required_is_exact": "named tool_choice, or one tool",
+          "parallel_tool_calls": true,
+          "constrained_decoding": false,
+          "forced_call_disables_thinking": true,
+          "argument_types_need_schema": true
+        },
+        "supported": [
+          "reasoning_effort",
+          "enable_thinking",
+          "preserve_thinking",
+          "max_thinking_tokens",
+          "thinking_budget_tokens",
+          "thinking_budget",
+          "thinking_token_budget",
+          "reasoning",
+          "thinking",
+          "tools",
+          "tool_choice",
+          "parallel_tool_calls",
+          "stop",
+          "max_tokens",
+          "max_completion_tokens",
+          "max_output_tokens",
+          "stream",
+          "stream_options"
+        ],
+        "token_budget_aliases": [
+          "max_tokens",
+          "max_completion_tokens",
+          "max_output_tokens"
+        ],
+        "max_tokens_default": 8192,
+        "reasoning_effort_default": "medium",
+        "reasoning_effort_values": [
+          "high",
+          "low",
+          "max",
+          "medium",
+          "minimal",
+          "none",
+          "xhigh"
+        ],
+        "token_budget_covers_reasoning": true,
+        "max_thinking_tokens_default": null,
+        "thinking_answer_room": "max(1024, 15% of max_tokens)",
+        "end_of_turn_guard": true,
+        "thinking_control_aliases": [
+          "thinking_budget_tokens",
+          "thinking_budget",
+          "thinking_token_budget",
+          "reasoning.{enabled,effort,max_tokens}",
+          "thinking.{type,budget_tokens}"
+        ],
+        "server_defaults": {
+          "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+          "HALOGEN_TEMPERATURE": 1.0,
+          "HALOGEN_TOP_P": 0.95,
+          "HALOGEN_TOP_K": 20,
+          "HALOGEN_REASONING_EFFORT": "medium"
+        },
+        "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+        "chat_template_kwargs": [
+          "reasoning_effort",
+          "enable_thinking",
+          "preserve_thinking"
+        ],
+        "error_format": "openai",
+        "accepted_but_ignored": [
+          "n"
+        ],
+        "not_implemented": [],
+        "structured_output": {
+          "enabled": true,
+          "reason": null,
+          "response_format": [
+            "json_schema",
+            "json_object"
+          ],
+          "text.format": [
+            "json_schema",
+            "json_object"
+          ],
+          "routes": [
+            "/v1/chat/completions",
+            "/v1/completions",
+            "/v1/responses",
+            "/v1/messages"
+          ],
+          "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+          "images": "a schema with images is a 400",
+          "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+          "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+          "keys": "object keys are emitted in schema order",
+          "enforced": [
+            "type",
+            "properties",
+            "required",
+            "additionalProperties",
+            "items",
+            "minItems",
+            "maxItems",
+            "minLength",
+            "maxLength",
+            "enum",
+            "const",
+            "anyOf",
+            "oneOf (as anyOf)",
+            "type: [..., \"null\"]",
+            "$ref",
+            "$defs"
+          ],
+          "accepted_not_enforced": [
+            "minimum",
+            "maximum",
+            "exclusiveMinimum",
+            "exclusiveMaximum",
+            "multipleOf",
+            "title",
+            "description",
+            "default",
+            "examples"
+          ],
+          "refused": [
+            "pattern",
+            "format",
+            "allOf",
+            "not",
+            "if",
+            "then",
+            "else",
+            "patternProperties",
+            "dependentRequired",
+            "dependentSchemas",
+            "uniqueItems",
+            "contains",
+            "propertyNames",
+            "unevaluatedProperties",
+            "unevaluatedItems",
+            "minProperties",
+            "maxProperties",
+            "prefixItems"
+          ]
+        },
+        "sampling": {
+          "implemented": [
+            "temperature",
+            "top_p",
+            "top_k",
+            "min_p",
+            "seed",
+            "presence_penalty",
+            "frequency_penalty",
+            "repetition_penalty",
+            "logit_bias",
+            "logprobs",
+            "top_logprobs"
+          ],
+          "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+          "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter. A sampled request that omits top_k or top_p takes the operator's default, else the model's (filter_defaults)",
+          "filter_defaults": {
+            "top_k": 20,
+            "top_p": 0.95,
+            "source": "generation_config.json"
+          },
+          "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+          "penalties": "presence and frequency count GENERATED tokens only; repetition_penalty scales every id in the prompt or the output (vLLM's rule); applied on both drafters",
+          "logprobs": "a sampled request carries the chosen token's logprob on every token; at temperature 0, and with top_logprobs (up to 20) at any temperature, the first generated token only, so those need max_tokens 1",
+          "not_implemented": [
+            "logprobs with stream=true",
+            "logprobs past the first token at temperature 0",
+            "n > 1"
+          ]
+        },
+        "max_tokens_cap": 65536,
+        "max_tokens_over_cap": "400"
+      },
+      "quality_summary": {
+        "cases": 13,
+        "serial_passed": 10,
+        "mtp_passed": 10,
+        "identical_cases": 13,
+        "probe_identical_text": true,
+        "speculative_totals": {
+          "serial": {
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          },
+          "mtp": {
+            "draft_n": 416,
+            "draft_n_accepted": 388
+          }
+        },
+        "mtp_working": true
+      },
+      "hardware_after_quality": {
+        "HALO_AI_DRM_DEVICE": "/sys/class/drm/card1/device",
+        "HALO_AI_GTT_APERTURE_BYTES": 126701535232,
+        "HALO_AI_GTT_APERTURE_GIB": 118,
+        "HALO_AI_GTT_USED_BYTES": 12839022592,
+        "HALO_AI_VRAM_TOTAL_BYTES": 2147483648,
+        "HALO_AI_VRAM_USED_BYTES": 1210261504,
+        "HALO_AI_CPU_MEM_TOTAL_BYTES": 132563701760,
+        "HALO_AI_CPU_MEM_AVAILABLE_BYTES": 113517187072,
+        "HALO_AI_GTT_TARGET_GIB": "auto",
+        "HALO_AI_GTT_PENDING_GIB": ""
+      },
+      "decode_runs": [
+        {
+          "round": 1,
+          "drafter": "serial",
+          "wall_seconds": 16.662855937996937,
+          "sha256": "1c3132f2d72198ebcd633119481289b19516857e565c49b5b0cc93e885fca9e9",
+          "response": {
+            "id": "chatcmpl-d533b806bf274d1c8a04bb1c",
+            "created": 1791199448,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "```python\nfrom __future__ import annotations\nfrom typing import Any, Iterator, Optional\n\n\nclass Node:\n    \"\"\"A node in a singly linked list.\"\"\"\n\n    def __init__(self, data: Any, next_node: Optional[Node] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data stored in the node.\n            next_node: The next node in the linked list, or None if this is the last node.\n        \"\"\"\n        self.data = data\n        self.next = next_node\n\n\nclass LinkedList:\n    \"\"\"A singly linked list implementation.\n\n    Supports push (add to front), pop (remove from front), reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node] = None\n        self._size: int = 0\n\n    def push(self, data: Any) -> None:\n        \"\"\"Add an element to the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> Any:\n        \"\"\"Remove and return the element from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node] = None\n        current: Optional[Node] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The size of the linked list.\n        \"\"\"\n        return self._size\n\n    def __iter__(self)"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 38,
+              "completion_tokens": 512,
+              "total_tokens": 550,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 38,
+              "predicted_n": 512,
+              "prompt_ms": 702.4,
+              "predicted_ms": 15956.1,
+              "prompt_per_second": 54.1,
+              "predicted_per_second": 32.088,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          }
+        },
+        {
+          "round": 1,
+          "drafter": "mtp",
+          "wall_seconds": 9.549770503996115,
+          "sha256": "1c3132f2d72198ebcd633119481289b19516857e565c49b5b0cc93e885fca9e9",
+          "response": {
+            "id": "chatcmpl-5b55771db023445491aef2dd",
+            "created": 1791199465,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "```python\nfrom __future__ import annotations\nfrom typing import Any, Iterator, Optional\n\n\nclass Node:\n    \"\"\"A node in a singly linked list.\"\"\"\n\n    def __init__(self, data: Any, next_node: Optional[Node] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data stored in the node.\n            next_node: The next node in the linked list, or None if this is the last node.\n        \"\"\"\n        self.data = data\n        self.next = next_node\n\n\nclass LinkedList:\n    \"\"\"A singly linked list implementation.\n\n    Supports push (add to front), pop (remove from front), reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node] = None\n        self._size: int = 0\n\n    def push(self, data: Any) -> None:\n        \"\"\"Add an element to the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> Any:\n        \"\"\"Remove and return the element from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node] = None\n        current: Optional[Node] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The size of the linked list.\n        \"\"\"\n        return self._size\n\n    def __iter__(self)"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 38,
+              "completion_tokens": 512,
+              "total_tokens": 550,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 38,
+              "predicted_n": 512,
+              "prompt_ms": 691.2,
+              "predicted_ms": 8853.5,
+              "prompt_per_second": 54.977,
+              "predicted_per_second": 57.83,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "draft_n": 354,
+              "draft_n_accepted": 333
+            }
+          }
+        },
+        {
+          "round": 2,
+          "drafter": "mtp",
+          "wall_seconds": 9.307326713998918,
+          "sha256": "1c3132f2d72198ebcd633119481289b19516857e565c49b5b0cc93e885fca9e9",
+          "response": {
+            "id": "chatcmpl-59be947a76de4f97b855bf85",
+            "created": 1791199475,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "```python\nfrom __future__ import annotations\nfrom typing import Any, Iterator, Optional\n\n\nclass Node:\n    \"\"\"A node in a singly linked list.\"\"\"\n\n    def __init__(self, data: Any, next_node: Optional[Node] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data stored in the node.\n            next_node: The next node in the linked list, or None if this is the last node.\n        \"\"\"\n        self.data = data\n        self.next = next_node\n\n\nclass LinkedList:\n    \"\"\"A singly linked list implementation.\n\n    Supports push (add to front), pop (remove from front), reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node] = None\n        self._size: int = 0\n\n    def push(self, data: Any) -> None:\n        \"\"\"Add an element to the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> Any:\n        \"\"\"Remove and return the element from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node] = None\n        current: Optional[Node] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The size of the linked list.\n        \"\"\"\n        return self._size\n\n    def __iter__(self)"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 38,
+              "completion_tokens": 512,
+              "total_tokens": 550,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 38,
+              "predicted_n": 512,
+              "prompt_ms": 598.4,
+              "predicted_ms": 8703.0,
+              "prompt_per_second": 63.503,
+              "predicted_per_second": 58.83,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "draft_n": 354,
+              "draft_n_accepted": 333
+            }
+          }
+        },
+        {
+          "round": 2,
+          "drafter": "serial",
+          "wall_seconds": 14.909414696994645,
+          "sha256": "1c3132f2d72198ebcd633119481289b19516857e565c49b5b0cc93e885fca9e9",
+          "response": {
+            "id": "chatcmpl-81f14104603b49d2a3f7bc3d",
+            "created": 1791199484,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "```python\nfrom __future__ import annotations\nfrom typing import Any, Iterator, Optional\n\n\nclass Node:\n    \"\"\"A node in a singly linked list.\"\"\"\n\n    def __init__(self, data: Any, next_node: Optional[Node] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data stored in the node.\n            next_node: The next node in the linked list, or None if this is the last node.\n        \"\"\"\n        self.data = data\n        self.next = next_node\n\n\nclass LinkedList:\n    \"\"\"A singly linked list implementation.\n\n    Supports push (add to front), pop (remove from front), reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node] = None\n        self._size: int = 0\n\n    def push(self, data: Any) -> None:\n        \"\"\"Add an element to the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> Any:\n        \"\"\"Remove and return the element from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node] = None\n        current: Optional[Node] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The size of the linked list.\n        \"\"\"\n        return self._size\n\n    def __iter__(self)"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 38,
+              "completion_tokens": 512,
+              "total_tokens": 550,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 38,
+              "predicted_n": 512,
+              "prompt_ms": 576.8,
+              "predicted_ms": 14326.2,
+              "prompt_per_second": 65.881,
+              "predicted_per_second": 35.739,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          }
+        },
+        {
+          "round": 3,
+          "drafter": "serial",
+          "wall_seconds": 14.986743897999986,
+          "sha256": "1c3132f2d72198ebcd633119481289b19516857e565c49b5b0cc93e885fca9e9",
+          "response": {
+            "id": "chatcmpl-a48ba47035104ae59fbe6fb2",
+            "created": 1791199499,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "```python\nfrom __future__ import annotations\nfrom typing import Any, Iterator, Optional\n\n\nclass Node:\n    \"\"\"A node in a singly linked list.\"\"\"\n\n    def __init__(self, data: Any, next_node: Optional[Node] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data stored in the node.\n            next_node: The next node in the linked list, or None if this is the last node.\n        \"\"\"\n        self.data = data\n        self.next = next_node\n\n\nclass LinkedList:\n    \"\"\"A singly linked list implementation.\n\n    Supports push (add to front), pop (remove from front), reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node] = None\n        self._size: int = 0\n\n    def push(self, data: Any) -> None:\n        \"\"\"Add an element to the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> Any:\n        \"\"\"Remove and return the element from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node] = None\n        current: Optional[Node] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The size of the linked list.\n        \"\"\"\n        return self._size\n\n    def __iter__(self)"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 38,
+              "completion_tokens": 512,
+              "total_tokens": 550,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 38,
+              "predicted_n": 512,
+              "prompt_ms": 583.4,
+              "predicted_ms": 14397.2,
+              "prompt_per_second": 65.135,
+              "predicted_per_second": 35.562,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          }
+        },
+        {
+          "round": 3,
+          "drafter": "mtp",
+          "wall_seconds": 9.346812032999878,
+          "sha256": "1c3132f2d72198ebcd633119481289b19516857e565c49b5b0cc93e885fca9e9",
+          "response": {
+            "id": "chatcmpl-daa41b2a221549289ed48f8d",
+            "created": 1791199514,
+            "model": "halogen-qwen3.8-flash-next",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "```python\nfrom __future__ import annotations\nfrom typing import Any, Iterator, Optional\n\n\nclass Node:\n    \"\"\"A node in a singly linked list.\"\"\"\n\n    def __init__(self, data: Any, next_node: Optional[Node] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data stored in the node.\n            next_node: The next node in the linked list, or None if this is the last node.\n        \"\"\"\n        self.data = data\n        self.next = next_node\n\n\nclass LinkedList:\n    \"\"\"A singly linked list implementation.\n\n    Supports push (add to front), pop (remove from front), reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node] = None\n        self._size: int = 0\n\n    def push(self, data: Any) -> None:\n        \"\"\"Add an element to the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> Any:\n        \"\"\"Remove and return the element from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node] = None\n        current: Optional[Node] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The size of the linked list.\n        \"\"\"\n        return self._size\n\n    def __iter__(self)"
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 38,
+              "completion_tokens": 512,
+              "total_tokens": 550,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 38,
+              "predicted_n": 512,
+              "prompt_ms": 602.3,
+              "predicted_ms": 8737.8,
+              "prompt_per_second": 63.091,
+              "predicted_per_second": 58.596,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "draft_n": 354,
+              "draft_n_accepted": 333
+            }
+          }
+        }
+      ],
+      "decode_median_tps": {
+        "serial": 35.562,
+        "mtp": 58.596
+      },
+      "decode_identical_within_checkpoint": true,
+      "hardware_after_decode": {
+        "HALO_AI_DRM_DEVICE": "/sys/class/drm/card1/device",
+        "HALO_AI_GTT_APERTURE_BYTES": 126701535232,
+        "HALO_AI_GTT_APERTURE_GIB": 118,
+        "HALO_AI_GTT_USED_BYTES": 12836925440,
+        "HALO_AI_VRAM_TOTAL_BYTES": 2147483648,
+        "HALO_AI_VRAM_USED_BYTES": 1190486016,
+        "HALO_AI_CPU_MEM_TOTAL_BYTES": 132563701760,
+        "HALO_AI_CPU_MEM_AVAILABLE_BYTES": 113540677632,
+        "HALO_AI_GTT_TARGET_GIB": "auto",
+        "HALO_AI_GTT_PENDING_GIB": ""
+      },
+      "retrieval_profile": {
+        "id": "halogen-w4b-comparison-262k",
+        "model": "halogen-qwen3.8-flash-next",
+        "engine": "halogen",
+        "context": 262144,
+        "startup_timeout": 1200,
+        "risk": "experimental",
+        "features": [
+          "mtp"
+        ],
+        "thinking": true,
+        "proposal_policy": "candidate-not-qualified-as-default",
+        "settings": {
+          "kv_pool_positions": 262144,
+          "parallel": 1,
+          "prefill_chunk": 16384,
+          "prompt_cache": 0,
+          "drafter": 1,
+          "reasoning_effort": "medium",
+          "max_tokens_default": 8192,
+          "prompt_lookup": 0
+        }
+      },
+      "retrieval": [
+        {
+          "records": 7910,
+          "correct_codes": 2,
+          "passed": false,
+          "output": "delta-90571,delta-24374,delta-80090",
+          "expected": "delta-68658,delta-24374,delta-80090",
+          "wall_seconds": 274.3912107799988,
+          "messages_sha256": "fc24c93372327c21e6d0cb69b95d226058201249c6e99bb625b8db96d8ae0536",
+          "timings": {
+            "prompt_n": 261107,
+            "predicted_n": 24,
+            "prompt_ms": 273253.4,
+            "predicted_ms": 799.3,
+            "prompt_per_second": 955.549,
+            "predicted_per_second": 30.026,
+            "cache_n": 0,
+            "disk_restore_n": 0,
+            "disk_restore_ms": 0.0,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        {
+          "records": 959,
+          "correct_codes": 3,
+          "passed": true,
+          "output": "delta-57034,delta-97930,delta-38826",
+          "expected": "delta-57034,delta-97930,delta-38826",
+          "wall_seconds": 34.143050759004836,
+          "messages_sha256": "acfc166777ce7365a515105a020c6ab72fe5094965c998599455642eaa2ec429",
+          "timings": {
+            "prompt_n": 31724,
+            "predicted_n": 24,
+            "prompt_ms": 33417.6,
+            "predicted_ms": 690.0,
+            "prompt_per_second": 949.32,
+            "predicted_per_second": 34.783,
+            "cache_n": 0,
+            "disk_restore_n": 0,
+            "disk_restore_ms": 0.0,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        }
+      ],
+      "hardware_after_retrieval": {
+        "HALO_AI_DRM_DEVICE": "/sys/class/drm/card1/device",
+        "HALO_AI_GTT_APERTURE_BYTES": 126701535232,
+        "HALO_AI_GTT_APERTURE_GIB": 118,
+        "HALO_AI_GTT_USED_BYTES": 19623473152,
+        "HALO_AI_VRAM_TOTAL_BYTES": 2147483648,
+        "HALO_AI_VRAM_USED_BYTES": 1204318208,
+        "HALO_AI_CPU_MEM_TOTAL_BYTES": 132563701760,
+        "HALO_AI_CPU_MEM_AVAILABLE_BYTES": 106774523904,
+        "HALO_AI_GTT_TARGET_GIB": "auto",
+        "HALO_AI_GTT_PENDING_GIB": ""
+      }
+    },
+    "v2": {
+      "profile": {
+        "id": "qwen3.8-flash-next-halogen-v2-32k-mtp",
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "engine": "halogen",
+        "context": 32768,
+        "startup_timeout": 1200,
+        "risk": "experimental",
+        "features": [
+          "mtp",
+          "external-ngram"
+        ],
+        "thinking": true,
+        "proposal_policy": "candidate-not-qualified-as-default",
+        "settings": {
+          "kv_pool_positions": 32768,
+          "parallel": 1,
+          "prefill_chunk": 16384,
+          "prompt_cache": 0,
+          "drafter": 1,
+          "reasoning_effort": "medium",
+          "max_tokens_default": 8192,
+          "prompt_lookup": 0
+        }
+      },
+      "health": {
+        "status": "ok",
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "endpoints": [
+          "/v1/chat/completions",
+          "/v1/completions",
+          "/v1/messages",
+          "/v1/messages/count_tokens",
+          "/v1/models",
+          "/v1/responses"
+        ],
+        "cache_counters": "/cache",
+        "metrics": "/metrics",
+        "context": 32768,
+        "capability_probe": "ok",
+        "rope_scaling": null,
+        "indexer_budget": 2048,
+        "vision": {
+          "enabled": false,
+          "endpoints": [
+            "/v1/chat/completions",
+            "/v1/messages",
+            "/v1/responses"
+          ],
+          "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+          "max_pixels": 3686400,
+          "size_multiple": 32,
+          "disabled_because": [
+            "the engine was started without a vision tower (HALOGEN_VISION_TOWER)"
+          ]
+        },
+        "version": {
+          "api": "0.16.2",
+          "engine": "0.16.2",
+          "match": true
+        },
+        "modes": [
+          "all",
+          "engine",
+          "api",
+          "bench",
+          "sweep",
+          "convert",
+          "inspect",
+          "verify",
+          "ppl",
+          "niah"
+        ],
+        "checkpoint_format": "hgn",
+        "chat_template": {
+          "path": "/models/tokenizer/chat_template.jinja",
+          "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+          "probe": "passed",
+          "thinking_control": true
+        },
+        "engine": {
+          "responds": true,
+          "probe_s": 1.001
+        },
+        "busy": false,
+        "slots": 1,
+        "slot_ctx": 32768,
+        "kv_pool_positions": 32768,
+        "in_flight": 0,
+        "busy_for_s": 0,
+        "queued": 0,
+        "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+        "drafters_available": [
+          "serial",
+          "mtp"
+        ],
+        "drafter_default": "mtp",
+        "prompt_lookup": "off",
+        "shortlist_draft_head": false,
+        "drafter_weights_loaded": true,
+        "prompt_cache": {
+          "enabled": false,
+          "cap_mb": 0,
+          "mode": 0,
+          "snapshot_align": 0,
+          "bitwise_identical_to_cold": false
+        },
+        "composable_context": {
+          "enabled": false
+        },
+        "tool_calls": {
+          "wire_format": "qwen-xml (<function=>/<parameter=>)",
+          "streaming": true,
+          "tool_choice": [
+            "auto",
+            "none",
+            "required",
+            "{type: function, function: {name}}"
+          ],
+          "forced_call_is_a_prefill": true,
+          "required_is_exact": "named tool_choice, or one tool",
+          "parallel_tool_calls": true,
+          "constrained_decoding": false,
+          "forced_call_disables_thinking": true,
+          "argument_types_need_schema": true
+        },
+        "supported": [
+          "reasoning_effort",
+          "enable_thinking",
+          "preserve_thinking",
+          "max_thinking_tokens",
+          "thinking_budget_tokens",
+          "thinking_budget",
+          "thinking_token_budget",
+          "reasoning",
+          "thinking",
+          "tools",
+          "tool_choice",
+          "parallel_tool_calls",
+          "stop",
+          "max_tokens",
+          "max_completion_tokens",
+          "max_output_tokens",
+          "stream",
+          "stream_options"
+        ],
+        "token_budget_aliases": [
+          "max_tokens",
+          "max_completion_tokens",
+          "max_output_tokens"
+        ],
+        "max_tokens_default": 8192,
+        "reasoning_effort_default": "medium",
+        "reasoning_effort_values": [
+          "high",
+          "low",
+          "max",
+          "medium",
+          "minimal",
+          "none",
+          "xhigh"
+        ],
+        "token_budget_covers_reasoning": true,
+        "max_thinking_tokens_default": null,
+        "thinking_answer_room": "max(1024, 15% of max_tokens)",
+        "end_of_turn_guard": true,
+        "thinking_control_aliases": [
+          "thinking_budget_tokens",
+          "thinking_budget",
+          "thinking_token_budget",
+          "reasoning.{enabled,effort,max_tokens}",
+          "thinking.{type,budget_tokens}"
+        ],
+        "server_defaults": {
+          "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+          "HALOGEN_TEMPERATURE": 1.0,
+          "HALOGEN_TOP_P": 0.95,
+          "HALOGEN_TOP_K": 20,
+          "HALOGEN_REASONING_EFFORT": "medium"
+        },
+        "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+        "chat_template_kwargs": [
+          "reasoning_effort",
+          "enable_thinking",
+          "preserve_thinking"
+        ],
+        "error_format": "openai",
+        "accepted_but_ignored": [
+          "n"
+        ],
+        "not_implemented": [],
+        "structured_output": {
+          "enabled": true,
+          "reason": null,
+          "response_format": [
+            "json_schema",
+            "json_object"
+          ],
+          "text.format": [
+            "json_schema",
+            "json_object"
+          ],
+          "routes": [
+            "/v1/chat/completions",
+            "/v1/completions",
+            "/v1/responses",
+            "/v1/messages"
+          ],
+          "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+          "images": "a schema with images is a 400",
+          "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+          "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+          "keys": "object keys are emitted in schema order",
+          "enforced": [
+            "type",
+            "properties",
+            "required",
+            "additionalProperties",
+            "items",
+            "minItems",
+            "maxItems",
+            "minLength",
+            "maxLength",
+            "enum",
+            "const",
+            "anyOf",
+            "oneOf (as anyOf)",
+            "type: [..., \"null\"]",
+            "$ref",
+            "$defs"
+          ],
+          "accepted_not_enforced": [
+            "minimum",
+            "maximum",
+            "exclusiveMinimum",
+            "exclusiveMaximum",
+            "multipleOf",
+            "title",
+            "description",
+            "default",
+            "examples"
+          ],
+          "refused": [
+            "pattern",
+            "format",
+            "allOf",
+            "not",
+            "if",
+            "then",
+            "else",
+            "patternProperties",
+            "dependentRequired",
+            "dependentSchemas",
+            "uniqueItems",
+            "contains",
+            "propertyNames",
+            "unevaluatedProperties",
+            "unevaluatedItems",
+            "minProperties",
+            "maxProperties",
+            "prefixItems"
+          ]
+        },
+        "sampling": {
+          "implemented": [
+            "temperature",
+            "top_p",
+            "top_k",
+            "min_p",
+            "seed",
+            "presence_penalty",
+            "frequency_penalty",
+            "repetition_penalty",
+            "logit_bias",
+            "logprobs",
+            "top_logprobs"
+          ],
+          "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+          "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter. A sampled request that omits top_k or top_p takes the operator's default, else the model's (filter_defaults)",
+          "filter_defaults": {
+            "top_k": 20,
+            "top_p": 0.95,
+            "source": "generation_config.json"
+          },
+          "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+          "penalties": "presence and frequency count GENERATED tokens only; repetition_penalty scales every id in the prompt or the output (vLLM's rule); applied on both drafters",
+          "logprobs": "a sampled request carries the chosen token's logprob on every token; at temperature 0, and with top_logprobs (up to 20) at any temperature, the first generated token only, so those need max_tokens 1",
+          "not_implemented": [
+            "logprobs with stream=true",
+            "logprobs past the first token at temperature 0",
+            "n > 1"
+          ]
+        },
+        "max_tokens_cap": 65536,
+        "max_tokens_over_cap": "400"
+      },
+      "quality_summary": {
+        "cases": 13,
+        "serial_passed": 11,
+        "mtp_passed": 11,
+        "identical_cases": 13,
+        "probe_identical_text": true,
+        "speculative_totals": {
+          "serial": {
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          },
+          "mtp": {
+            "draft_n": 425,
+            "draft_n_accepted": 388
+          }
+        },
+        "mtp_working": true
+      },
+      "hardware_after_quality": {
+        "HALO_AI_DRM_DEVICE": "/sys/class/drm/card1/device",
+        "HALO_AI_GTT_APERTURE_BYTES": 126701535232,
+        "HALO_AI_GTT_APERTURE_GIB": 118,
+        "HALO_AI_GTT_USED_BYTES": 9789927424,
+        "HALO_AI_VRAM_TOTAL_BYTES": 2147483648,
+        "HALO_AI_VRAM_USED_BYTES": 1152835584,
+        "HALO_AI_CPU_MEM_TOTAL_BYTES": 132563701760,
+        "HALO_AI_CPU_MEM_AVAILABLE_BYTES": 116742066176,
+        "HALO_AI_GTT_TARGET_GIB": "auto",
+        "HALO_AI_GTT_PENDING_GIB": ""
+      },
+      "decode_runs": [
+        {
+          "round": 1,
+          "drafter": "serial",
+          "wall_seconds": 17.080419179001183,
+          "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+          "response": {
+            "id": "chatcmpl-30fd77b079034250941f580e",
+            "created": 1791199940,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "```python\nfrom typing import Optional, Iterator, TypeVar, Generic\n\nT = TypeVar('T')\n\n\nclass Node(Generic[T]):\n    \"\"\"A node in a linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional['Node[T]'] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the list, or None if this is the last node.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList(Generic[T]):\n    \"\"\"A generic singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Push data onto the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Pop data from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The number of elements in the list.\n        \"\"\"\n       "
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 38,
+              "completion_tokens": 512,
+              "total_tokens": 550,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 38,
+              "predicted_n": 512,
+              "prompt_ms": 198.6,
+              "predicted_ms": 16877.2,
+              "prompt_per_second": 191.339,
+              "predicted_per_second": 30.337,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          }
+        },
+        {
+          "round": 1,
+          "drafter": "mtp",
+          "wall_seconds": 10.040007619005337,
+          "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+          "response": {
+            "id": "chatcmpl-b9c09a62c1a74903b50a5659",
+            "created": 1791199957,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "```python\nfrom typing import Optional, Iterator, TypeVar, Generic\n\nT = TypeVar('T')\n\n\nclass Node(Generic[T]):\n    \"\"\"A node in a linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional['Node[T]'] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the list, or None if this is the last node.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList(Generic[T]):\n    \"\"\"A generic singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Push data onto the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Pop data from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The number of elements in the list.\n        \"\"\"\n       "
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 38,
+              "completion_tokens": 512,
+              "total_tokens": 550,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 38,
+              "predicted_n": 512,
+              "prompt_ms": 222.4,
+              "predicted_ms": 9812.8,
+              "prompt_per_second": 170.863,
+              "predicted_per_second": 52.177,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "draft_n": 359,
+              "draft_n_accepted": 331
+            }
+          }
+        },
+        {
+          "round": 2,
+          "drafter": "mtp",
+          "wall_seconds": 9.039299100004428,
+          "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+          "response": {
+            "id": "chatcmpl-b66f59f8ec8b45178ec2843d",
+            "created": 1791199967,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "```python\nfrom typing import Optional, Iterator, TypeVar, Generic\n\nT = TypeVar('T')\n\n\nclass Node(Generic[T]):\n    \"\"\"A node in a linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional['Node[T]'] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the list, or None if this is the last node.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList(Generic[T]):\n    \"\"\"A generic singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Push data onto the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Pop data from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The number of elements in the list.\n        \"\"\"\n       "
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 38,
+              "completion_tokens": 512,
+              "total_tokens": 550,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 38,
+              "predicted_n": 512,
+              "prompt_ms": 190.7,
+              "predicted_ms": 8842.9,
+              "prompt_per_second": 199.266,
+              "predicted_per_second": 57.9,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "draft_n": 359,
+              "draft_n_accepted": 331
+            }
+          }
+        },
+        {
+          "round": 2,
+          "drafter": "serial",
+          "wall_seconds": 14.569354854000267,
+          "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+          "response": {
+            "id": "chatcmpl-fbabf336e12e4a43bf58b085",
+            "created": 1791199976,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "```python\nfrom typing import Optional, Iterator, TypeVar, Generic\n\nT = TypeVar('T')\n\n\nclass Node(Generic[T]):\n    \"\"\"A node in a linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional['Node[T]'] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the list, or None if this is the last node.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList(Generic[T]):\n    \"\"\"A generic singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Push data onto the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Pop data from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The number of elements in the list.\n        \"\"\"\n       "
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 38,
+              "completion_tokens": 512,
+              "total_tokens": 550,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 38,
+              "predicted_n": 512,
+              "prompt_ms": 178.6,
+              "predicted_ms": 14384.1,
+              "prompt_per_second": 212.766,
+              "predicted_per_second": 35.595,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          }
+        },
+        {
+          "round": 3,
+          "drafter": "serial",
+          "wall_seconds": 14.538676320000377,
+          "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+          "response": {
+            "id": "chatcmpl-3b078a796e00437f866633de",
+            "created": 1791199990,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "```python\nfrom typing import Optional, Iterator, TypeVar, Generic\n\nT = TypeVar('T')\n\n\nclass Node(Generic[T]):\n    \"\"\"A node in a linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional['Node[T]'] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the list, or None if this is the last node.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList(Generic[T]):\n    \"\"\"A generic singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Push data onto the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Pop data from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The number of elements in the list.\n        \"\"\"\n       "
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 38,
+              "completion_tokens": 512,
+              "total_tokens": 550,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 38,
+              "predicted_n": 512,
+              "prompt_ms": 179.2,
+              "predicted_ms": 14353.0,
+              "prompt_per_second": 212.054,
+              "predicted_per_second": 35.672,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "draft_n": 0,
+              "draft_n_accepted": 0
+            }
+          }
+        },
+        {
+          "round": 3,
+          "drafter": "mtp",
+          "wall_seconds": 9.113989736004442,
+          "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+          "response": {
+            "id": "chatcmpl-8d889efd128847539bf8d353",
+            "created": 1791200005,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "```python\nfrom typing import Optional, Iterator, TypeVar, Generic\n\nT = TypeVar('T')\n\n\nclass Node(Generic[T]):\n    \"\"\"A node in a linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional['Node[T]'] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the list, or None if this is the last node.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList(Generic[T]):\n    \"\"\"A generic singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Push data onto the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Pop data from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The number of elements in the list.\n        \"\"\"\n       "
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 38,
+              "completion_tokens": 512,
+              "total_tokens": 550,
+              "completion_tokens_details": {
+                "reasoning_tokens": 0
+              }
+            },
+            "timings": {
+              "prompt_n": 38,
+              "predicted_n": 512,
+              "prompt_ms": 197.9,
+              "predicted_ms": 8909.2,
+              "prompt_per_second": 192.016,
+              "predicted_per_second": 57.469,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "draft_n": 359,
+              "draft_n_accepted": 331
+            }
+          }
+        }
+      ],
+      "decode_median_tps": {
+        "serial": 35.595,
+        "mtp": 57.469
+      },
+      "decode_identical_within_checkpoint": true,
+      "hardware_after_decode": {
+        "HALO_AI_DRM_DEVICE": "/sys/class/drm/card1/device",
+        "HALO_AI_GTT_APERTURE_BYTES": 126701535232,
+        "HALO_AI_GTT_APERTURE_GIB": 118,
+        "HALO_AI_GTT_USED_BYTES": 9787830272,
+        "HALO_AI_VRAM_TOTAL_BYTES": 2147483648,
+        "HALO_AI_VRAM_USED_BYTES": 1172049920,
+        "HALO_AI_CPU_MEM_TOTAL_BYTES": 132563701760,
+        "HALO_AI_CPU_MEM_AVAILABLE_BYTES": 116725964800,
+        "HALO_AI_GTT_TARGET_GIB": "auto",
+        "HALO_AI_GTT_PENDING_GIB": ""
+      },
+      "retrieval_profile": {
+        "id": "halogen-v2-comparison-262k",
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "engine": "halogen",
+        "context": 262144,
+        "startup_timeout": 1200,
+        "risk": "experimental",
+        "features": [
+          "mtp",
+          "external-ngram"
+        ],
+        "thinking": true,
+        "proposal_policy": "candidate-not-qualified-as-default",
+        "settings": {
+          "kv_pool_positions": 262144,
+          "parallel": 1,
+          "prefill_chunk": 16384,
+          "prompt_cache": 0,
+          "drafter": 1,
+          "reasoning_effort": "medium",
+          "max_tokens_default": 8192,
+          "prompt_lookup": 0
+        }
+      },
+      "retrieval": [
+        {
+          "records": 7910,
+          "correct_codes": 2,
+          "passed": false,
+          "output": "delta-33577,delta-24374,delta-80090",
+          "expected": "delta-68658,delta-24374,delta-80090",
+          "wall_seconds": 267.43751471200085,
+          "messages_sha256": "fc24c93372327c21e6d0cb69b95d226058201249c6e99bb625b8db96d8ae0536",
+          "timings": {
+            "prompt_n": 261107,
+            "predicted_n": 24,
+            "prompt_ms": 266288.5,
+            "predicted_ms": 809.5,
+            "prompt_per_second": 980.542,
+            "predicted_per_second": 29.648,
+            "cache_n": 0,
+            "disk_restore_n": 0,
+            "disk_restore_ms": 0.0,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        {
+          "records": 959,
+          "correct_codes": 3,
+          "passed": true,
+          "output": "delta-57034,delta-97930,delta-38826",
+          "expected": "delta-57034,delta-97930,delta-38826",
+          "wall_seconds": 33.59281294500397,
+          "messages_sha256": "acfc166777ce7365a515105a020c6ab72fe5094965c998599455642eaa2ec429",
+          "timings": {
+            "prompt_n": 31724,
+            "predicted_n": 24,
+            "prompt_ms": 32790.2,
+            "predicted_ms": 769.0,
+            "prompt_per_second": 967.484,
+            "predicted_per_second": 31.209,
+            "cache_n": 0,
+            "disk_restore_n": 0,
+            "disk_restore_ms": 0.0,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        }
+      ],
+      "hardware_after_retrieval": {
+        "HALO_AI_DRM_DEVICE": "/sys/class/drm/card1/device",
+        "HALO_AI_GTT_APERTURE_BYTES": 126701535232,
+        "HALO_AI_GTT_APERTURE_GIB": 118,
+        "HALO_AI_GTT_USED_BYTES": 16557436928,
+        "HALO_AI_VRAM_TOTAL_BYTES": 2147483648,
+        "HALO_AI_VRAM_USED_BYTES": 1160065024,
+        "HALO_AI_CPU_MEM_TOTAL_BYTES": 132563701760,
+        "HALO_AI_CPU_MEM_AVAILABLE_BYTES": 109928628224,
+        "HALO_AI_GTT_TARGET_GIB": "auto",
+        "HALO_AI_GTT_PENDING_GIB": ""
+      }
+    }
+  },
+  "decode_change_percent_v2_vs_w4b": {
+    "serial": 0.09279568078286449,
+    "mtp": -1.9233394770974077
+  },
+  "completed": true,
+  "restored_health": {
+    "status": "ok",
+    "model": "halogen-qwen3.8-flash-next-v2",
+    "endpoints": [
+      "/v1/chat/completions",
+      "/v1/completions",
+      "/v1/embeddings",
+      "/v1/messages",
+      "/v1/messages/count_tokens",
+      "/v1/models",
+      "/v1/moderations",
+      "/v1/rerank",
+      "/v1/responses"
+    ],
+    "cache_counters": "/cache",
+    "metrics": "/metrics",
+    "context": 262144,
+    "capability_probe": "ok",
+    "rope_scaling": null,
+    "indexer_budget": 2048,
+    "vision": {
+      "enabled": true,
+      "endpoints": [
+        "/v1/chat/completions",
+        "/v1/messages",
+        "/v1/responses"
+      ],
+      "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+      "max_pixels": 3686400,
+      "size_multiple": 32
+    },
+    "version": {
+      "api": "0.16.2",
+      "engine": "0.16.2",
+      "match": true
+    },
+    "modes": [
+      "all",
+      "engine",
+      "api",
+      "bench",
+      "sweep",
+      "convert",
+      "inspect",
+      "verify",
+      "ppl",
+      "niah"
+    ],
+    "checkpoint_format": "hgn",
+    "chat_template": {
+      "path": "/models/tokenizer/chat_template.jinja",
+      "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+      "probe": "passed",
+      "thinking_control": true
+    },
+    "engine": {
+      "responds": true,
+      "probe_s": 1.001
+    },
+    "busy": false,
+    "slots": 1,
+    "slot_ctx": 262144,
+    "kv_pool_positions": 262144,
+    "in_flight": 0,
+    "busy_for_s": 0,
+    "queued": 0,
+    "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+    "drafters_available": [
+      "serial",
+      "mtp"
+    ],
+    "drafter_default": "mtp",
+    "prompt_lookup": {
+      "ngram": 3,
+      "chain": 3,
+      "applies_to": "greedy requests with the mtp drafter"
+    },
+    "shortlist_draft_head": false,
+    "drafter_weights_loaded": true,
+    "prompt_cache": {
+      "enabled": true,
+      "cap_mb": 110,
+      "mode": 2,
+      "snapshot_align": 64,
+      "bitwise_identical_to_cold": false
+    },
+    "composable_context": {
+      "enabled": false
+    },
+    "tool_calls": {
+      "wire_format": "qwen-xml (<function=>/<parameter=>)",
+      "streaming": true,
+      "tool_choice": [
+        "auto",
+        "none",
+        "required",
+        "{type: function, function: {name}}"
+      ],
+      "forced_call_is_a_prefill": true,
+      "required_is_exact": "named tool_choice, or one tool",
+      "parallel_tool_calls": true,
+      "constrained_decoding": false,
+      "forced_call_disables_thinking": true,
+      "argument_types_need_schema": true
+    },
+    "supported": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking",
+      "max_thinking_tokens",
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning",
+      "thinking",
+      "tools",
+      "tool_choice",
+      "parallel_tool_calls",
+      "stop",
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens",
+      "stream",
+      "stream_options"
+    ],
+    "token_budget_aliases": [
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens"
+    ],
+    "max_tokens_default": 8192,
+    "reasoning_effort_default": "medium",
+    "reasoning_effort_values": [
+      "high",
+      "low",
+      "max",
+      "medium",
+      "minimal",
+      "none",
+      "xhigh"
+    ],
+    "token_budget_covers_reasoning": true,
+    "max_thinking_tokens_default": null,
+    "thinking_answer_room": "max(1024, 15% of max_tokens)",
+    "end_of_turn_guard": true,
+    "thinking_control_aliases": [
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning.{enabled,effort,max_tokens}",
+      "thinking.{type,budget_tokens}"
+    ],
+    "server_defaults": {
+      "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+      "HALOGEN_TEMPERATURE": 1.0,
+      "HALOGEN_TOP_P": 0.95,
+      "HALOGEN_TOP_K": 20,
+      "HALOGEN_REASONING_EFFORT": "medium"
+    },
+    "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+    "chat_template_kwargs": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking"
+    ],
+    "error_format": "openai",
+    "accepted_but_ignored": [
+      "n"
+    ],
+    "not_implemented": [],
+    "structured_output": {
+      "enabled": true,
+      "reason": null,
+      "response_format": [
+        "json_schema",
+        "json_object"
+      ],
+      "text.format": [
+        "json_schema",
+        "json_object"
+      ],
+      "routes": [
+        "/v1/chat/completions",
+        "/v1/completions",
+        "/v1/responses",
+        "/v1/messages"
+      ],
+      "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+      "images": "a schema with images is a 400",
+      "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+      "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+      "keys": "object keys are emitted in schema order",
+      "enforced": [
+        "type",
+        "properties",
+        "required",
+        "additionalProperties",
+        "items",
+        "minItems",
+        "maxItems",
+        "minLength",
+        "maxLength",
+        "enum",
+        "const",
+        "anyOf",
+        "oneOf (as anyOf)",
+        "type: [..., \"null\"]",
+        "$ref",
+        "$defs"
+      ],
+      "accepted_not_enforced": [
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "title",
+        "description",
+        "default",
+        "examples"
+      ],
+      "refused": [
+        "pattern",
+        "format",
+        "allOf",
+        "not",
+        "if",
+        "then",
+        "else",
+        "patternProperties",
+        "dependentRequired",
+        "dependentSchemas",
+        "uniqueItems",
+        "contains",
+        "propertyNames",
+        "unevaluatedProperties",
+        "unevaluatedItems",
+        "minProperties",
+        "maxProperties",
+        "prefixItems"
+      ]
+    },
+    "sampling": {
+      "implemented": [
+        "temperature",
+        "top_p",
+        "top_k",
+        "min_p",
+        "seed",
+        "presence_penalty",
+        "frequency_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ],
+      "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+      "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter. A sampled request that omits top_k or top_p takes the operator's default, else the model's (filter_defaults)",
+      "filter_defaults": {
+        "top_k": 20,
+        "top_p": 0.95,
+        "source": "generation_config.json"
+      },
+      "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+      "penalties": "presence and frequency count GENERATED tokens only; repetition_penalty scales every id in the prompt or the output (vLLM's rule); applied on both drafters",
+      "logprobs": "a sampled request carries the chosen token's logprob on every token; at temperature 0, and with top_logprobs (up to 20) at any temperature, the first generated token only, so those need max_tokens 1",
+      "not_implemented": [
+        "logprobs with stream=true",
+        "logprobs past the first token at temperature 0",
+        "n > 1"
+      ]
+    },
+    "max_tokens_cap": 65536,
+    "max_tokens_over_cap": "400",
+    "npu": {
+      "status": "ok",
+      "models": [
+        "qwen3-embedding-0.6b",
+        "qwen3-reranker-0.6b"
+      ],
+      "loaded": [],
+      "queued": 0,
+      "passes": 0,
+      "contexts": 4
+    }
+  },
+  "restored_at": "2026-10-05T11:38:58.956889+00:00"
+}

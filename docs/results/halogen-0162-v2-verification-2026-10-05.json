@@ -1,0 +1,94 @@
+[
+  {
+    "model": "halogen-qwen3.8-flash-next-v2",
+    "valid": true,
+    "full": true,
+    "checked_at": "2026-10-05T05:20:13.656074+00:00",
+    "files": [
+      {
+        "path": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-vision.hgn",
+        "role": "mmproj",
+        "expected_bytes": 897916416,
+        "bytes": 897916416,
+        "mode": "-rwxr-xr-x",
+        "hgn_header_valid": true,
+        "sha256": "d62e0ae553fe88afd3833733d4a4c669f34d20fd8dfce4b9610525bed2134b10",
+        "digest_valid": true
+      },
+      {
+        "path": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/chat_template.jinja",
+        "role": "processor",
+        "expected_bytes": 8952,
+        "bytes": 8952,
+        "mode": "-rwxr-xr-x",
+        "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+        "digest_valid": true
+      },
+      {
+        "path": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/generation_config.json",
+        "role": "processor",
+        "expected_bytes": 202,
+        "bytes": 202,
+        "mode": "-rwxr-xr-x",
+        "sha256": "e70c136c1b78ddc1fb0905bac8e733a4dc448d4f852a5dd75143fffc70be550e",
+        "digest_valid": true
+      },
+      {
+        "path": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/merges.txt",
+        "role": "processor",
+        "expected_bytes": 3353259,
+        "bytes": 3353259,
+        "mode": "-rwxr-xr-x",
+        "sha256": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d",
+        "digest_valid": true
+      },
+      {
+        "path": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer.json",
+        "role": "processor",
+        "expected_bytes": 12809320,
+        "bytes": 12809320,
+        "mode": "-rwxr-xr-x",
+        "sha256": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3",
+        "digest_valid": true
+      },
+      {
+        "path": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer_config.json",
+        "role": "processor",
+        "expected_bytes": 17928,
+        "bytes": 17928,
+        "mode": "-rwxr-xr-x",
+        "sha256": "b11349aafa7cdc6a320767cf7ceb29ed82f7eda5d65e8e0819e76f0ce947bf27",
+        "digest_valid": true
+      },
+      {
+        "path": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/vocab.json",
+        "role": "processor",
+        "expected_bytes": 6722759,
+        "bytes": 6722759,
+        "mode": "-rwxr-xr-x",
+        "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003",
+        "digest_valid": true
+      },
+      {
+        "path": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-v2.hgn",
+        "role": "main",
+        "expected_bytes": 66687678432,
+        "bytes": 66687678432,
+        "mode": "-rw-r--r--",
+        "hgn_header_valid": true,
+        "sha256": "71246c6ab3fc1de2cf06326f18e275fe9c2a18366d646ed3357d194c884fc687",
+        "digest_valid": true
+      },
+      {
+        "path": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-ngram.hgn",
+        "role": "ngram",
+        "expected_bytes": 51200246144,
+        "bytes": 51200246144,
+        "mode": "-rw-r--r--",
+        "hgn_header_valid": true,
+        "sha256": "3450acada94e19aabad88bd49b45eb70304820949c2240fc178067b20ae5dffe",
+        "digest_valid": true
+      }
+    ]
+  }
+]

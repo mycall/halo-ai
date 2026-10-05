@@ -179,7 +179,13 @@ project and will not be modified.
 ├── bin/
 │   └── halo-ai                   # Bash entry point
 ├── lib/halo_ai/
-│   ├── cli.py                    # lifecycle/catalog/runtime implementation
+│   ├── cli.py                    # CLI, lifecycle and benchmark orchestration
+│   ├── engines.py                # engine metadata and policy hooks
+│   ├── engine_halogen.py         # Halogen validation, rendering and health policy
+│   ├── profile_artifacts.py      # shared profile artifact selection
+│   ├── artifact_store.py         # pinned records and resumable verified downloads
+│   ├── halogen_npu.py            # NPU dependency manifest and host checks
+│   ├── errors.py                 # shared user-facing errors
 │   ├── longbench.py              # pinned, resumable LongBench-v2 adapter
 │   ├── rocmfpx_tune.py           # MTP and exact-prefix Stage 3 scoring gates
 │   ├── host_profile.py           # guarded Limine profile implementation
@@ -212,6 +218,35 @@ tree:
 
 The system-integrated layout below supersedes these per-user defaults when the
 project is installed under `/opt`.
+
+### Implementation boundaries
+
+Keep this as a modular Python application. Catalogs define models and profiles;
+`profile_artifacts.py` resolves their target files, optional draft model, and
+optional NPU dependencies into typed selections. Acquisition previews, profile
+downloads, readiness checks, memory accounting, and container rendering use
+that selection. Disk bytes and resident-memory estimates remain distinct:
+Halogen's demand-paged tables cannot be budgeted as fully resident weights.
+
+`artifact_store.py` owns hash/size verification and the shared locked, resumable,
+atomic downloader. `halo-ai profiles acquire PROFILE --dry-run` reports the
+selected NPU files under `auxiliary` and includes their missing bytes in the
+total. Acquiring the profile downloads and verifies these files before runtime
+installation. Host NPU preparation remains a separate, explicit operation.
+
+`engines.py` is the explicit registry for image keys, ports, container names,
+health routes, and optional policy hooks. Halogen is the first extracted engine:
+its module validates profiles and health responses and renders arguments from
+supplied values. HTTP requests and XRT library discovery stay with callers.
+Its NPU mounts expose only selected files, including shared device programs.
+
+The CLI still owns lifecycle and benchmark orchestration and the other engines'
+specialized policies. Extract those responsibilities incrementally when changing
+them, with explicit inputs and behavior tests. Preserve one implementation of
+artifact selection and download safety; avoid parallel engine-specific copies.
+This does not require an event bus, repository hierarchy, or dependency-injection
+framework. Contract tests in `tests/test_artifacts.py` cover acquisition totals,
+selected/excluded classes, Halogen mount parity, failed downloads, and reuse.
 
 ### Current implementation boundary
 
@@ -386,13 +421,15 @@ the upstream repositories through 2026-09-20. They become locally verified only 
 `halo-ai models verify --full` hashes the installed bytes and records the result.
 The four Flash Next UD-Q4_K_XL shards were independently hashed locally on
 2026-09-02, and its shared Q8_0 head on 2026-09-10; all matched these values.
-The Halogen HGN files and tokenizer were fully hashed and matched on 2026-09-20.
+The original Halogen W4B HGN files and tokenizer were fully hashed and matched on 2026-09-20. The v2 and external n-gram entries below were downloaded and fully hashed locally on 2026-10-05 UTC; both matched their upstream-pinned expected hashes. Evidence is in `results/halogen-0162-v2-verification-2026-10-05.json`.
 Each manifest entry is `sha256 bytes relative-path`:
 
 ```text
 0f50e9626df98168e7c6e0cc264e2a92b5184dd885a175a06628d979b5edceeb 1523566720 peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-mtp.hgn
 d62e0ae553fe88afd3833733d4a4c669f34d20fd8dfce4b9610525bed2134b10 897916416 peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-vision.hgn
 9c116bbc01f77b7a15464c1a124eb3325b286089b8a2a6f2856c9b246a235bd6 124068083904 peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.hgn
+71246c6ab3fc1de2cf06326f18e275fe9c2a18366d646ed3357d194c884fc687 66687678432 peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-v2.hgn
+3450acada94e19aabad88bd49b45eb70304820949c2240fc178067b20ae5dffe 51200246144 peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-ngram.hgn
 f49c8d14fa972c1db5115c714981e399585a6a98106a1a055d9e77026bb6de4c 2478095488 peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.overlay-speed.hgn
 1cdfc3a9f988955bfe9a71bb808d393030abbf9f99d34ffa1ef93815a49b39ab 2572466560 peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.overlay.hgn
 c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041 8952 peonist-ai/halogen-qwen3.8-flash-next/tokenizer/chat_template.jinja

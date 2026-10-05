@@ -90,7 +90,7 @@ if ! "$dry_run" && ((EUID != 0)); then
     die "run as root (normally: sudo ./install.sh --run-user $run_user)"
 fi
 
-for required in python3 install cp mv ln readlink findmnt cmp; do
+for required in python3 install cp mv ln readlink findmnt; do
     command -v "$required" >/dev/null || die "required command is missing: $required"
 done
 
@@ -263,7 +263,9 @@ verify_catalogs() {
     local catalog destination
     for catalog in "$source_root"/config/models.d/*.json; do
         destination="$CONFIG_ROOT/models.d/$(catalog_destination_name "$catalog")"
-        cmp -s -- "$catalog" "$destination" || return 1
+        [[ -f "$destination" ]] || return 1
+        python3 -c 'import filecmp, sys; sys.exit(not filecmp.cmp(sys.argv[1], sys.argv[2], shallow=False))' \
+            "$catalog" "$destination" || return 1
     done
 }
 
@@ -295,6 +297,29 @@ verify_config() {
         grep -Eq '^[[:space:]]*SPEECH_IMAGE[[:space:]]*=[[:space:]]*[^[:space:]]+[[:space:]]*$' \
             "$CONFIG_ROOT/config.env" &&
         runuser -u "$run_user" -- test -r "$CONFIG_ROOT/config.env"
+}
+
+migrate_halogen_image() {
+    local target current
+    target=$(sed -n 's/^HALOGEN_IMAGE=//p' "$source_root/config/halo-ai.env.example")
+    current=$(sed -n 's/^[[:space:]]*HALOGEN_IMAGE[[:space:]]*=[[:space:]]*//p' "$CONFIG_ROOT/config.env")
+    case "$current" in
+        ''|ghcr.io/peonist-ai/halogen-flash-server:0.12.2|ghcr.io/peonist-ai/halogen-flash-server@sha256:8f4c75fc15a0e2f2c023241389c4c946a60fa4fb4cd6d350dfcea17e22d119f9) ;;
+        *) return 0 ;;
+    esac
+    if "$dry_run"; then
+        printf '  set HALOGEN_IMAGE=%s in %s\n' "$target" "$CONFIG_ROOT/config.env"
+        return
+    fi
+    cp -- "$CONFIG_ROOT/config.env" "$CONFIG_ROOT/.config.env.tmp"
+    if grep -Eq '^[[:space:]]*HALOGEN_IMAGE[[:space:]]*=' "$CONFIG_ROOT/.config.env.tmp"; then
+        sed -i "s|^[[:space:]]*HALOGEN_IMAGE[[:space:]]*=.*$|HALOGEN_IMAGE=$target|" "$CONFIG_ROOT/.config.env.tmp"
+    else
+        printf '\nHALOGEN_IMAGE=%s\n' "$target" >>"$CONFIG_ROOT/.config.env.tmp"
+    fi
+    chmod 0640 "$CONFIG_ROOT/.config.env.tmp"
+    chown root:"$run_gid" "$CONFIG_ROOT/.config.env.tmp"
+    mv -T "$CONFIG_ROOT/.config.env.tmp" "$CONFIG_ROOT/config.env"
 }
 
 action_config() {
@@ -434,6 +459,7 @@ action_config() {
             mv -T "$CONFIG_ROOT/.config.env.tmp" "$CONFIG_ROOT/config.env"
         fi
     fi
+    migrate_halogen_image
     run_action chown root:"$run_gid" "$CONFIG_ROOT/config.env"
     run_action chmod 0640 "$CONFIG_ROOT/config.env"
     install_catalogs

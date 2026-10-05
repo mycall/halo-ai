@@ -31,3 +31,18 @@ class InstallerCatalogTests(unittest.TestCase):
         self.assertNotEqual(self.run_shell('verify_catalogs').returncode, 0)
         (self.root / 'models.d/10-halogen.json').write_text('{}')
         self.assertNotEqual(self.run_shell('verify_catalogs').returncode, 0)
+
+
+class HalogenMigrationTests(unittest.TestCase):
+    def test_old_pin_migrates_and_custom_pin_is_preserved(self):
+        source = (ROOT / 'install.sh').read_text()
+        function = re.search(r'^migrate_halogen_image\(\) \{\n.*?^\}', source, re.M | re.S).group()
+        expected = re.search(r'^HALOGEN_IMAGE=(.*)$', (ROOT / 'config/halo-ai.env.example').read_text(), re.M).group(1)
+        for original in ['', 'ghcr.io/peonist-ai/halogen-flash-server:0.12.2', 'custom-image:local']:
+            with self.subTest(original=original), tempfile.TemporaryDirectory() as temporary:
+                config = Path(temporary) / 'config.env'
+                config.write_text('KEEP=this\n' + (f'HALOGEN_IMAGE={original}\n' if original else ''))
+                result = subprocess.run(['bash', '-c', function + '\nchown() { :; }; dry_run=false; migrate_halogen_image'], env={**os.environ, 'source_root': str(ROOT), 'CONFIG_ROOT': temporary, 'run_gid': str(os.getgid())}, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn('KEEP=this\n', config.read_text())
+                self.assertIn('HALOGEN_IMAGE=' + (original if original.startswith('custom') else expected), config.read_text())

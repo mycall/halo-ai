@@ -1,0 +1,162 @@
+{
+  "recorded_at": "2026-10-05T00:10:14.605384+00:00",
+  "method": "Each endpoint alone: one warmup then three measured requests. Run without other inference clients. GPU model remains loaded but idle. HTTP wall latency includes endpoint overhead. Synthetic repeated texts, not upstream benchmark data.",
+  "sentence": "Paris is the capital of France. The city has museums, parks, bridges, and a river. ",
+  "measurements": [
+    {
+      "endpoint": "embeddings",
+      "sentence_repetitions": 25,
+      "batch_size": 8,
+      "samples": [
+        {
+          "seconds": 0.43502836499999376,
+          "total_tokens": 4016,
+          "tokens_per_input": 502.0,
+          "tokens_per_second": 9231.581945237198,
+          "inputs_per_second": 18.389605468599996
+        },
+        {
+          "seconds": 0.4427593990000105,
+          "total_tokens": 4016,
+          "tokens_per_input": 502.0,
+          "tokens_per_second": 9070.389039894566,
+          "inputs_per_second": 18.06850406353499
+        },
+        {
+          "seconds": 0.4314737659999537,
+          "total_tokens": 4016,
+          "tokens_per_input": 502.0,
+          "tokens_per_second": 9307.634244443105,
+          "inputs_per_second": 18.541104072595825
+        }
+      ],
+      "median_seconds": 0.43502836499999376,
+      "median_tokens_per_second": 9231.581945237198,
+      "median_inputs_per_second": 18.389605468599996
+    },
+    {
+      "endpoint": "embeddings",
+      "sentence_repetitions": 26,
+      "batch_size": 8,
+      "samples": [
+        {
+          "seconds": 1.2105015259999163,
+          "total_tokens": 4176,
+          "tokens_per_input": 522.0,
+          "tokens_per_second": 3449.809777439544,
+          "inputs_per_second": 6.608830991263495
+        },
+        {
+          "seconds": 1.217513433000022,
+          "total_tokens": 4176,
+          "tokens_per_input": 522.0,
+          "tokens_per_second": 3429.941622664565,
+          "inputs_per_second": 6.57076939207771
+        },
+        {
+          "seconds": 1.2193474470000183,
+          "total_tokens": 4176,
+          "tokens_per_input": 522.0,
+          "tokens_per_second": 3424.7826657400115,
+          "inputs_per_second": 6.560886332835271
+        }
+      ],
+      "median_seconds": 1.217513433000022,
+      "median_tokens_per_second": 3429.941622664565,
+      "median_inputs_per_second": 6.57076939207771
+    },
+    {
+      "endpoint": "rerank",
+      "sentence_repetitions": 21,
+      "batch_size": 8,
+      "samples": [
+        {
+          "seconds": 0.4268259330000319,
+          "total_tokens": 3992,
+          "tokens_per_input": 499.0,
+          "tokens_per_second": 9352.758797811148,
+          "inputs_per_second": 18.74300360282795
+        },
+        {
+          "seconds": 0.4271894720000091,
+          "total_tokens": 3992,
+          "tokens_per_input": 499.0,
+          "tokens_per_second": 9344.799583450209,
+          "inputs_per_second": 18.727053273447314
+        },
+        {
+          "seconds": 0.42636573199990835,
+          "total_tokens": 3992,
+          "tokens_per_input": 499.0,
+          "tokens_per_second": 9362.853767058508,
+          "inputs_per_second": 18.76323400212126
+        }
+      ],
+      "median_seconds": 0.4268259330000319,
+      "median_tokens_per_second": 9352.758797811148,
+      "median_inputs_per_second": 18.74300360282795
+    },
+    {
+      "endpoint": "rerank",
+      "sentence_repetitions": 26,
+      "batch_size": 8,
+      "samples": [
+        {
+          "seconds": 1.2091862409999976,
+          "total_tokens": 4792,
+          "tokens_per_input": 599.0,
+          "tokens_per_second": 3962.9958045478697,
+          "inputs_per_second": 6.616019707091603
+        },
+        {
+          "seconds": 1.2134431220000579,
+          "total_tokens": 4792,
+          "tokens_per_input": 599.0,
+          "tokens_per_second": 3949.0932150998433,
+          "inputs_per_second": 6.5928100419029105
+        },
+        {
+          "seconds": 1.2153409160000592,
+          "total_tokens": 4792,
+          "tokens_per_input": 599.0,
+          "tokens_per_second": 3942.926578800188,
+          "inputs_per_second": 6.582515156594638
+        }
+      ],
+      "median_seconds": 1.2134431220000579,
+      "median_tokens_per_second": 3949.0932150998433,
+      "median_inputs_per_second": 6.5928100419029105
+    },
+    {
+      "endpoint": "embeddings",
+      "sentence_repetitions": 25,
+      "batch_size": 1,
+      "samples": [
+        {
+          "seconds": 0.09923971999990044,
+          "total_tokens": 502,
+          "tokens_per_input": 502.0,
+          "tokens_per_second": 5058.4584478926745,
+          "inputs_per_second": 10.07661045396947
+        },
+        {
+          "seconds": 0.09951507099992796,
+          "total_tokens": 502,
+          "tokens_per_input": 502.0,
+          "tokens_per_second": 5044.462059423778,
+          "inputs_per_second": 10.048729202039397
+        },
+        {
+          "seconds": 0.09778632799998377,
+          "total_tokens": 502,
+          "tokens_per_input": 502.0,
+          "tokens_per_second": 5133.641995433997,
+          "inputs_per_second": 10.226378476960154
+        }
+      ],
+      "median_seconds": 0.09923971999990044,
+      "median_tokens_per_second": 5058.4584478926745,
+      "median_inputs_per_second": 10.07661045396947
+    }
+  ]
+}
