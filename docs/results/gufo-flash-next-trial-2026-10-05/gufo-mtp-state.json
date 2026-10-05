@@ -1,0 +1,17 @@
+{
+  "OciVersion": "1.3.0",
+  "Status": "exited",
+  "Running": false,
+  "Paused": false,
+  "Restarting": false,
+  "OOMKilled": false,
+  "Dead": false,
+  "Pid": 0,
+  "ExitCode": 0,
+  "Error": "",
+  "StartedAt": "2026-10-05T07:19:16.855830878-07:00",
+  "FinishedAt": "2026-10-05T07:46:39.763041609-07:00",
+  "CheckpointedAt": "0001-01-01T00:00:00Z",
+  "RestoredAt": "0001-01-01T00:00:00Z",
+  "StoppedByUser": true
+}

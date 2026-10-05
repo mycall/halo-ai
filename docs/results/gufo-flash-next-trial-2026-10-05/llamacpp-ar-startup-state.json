@@ -1,0 +1,17 @@
+{
+  "OciVersion": "1.3.0",
+  "Status": "exited",
+  "Running": false,
+  "Paused": false,
+  "Restarting": false,
+  "OOMKilled": false,
+  "Dead": false,
+  "Pid": 0,
+  "ExitCode": 137,
+  "Error": "given PID did not die within timeout",
+  "StartedAt": "2026-10-05T07:46:40.029567667-07:00",
+  "FinishedAt": "2026-10-05T07:57:21.645948466-07:00",
+  "CheckpointedAt": "0001-01-01T00:00:00Z",
+  "RestoredAt": "0001-01-01T00:00:00Z",
+  "StoppedByUser": true
+}

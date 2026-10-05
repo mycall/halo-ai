@@ -1,0 +1,978 @@
+2026-10-05 13:50:05 [INFO] [gpu] event=queue_budget kind=llm observed=0 budget=8 expected_max=3 cap=2
+2026-10-05 13:50:05 [INFO] [loader] event=load_started kind=text artifact=/models/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf rss_mib=191 host_available_mib=120541
+2026-10-05 13:50:45 [INFO] [cache] event=snapshot_cache_configured sessions=1 snapshot_entries=2 capacity_bytes=18780727296
+2026-10-05 13:50:45 [INFO] [sampling] event=defaults thinking=off temperature=0 top_k=20 top_p=0.8 min_p=0 min_keep=0 seed=-1 repeat_penalty=1 repeat_last_n=64 frequency_penalty=0 presence_penalty=0
+2026-10-05 13:50:45 [INFO] [loader] event=load_completed kind=text elapsed_ms=39802 model=gufo-flash-next-trial sessions=1 context_tokens=135168 speculative=off draft_limit=7 disk_cache=off rss_mib=484 host_available_mib=35841 gpu_device_used_mib=84369 gpu_device_total_mib=120832
+2026-10-05 13:50:45 [INFO] [server] event=listening address=http://0.0.0.0:18080 auth=off max_connections=16 max_body_bytes=8388608
+2026-10-05 13:50:59 [INFO] [http] request=r3 event=received method=GET path=/v1/models body_bytes=0
+2026-10-05 13:50:59 [INFO] [http] request=r3 event=completed method=GET path=/v1/models status=200 duration_ms=1.9 outcome=completed rss_mib=485 host_available_mib=35807
+2026-10-05 13:50:59 [INFO] [http] request=r4 event=received method=POST path=/v1/chat/completions body_bytes=612
+2026-10-05 13:51:00 [INFO] [progress] request=1 phase=prefill tokens=104/111 percentage=93.7 chunk_tps=103.3 avg_tps=103.3
+2026-10-05 13:51:00 [INFO] [progress] request=1 phase=prefill tokens=111/111 percentage=100.0 chunk_tps=54.3 avg_tps=97.7
+2026-10-05 13:51:01 [INFO] [progress] request=1 phase=decode tokens=2/32 percentage=6.2 chunk_tps=19.8 avg_tps=19.8
+2026-10-05 13:51:01 [INFO] [http] request=r4 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=1364.7 outcome=completed prompt_tokens=111 prefill_tokens=111 generated_tokens=2 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=19.9 ttft_ms=1178.9 prefill_tps=97.7 decode_tps=19.8 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=244669708 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=802 host_available_mib=35258
+2026-10-05 13:51:01 [INFO] [http] request=r5 event=received method=POST path=/v1/chat/completions body_bytes=479
+2026-10-05 13:51:01 [INFO] [progress] request=2 phase=prefill tokens=60/67 percentage=89.6 chunk_tps=158.0 avg_tps=158.0
+2026-10-05 13:51:01 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=122227320 tokens=104 retained_bytes=122442388 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:01 [INFO] [progress] request=2 phase=prefill tokens=67/67 percentage=100.0 chunk_tps=60.0 avg_tps=134.9
+2026-10-05 13:51:01 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=122442388 tokens=111 retained_bytes=120875464 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:01 [INFO] [progress] request=2 phase=decode tokens=1/32 percentage=3.1 chunk_tps=23.8 avg_tps=23.8
+2026-10-05 13:51:01 [INFO] [http] request=r5 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=610.6 outcome=completed prompt_tokens=67 prefill_tokens=67 generated_tokens=1 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.6 ttft_ms=547.7 prefill_tps=134.9 decode_tps=23.8 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=241965996 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=800 host_available_mib=35341
+2026-10-05 13:51:01 [INFO] [http] request=r6 event=received method=POST path=/v1/chat/completions body_bytes=456
+2026-10-05 13:51:01 [INFO] [progress] request=3 phase=prefill tokens=56/63 percentage=88.9 chunk_tps=183.8 avg_tps=183.8
+2026-10-05 13:51:01 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120875464 tokens=60 retained_bytes=121090532 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:02 [INFO] [progress] request=3 phase=prefill tokens=63/63 percentage=100.0 chunk_tps=59.6 avg_tps=149.3
+2026-10-05 13:51:02 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121090532 tokens=67 retained_bytes=120752568 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:02 [INFO] [progress] request=3 phase=decode tokens=2/32 percentage=6.2 chunk_tps=23.5 avg_tps=23.5
+2026-10-05 13:51:02 [INFO] [http] request=r6 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=544.3 outcome=completed prompt_tokens=63 prefill_tokens=63 generated_tokens=2 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=434.2 prefill_tps=149.3 decode_tps=23.5 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=241720204 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=800 host_available_mib=35328
+2026-10-05 13:51:02 [INFO] [http] request=r7 event=received method=POST path=/v1/chat/completions body_bytes=520
+2026-10-05 13:51:02 [INFO] [progress] request=4 phase=prefill tokens=62/69 percentage=89.9 chunk_tps=189.3 avg_tps=189.3
+2026-10-05 13:51:02 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120752568 tokens=56 retained_bytes=120967636 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:02 [INFO] [progress] request=4 phase=prefill tokens=69/69 percentage=100.0 chunk_tps=60.9 avg_tps=156.0
+2026-10-05 13:51:02 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120967636 tokens=63 retained_bytes=120936912 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:02 [INFO] [progress] request=4 phase=decode tokens=4/32 percentage=12.5 chunk_tps=24.2 avg_tps=24.2
+2026-10-05 13:51:02 [INFO] [http] request=r7 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=638.4 outcome=completed prompt_tokens=69 prefill_tokens=69 generated_tokens=4 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=455.7 prefill_tps=156.0 decode_tps=24.2 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242088892 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=800 host_available_mib=35339
+2026-10-05 13:51:02 [INFO] [http] request=r8 event=received method=POST path=/v1/chat/completions body_bytes=519
+2026-10-05 13:51:03 [INFO] [progress] request=5 phase=prefill tokens=64/71 percentage=90.1 chunk_tps=196.7 avg_tps=196.7
+2026-10-05 13:51:03 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120936912 tokens=62 retained_bytes=121151980 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:03 [INFO] [progress] request=5 phase=prefill tokens=71/71 percentage=100.0 chunk_tps=60.7 avg_tps=161.1
+2026-10-05 13:51:03 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121151980 tokens=69 retained_bytes=120998360 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:03 [INFO] [progress] request=5 phase=decode tokens=7/32 percentage=21.9 chunk_tps=24.2 avg_tps=24.2
+2026-10-05 13:51:03 [INFO] [http] request=r8 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=793.9 outcome=completed prompt_tokens=71 prefill_tokens=71 generated_tokens=7 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=471.7 prefill_tps=161.1 decode_tps=24.2 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242211788 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=800 host_available_mib=35312
+2026-10-05 13:51:03 [INFO] [http] request=r9 event=received method=POST path=/v1/chat/completions body_bytes=513
+2026-10-05 13:51:03 [INFO] [progress] request=6 phase=prefill tokens=58/65 percentage=89.2 chunk_tps=215.9 avg_tps=215.9
+2026-10-05 13:51:03 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120998360 tokens=64 retained_bytes=121213428 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:04 [INFO] [progress] request=6 phase=prefill tokens=65/65 percentage=100.0 chunk_tps=61.3 avg_tps=169.8
+2026-10-05 13:51:04 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121213428 tokens=71 retained_bytes=120814016 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:04 [INFO] [progress] request=6 phase=decode tokens=5/32 percentage=15.6 chunk_tps=24.2 avg_tps=24.2
+2026-10-05 13:51:04 [INFO] [http] request=r9 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=648.8 outcome=completed prompt_tokens=65 prefill_tokens=65 generated_tokens=5 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=403.5 prefill_tps=169.8 decode_tps=24.2 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=241843100 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=800 host_available_mib=35284
+2026-10-05 13:51:04 [INFO] [http] request=r10 event=received method=POST path=/v1/chat/completions body_bytes=565
+2026-10-05 13:51:04 [INFO] [progress] request=7 phase=prefill tokens=75/82 percentage=91.5 chunk_tps=215.2 avg_tps=215.2
+2026-10-05 13:51:04 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120814016 tokens=58 retained_bytes=121029084 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:04 [INFO] [progress] request=7 phase=prefill tokens=82/82 percentage=100.0 chunk_tps=60.3 avg_tps=176.5
+2026-10-05 13:51:05 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121029084 tokens=65 retained_bytes=121336324 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:05 [INFO] [progress] request=7 phase=decode tokens=19/64 percentage=29.7 chunk_tps=24.1 avg_tps=24.1
+2026-10-05 13:51:05 [INFO] [http] request=r10 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=1295.5 outcome=completed prompt_tokens=82 prefill_tokens=82 generated_tokens=19 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=477.8 prefill_tps=176.5 decode_tps=24.1 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242887716 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=801 host_available_mib=35319
+2026-10-05 13:51:05 [INFO] [http] request=r11 event=received method=POST path=/v1/chat/completions body_bytes=560
+2026-10-05 13:51:05 [INFO] [progress] request=8 phase=prefill tokens=81/88 percentage=92.0 chunk_tps=229.8 avg_tps=229.8
+2026-10-05 13:51:05 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121336324 tokens=75 retained_bytes=121551392 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:06 [INFO] [progress] request=8 phase=prefill tokens=88/88 percentage=100.0 chunk_tps=61.2 avg_tps=188.5
+2026-10-05 13:51:06 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121551392 tokens=82 retained_bytes=121520668 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:06 [INFO] [progress] request=8 phase=decode tokens=5/64 percentage=7.8 chunk_tps=24.2 avg_tps=24.2
+2026-10-05 13:51:06 [INFO] [http] request=r11 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=707.5 outcome=completed prompt_tokens=88 prefill_tokens=88 generated_tokens=5 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=480.0 prefill_tps=188.5 decode_tps=24.2 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=243256404 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=801 host_available_mib=35302
+2026-10-05 13:51:06 [INFO] [http] request=r12 event=received method=POST path=/v1/chat/completions body_bytes=653
+2026-10-05 13:51:06 [INFO] [progress] request=9 phase=prefill tokens=74/81 percentage=91.4 chunk_tps=218.2 avg_tps=218.2
+2026-10-05 13:51:06 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121520668 tokens=81 retained_bytes=121735736 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:06 [INFO] [progress] request=9 phase=prefill tokens=81/81 percentage=100.0 chunk_tps=60.1 avg_tps=177.8
+2026-10-05 13:51:07 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121735736 tokens=88 retained_bytes=121305600 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:07 [INFO] [progress] request=9 phase=decode tokens=8/32 percentage=25.0 chunk_tps=24.4 avg_tps=24.4
+2026-10-05 13:51:07 [INFO] [http] request=r12 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=812.0 outcome=completed prompt_tokens=81 prefill_tokens=81 generated_tokens=8 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=466.8 prefill_tps=177.8 decode_tps=24.4 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242826268 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=801 host_available_mib=35288
+2026-10-05 13:51:07 [INFO] [http] request=r13 event=received method=POST path=/v1/chat/completions body_bytes=573
+2026-10-05 13:51:07 [INFO] [progress] request=10 phase=prefill tokens=70/77 percentage=90.9 chunk_tps=217.4 avg_tps=217.4
+2026-10-05 13:51:07 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121305600 tokens=74 retained_bytes=121520668 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:07 [INFO] [progress] request=10 phase=prefill tokens=77/77 percentage=100.0 chunk_tps=60.3 avg_tps=175.7
+2026-10-05 13:51:07 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121520668 tokens=81 retained_bytes=121182704 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:07 [INFO] [progress] request=10 phase=decode tokens=1/32 percentage=3.1 chunk_tps=23.6 avg_tps=23.6
+2026-10-05 13:51:07 [INFO] [http] request=r13 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=514.1 outcome=completed prompt_tokens=77 prefill_tokens=77 generated_tokens=1 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=452.4 prefill_tps=175.7 decode_tps=23.6 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242580476 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=801 host_available_mib=35334
+2026-10-05 13:51:07 [INFO] [http] request=r14 event=received method=POST path=/v1/chat/completions body_bytes=505
+2026-10-05 13:51:07 [INFO] [progress] request=11 phase=prefill tokens=75/82 percentage=91.5 chunk_tps=218.7 avg_tps=218.7
+2026-10-05 13:51:07 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121182704 tokens=70 retained_bytes=121397772 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:08 [INFO] [progress] request=11 phase=prefill tokens=82/82 percentage=100.0 chunk_tps=60.2 avg_tps=178.5
+2026-10-05 13:51:08 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121397772 tokens=77 retained_bytes=121336324 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:08 [INFO] [progress] request=11 phase=decode tokens=6/32 percentage=18.8 chunk_tps=24.2 avg_tps=24.2
+2026-10-05 13:51:08 [INFO] [http] request=r14 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=736.0 outcome=completed prompt_tokens=82 prefill_tokens=82 generated_tokens=6 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=470.3 prefill_tps=178.5 decode_tps=24.2 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242887716 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=802 host_available_mib=35321
+2026-10-05 13:51:08 [INFO] [http] request=r15 event=received method=POST path=/v1/chat/completions body_bytes=547
+2026-10-05 13:51:08 [INFO] [progress] request=12 phase=prefill tokens=70/77 percentage=90.9 chunk_tps=214.0 avg_tps=214.0
+2026-10-05 13:51:08 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121336324 tokens=75 retained_bytes=121551392 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:08 [INFO] [progress] request=12 phase=prefill tokens=77/77 percentage=100.0 chunk_tps=59.6 avg_tps=173.2
+2026-10-05 13:51:09 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121551392 tokens=82 retained_bytes=121182704 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:09 [INFO] [progress] request=12 phase=decode tokens=5/32 percentage=15.6 chunk_tps=24.3 avg_tps=24.3
+2026-10-05 13:51:09 [INFO] [http] request=r15 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=681.9 outcome=completed prompt_tokens=77 prefill_tokens=77 generated_tokens=5 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=456.8 prefill_tps=173.2 decode_tps=24.3 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242580476 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=801 host_available_mib=35305
+2026-10-05 13:51:09 [INFO] [http] request=r16 event=received method=POST path=/v1/chat/completions body_bytes=41895
+2026-10-05 13:51:11 [INFO] [progress] request=13 phase=prefill tokens=2048/16949 percentage=12.1 chunk_tps=738.0 avg_tps=738.0
+2026-10-05 13:51:14 [INFO] [progress] request=13 phase=prefill tokens=4096/16949 percentage=24.2 chunk_tps=739.2 avg_tps=738.6
+2026-10-05 13:51:17 [INFO] [progress] request=13 phase=prefill tokens=6144/16949 percentage=36.2 chunk_tps=752.7 avg_tps=743.2
+2026-10-05 13:51:20 [INFO] [progress] request=13 phase=prefill tokens=8192/16949 percentage=48.3 chunk_tps=720.7 avg_tps=737.5
+2026-10-05 13:51:22 [INFO] [progress] request=13 phase=prefill tokens=10240/16949 percentage=60.4 chunk_tps=725.9 avg_tps=735.1
+2026-10-05 13:51:25 [INFO] [progress] request=13 phase=prefill tokens=12288/16949 percentage=72.5 chunk_tps=718.5 avg_tps=732.3
+2026-10-05 13:51:28 [INFO] [progress] request=13 phase=prefill tokens=14336/16949 percentage=84.6 chunk_tps=712.3 avg_tps=729.4
+2026-10-05 13:51:31 [INFO] [progress] request=13 phase=prefill tokens=16384/16949 percentage=96.7 chunk_tps=683.3 avg_tps=723.3
+2026-10-05 13:51:32 [INFO] [progress] request=13 phase=prefill tokens=16942/16949 percentage=100.0 chunk_tps=454.5 avg_tps=709.4
+2026-10-05 13:51:33 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121182704 tokens=70 retained_bytes=121397772 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:33 [INFO] [progress] request=13 phase=prefill tokens=16949/16949 percentage=100.0 chunk_tps=58.2 avg_tps=706.2
+2026-10-05 13:51:33 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121397772 tokens=77 retained_bytes=548488592 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:33 [INFO] [progress] request=13 phase=decode tokens=7/32 percentage=21.9 chunk_tps=23.0 avg_tps=23.0
+2026-10-05 13:51:33 [INFO] [http] request=r16 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=24395.9 outcome=completed prompt_tokens=16949 prefill_tokens=16949 generated_tokens=7 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=1.1 ttft_ms=24055.2 prefill_tps=706.2 decode_tps=23.0 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=1097149244 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=1617 host_available_mib=34491
+2026-10-05 13:51:33 [INFO] [http] request=r17 event=received method=POST path=/v1/chat/completions body_bytes=10197
+2026-10-05 13:51:36 [INFO] [progress] request=14 phase=prefill tokens=2048/4015 percentage=51.0 chunk_tps=767.3 avg_tps=767.3
+2026-10-05 13:51:38 [INFO] [progress] request=14 phase=prefill tokens=4008/4015 percentage=99.8 chunk_tps=701.7 avg_tps=733.7
+2026-10-05 13:51:38 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=548488592 tokens=16942 retained_bytes=548660652 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:51:39 [INFO] [progress] request=14 phase=prefill tokens=4015/4015 percentage=100.0 chunk_tps=54.1 avg_tps=718.0
+2026-10-05 13:51:41 [INFO] [progress] request=14 phase=decode tokens=50/512 percentage=9.8 chunk_tps=23.7 avg_tps=23.7
+2026-10-05 13:51:43 [INFO] [progress] request=14 phase=decode tokens=100/512 percentage=19.5 chunk_tps=23.6 avg_tps=23.7
+2026-10-05 13:51:45 [INFO] [progress] request=14 phase=decode tokens=150/512 percentage=29.3 chunk_tps=23.7 avg_tps=23.7
+2026-10-05 13:51:47 [INFO] [progress] request=14 phase=decode tokens=200/512 percentage=39.1 chunk_tps=23.8 avg_tps=23.7
+2026-10-05 13:51:49 [INFO] [progress] request=14 phase=decode tokens=250/512 percentage=48.8 chunk_tps=23.9 avg_tps=23.7
+2026-10-05 13:51:51 [INFO] [progress] request=14 phase=decode tokens=300/512 percentage=58.6 chunk_tps=23.9 avg_tps=23.8
+2026-10-05 13:51:53 [INFO] [progress] request=14 phase=decode tokens=350/512 percentage=68.4 chunk_tps=23.8 avg_tps=23.8
+2026-10-05 13:51:55 [INFO] [progress] request=14 phase=decode tokens=400/512 percentage=78.1 chunk_tps=23.7 avg_tps=23.8
+2026-10-05 13:51:58 [INFO] [progress] request=14 phase=decode tokens=450/512 percentage=87.9 chunk_tps=23.9 avg_tps=23.8
+2026-10-05 13:52:00 [INFO] [progress] request=14 phase=decode tokens=500/512 percentage=97.7 chunk_tps=24.0 avg_tps=23.8
+2026-10-05 13:52:00 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=548660652 tokens=16949 retained_bytes=220626808 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:52:00 [INFO] [progress] request=14 phase=decode tokens=512/512 percentage=100.0 chunk_tps=26.6 avg_tps=23.9
+2026-10-05 13:52:00 [INFO] [http] request=r17 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=27098.2 outcome=completed prompt_tokens=4015 prefill_tokens=4015 generated_tokens=512 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=5612.5 prefill_tps=718.0 decode_tps=23.9 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=441447180 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=991 host_available_mib=35087
+2026-10-05 13:52:00 [INFO] [http] request=r18 event=received method=POST path=/v1/chat/completions body_bytes=10197
+2026-10-05 13:52:03 [INFO] [progress] request=15 phase=prefill tokens=2048/4015 percentage=51.0 chunk_tps=795.8 avg_tps=795.8
+2026-10-05 13:52:05 [INFO] [progress] request=15 phase=prefill tokens=4008/4015 percentage=99.8 chunk_tps=782.2 avg_tps=789.1
+2026-10-05 13:52:05 [INFO] [progress] request=15 phase=prefill tokens=4015/4015 percentage=100.0 chunk_tps=62.4 avg_tps=773.4
+2026-10-05 13:52:07 [INFO] [progress] request=15 phase=decode tokens=50/512 percentage=9.8 chunk_tps=23.5 avg_tps=23.5
+2026-10-05 13:52:10 [INFO] [progress] request=15 phase=decode tokens=100/512 percentage=19.5 chunk_tps=23.9 avg_tps=23.7
+2026-10-05 13:52:12 [INFO] [progress] request=15 phase=decode tokens=150/512 percentage=29.3 chunk_tps=23.8 avg_tps=23.7
+2026-10-05 13:52:14 [INFO] [progress] request=15 phase=decode tokens=200/512 percentage=39.1 chunk_tps=23.9 avg_tps=23.8
+2026-10-05 13:52:16 [INFO] [progress] request=15 phase=decode tokens=250/512 percentage=48.8 chunk_tps=23.9 avg_tps=23.8
+2026-10-05 13:52:18 [INFO] [progress] request=15 phase=decode tokens=300/512 percentage=58.6 chunk_tps=23.7 avg_tps=23.8
+2026-10-05 13:52:20 [INFO] [progress] request=15 phase=decode tokens=350/512 percentage=68.4 chunk_tps=23.8 avg_tps=23.8
+2026-10-05 13:52:22 [INFO] [progress] request=15 phase=decode tokens=400/512 percentage=78.1 chunk_tps=23.7 avg_tps=23.8
+2026-10-05 13:52:24 [INFO] [progress] request=15 phase=decode tokens=450/512 percentage=87.9 chunk_tps=23.7 avg_tps=23.8
+2026-10-05 13:52:26 [INFO] [progress] request=15 phase=decode tokens=500/512 percentage=97.7 chunk_tps=23.8 avg_tps=23.8
+2026-10-05 13:52:27 [INFO] [progress] request=15 phase=decode tokens=512/512 percentage=100.0 chunk_tps=26.8 avg_tps=23.8
+2026-10-05 13:52:27 [INFO] [http] request=r18 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=26712.0 outcome=completed prompt_tokens=4015 prefill_tokens=4015 generated_tokens=512 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.6 ttft_ms=5211.2 prefill_tps=773.4 decode_tps=23.8 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=441447180 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=991 host_available_mib=35077
+2026-10-05 13:52:27 [INFO] [http] request=r19 event=received method=POST path=/v1/chat/completions body_bytes=10197
+2026-10-05 13:52:29 [INFO] [progress] request=16 phase=prefill tokens=2048/4015 percentage=51.0 chunk_tps=783.0 avg_tps=783.0
+2026-10-05 13:52:32 [INFO] [progress] request=16 phase=prefill tokens=4008/4015 percentage=99.8 chunk_tps=777.2 avg_tps=780.1
+2026-10-05 13:52:32 [INFO] [progress] request=16 phase=prefill tokens=4015/4015 percentage=100.0 chunk_tps=55.7 avg_tps=762.8
+2026-10-05 13:52:34 [INFO] [progress] request=16 phase=decode tokens=50/512 percentage=9.8 chunk_tps=23.4 avg_tps=23.4
+2026-10-05 13:52:36 [INFO] [progress] request=16 phase=decode tokens=100/512 percentage=19.5 chunk_tps=23.4 avg_tps=23.4
+2026-10-05 13:52:38 [INFO] [progress] request=16 phase=decode tokens=150/512 percentage=29.3 chunk_tps=23.4 avg_tps=23.4
+2026-10-05 13:52:41 [INFO] [progress] request=16 phase=decode tokens=200/512 percentage=39.1 chunk_tps=23.6 avg_tps=23.5
+2026-10-05 13:52:43 [INFO] [progress] request=16 phase=decode tokens=250/512 percentage=48.8 chunk_tps=23.8 avg_tps=23.5
+2026-10-05 13:52:45 [INFO] [progress] request=16 phase=decode tokens=300/512 percentage=58.6 chunk_tps=23.9 avg_tps=23.6
+2026-10-05 13:52:47 [INFO] [progress] request=16 phase=decode tokens=350/512 percentage=68.4 chunk_tps=23.8 avg_tps=23.6
+2026-10-05 13:52:49 [INFO] [progress] request=16 phase=decode tokens=400/512 percentage=78.1 chunk_tps=23.5 avg_tps=23.6
+2026-10-05 13:52:51 [INFO] [progress] request=16 phase=decode tokens=450/512 percentage=87.9 chunk_tps=23.7 avg_tps=23.6
+2026-10-05 13:52:53 [INFO] [progress] request=16 phase=decode tokens=500/512 percentage=97.7 chunk_tps=24.4 avg_tps=23.7
+2026-10-05 13:52:54 [INFO] [progress] request=16 phase=decode tokens=512/512 percentage=100.0 chunk_tps=26.8 avg_tps=23.8
+2026-10-05 13:52:54 [INFO] [http] request=r19 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=26862.2 outcome=completed prompt_tokens=4015 prefill_tokens=4015 generated_tokens=512 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=5283.7 prefill_tps=762.8 decode_tps=23.8 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=441447180 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=991 host_available_mib=35041
+2026-10-05 13:52:54 [INFO] [http] request=r20 event=received method=POST path=/v1/chat/completions body_bytes=10196
+2026-10-05 13:52:56 [INFO] [progress] request=17 phase=prefill tokens=2048/4037 percentage=50.7 chunk_tps=784.4 avg_tps=784.4
+2026-10-05 13:52:59 [INFO] [progress] request=17 phase=prefill tokens=4030/4037 percentage=99.8 chunk_tps=774.5 avg_tps=779.5
+2026-10-05 13:52:59 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=220626808 tokens=4008 retained_bytes=220820372 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:52:59 [INFO] [progress] request=17 phase=prefill tokens=4037/4037 percentage=100.0 chunk_tps=54.0 avg_tps=761.7
+2026-10-05 13:53:00 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=220820372 tokens=4015 retained_bytes=221195216 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:53:00 [INFO] [progress] request=17 phase=decode tokens=23/128 percentage=18.0 chunk_tps=23.6 avg_tps=23.6
+2026-10-05 13:53:00 [INFO] [http] request=r20 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=6322.6 outcome=completed prompt_tokens=4037 prefill_tokens=4037 generated_tokens=23 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.6 ttft_ms=5318.4 prefill_tps=761.7 decode_tps=23.6 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=442562492 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=993 host_available_mib=35049
+2026-10-05 13:53:00 [INFO] [http] request=r21 event=received method=POST path=/v1/chat/completions body_bytes=78156
+2026-10-05 13:53:03 [INFO] [progress] request=18 phase=prefill tokens=2048/31702 percentage=6.5 chunk_tps=757.6 avg_tps=757.6
+2026-10-05 13:53:05 [INFO] [progress] request=18 phase=prefill tokens=4096/31702 percentage=12.9 chunk_tps=744.2 avg_tps=750.9
+2026-10-05 13:53:08 [INFO] [progress] request=18 phase=prefill tokens=6144/31702 percentage=19.4 chunk_tps=738.1 avg_tps=746.5
+2026-10-05 13:53:11 [INFO] [progress] request=18 phase=prefill tokens=8192/31702 percentage=25.8 chunk_tps=718.0 avg_tps=739.2
+2026-10-05 13:53:14 [INFO] [progress] request=18 phase=prefill tokens=10240/31702 percentage=32.3 chunk_tps=683.6 avg_tps=727.4
+2026-10-05 13:53:17 [INFO] [progress] request=18 phase=prefill tokens=12288/31702 percentage=38.8 chunk_tps=709.4 avg_tps=724.3
+2026-10-05 13:53:20 [INFO] [progress] request=18 phase=prefill tokens=14336/31702 percentage=45.2 chunk_tps=701.0 avg_tps=720.9
+2026-10-05 13:53:23 [INFO] [progress] request=18 phase=prefill tokens=16384/31702 percentage=51.7 chunk_tps=751.1 avg_tps=724.5
+2026-10-05 13:53:25 [INFO] [progress] request=18 phase=prefill tokens=18432/31702 percentage=58.1 chunk_tps=769.9 avg_tps=729.3
+2026-10-05 13:53:28 [INFO] [progress] request=18 phase=prefill tokens=20480/31702 percentage=64.6 chunk_tps=763.9 avg_tps=732.6
+2026-10-05 13:53:31 [INFO] [progress] request=18 phase=prefill tokens=22528/31702 percentage=71.1 chunk_tps=766.3 avg_tps=735.6
+2026-10-05 13:53:33 [INFO] [progress] request=18 phase=prefill tokens=24576/31702 percentage=77.5 chunk_tps=765.3 avg_tps=737.9
+2026-10-05 13:53:36 [INFO] [progress] request=18 phase=prefill tokens=26624/31702 percentage=84.0 chunk_tps=762.3 avg_tps=739.8
+2026-10-05 13:53:39 [INFO] [progress] request=18 phase=prefill tokens=28672/31702 percentage=90.4 chunk_tps=763.3 avg_tps=741.4
+2026-10-05 13:53:41 [INFO] [progress] request=18 phase=prefill tokens=30720/31702 percentage=96.9 chunk_tps=752.9 avg_tps=742.2
+2026-10-05 13:53:43 [INFO] [progress] request=18 phase=prefill tokens=31695/31702 percentage=100.0 chunk_tps=624.4 avg_tps=737.9
+2026-10-05 13:53:43 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=221195216 tokens=4030 retained_bytes=221367276 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:53:43 [INFO] [progress] request=18 phase=prefill tokens=31702/31702 percentage=100.0 chunk_tps=58.9 avg_tps=736.0
+2026-10-05 13:53:45 [INFO] [progress] request=18 phase=decode tokens=50/512 percentage=9.8 chunk_tps=23.3 avg_tps=23.3
+2026-10-05 13:53:47 [INFO] [progress] request=18 phase=decode tokens=100/512 percentage=19.5 chunk_tps=23.3 avg_tps=23.3
+2026-10-05 13:53:50 [INFO] [progress] request=18 phase=decode tokens=150/512 percentage=29.3 chunk_tps=23.4 avg_tps=23.3
+2026-10-05 13:53:52 [INFO] [progress] request=18 phase=decode tokens=200/512 percentage=39.1 chunk_tps=23.5 avg_tps=23.4
+2026-10-05 13:53:54 [INFO] [progress] request=18 phase=decode tokens=250/512 percentage=48.8 chunk_tps=23.2 avg_tps=23.3
+2026-10-05 13:53:56 [INFO] [progress] request=18 phase=decode tokens=300/512 percentage=58.6 chunk_tps=22.7 avg_tps=23.2
+2026-10-05 13:53:58 [INFO] [progress] request=18 phase=decode tokens=350/512 percentage=68.4 chunk_tps=22.7 avg_tps=23.1
+2026-10-05 13:54:00 [INFO] [progress] request=18 phase=decode tokens=400/512 percentage=78.1 chunk_tps=22.5 avg_tps=23.1
+2026-10-05 13:54:03 [INFO] [progress] request=18 phase=decode tokens=450/512 percentage=87.9 chunk_tps=22.6 avg_tps=23.0
+2026-10-05 13:54:05 [INFO] [progress] request=18 phase=decode tokens=500/512 percentage=97.7 chunk_tps=22.9 avg_tps=23.0
+2026-10-05 13:54:05 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=221367276 tokens=4037 retained_bytes=922453012 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:54:05 [INFO] [progress] request=18 phase=decode tokens=512/512 percentage=100.0 chunk_tps=25.0 avg_tps=23.0
+2026-10-05 13:54:05 [INFO] [http] request=r21 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=65401.3 outcome=completed prompt_tokens=31702 prefill_tokens=31702 generated_tokens=512 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=1.3 ttft_ms=43129.8 prefill_tps=736.0 decode_tps=23.0 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=1845078084 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=2330 host_available_mib=33671
+2026-10-05 13:54:05 [INFO] [http] request=r22 event=received method=POST path=/v1/chat/completions body_bytes=78156
+2026-10-05 13:54:08 [INFO] [progress] request=19 phase=prefill tokens=2048/31702 percentage=6.5 chunk_tps=738.5 avg_tps=738.5
+2026-10-05 13:54:11 [INFO] [progress] request=19 phase=prefill tokens=4096/31702 percentage=12.9 chunk_tps=770.3 avg_tps=754.0
+2026-10-05 13:54:13 [INFO] [progress] request=19 phase=prefill tokens=6144/31702 percentage=19.4 chunk_tps=776.0 avg_tps=761.2
+2026-10-05 13:54:16 [INFO] [progress] request=19 phase=prefill tokens=8192/31702 percentage=25.8 chunk_tps=763.0 avg_tps=761.7
+2026-10-05 13:54:19 [INFO] [progress] request=19 phase=prefill tokens=10240/31702 percentage=32.3 chunk_tps=758.7 avg_tps=761.1
+2026-10-05 13:54:22 [INFO] [progress] request=19 phase=prefill tokens=12288/31702 percentage=38.8 chunk_tps=759.7 avg_tps=760.9
+2026-10-05 13:54:24 [INFO] [progress] request=19 phase=prefill tokens=14336/31702 percentage=45.2 chunk_tps=749.6 avg_tps=759.2
+2026-10-05 13:54:27 [INFO] [progress] request=19 phase=prefill tokens=16384/31702 percentage=51.7 chunk_tps=740.1 avg_tps=756.8
+2026-10-05 13:54:30 [INFO] [progress] request=19 phase=prefill tokens=18432/31702 percentage=58.1 chunk_tps=750.4 avg_tps=756.1
+2026-10-05 13:54:32 [INFO] [progress] request=19 phase=prefill tokens=20480/31702 percentage=64.6 chunk_tps=748.9 avg_tps=755.4
+2026-10-05 13:54:35 [INFO] [progress] request=19 phase=prefill tokens=22528/31702 percentage=71.1 chunk_tps=750.1 avg_tps=754.9
+2026-10-05 13:54:38 [INFO] [progress] request=19 phase=prefill tokens=24576/31702 percentage=77.5 chunk_tps=745.3 avg_tps=754.1
+2026-10-05 13:54:41 [INFO] [progress] request=19 phase=prefill tokens=26624/31702 percentage=84.0 chunk_tps=741.8 avg_tps=753.1
+2026-10-05 13:54:43 [INFO] [progress] request=19 phase=prefill tokens=28672/31702 percentage=90.4 chunk_tps=745.2 avg_tps=752.5
+2026-10-05 13:54:46 [INFO] [progress] request=19 phase=prefill tokens=30720/31702 percentage=96.9 chunk_tps=741.5 avg_tps=751.8
+2026-10-05 13:54:48 [INFO] [progress] request=19 phase=prefill tokens=31695/31702 percentage=100.0 chunk_tps=573.6 avg_tps=744.7
+2026-10-05 13:54:48 [INFO] [progress] request=19 phase=prefill tokens=31702/31702 percentage=100.0 chunk_tps=56.2 avg_tps=742.7
+2026-10-05 13:54:50 [INFO] [progress] request=19 phase=decode tokens=50/512 percentage=9.8 chunk_tps=22.0 avg_tps=22.0
+2026-10-05 13:54:53 [INFO] [progress] request=19 phase=decode tokens=100/512 percentage=19.5 chunk_tps=23.4 avg_tps=22.7
+2026-10-05 13:54:55 [INFO] [progress] request=19 phase=decode tokens=150/512 percentage=29.3 chunk_tps=23.6 avg_tps=23.0
+2026-10-05 13:54:57 [INFO] [progress] request=19 phase=decode tokens=200/512 percentage=39.1 chunk_tps=23.2 avg_tps=23.0
+2026-10-05 13:54:59 [INFO] [progress] request=19 phase=decode tokens=250/512 percentage=48.8 chunk_tps=23.0 avg_tps=23.0
+2026-10-05 13:55:01 [INFO] [progress] request=19 phase=decode tokens=300/512 percentage=58.6 chunk_tps=22.9 avg_tps=23.0
+2026-10-05 13:55:03 [INFO] [progress] request=19 phase=decode tokens=350/512 percentage=68.4 chunk_tps=23.1 avg_tps=23.0
+2026-10-05 13:55:06 [INFO] [progress] request=19 phase=decode tokens=400/512 percentage=78.1 chunk_tps=23.3 avg_tps=23.1
+2026-10-05 13:55:08 [INFO] [progress] request=19 phase=decode tokens=450/512 percentage=87.9 chunk_tps=23.6 avg_tps=23.1
+2026-10-05 13:55:10 [INFO] [progress] request=19 phase=decode tokens=500/512 percentage=97.7 chunk_tps=23.5 avg_tps=23.1
+2026-10-05 13:55:10 [INFO] [progress] request=19 phase=decode tokens=512/512 percentage=100.0 chunk_tps=25.7 avg_tps=23.2
+2026-10-05 13:55:10 [INFO] [http] request=r22 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=64893.4 outcome=completed prompt_tokens=31702 prefill_tokens=31702 generated_tokens=512 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=1.4 ttft_ms=42754.2 prefill_tps=742.7 decode_tps=23.2 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=1845078084 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=2330 host_available_mib=33329
+2026-10-05 13:55:10 [INFO] [http] request=r23 event=received method=POST path=/v1/chat/completions body_bytes=78156
+2026-10-05 13:55:13 [INFO] [progress] request=20 phase=prefill tokens=2048/31702 percentage=6.5 chunk_tps=766.8 avg_tps=766.8
+2026-10-05 13:55:15 [INFO] [progress] request=20 phase=prefill tokens=4096/31702 percentage=12.9 chunk_tps=810.6 avg_tps=788.1
+2026-10-05 13:55:18 [INFO] [progress] request=20 phase=prefill tokens=6144/31702 percentage=19.4 chunk_tps=793.4 avg_tps=789.9
+2026-10-05 13:55:21 [INFO] [progress] request=20 phase=prefill tokens=8192/31702 percentage=25.8 chunk_tps=781.6 avg_tps=787.8
+2026-10-05 13:55:23 [INFO] [progress] request=20 phase=prefill tokens=10240/31702 percentage=32.3 chunk_tps=778.3 avg_tps=785.9
+2026-10-05 13:55:26 [INFO] [progress] request=20 phase=prefill tokens=12288/31702 percentage=38.8 chunk_tps=783.9 avg_tps=785.5
+2026-10-05 13:55:29 [INFO] [progress] request=20 phase=prefill tokens=14336/31702 percentage=45.2 chunk_tps=776.8 avg_tps=784.3
+2026-10-05 13:55:31 [INFO] [progress] request=20 phase=prefill tokens=16384/31702 percentage=51.7 chunk_tps=773.0 avg_tps=782.9
+2026-10-05 13:55:34 [INFO] [progress] request=20 phase=prefill tokens=18432/31702 percentage=58.1 chunk_tps=774.2 avg_tps=781.9
+2026-10-05 13:55:37 [INFO] [progress] request=20 phase=prefill tokens=20480/31702 percentage=64.6 chunk_tps=770.0 avg_tps=780.7
+2026-10-05 13:55:39 [INFO] [progress] request=20 phase=prefill tokens=22528/31702 percentage=71.1 chunk_tps=770.0 avg_tps=779.7
+2026-10-05 13:55:42 [INFO] [progress] request=20 phase=prefill tokens=24576/31702 percentage=77.5 chunk_tps=766.4 avg_tps=778.6
+2026-10-05 13:55:45 [INFO] [progress] request=20 phase=prefill tokens=26624/31702 percentage=84.0 chunk_tps=762.8 avg_tps=777.3
+2026-10-05 13:55:47 [INFO] [progress] request=20 phase=prefill tokens=28672/31702 percentage=90.4 chunk_tps=757.6 avg_tps=775.9
+2026-10-05 13:55:50 [INFO] [progress] request=20 phase=prefill tokens=30720/31702 percentage=96.9 chunk_tps=754.9 avg_tps=774.5
+2026-10-05 13:55:51 [INFO] [progress] request=20 phase=prefill tokens=31695/31702 percentage=100.0 chunk_tps=630.9 avg_tps=769.1
+2026-10-05 13:55:52 [INFO] [progress] request=20 phase=prefill tokens=31702/31702 percentage=100.0 chunk_tps=59.3 avg_tps=767.0
+2026-10-05 13:55:54 [INFO] [progress] request=20 phase=decode tokens=50/512 percentage=9.8 chunk_tps=23.5 avg_tps=23.5
+2026-10-05 13:55:56 [INFO] [progress] request=20 phase=decode tokens=100/512 percentage=19.5 chunk_tps=23.5 avg_tps=23.5
+2026-10-05 13:55:58 [INFO] [progress] request=20 phase=decode tokens=150/512 percentage=29.3 chunk_tps=23.5 avg_tps=23.5
+2026-10-05 13:56:00 [INFO] [progress] request=20 phase=decode tokens=200/512 percentage=39.1 chunk_tps=23.7 avg_tps=23.6
+2026-10-05 13:56:02 [INFO] [progress] request=20 phase=decode tokens=250/512 percentage=48.8 chunk_tps=23.5 avg_tps=23.6
+2026-10-05 13:56:04 [INFO] [progress] request=20 phase=decode tokens=300/512 percentage=58.6 chunk_tps=23.5 avg_tps=23.5
+2026-10-05 13:56:07 [INFO] [progress] request=20 phase=decode tokens=350/512 percentage=68.4 chunk_tps=23.5 avg_tps=23.5
+2026-10-05 13:56:09 [INFO] [progress] request=20 phase=decode tokens=400/512 percentage=78.1 chunk_tps=23.5 avg_tps=23.5
+2026-10-05 13:56:11 [INFO] [progress] request=20 phase=decode tokens=450/512 percentage=87.9 chunk_tps=23.5 avg_tps=23.5
+2026-10-05 13:56:13 [INFO] [progress] request=20 phase=decode tokens=500/512 percentage=97.7 chunk_tps=23.5 avg_tps=23.5
+2026-10-05 13:56:13 [INFO] [progress] request=20 phase=decode tokens=512/512 percentage=100.0 chunk_tps=25.6 avg_tps=23.6
+2026-10-05 13:56:13 [INFO] [http] request=r23 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=63177.3 outcome=completed prompt_tokens=31702 prefill_tokens=31702 generated_tokens=512 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=1.3 ttft_ms=41402.3 prefill_tps=767.0 decode_tps=23.6 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=1845078084 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=2330 host_available_mib=33435
+2026-10-05 13:56:13 [INFO] [http] request=r24 event=received method=POST path=/v1/chat/completions body_bytes=78155
+2026-10-05 13:56:16 [INFO] [progress] request=21 phase=prefill tokens=2048/31724 percentage=6.5 chunk_tps=736.5 avg_tps=736.5
+2026-10-05 13:56:19 [INFO] [progress] request=21 phase=prefill tokens=4096/31724 percentage=12.9 chunk_tps=733.7 avg_tps=735.1
+2026-10-05 13:56:22 [INFO] [progress] request=21 phase=prefill tokens=6144/31724 percentage=19.4 chunk_tps=760.4 avg_tps=743.3
+2026-10-05 13:56:24 [INFO] [progress] request=21 phase=prefill tokens=8192/31724 percentage=25.8 chunk_tps=784.9 avg_tps=753.3
+2026-10-05 13:56:27 [INFO] [progress] request=21 phase=prefill tokens=10240/31724 percentage=32.3 chunk_tps=782.8 avg_tps=759.0
+2026-10-05 13:56:30 [INFO] [progress] request=21 phase=prefill tokens=12288/31724 percentage=38.7 chunk_tps=785.5 avg_tps=763.3
+2026-10-05 13:56:32 [INFO] [progress] request=21 phase=prefill tokens=14336/31724 percentage=45.2 chunk_tps=774.4 avg_tps=764.9
+2026-10-05 13:56:35 [INFO] [progress] request=21 phase=prefill tokens=16384/31724 percentage=51.6 chunk_tps=775.9 avg_tps=766.2
+2026-10-05 13:56:37 [INFO] [progress] request=21 phase=prefill tokens=18432/31724 percentage=58.1 chunk_tps=774.5 avg_tps=767.2
+2026-10-05 13:56:40 [INFO] [progress] request=21 phase=prefill tokens=20480/31724 percentage=64.6 chunk_tps=771.2 avg_tps=767.6
+2026-10-05 13:56:43 [INFO] [progress] request=21 phase=prefill tokens=22528/31724 percentage=71.0 chunk_tps=763.3 avg_tps=767.2
+2026-10-05 13:56:46 [INFO] [progress] request=21 phase=prefill tokens=24576/31724 percentage=77.5 chunk_tps=764.6 avg_tps=767.0
+2026-10-05 13:56:48 [INFO] [progress] request=21 phase=prefill tokens=26624/31724 percentage=83.9 chunk_tps=757.0 avg_tps=766.2
+2026-10-05 13:56:51 [INFO] [progress] request=21 phase=prefill tokens=28672/31724 percentage=90.4 chunk_tps=757.3 avg_tps=765.5
+2026-10-05 13:56:54 [INFO] [progress] request=21 phase=prefill tokens=30720/31724 percentage=96.8 chunk_tps=761.6 avg_tps=765.3
+2026-10-05 13:56:55 [INFO] [progress] request=21 phase=prefill tokens=31717/31724 percentage=100.0 chunk_tps=643.9 avg_tps=760.8
+2026-10-05 13:56:55 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=922453012 tokens=31695 retained_bytes=922625072 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:56:55 [INFO] [progress] request=21 phase=prefill tokens=31724/31724 percentage=100.0 chunk_tps=58.2 avg_tps=758.7
+2026-10-05 13:56:56 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=922625072 tokens=31702 retained_bytes=922999916 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:56:56 [INFO] [progress] request=21 phase=decode tokens=23/128 percentage=18.0 chunk_tps=23.6 avg_tps=23.6
+2026-10-05 13:56:56 [INFO] [http] request=r24 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=42899.6 outcome=completed prompt_tokens=31724 prefill_tokens=31724 generated_tokens=23 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=1.4 ttft_ms=41872.5 prefill_tps=758.7 decode_tps=23.6 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=1846171892 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=2332 host_available_mib=33675
+2026-10-05 13:56:56 [INFO] [http] request=r25 event=received method=POST path=/v1/chat/completions body_bytes=320832
+2026-10-05 13:56:59 [INFO] [progress] request=22 phase=prefill tokens=2048/130570 percentage=1.6 chunk_tps=753.0 avg_tps=753.0
+2026-10-05 13:57:02 [INFO] [progress] request=22 phase=prefill tokens=4096/130570 percentage=3.1 chunk_tps=767.8 avg_tps=760.3
+2026-10-05 13:57:05 [INFO] [progress] request=22 phase=prefill tokens=6144/130570 percentage=4.7 chunk_tps=738.0 avg_tps=752.7
+2026-10-05 13:57:07 [INFO] [progress] request=22 phase=prefill tokens=8192/130570 percentage=6.3 chunk_tps=736.0 avg_tps=748.5
+2026-10-05 13:57:10 [INFO] [progress] request=22 phase=prefill tokens=10240/130570 percentage=7.8 chunk_tps=712.6 avg_tps=741.0
+2026-10-05 13:57:13 [INFO] [progress] request=22 phase=prefill tokens=12288/130570 percentage=9.4 chunk_tps=720.9 avg_tps=737.6
+2026-10-05 13:57:16 [INFO] [progress] request=22 phase=prefill tokens=14336/130570 percentage=11.0 chunk_tps=745.3 avg_tps=738.7
+2026-10-05 13:57:19 [INFO] [progress] request=22 phase=prefill tokens=16384/130570 percentage=12.5 chunk_tps=697.3 avg_tps=733.2
+2026-10-05 13:57:22 [INFO] [progress] request=22 phase=prefill tokens=18432/130570 percentage=14.1 chunk_tps=711.2 avg_tps=730.7
+2026-10-05 13:57:24 [INFO] [progress] request=22 phase=prefill tokens=20480/130570 percentage=15.7 chunk_tps=739.1 avg_tps=731.5
+2026-10-05 13:57:27 [INFO] [progress] request=22 phase=prefill tokens=22528/130570 percentage=17.3 chunk_tps=766.6 avg_tps=734.6
+2026-10-05 13:57:30 [INFO] [progress] request=22 phase=prefill tokens=24576/130570 percentage=18.8 chunk_tps=769.1 avg_tps=737.4
+2026-10-05 13:57:32 [INFO] [progress] request=22 phase=prefill tokens=26624/130570 percentage=20.4 chunk_tps=764.5 avg_tps=739.4
+2026-10-05 13:57:35 [INFO] [progress] request=22 phase=prefill tokens=28672/130570 percentage=22.0 chunk_tps=768.2 avg_tps=741.4
+2026-10-05 13:57:38 [INFO] [progress] request=22 phase=prefill tokens=30720/130570 percentage=23.5 chunk_tps=761.3 avg_tps=742.7
+2026-10-05 13:57:40 [INFO] [progress] request=22 phase=prefill tokens=32768/130570 percentage=25.1 chunk_tps=760.6 avg_tps=743.8
+2026-10-05 13:57:43 [INFO] [progress] request=22 phase=prefill tokens=34816/130570 percentage=26.7 chunk_tps=756.8 avg_tps=744.5
+2026-10-05 13:57:46 [INFO] [progress] request=22 phase=prefill tokens=36864/130570 percentage=28.2 chunk_tps=750.6 avg_tps=744.8
+2026-10-05 13:57:49 [INFO] [progress] request=22 phase=prefill tokens=38912/130570 percentage=29.8 chunk_tps=755.7 avg_tps=745.4
+2026-10-05 13:57:51 [INFO] [progress] request=22 phase=prefill tokens=40960/130570 percentage=31.4 chunk_tps=753.9 avg_tps=745.8
+2026-10-05 13:57:54 [INFO] [progress] request=22 phase=prefill tokens=43008/130570 percentage=32.9 chunk_tps=750.9 avg_tps=746.1
+2026-10-05 13:57:57 [INFO] [progress] request=22 phase=prefill tokens=45056/130570 percentage=34.5 chunk_tps=746.2 avg_tps=746.1
+2026-10-05 13:58:00 [INFO] [progress] request=22 phase=prefill tokens=47104/130570 percentage=36.1 chunk_tps=751.2 avg_tps=746.3
+2026-10-05 13:58:02 [INFO] [progress] request=22 phase=prefill tokens=49152/130570 percentage=37.6 chunk_tps=747.2 avg_tps=746.3
+2026-10-05 13:58:05 [INFO] [progress] request=22 phase=prefill tokens=51200/130570 percentage=39.2 chunk_tps=750.0 avg_tps=746.5
+2026-10-05 13:58:08 [INFO] [progress] request=22 phase=prefill tokens=53248/130570 percentage=40.8 chunk_tps=745.0 avg_tps=746.4
+2026-10-05 13:58:10 [INFO] [progress] request=22 phase=prefill tokens=55296/130570 percentage=42.3 chunk_tps=745.9 avg_tps=746.4
+2026-10-05 13:58:13 [INFO] [progress] request=22 phase=prefill tokens=57344/130570 percentage=43.9 chunk_tps=746.6 avg_tps=746.4
+2026-10-05 13:58:16 [INFO] [progress] request=22 phase=prefill tokens=59392/130570 percentage=45.5 chunk_tps=736.8 avg_tps=746.1
+2026-10-05 13:58:19 [INFO] [progress] request=22 phase=prefill tokens=61440/130570 percentage=47.1 chunk_tps=740.9 avg_tps=745.9
+2026-10-05 13:58:22 [INFO] [progress] request=22 phase=prefill tokens=63488/130570 percentage=48.6 chunk_tps=743.4 avg_tps=745.8
+2026-10-05 13:58:24 [INFO] [progress] request=22 phase=prefill tokens=65536/130570 percentage=50.2 chunk_tps=737.2 avg_tps=745.5
+2026-10-05 13:58:27 [INFO] [progress] request=22 phase=prefill tokens=67584/130570 percentage=51.8 chunk_tps=731.3 avg_tps=745.1
+2026-10-05 13:58:30 [INFO] [progress] request=22 phase=prefill tokens=69632/130570 percentage=53.3 chunk_tps=733.3 avg_tps=744.8
+2026-10-05 13:58:33 [INFO] [progress] request=22 phase=prefill tokens=71680/130570 percentage=54.9 chunk_tps=730.3 avg_tps=744.3
+2026-10-05 13:58:35 [INFO] [progress] request=22 phase=prefill tokens=73728/130570 percentage=56.5 chunk_tps=731.1 avg_tps=744.0
+2026-10-05 13:58:38 [INFO] [progress] request=22 phase=prefill tokens=75776/130570 percentage=58.0 chunk_tps=733.2 avg_tps=743.7
+2026-10-05 13:58:41 [INFO] [progress] request=22 phase=prefill tokens=77824/130570 percentage=59.6 chunk_tps=729.1 avg_tps=743.3
+2026-10-05 13:58:44 [INFO] [progress] request=22 phase=prefill tokens=79872/130570 percentage=61.2 chunk_tps=730.0 avg_tps=742.9
+2026-10-05 13:58:47 [INFO] [progress] request=22 phase=prefill tokens=81920/130570 percentage=62.7 chunk_tps=728.6 avg_tps=742.6
+2026-10-05 13:58:50 [INFO] [progress] request=22 phase=prefill tokens=83968/130570 percentage=64.3 chunk_tps=723.8 avg_tps=742.1
+2026-10-05 13:58:52 [INFO] [progress] request=22 phase=prefill tokens=86016/130570 percentage=65.9 chunk_tps=728.1 avg_tps=741.8
+2026-10-05 13:58:55 [INFO] [progress] request=22 phase=prefill tokens=88064/130570 percentage=67.4 chunk_tps=723.9 avg_tps=741.3
+2026-10-05 13:58:58 [INFO] [progress] request=22 phase=prefill tokens=90112/130570 percentage=69.0 chunk_tps=722.1 avg_tps=740.9
+2026-10-05 13:59:01 [INFO] [progress] request=22 phase=prefill tokens=92160/130570 percentage=70.6 chunk_tps=722.0 avg_tps=740.5
+2026-10-05 13:59:04 [INFO] [progress] request=22 phase=prefill tokens=94208/130570 percentage=72.2 chunk_tps=720.4 avg_tps=740.0
+2026-10-05 13:59:07 [INFO] [progress] request=22 phase=prefill tokens=96256/130570 percentage=73.7 chunk_tps=711.7 avg_tps=739.4
+2026-10-05 13:59:09 [INFO] [progress] request=22 phase=prefill tokens=98304/130570 percentage=75.3 chunk_tps=720.6 avg_tps=739.0
+2026-10-05 13:59:12 [INFO] [progress] request=22 phase=prefill tokens=100352/130570 percentage=76.9 chunk_tps=708.1 avg_tps=738.3
+2026-10-05 13:59:15 [INFO] [progress] request=22 phase=prefill tokens=102400/130570 percentage=78.4 chunk_tps=720.5 avg_tps=738.0
+2026-10-05 13:59:18 [INFO] [progress] request=22 phase=prefill tokens=104448/130570 percentage=80.0 chunk_tps=716.5 avg_tps=737.5
+2026-10-05 13:59:21 [INFO] [progress] request=22 phase=prefill tokens=106496/130570 percentage=81.6 chunk_tps=716.1 avg_tps=737.1
+2026-10-05 13:59:24 [INFO] [progress] request=22 phase=prefill tokens=108544/130570 percentage=83.1 chunk_tps=718.7 avg_tps=736.7
+2026-10-05 13:59:27 [INFO] [progress] request=22 phase=prefill tokens=110592/130570 percentage=84.7 chunk_tps=712.5 avg_tps=736.3
+2026-10-05 13:59:29 [INFO] [progress] request=22 phase=prefill tokens=112640/130570 percentage=86.3 chunk_tps=713.3 avg_tps=735.8
+2026-10-05 13:59:32 [INFO] [progress] request=22 phase=prefill tokens=114688/130570 percentage=87.8 chunk_tps=714.7 avg_tps=735.5
+2026-10-05 13:59:35 [INFO] [progress] request=22 phase=prefill tokens=116736/130570 percentage=89.4 chunk_tps=709.8 avg_tps=735.0
+2026-10-05 13:59:38 [INFO] [progress] request=22 phase=prefill tokens=118784/130570 percentage=91.0 chunk_tps=711.6 avg_tps=734.6
+2026-10-05 13:59:41 [INFO] [progress] request=22 phase=prefill tokens=120832/130570 percentage=92.5 chunk_tps=711.3 avg_tps=734.2
+2026-10-05 13:59:44 [INFO] [progress] request=22 phase=prefill tokens=122880/130570 percentage=94.1 chunk_tps=703.3 avg_tps=733.6
+2026-10-05 13:59:47 [INFO] [progress] request=22 phase=prefill tokens=124928/130570 percentage=95.7 chunk_tps=707.7 avg_tps=733.2
+2026-10-05 13:59:50 [INFO] [progress] request=22 phase=prefill tokens=126976/130570 percentage=97.2 chunk_tps=708.1 avg_tps=732.8
+2026-10-05 13:59:53 [INFO] [progress] request=22 phase=prefill tokens=129024/130570 percentage=98.8 chunk_tps=699.8 avg_tps=732.2
+2026-10-05 13:59:55 [INFO] [progress] request=22 phase=prefill tokens=130563/130570 percentage=100.0 chunk_tps=655.9 avg_tps=731.2
+2026-10-05 13:59:55 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=922999916 tokens=31717 retained_bytes=923171976 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 13:59:55 [INFO] [progress] request=22 phase=prefill tokens=130570/130570 percentage=100.0 chunk_tps=52.5 avg_tps=730.7
+2026-10-05 13:59:58 [INFO] [progress] request=22 phase=decode tokens=50/512 percentage=9.8 chunk_tps=22.7 avg_tps=22.7
+2026-10-05 14:00:00 [INFO] [progress] request=22 phase=decode tokens=100/512 percentage=19.5 chunk_tps=22.8 avg_tps=22.8
+2026-10-05 14:00:02 [INFO] [progress] request=22 phase=decode tokens=150/512 percentage=29.3 chunk_tps=22.8 avg_tps=22.8
+2026-10-05 14:00:04 [INFO] [progress] request=22 phase=decode tokens=200/512 percentage=39.1 chunk_tps=22.8 avg_tps=22.8
+2026-10-05 14:00:07 [INFO] [progress] request=22 phase=decode tokens=250/512 percentage=48.8 chunk_tps=23.0 avg_tps=22.8
+2026-10-05 14:00:09 [INFO] [progress] request=22 phase=decode tokens=300/512 percentage=58.6 chunk_tps=22.7 avg_tps=22.8
+2026-10-05 14:00:11 [INFO] [progress] request=22 phase=decode tokens=350/512 percentage=68.4 chunk_tps=22.8 avg_tps=22.8
+2026-10-05 14:00:13 [INFO] [progress] request=22 phase=decode tokens=400/512 percentage=78.1 chunk_tps=23.1 avg_tps=22.8
+2026-10-05 14:00:15 [INFO] [progress] request=22 phase=decode tokens=450/512 percentage=87.9 chunk_tps=23.0 avg_tps=22.9
+2026-10-05 14:00:18 [INFO] [progress] request=22 phase=decode tokens=500/512 percentage=97.7 chunk_tps=22.9 avg_tps=22.9
+2026-10-05 14:00:18 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=923171976 tokens=31724 retained_bytes=3428559076 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:00:18 [INFO] [progress] request=22 phase=decode tokens=512/512 percentage=100.0 chunk_tps=25.1 avg_tps=22.9
+2026-10-05 14:00:18 [INFO] [http] request=r25 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=201697.6 outcome=completed prompt_tokens=130570 prefill_tokens=130570 generated_tokens=512 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=4.1 ttft_ms=179111.4 prefill_tps=730.7 decode_tps=22.9 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=6857290212 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=7113 host_available_mib=28953
+2026-10-05 14:00:18 [INFO] [http] request=r26 event=received method=POST path=/v1/chat/completions body_bytes=320832
+2026-10-05 14:00:21 [INFO] [progress] request=23 phase=prefill tokens=2048/130570 percentage=1.6 chunk_tps=775.3 avg_tps=775.3
+2026-10-05 14:00:24 [INFO] [progress] request=23 phase=prefill tokens=4096/130570 percentage=3.1 chunk_tps=728.1 avg_tps=751.0
+2026-10-05 14:00:26 [INFO] [progress] request=23 phase=prefill tokens=6144/130570 percentage=4.7 chunk_tps=731.8 avg_tps=744.5
+2026-10-05 14:00:29 [INFO] [progress] request=23 phase=prefill tokens=8192/130570 percentage=6.3 chunk_tps=712.4 avg_tps=736.2
+2026-10-05 14:00:32 [INFO] [progress] request=23 phase=prefill tokens=10240/130570 percentage=7.8 chunk_tps=780.2 avg_tps=744.6
+2026-10-05 14:00:34 [INFO] [progress] request=23 phase=prefill tokens=12288/130570 percentage=9.4 chunk_tps=782.9 avg_tps=750.7
+2026-10-05 14:00:37 [INFO] [progress] request=23 phase=prefill tokens=14336/130570 percentage=11.0 chunk_tps=746.4 avg_tps=750.1
+2026-10-05 14:00:40 [INFO] [progress] request=23 phase=prefill tokens=16384/130570 percentage=12.5 chunk_tps=759.0 avg_tps=751.2
+2026-10-05 14:00:43 [INFO] [progress] request=23 phase=prefill tokens=18432/130570 percentage=14.1 chunk_tps=760.4 avg_tps=752.2
+2026-10-05 14:00:45 [INFO] [progress] request=23 phase=prefill tokens=20480/130570 percentage=15.7 chunk_tps=764.1 avg_tps=753.4
+2026-10-05 14:00:48 [INFO] [progress] request=23 phase=prefill tokens=22528/130570 percentage=17.3 chunk_tps=769.0 avg_tps=754.8
+2026-10-05 14:00:51 [INFO] [progress] request=23 phase=prefill tokens=24576/130570 percentage=18.8 chunk_tps=769.6 avg_tps=756.0
+2026-10-05 14:00:53 [INFO] [progress] request=23 phase=prefill tokens=26624/130570 percentage=20.4 chunk_tps=762.4 avg_tps=756.5
+2026-10-05 14:00:56 [INFO] [progress] request=23 phase=prefill tokens=28672/130570 percentage=22.0 chunk_tps=765.3 avg_tps=757.1
+2026-10-05 14:00:59 [INFO] [progress] request=23 phase=prefill tokens=30720/130570 percentage=23.5 chunk_tps=760.7 avg_tps=757.3
+2026-10-05 14:01:01 [INFO] [progress] request=23 phase=prefill tokens=32768/130570 percentage=25.1 chunk_tps=757.2 avg_tps=757.3
+2026-10-05 14:01:04 [INFO] [progress] request=23 phase=prefill tokens=34816/130570 percentage=26.7 chunk_tps=756.3 avg_tps=757.3
+2026-10-05 14:01:07 [INFO] [progress] request=23 phase=prefill tokens=36864/130570 percentage=28.2 chunk_tps=756.7 avg_tps=757.2
+2026-10-05 14:01:09 [INFO] [progress] request=23 phase=prefill tokens=38912/130570 percentage=29.8 chunk_tps=754.2 avg_tps=757.1
+2026-10-05 14:01:12 [INFO] [progress] request=23 phase=prefill tokens=40960/130570 percentage=31.4 chunk_tps=751.4 avg_tps=756.8
+2026-10-05 14:01:15 [INFO] [progress] request=23 phase=prefill tokens=43008/130570 percentage=32.9 chunk_tps=752.9 avg_tps=756.6
+2026-10-05 14:01:18 [INFO] [progress] request=23 phase=prefill tokens=45056/130570 percentage=34.5 chunk_tps=753.8 avg_tps=756.5
+2026-10-05 14:01:20 [INFO] [progress] request=23 phase=prefill tokens=47104/130570 percentage=36.1 chunk_tps=751.2 avg_tps=756.3
+2026-10-05 14:01:23 [INFO] [progress] request=23 phase=prefill tokens=49152/130570 percentage=37.6 chunk_tps=748.7 avg_tps=755.9
+2026-10-05 14:01:26 [INFO] [progress] request=23 phase=prefill tokens=51200/130570 percentage=39.2 chunk_tps=750.0 avg_tps=755.7
+2026-10-05 14:01:29 [INFO] [progress] request=23 phase=prefill tokens=53248/130570 percentage=40.8 chunk_tps=745.1 avg_tps=755.3
+2026-10-05 14:01:31 [INFO] [progress] request=23 phase=prefill tokens=55296/130570 percentage=42.3 chunk_tps=744.9 avg_tps=754.9
+2026-10-05 14:01:34 [INFO] [progress] request=23 phase=prefill tokens=57344/130570 percentage=43.9 chunk_tps=741.1 avg_tps=754.4
+2026-10-05 14:01:37 [INFO] [progress] request=23 phase=prefill tokens=59392/130570 percentage=45.5 chunk_tps=742.9 avg_tps=754.0
+2026-10-05 14:01:40 [INFO] [progress] request=23 phase=prefill tokens=61440/130570 percentage=47.1 chunk_tps=740.2 avg_tps=753.5
+2026-10-05 14:01:42 [INFO] [progress] request=23 phase=prefill tokens=63488/130570 percentage=48.6 chunk_tps=745.0 avg_tps=753.2
+2026-10-05 14:01:45 [INFO] [progress] request=23 phase=prefill tokens=65536/130570 percentage=50.2 chunk_tps=738.1 avg_tps=752.8
+2026-10-05 14:01:48 [INFO] [progress] request=23 phase=prefill tokens=67584/130570 percentage=51.8 chunk_tps=716.1 avg_tps=751.6
+2026-10-05 14:01:51 [INFO] [progress] request=23 phase=prefill tokens=69632/130570 percentage=53.3 chunk_tps=732.6 avg_tps=751.0
+2026-10-05 14:01:54 [INFO] [progress] request=23 phase=prefill tokens=71680/130570 percentage=54.9 chunk_tps=727.2 avg_tps=750.3
+2026-10-05 14:01:56 [INFO] [progress] request=23 phase=prefill tokens=73728/130570 percentage=56.5 chunk_tps=715.9 avg_tps=749.3
+2026-10-05 14:01:59 [INFO] [progress] request=23 phase=prefill tokens=75776/130570 percentage=58.0 chunk_tps=721.1 avg_tps=748.5
+2026-10-05 14:02:02 [INFO] [progress] request=23 phase=prefill tokens=77824/130570 percentage=59.6 chunk_tps=715.6 avg_tps=747.6
+2026-10-05 14:02:05 [INFO] [progress] request=23 phase=prefill tokens=79872/130570 percentage=61.2 chunk_tps=714.5 avg_tps=746.7
+2026-10-05 14:02:08 [INFO] [progress] request=23 phase=prefill tokens=81920/130570 percentage=62.7 chunk_tps=710.2 avg_tps=745.8
+2026-10-05 14:02:11 [INFO] [progress] request=23 phase=prefill tokens=83968/130570 percentage=64.3 chunk_tps=707.3 avg_tps=744.8
+2026-10-05 14:02:14 [INFO] [progress] request=23 phase=prefill tokens=86016/130570 percentage=65.9 chunk_tps=699.0 avg_tps=743.6
+2026-10-05 14:02:17 [INFO] [progress] request=23 phase=prefill tokens=88064/130570 percentage=67.4 chunk_tps=702.9 avg_tps=742.6
+2026-10-05 14:02:20 [INFO] [progress] request=23 phase=prefill tokens=90112/130570 percentage=69.0 chunk_tps=705.1 avg_tps=741.7
+2026-10-05 14:02:22 [INFO] [progress] request=23 phase=prefill tokens=92160/130570 percentage=70.6 chunk_tps=707.2 avg_tps=740.9
+2026-10-05 14:02:25 [INFO] [progress] request=23 phase=prefill tokens=94208/130570 percentage=72.2 chunk_tps=703.0 avg_tps=740.1
+2026-10-05 14:02:28 [INFO] [progress] request=23 phase=prefill tokens=96256/130570 percentage=73.7 chunk_tps=700.8 avg_tps=739.2
+2026-10-05 14:02:31 [INFO] [progress] request=23 phase=prefill tokens=98304/130570 percentage=75.3 chunk_tps=703.1 avg_tps=738.4
+2026-10-05 14:02:34 [INFO] [progress] request=23 phase=prefill tokens=100352/130570 percentage=76.9 chunk_tps=696.2 avg_tps=737.5
+2026-10-05 14:02:37 [INFO] [progress] request=23 phase=prefill tokens=102400/130570 percentage=78.4 chunk_tps=697.3 avg_tps=736.6
+2026-10-05 14:02:40 [INFO] [progress] request=23 phase=prefill tokens=104448/130570 percentage=80.0 chunk_tps=694.9 avg_tps=735.8
+2026-10-05 14:02:43 [INFO] [progress] request=23 phase=prefill tokens=106496/130570 percentage=81.6 chunk_tps=688.7 avg_tps=734.8
+2026-10-05 14:02:46 [INFO] [progress] request=23 phase=prefill tokens=108544/130570 percentage=83.1 chunk_tps=698.1 avg_tps=734.1
+2026-10-05 14:02:49 [INFO] [progress] request=23 phase=prefill tokens=110592/130570 percentage=84.7 chunk_tps=690.3 avg_tps=733.2
+2026-10-05 14:02:52 [INFO] [progress] request=23 phase=prefill tokens=112640/130570 percentage=86.3 chunk_tps=695.9 avg_tps=732.5
+2026-10-05 14:02:55 [INFO] [progress] request=23 phase=prefill tokens=114688/130570 percentage=87.8 chunk_tps=695.8 avg_tps=731.8
+2026-10-05 14:02:58 [INFO] [progress] request=23 phase=prefill tokens=116736/130570 percentage=89.4 chunk_tps=689.6 avg_tps=731.0
+2026-10-05 14:03:01 [INFO] [progress] request=23 phase=prefill tokens=118784/130570 percentage=91.0 chunk_tps=685.1 avg_tps=730.2
+2026-10-05 14:03:04 [INFO] [progress] request=23 phase=prefill tokens=120832/130570 percentage=92.5 chunk_tps=691.4 avg_tps=729.5
+2026-10-05 14:03:07 [INFO] [progress] request=23 phase=prefill tokens=122880/130570 percentage=94.1 chunk_tps=689.4 avg_tps=728.8
+2026-10-05 14:03:10 [INFO] [progress] request=23 phase=prefill tokens=124928/130570 percentage=95.7 chunk_tps=689.9 avg_tps=728.1
+2026-10-05 14:03:13 [INFO] [progress] request=23 phase=prefill tokens=126976/130570 percentage=97.2 chunk_tps=690.7 avg_tps=727.5
+2026-10-05 14:03:16 [INFO] [progress] request=23 phase=prefill tokens=129024/130570 percentage=98.8 chunk_tps=686.3 avg_tps=726.8
+2026-10-05 14:03:18 [INFO] [progress] request=23 phase=prefill tokens=130563/130570 percentage=100.0 chunk_tps=638.1 avg_tps=725.6
+2026-10-05 14:03:18 [INFO] [progress] request=23 phase=prefill tokens=130570/130570 percentage=100.0 chunk_tps=50.4 avg_tps=725.1
+2026-10-05 14:03:21 [INFO] [progress] request=23 phase=decode tokens=50/512 percentage=9.8 chunk_tps=22.1 avg_tps=22.1
+2026-10-05 14:03:23 [INFO] [progress] request=23 phase=decode tokens=100/512 percentage=19.5 chunk_tps=22.2 avg_tps=22.1
+2026-10-05 14:03:25 [INFO] [progress] request=23 phase=decode tokens=150/512 percentage=29.3 chunk_tps=22.1 avg_tps=22.1
+2026-10-05 14:03:28 [INFO] [progress] request=23 phase=decode tokens=200/512 percentage=39.1 chunk_tps=22.1 avg_tps=22.1
+2026-10-05 14:03:30 [INFO] [progress] request=23 phase=decode tokens=250/512 percentage=48.8 chunk_tps=22.1 avg_tps=22.1
+2026-10-05 14:03:32 [INFO] [progress] request=23 phase=decode tokens=300/512 percentage=58.6 chunk_tps=22.2 avg_tps=22.1
+2026-10-05 14:03:34 [INFO] [progress] request=23 phase=decode tokens=350/512 percentage=68.4 chunk_tps=22.1 avg_tps=22.1
+2026-10-05 14:03:37 [INFO] [progress] request=23 phase=decode tokens=400/512 percentage=78.1 chunk_tps=22.2 avg_tps=22.1
+2026-10-05 14:03:39 [INFO] [progress] request=23 phase=decode tokens=450/512 percentage=87.9 chunk_tps=22.2 avg_tps=22.1
+2026-10-05 14:03:41 [INFO] [progress] request=23 phase=decode tokens=500/512 percentage=97.7 chunk_tps=22.2 avg_tps=22.1
+2026-10-05 14:03:42 [INFO] [progress] request=23 phase=decode tokens=512/512 percentage=100.0 chunk_tps=24.1 avg_tps=22.2
+2026-10-05 14:03:42 [INFO] [http] request=r26 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=203511.5 outcome=completed prompt_tokens=130570 prefill_tokens=130570 generated_tokens=512 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=3.3 ttft_ms=180302.8 prefill_tps=725.1 decode_tps=22.2 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=6857290212 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=7107 host_available_mib=28848
+2026-10-05 14:03:42 [INFO] [http] request=r27 event=received method=POST path=/v1/chat/completions body_bytes=320832
+2026-10-05 14:03:45 [INFO] [progress] request=24 phase=prefill tokens=2048/130570 percentage=1.6 chunk_tps=707.4 avg_tps=707.4
+2026-10-05 14:03:48 [INFO] [progress] request=24 phase=prefill tokens=4096/130570 percentage=3.1 chunk_tps=682.8 avg_tps=694.9
+2026-10-05 14:03:50 [INFO] [progress] request=24 phase=prefill tokens=6144/130570 percentage=4.7 chunk_tps=685.8 avg_tps=691.8
+2026-10-05 14:03:54 [INFO] [progress] request=24 phase=prefill tokens=8192/130570 percentage=6.3 chunk_tps=674.6 avg_tps=687.4
+2026-10-05 14:03:57 [INFO] [progress] request=24 phase=prefill tokens=10240/130570 percentage=7.8 chunk_tps=671.5 avg_tps=684.2
+2026-10-05 14:03:59 [INFO] [progress] request=24 phase=prefill tokens=12288/130570 percentage=9.4 chunk_tps=702.1 avg_tps=687.1
+2026-10-05 14:04:02 [INFO] [progress] request=24 phase=prefill tokens=14336/130570 percentage=11.0 chunk_tps=757.6 avg_tps=696.4
+2026-10-05 14:04:05 [INFO] [progress] request=24 phase=prefill tokens=16384/130570 percentage=12.5 chunk_tps=765.7 avg_tps=704.3
+2026-10-05 14:04:08 [INFO] [progress] request=24 phase=prefill tokens=18432/130570 percentage=14.1 chunk_tps=767.9 avg_tps=710.9
+2026-10-05 14:04:10 [INFO] [progress] request=24 phase=prefill tokens=20480/130570 percentage=15.7 chunk_tps=759.4 avg_tps=715.4
+2026-10-05 14:04:13 [INFO] [progress] request=24 phase=prefill tokens=22528/130570 percentage=17.3 chunk_tps=758.1 avg_tps=719.1
+2026-10-05 14:04:16 [INFO] [progress] request=24 phase=prefill tokens=24576/130570 percentage=18.8 chunk_tps=759.5 avg_tps=722.3
+2026-10-05 14:04:18 [INFO] [progress] request=24 phase=prefill tokens=26624/130570 percentage=20.4 chunk_tps=753.5 avg_tps=724.6
+2026-10-05 14:04:21 [INFO] [progress] request=24 phase=prefill tokens=28672/130570 percentage=22.0 chunk_tps=750.5 avg_tps=726.4
+2026-10-05 14:04:24 [INFO] [progress] request=24 phase=prefill tokens=30720/130570 percentage=23.5 chunk_tps=752.6 avg_tps=728.1
+2026-10-05 14:04:27 [INFO] [progress] request=24 phase=prefill tokens=32768/130570 percentage=25.1 chunk_tps=750.3 avg_tps=729.5
+2026-10-05 14:04:29 [INFO] [progress] request=24 phase=prefill tokens=34816/130570 percentage=26.7 chunk_tps=734.2 avg_tps=729.7
+2026-10-05 14:04:32 [INFO] [progress] request=24 phase=prefill tokens=36864/130570 percentage=28.2 chunk_tps=742.9 avg_tps=730.4
+2026-10-05 14:04:35 [INFO] [progress] request=24 phase=prefill tokens=38912/130570 percentage=29.8 chunk_tps=740.8 avg_tps=731.0
+2026-10-05 14:04:38 [INFO] [progress] request=24 phase=prefill tokens=40960/130570 percentage=31.4 chunk_tps=740.1 avg_tps=731.4
+2026-10-05 14:04:40 [INFO] [progress] request=24 phase=prefill tokens=43008/130570 percentage=32.9 chunk_tps=733.8 avg_tps=731.5
+2026-10-05 14:04:43 [INFO] [progress] request=24 phase=prefill tokens=45056/130570 percentage=34.5 chunk_tps=736.3 avg_tps=731.8
+2026-10-05 14:04:46 [INFO] [progress] request=24 phase=prefill tokens=47104/130570 percentage=36.1 chunk_tps=733.9 avg_tps=731.9
+2026-10-05 14:04:49 [INFO] [progress] request=24 phase=prefill tokens=49152/130570 percentage=37.6 chunk_tps=732.2 avg_tps=731.9
+2026-10-05 14:04:52 [INFO] [progress] request=24 phase=prefill tokens=51200/130570 percentage=39.2 chunk_tps=730.4 avg_tps=731.8
+2026-10-05 14:04:54 [INFO] [progress] request=24 phase=prefill tokens=53248/130570 percentage=40.8 chunk_tps=718.6 avg_tps=731.3
+2026-10-05 14:04:57 [INFO] [progress] request=24 phase=prefill tokens=55296/130570 percentage=42.3 chunk_tps=728.7 avg_tps=731.2
+2026-10-05 14:05:00 [INFO] [progress] request=24 phase=prefill tokens=57344/130570 percentage=43.9 chunk_tps=730.7 avg_tps=731.2
+2026-10-05 14:05:03 [INFO] [progress] request=24 phase=prefill tokens=59392/130570 percentage=45.5 chunk_tps=720.6 avg_tps=730.8
+2026-10-05 14:05:06 [INFO] [progress] request=24 phase=prefill tokens=61440/130570 percentage=47.1 chunk_tps=723.2 avg_tps=730.5
+2026-10-05 14:05:09 [INFO] [progress] request=24 phase=prefill tokens=63488/130570 percentage=48.6 chunk_tps=726.3 avg_tps=730.4
+2026-10-05 14:05:11 [INFO] [progress] request=24 phase=prefill tokens=65536/130570 percentage=50.2 chunk_tps=719.0 avg_tps=730.0
+2026-10-05 14:05:14 [INFO] [progress] request=24 phase=prefill tokens=67584/130570 percentage=51.8 chunk_tps=716.1 avg_tps=729.6
+2026-10-05 14:05:17 [INFO] [progress] request=24 phase=prefill tokens=69632/130570 percentage=53.3 chunk_tps=716.7 avg_tps=729.2
+2026-10-05 14:05:20 [INFO] [progress] request=24 phase=prefill tokens=71680/130570 percentage=54.9 chunk_tps=712.4 avg_tps=728.7
+2026-10-05 14:05:23 [INFO] [progress] request=24 phase=prefill tokens=73728/130570 percentage=56.5 chunk_tps=714.7 avg_tps=728.3
+2026-10-05 14:05:26 [INFO] [progress] request=24 phase=prefill tokens=75776/130570 percentage=58.0 chunk_tps=717.9 avg_tps=728.1
+2026-10-05 14:05:29 [INFO] [progress] request=24 phase=prefill tokens=77824/130570 percentage=59.6 chunk_tps=712.9 avg_tps=727.6
+2026-10-05 14:05:31 [INFO] [progress] request=24 phase=prefill tokens=79872/130570 percentage=61.2 chunk_tps=714.0 avg_tps=727.3
+2026-10-05 14:05:34 [INFO] [progress] request=24 phase=prefill tokens=81920/130570 percentage=62.7 chunk_tps=714.9 avg_tps=727.0
+2026-10-05 14:05:37 [INFO] [progress] request=24 phase=prefill tokens=83968/130570 percentage=64.3 chunk_tps=711.7 avg_tps=726.6
+2026-10-05 14:05:40 [INFO] [progress] request=24 phase=prefill tokens=86016/130570 percentage=65.9 chunk_tps=714.5 avg_tps=726.3
+2026-10-05 14:05:43 [INFO] [progress] request=24 phase=prefill tokens=88064/130570 percentage=67.4 chunk_tps=706.9 avg_tps=725.8
+2026-10-05 14:05:46 [INFO] [progress] request=24 phase=prefill tokens=90112/130570 percentage=69.0 chunk_tps=705.7 avg_tps=725.4
+2026-10-05 14:05:49 [INFO] [progress] request=24 phase=prefill tokens=92160/130570 percentage=70.6 chunk_tps=701.9 avg_tps=724.8
+2026-10-05 14:05:52 [INFO] [progress] request=24 phase=prefill tokens=94208/130570 percentage=72.2 chunk_tps=703.4 avg_tps=724.4
+2026-10-05 14:05:55 [INFO] [progress] request=24 phase=prefill tokens=96256/130570 percentage=73.7 chunk_tps=694.1 avg_tps=723.7
+2026-10-05 14:05:58 [INFO] [progress] request=24 phase=prefill tokens=98304/130570 percentage=75.3 chunk_tps=708.1 avg_tps=723.3
+2026-10-05 14:06:00 [INFO] [progress] request=24 phase=prefill tokens=100352/130570 percentage=76.9 chunk_tps=699.6 avg_tps=722.8
+2026-10-05 14:06:03 [INFO] [progress] request=24 phase=prefill tokens=102400/130570 percentage=78.4 chunk_tps=699.1 avg_tps=722.4
+2026-10-05 14:06:06 [INFO] [progress] request=24 phase=prefill tokens=104448/130570 percentage=80.0 chunk_tps=695.4 avg_tps=721.8
+2026-10-05 14:06:09 [INFO] [progress] request=24 phase=prefill tokens=106496/130570 percentage=81.6 chunk_tps=698.6 avg_tps=721.3
+2026-10-05 14:06:12 [INFO] [progress] request=24 phase=prefill tokens=108544/130570 percentage=83.1 chunk_tps=692.3 avg_tps=720.8
+2026-10-05 14:06:15 [INFO] [progress] request=24 phase=prefill tokens=110592/130570 percentage=84.7 chunk_tps=698.1 avg_tps=720.3
+2026-10-05 14:06:18 [INFO] [progress] request=24 phase=prefill tokens=112640/130570 percentage=86.3 chunk_tps=698.4 avg_tps=719.9
+2026-10-05 14:06:21 [INFO] [progress] request=24 phase=prefill tokens=114688/130570 percentage=87.8 chunk_tps=700.2 avg_tps=719.6
+2026-10-05 14:06:24 [INFO] [progress] request=24 phase=prefill tokens=116736/130570 percentage=89.4 chunk_tps=691.0 avg_tps=719.0
+2026-10-05 14:06:27 [INFO] [progress] request=24 phase=prefill tokens=118784/130570 percentage=91.0 chunk_tps=695.0 avg_tps=718.6
+2026-10-05 14:06:30 [INFO] [progress] request=24 phase=prefill tokens=120832/130570 percentage=92.5 chunk_tps=698.3 avg_tps=718.3
+2026-10-05 14:06:33 [INFO] [progress] request=24 phase=prefill tokens=122880/130570 percentage=94.1 chunk_tps=695.0 avg_tps=717.9
+2026-10-05 14:06:36 [INFO] [progress] request=24 phase=prefill tokens=124928/130570 percentage=95.7 chunk_tps=694.2 avg_tps=717.5
+2026-10-05 14:06:39 [INFO] [progress] request=24 phase=prefill tokens=126976/130570 percentage=97.2 chunk_tps=693.7 avg_tps=717.1
+2026-10-05 14:06:42 [INFO] [progress] request=24 phase=prefill tokens=129024/130570 percentage=98.8 chunk_tps=689.4 avg_tps=716.6
+2026-10-05 14:06:44 [INFO] [progress] request=24 phase=prefill tokens=130563/130570 percentage=100.0 chunk_tps=639.6 avg_tps=715.6
+2026-10-05 14:06:44 [INFO] [progress] request=24 phase=prefill tokens=130570/130570 percentage=100.0 chunk_tps=53.2 avg_tps=715.1
+2026-10-05 14:06:47 [INFO] [progress] request=24 phase=decode tokens=50/512 percentage=9.8 chunk_tps=22.2 avg_tps=22.2
+2026-10-05 14:06:49 [INFO] [progress] request=24 phase=decode tokens=100/512 percentage=19.5 chunk_tps=22.2 avg_tps=22.2
+2026-10-05 14:06:51 [INFO] [progress] request=24 phase=decode tokens=150/512 percentage=29.3 chunk_tps=22.2 avg_tps=22.2
+2026-10-05 14:06:53 [INFO] [progress] request=24 phase=decode tokens=200/512 percentage=39.1 chunk_tps=22.2 avg_tps=22.2
+2026-10-05 14:06:56 [INFO] [progress] request=24 phase=decode tokens=250/512 percentage=48.8 chunk_tps=22.2 avg_tps=22.2
+2026-10-05 14:06:58 [INFO] [progress] request=24 phase=decode tokens=300/512 percentage=58.6 chunk_tps=22.2 avg_tps=22.2
+2026-10-05 14:07:00 [INFO] [progress] request=24 phase=decode tokens=350/512 percentage=68.4 chunk_tps=22.2 avg_tps=22.2
+2026-10-05 14:07:02 [INFO] [progress] request=24 phase=decode tokens=400/512 percentage=78.1 chunk_tps=22.2 avg_tps=22.2
+2026-10-05 14:07:05 [INFO] [progress] request=24 phase=decode tokens=450/512 percentage=87.9 chunk_tps=22.2 avg_tps=22.2
+2026-10-05 14:07:07 [INFO] [progress] request=24 phase=decode tokens=500/512 percentage=97.7 chunk_tps=22.3 avg_tps=22.2
+2026-10-05 14:07:07 [INFO] [progress] request=24 phase=decode tokens=512/512 percentage=100.0 chunk_tps=24.0 avg_tps=22.3
+2026-10-05 14:07:07 [INFO] [http] request=r27 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=205875.0 outcome=completed prompt_tokens=130570 prefill_tokens=130570 generated_tokens=512 finish=length cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=3.6 ttft_ms=182739.3 prefill_tps=715.1 decode_tps=22.3 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=6857290212 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=7107 host_available_mib=28877
+2026-10-05 14:07:07 [INFO] [http] request=r28 event=received method=POST path=/v1/chat/completions body_bytes=320831
+2026-10-05 14:07:10 [INFO] [progress] request=25 phase=prefill tokens=2048/130592 percentage=1.6 chunk_tps=706.5 avg_tps=706.5
+2026-10-05 14:07:13 [INFO] [progress] request=25 phase=prefill tokens=4096/130592 percentage=3.1 chunk_tps=711.9 avg_tps=709.2
+2026-10-05 14:07:16 [INFO] [progress] request=25 phase=prefill tokens=6144/130592 percentage=4.7 chunk_tps=766.6 avg_tps=727.4
+2026-10-05 14:07:19 [INFO] [progress] request=25 phase=prefill tokens=8192/130592 percentage=6.3 chunk_tps=751.9 avg_tps=733.4
+2026-10-05 14:07:21 [INFO] [progress] request=25 phase=prefill tokens=10240/130592 percentage=7.8 chunk_tps=743.0 avg_tps=735.3
+2026-10-05 14:07:24 [INFO] [progress] request=25 phase=prefill tokens=12288/130592 percentage=9.4 chunk_tps=762.2 avg_tps=739.6
+2026-10-05 14:07:27 [INFO] [progress] request=25 phase=prefill tokens=14336/130592 percentage=11.0 chunk_tps=751.9 avg_tps=741.4
+2026-10-05 14:07:30 [INFO] [progress] request=25 phase=prefill tokens=16384/130592 percentage=12.5 chunk_tps=750.8 avg_tps=742.5
+2026-10-05 14:07:32 [INFO] [progress] request=25 phase=prefill tokens=18432/130592 percentage=14.1 chunk_tps=765.6 avg_tps=745.0
+2026-10-05 14:07:35 [INFO] [progress] request=25 phase=prefill tokens=20480/130592 percentage=15.7 chunk_tps=762.5 avg_tps=746.7
+2026-10-05 14:07:38 [INFO] [progress] request=25 phase=prefill tokens=22528/130592 percentage=17.3 chunk_tps=758.9 avg_tps=747.8
+2026-10-05 14:07:40 [INFO] [progress] request=25 phase=prefill tokens=24576/130592 percentage=18.8 chunk_tps=757.3 avg_tps=748.6
+2026-10-05 14:07:43 [INFO] [progress] request=25 phase=prefill tokens=26624/130592 percentage=20.4 chunk_tps=755.0 avg_tps=749.1
+2026-10-05 14:07:46 [INFO] [progress] request=25 phase=prefill tokens=28672/130592 percentage=22.0 chunk_tps=759.6 avg_tps=749.8
+2026-10-05 14:07:48 [INFO] [progress] request=25 phase=prefill tokens=30720/130592 percentage=23.5 chunk_tps=753.3 avg_tps=750.1
+2026-10-05 14:07:51 [INFO] [progress] request=25 phase=prefill tokens=32768/130592 percentage=25.1 chunk_tps=747.2 avg_tps=749.9
+2026-10-05 14:07:54 [INFO] [progress] request=25 phase=prefill tokens=34816/130592 percentage=26.7 chunk_tps=738.9 avg_tps=749.2
+2026-10-05 14:07:57 [INFO] [progress] request=25 phase=prefill tokens=36864/130592 percentage=28.2 chunk_tps=731.7 avg_tps=748.2
+2026-10-05 14:08:00 [INFO] [progress] request=25 phase=prefill tokens=38912/130592 percentage=29.8 chunk_tps=732.1 avg_tps=747.4
+2026-10-05 14:08:02 [INFO] [progress] request=25 phase=prefill tokens=40960/130592 percentage=31.4 chunk_tps=740.6 avg_tps=747.0
+2026-10-05 14:08:05 [INFO] [progress] request=25 phase=prefill tokens=43008/130592 percentage=32.9 chunk_tps=745.6 avg_tps=747.0
+2026-10-05 14:08:08 [INFO] [progress] request=25 phase=prefill tokens=45056/130592 percentage=34.5 chunk_tps=745.2 avg_tps=746.9
+2026-10-05 14:08:11 [INFO] [progress] request=25 phase=prefill tokens=47104/130592 percentage=36.1 chunk_tps=745.3 avg_tps=746.8
+2026-10-05 14:08:13 [INFO] [progress] request=25 phase=prefill tokens=49152/130592 percentage=37.6 chunk_tps=741.3 avg_tps=746.6
+2026-10-05 14:08:16 [INFO] [progress] request=25 phase=prefill tokens=51200/130592 percentage=39.2 chunk_tps=741.5 avg_tps=746.4
+2026-10-05 14:08:19 [INFO] [progress] request=25 phase=prefill tokens=53248/130592 percentage=40.8 chunk_tps=741.2 avg_tps=746.2
+2026-10-05 14:08:22 [INFO] [progress] request=25 phase=prefill tokens=55296/130592 percentage=42.3 chunk_tps=739.1 avg_tps=745.9
+2026-10-05 14:08:24 [INFO] [progress] request=25 phase=prefill tokens=57344/130592 percentage=43.9 chunk_tps=739.9 avg_tps=745.7
+2026-10-05 14:08:27 [INFO] [progress] request=25 phase=prefill tokens=59392/130592 percentage=45.5 chunk_tps=734.6 avg_tps=745.3
+2026-10-05 14:08:30 [INFO] [progress] request=25 phase=prefill tokens=61440/130592 percentage=47.0 chunk_tps=734.7 avg_tps=744.9
+2026-10-05 14:08:33 [INFO] [progress] request=25 phase=prefill tokens=63488/130592 percentage=48.6 chunk_tps=730.8 avg_tps=744.5
+2026-10-05 14:08:36 [INFO] [progress] request=25 phase=prefill tokens=65536/130592 percentage=50.2 chunk_tps=721.8 avg_tps=743.7
+2026-10-05 14:08:39 [INFO] [progress] request=25 phase=prefill tokens=67584/130592 percentage=51.8 chunk_tps=695.9 avg_tps=742.2
+2026-10-05 14:08:41 [INFO] [progress] request=25 phase=prefill tokens=69632/130592 percentage=53.3 chunk_tps=702.0 avg_tps=740.9
+2026-10-05 14:08:44 [INFO] [progress] request=25 phase=prefill tokens=71680/130592 percentage=54.9 chunk_tps=706.2 avg_tps=739.9
+2026-10-05 14:08:47 [INFO] [progress] request=25 phase=prefill tokens=73728/130592 percentage=56.5 chunk_tps=706.1 avg_tps=738.9
+2026-10-05 14:08:50 [INFO] [progress] request=25 phase=prefill tokens=75776/130592 percentage=58.0 chunk_tps=707.0 avg_tps=738.0
+2026-10-05 14:08:53 [INFO] [progress] request=25 phase=prefill tokens=77824/130592 percentage=59.6 chunk_tps=707.4 avg_tps=737.2
+2026-10-05 14:08:56 [INFO] [progress] request=25 phase=prefill tokens=79872/130592 percentage=61.2 chunk_tps=710.7 avg_tps=736.5
+2026-10-05 14:08:59 [INFO] [progress] request=25 phase=prefill tokens=81920/130592 percentage=62.7 chunk_tps=707.5 avg_tps=735.7
+2026-10-05 14:09:02 [INFO] [progress] request=25 phase=prefill tokens=83968/130592 percentage=64.3 chunk_tps=702.9 avg_tps=734.9
+2026-10-05 14:09:05 [INFO] [progress] request=25 phase=prefill tokens=86016/130592 percentage=65.9 chunk_tps=704.7 avg_tps=734.1
+2026-10-05 14:09:08 [INFO] [progress] request=25 phase=prefill tokens=88064/130592 percentage=67.4 chunk_tps=702.0 avg_tps=733.4
+2026-10-05 14:09:10 [INFO] [progress] request=25 phase=prefill tokens=90112/130592 percentage=69.0 chunk_tps=705.7 avg_tps=732.7
+2026-10-05 14:09:13 [INFO] [progress] request=25 phase=prefill tokens=92160/130592 percentage=70.6 chunk_tps=718.4 avg_tps=732.4
+2026-10-05 14:09:16 [INFO] [progress] request=25 phase=prefill tokens=94208/130592 percentage=72.1 chunk_tps=715.4 avg_tps=732.0
+2026-10-05 14:09:19 [INFO] [progress] request=25 phase=prefill tokens=96256/130592 percentage=73.7 chunk_tps=714.9 avg_tps=731.6
+2026-10-05 14:09:22 [INFO] [progress] request=25 phase=prefill tokens=98304/130592 percentage=75.3 chunk_tps=714.9 avg_tps=731.3
+2026-10-05 14:09:25 [INFO] [progress] request=25 phase=prefill tokens=100352/130592 percentage=76.8 chunk_tps=710.5 avg_tps=730.8
+2026-10-05 14:09:28 [INFO] [progress] request=25 phase=prefill tokens=102400/130592 percentage=78.4 chunk_tps=712.0 avg_tps=730.5
+2026-10-05 14:09:31 [INFO] [progress] request=25 phase=prefill tokens=104448/130592 percentage=80.0 chunk_tps=710.1 avg_tps=730.0
+2026-10-05 14:09:33 [INFO] [progress] request=25 phase=prefill tokens=106496/130592 percentage=81.5 chunk_tps=708.5 avg_tps=729.6
+2026-10-05 14:09:36 [INFO] [progress] request=25 phase=prefill tokens=108544/130592 percentage=83.1 chunk_tps=711.3 avg_tps=729.3
+2026-10-05 14:09:39 [INFO] [progress] request=25 phase=prefill tokens=110592/130592 percentage=84.7 chunk_tps=706.4 avg_tps=728.8
+2026-10-05 14:09:42 [INFO] [progress] request=25 phase=prefill tokens=112640/130592 percentage=86.3 chunk_tps=705.8 avg_tps=728.4
+2026-10-05 14:09:45 [INFO] [progress] request=25 phase=prefill tokens=114688/130592 percentage=87.8 chunk_tps=708.8 avg_tps=728.0
+2026-10-05 14:09:48 [INFO] [progress] request=25 phase=prefill tokens=116736/130592 percentage=89.4 chunk_tps=702.0 avg_tps=727.6
+2026-10-05 14:09:51 [INFO] [progress] request=25 phase=prefill tokens=118784/130592 percentage=91.0 chunk_tps=704.2 avg_tps=727.1
+2026-10-05 14:09:54 [INFO] [progress] request=25 phase=prefill tokens=120832/130592 percentage=92.5 chunk_tps=705.0 avg_tps=726.8
+2026-10-05 14:09:57 [INFO] [progress] request=25 phase=prefill tokens=122880/130592 percentage=94.1 chunk_tps=693.5 avg_tps=726.2
+2026-10-05 14:10:00 [INFO] [progress] request=25 phase=prefill tokens=124928/130592 percentage=95.7 chunk_tps=698.7 avg_tps=725.7
+2026-10-05 14:10:03 [INFO] [progress] request=25 phase=prefill tokens=126976/130592 percentage=97.2 chunk_tps=699.7 avg_tps=725.3
+2026-10-05 14:10:06 [INFO] [progress] request=25 phase=prefill tokens=129024/130592 percentage=98.8 chunk_tps=699.1 avg_tps=724.8
+2026-10-05 14:10:08 [INFO] [progress] request=25 phase=prefill tokens=130585/130592 percentage=100.0 chunk_tps=653.7 avg_tps=723.9
+2026-10-05 14:10:08 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=3428559076 tokens=130563 retained_bytes=3428731136 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:08 [INFO] [progress] request=25 phase=prefill tokens=130592/130592 percentage=100.0 chunk_tps=50.0 avg_tps=723.4
+2026-10-05 14:10:09 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=3428731136 tokens=130570 retained_bytes=3429105980 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:09 [INFO] [progress] request=25 phase=decode tokens=23/128 percentage=18.0 chunk_tps=22.4 avg_tps=22.4
+2026-10-05 14:10:09 [INFO] [http] request=r28 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=181833.8 outcome=completed prompt_tokens=130592 prefill_tokens=130592 generated_tokens=23 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=3.4 ttft_ms=180676.8 prefill_tps=723.4 decode_tps=22.4 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=6858384020 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=7108 host_available_mib=28845
+2026-10-05 14:10:10 [INFO] [http] request=r29 event=received method=GET path=/v1/models body_bytes=0
+2026-10-05 14:10:10 [INFO] [http] request=r29 event=completed method=GET path=/v1/models status=200 duration_ms=0.4 outcome=completed rss_mib=7108 host_available_mib=28837
+2026-10-05 14:10:10 [INFO] [http] request=r30 event=received method=POST path=/v1/chat/completions body_bytes=612
+2026-10-05 14:10:10 [INFO] [progress] request=26 phase=prefill tokens=104/111 percentage=93.7 chunk_tps=233.9 avg_tps=233.9
+2026-10-05 14:10:10 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=3429105980 tokens=130585 retained_bytes=3429278040 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:10 [INFO] [progress] request=26 phase=prefill tokens=111/111 percentage=100.0 chunk_tps=53.6 avg_tps=192.9
+2026-10-05 14:10:10 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=3429278040 tokens=130592 retained_bytes=122227320 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:10 [INFO] [progress] request=26 phase=decode tokens=2/32 percentage=6.2 chunk_tps=23.7 avg_tps=23.7
+2026-10-05 14:10:10 [INFO] [http] request=r30 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=703.2 outcome=completed prompt_tokens=111 prefill_tokens=111 generated_tokens=2 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.6 ttft_ms=588.7 prefill_tps=192.9 decode_tps=23.7 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=244669708 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=800 host_available_mib=35161
+2026-10-05 14:10:10 [INFO] [http] request=r31 event=received method=POST path=/v1/chat/completions body_bytes=479
+2026-10-05 14:10:11 [INFO] [progress] request=27 phase=prefill tokens=60/67 percentage=89.6 chunk_tps=196.9 avg_tps=196.9
+2026-10-05 14:10:11 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=122227320 tokens=104 retained_bytes=122442388 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:11 [INFO] [progress] request=27 phase=prefill tokens=67/67 percentage=100.0 chunk_tps=58.2 avg_tps=157.6
+2026-10-05 14:10:11 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=122442388 tokens=111 retained_bytes=120875464 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:11 [INFO] [progress] request=27 phase=decode tokens=1/32 percentage=3.1 chunk_tps=23.6 avg_tps=23.6
+2026-10-05 14:10:11 [INFO] [http] request=r31 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=499.0 outcome=completed prompt_tokens=67 prefill_tokens=67 generated_tokens=1 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.6 ttft_ms=436.3 prefill_tps=157.6 decode_tps=23.6 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=241965996 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35106
+2026-10-05 14:10:11 [INFO] [http] request=r32 event=received method=POST path=/v1/chat/completions body_bytes=456
+2026-10-05 14:10:11 [INFO] [progress] request=28 phase=prefill tokens=56/63 percentage=88.9 chunk_tps=194.5 avg_tps=194.5
+2026-10-05 14:10:11 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120875464 tokens=60 retained_bytes=121090532 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:11 [INFO] [progress] request=28 phase=prefill tokens=63/63 percentage=100.0 chunk_tps=59.0 avg_tps=155.0
+2026-10-05 14:10:11 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121090532 tokens=67 retained_bytes=120752568 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:11 [INFO] [progress] request=28 phase=decode tokens=2/32 percentage=6.2 chunk_tps=23.7 avg_tps=23.7
+2026-10-05 14:10:11 [INFO] [http] request=r32 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=519.4 outcome=completed prompt_tokens=63 prefill_tokens=63 generated_tokens=2 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=418.6 prefill_tps=155.0 decode_tps=23.7 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=241720204 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35089
+2026-10-05 14:10:11 [INFO] [http] request=r33 event=received method=POST path=/v1/chat/completions body_bytes=520
+2026-10-05 14:10:12 [INFO] [progress] request=29 phase=prefill tokens=62/69 percentage=89.9 chunk_tps=203.7 avg_tps=203.7
+2026-10-05 14:10:12 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120752568 tokens=56 retained_bytes=120967636 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:12 [INFO] [progress] request=29 phase=prefill tokens=69/69 percentage=100.0 chunk_tps=59.1 avg_tps=163.2
+2026-10-05 14:10:12 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120967636 tokens=63 retained_bytes=120936912 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:12 [INFO] [progress] request=29 phase=decode tokens=4/32 percentage=12.5 chunk_tps=24.0 avg_tps=24.0
+2026-10-05 14:10:12 [INFO] [http] request=r33 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=617.0 outcome=completed prompt_tokens=69 prefill_tokens=69 generated_tokens=4 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=434.9 prefill_tps=163.2 decode_tps=24.0 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242088892 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35124
+2026-10-05 14:10:12 [INFO] [http] request=r34 event=received method=POST path=/v1/chat/completions body_bytes=519
+2026-10-05 14:10:12 [INFO] [progress] request=30 phase=prefill tokens=64/71 percentage=90.1 chunk_tps=209.2 avg_tps=209.2
+2026-10-05 14:10:12 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120936912 tokens=62 retained_bytes=121151980 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:13 [INFO] [progress] request=30 phase=prefill tokens=71/71 percentage=100.0 chunk_tps=59.2 avg_tps=167.4
+2026-10-05 14:10:13 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121151980 tokens=69 retained_bytes=120998360 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:13 [INFO] [progress] request=30 phase=decode tokens=7/32 percentage=21.9 chunk_tps=24.0 avg_tps=24.0
+2026-10-05 14:10:13 [INFO] [http] request=r34 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=745.1 outcome=completed prompt_tokens=71 prefill_tokens=71 generated_tokens=7 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=434.1 prefill_tps=167.4 decode_tps=24.0 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242211788 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35101
+2026-10-05 14:10:13 [INFO] [http] request=r35 event=received method=POST path=/v1/chat/completions body_bytes=513
+2026-10-05 14:10:13 [INFO] [progress] request=31 phase=prefill tokens=58/65 percentage=89.2 chunk_tps=211.5 avg_tps=211.5
+2026-10-05 14:10:13 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120998360 tokens=64 retained_bytes=121213428 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:13 [INFO] [progress] request=31 phase=prefill tokens=65/65 percentage=100.0 chunk_tps=60.3 avg_tps=166.5
+2026-10-05 14:10:13 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121213428 tokens=71 retained_bytes=120814016 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:13 [INFO] [progress] request=31 phase=decode tokens=5/32 percentage=15.6 chunk_tps=23.9 avg_tps=23.9
+2026-10-05 14:10:13 [INFO] [http] request=r35 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=629.7 outcome=completed prompt_tokens=65 prefill_tokens=65 generated_tokens=5 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=402.5 prefill_tps=166.5 decode_tps=23.9 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=241843100 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35132
+2026-10-05 14:10:13 [INFO] [http] request=r36 event=received method=POST path=/v1/chat/completions body_bytes=565
+2026-10-05 14:10:14 [INFO] [progress] request=32 phase=prefill tokens=75/82 percentage=91.5 chunk_tps=208.2 avg_tps=208.2
+2026-10-05 14:10:14 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120814016 tokens=58 retained_bytes=121029084 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:14 [INFO] [progress] request=32 phase=prefill tokens=82/82 percentage=100.0 chunk_tps=58.6 avg_tps=170.9
+2026-10-05 14:10:15 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121029084 tokens=65 retained_bytes=121336324 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:15 [INFO] [progress] request=32 phase=decode tokens=19/64 percentage=29.7 chunk_tps=23.9 avg_tps=23.9
+2026-10-05 14:10:15 [INFO] [http] request=r36 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=1306.6 outcome=completed prompt_tokens=82 prefill_tokens=82 generated_tokens=19 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=491.8 prefill_tps=170.9 decode_tps=23.9 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242887716 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=799 host_available_mib=35158
+2026-10-05 14:10:15 [INFO] [http] request=r37 event=received method=POST path=/v1/chat/completions body_bytes=560
+2026-10-05 14:10:15 [INFO] [progress] request=33 phase=prefill tokens=81/88 percentage=92.0 chunk_tps=221.5 avg_tps=221.5
+2026-10-05 14:10:15 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121336324 tokens=75 retained_bytes=121551392 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:15 [INFO] [progress] request=33 phase=prefill tokens=88/88 percentage=100.0 chunk_tps=58.6 avg_tps=181.4
+2026-10-05 14:10:16 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121551392 tokens=82 retained_bytes=121520668 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:16 [INFO] [progress] request=33 phase=decode tokens=5/64 percentage=7.8 chunk_tps=23.6 avg_tps=23.6
+2026-10-05 14:10:16 [INFO] [http] request=r37 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=731.0 outcome=completed prompt_tokens=88 prefill_tokens=88 generated_tokens=5 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=498.4 prefill_tps=181.4 decode_tps=23.6 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=243256404 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=799 host_available_mib=35180
+2026-10-05 14:10:16 [INFO] [http] request=r38 event=received method=POST path=/v1/chat/completions body_bytes=653
+2026-10-05 14:10:16 [INFO] [progress] request=34 phase=prefill tokens=74/81 percentage=91.4 chunk_tps=205.7 avg_tps=205.7
+2026-10-05 14:10:16 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121520668 tokens=81 retained_bytes=121735736 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:16 [INFO] [progress] request=34 phase=prefill tokens=81/81 percentage=100.0 chunk_tps=58.2 avg_tps=168.8
+2026-10-05 14:10:16 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121735736 tokens=88 retained_bytes=121305600 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:16 [INFO] [progress] request=34 phase=decode tokens=8/32 percentage=25.0 chunk_tps=23.9 avg_tps=23.9
+2026-10-05 14:10:16 [INFO] [http] request=r38 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=843.9 outcome=completed prompt_tokens=81 prefill_tokens=81 generated_tokens=8 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=491.2 prefill_tps=168.8 decode_tps=23.9 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242826268 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=799 host_available_mib=35152
+2026-10-05 14:10:16 [INFO] [http] request=r39 event=received method=POST path=/v1/chat/completions body_bytes=573
+2026-10-05 14:10:17 [INFO] [progress] request=35 phase=prefill tokens=70/77 percentage=90.9 chunk_tps=206.0 avg_tps=206.0
+2026-10-05 14:10:17 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121305600 tokens=74 retained_bytes=121520668 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:17 [INFO] [progress] request=35 phase=prefill tokens=77/77 percentage=100.0 chunk_tps=57.7 avg_tps=167.0
+2026-10-05 14:10:17 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121520668 tokens=81 retained_bytes=121182704 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:17 [INFO] [progress] request=35 phase=decode tokens=1/32 percentage=3.1 chunk_tps=23.3 avg_tps=23.3
+2026-10-05 14:10:17 [INFO] [http] request=r39 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=533.5 outcome=completed prompt_tokens=77 prefill_tokens=77 generated_tokens=1 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=473.3 prefill_tps=167.0 decode_tps=23.3 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242580476 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35084
+2026-10-05 14:10:17 [INFO] [http] request=r40 event=received method=POST path=/v1/chat/completions body_bytes=505
+2026-10-05 14:10:17 [INFO] [progress] request=36 phase=prefill tokens=75/82 percentage=91.5 chunk_tps=210.7 avg_tps=210.7
+2026-10-05 14:10:17 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121182704 tokens=70 retained_bytes=121397772 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:17 [INFO] [progress] request=36 phase=prefill tokens=82/82 percentage=100.0 chunk_tps=57.8 avg_tps=171.9
+2026-10-05 14:10:18 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121397772 tokens=77 retained_bytes=121336324 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:18 [INFO] [progress] request=36 phase=decode tokens=6/32 percentage=18.8 chunk_tps=24.1 avg_tps=24.1
+2026-10-05 14:10:18 [INFO] [http] request=r40 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=755.7 outcome=completed prompt_tokens=82 prefill_tokens=82 generated_tokens=6 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=489.1 prefill_tps=171.9 decode_tps=24.1 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242887716 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=799 host_available_mib=35145
+2026-10-05 14:10:18 [INFO] [http] request=r41 event=received method=POST path=/v1/chat/completions body_bytes=547
+2026-10-05 14:10:18 [INFO] [progress] request=37 phase=prefill tokens=70/77 percentage=90.9 chunk_tps=212.3 avg_tps=212.3
+2026-10-05 14:10:18 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121336324 tokens=75 retained_bytes=121551392 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:18 [INFO] [progress] request=37 phase=prefill tokens=77/77 percentage=100.0 chunk_tps=58.1 avg_tps=171.0
+2026-10-05 14:10:18 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121551392 tokens=82 retained_bytes=121182704 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:18 [INFO] [progress] request=37 phase=decode tokens=5/32 percentage=15.6 chunk_tps=24.1 avg_tps=24.1
+2026-10-05 14:10:18 [INFO] [http] request=r41 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=689.1 outcome=completed prompt_tokens=77 prefill_tokens=77 generated_tokens=5 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=462.3 prefill_tps=171.0 decode_tps=24.1 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242580476 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35164
+2026-10-05 14:10:18 [INFO] [http] request=r42 event=received method=POST path=/v1/chat/completions body_bytes=41895
+2026-10-05 14:10:21 [INFO] [progress] request=38 phase=prefill tokens=2048/16949 percentage=12.1 chunk_tps=704.2 avg_tps=704.2
+2026-10-05 14:10:24 [INFO] [progress] request=38 phase=prefill tokens=4096/16949 percentage=24.2 chunk_tps=698.5 avg_tps=701.4
+2026-10-05 14:10:27 [INFO] [progress] request=38 phase=prefill tokens=6144/16949 percentage=36.2 chunk_tps=692.4 avg_tps=698.3
+2026-10-05 14:10:30 [INFO] [progress] request=38 phase=prefill tokens=8192/16949 percentage=48.3 chunk_tps=678.0 avg_tps=693.1
+2026-10-05 14:10:33 [INFO] [progress] request=38 phase=prefill tokens=10240/16949 percentage=60.4 chunk_tps=674.8 avg_tps=689.4
+2026-10-05 14:10:36 [INFO] [progress] request=38 phase=prefill tokens=12288/16949 percentage=72.5 chunk_tps=675.7 avg_tps=687.0
+2026-10-05 14:10:39 [INFO] [progress] request=38 phase=prefill tokens=14336/16949 percentage=84.6 chunk_tps=659.6 avg_tps=683.0
+2026-10-05 14:10:42 [INFO] [progress] request=38 phase=prefill tokens=16384/16949 percentage=96.7 chunk_tps=665.0 avg_tps=680.7
+2026-10-05 14:10:44 [INFO] [progress] request=38 phase=prefill tokens=16942/16949 percentage=100.0 chunk_tps=442.9 avg_tps=668.9
+2026-10-05 14:10:44 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121182704 tokens=70 retained_bytes=121397772 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:44 [INFO] [progress] request=38 phase=prefill tokens=16949/16949 percentage=100.0 chunk_tps=57.9 avg_tps=665.9
+2026-10-05 14:10:44 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121397772 tokens=77 retained_bytes=548488592 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:44 [INFO] [progress] request=38 phase=decode tokens=7/32 percentage=21.9 chunk_tps=23.1 avg_tps=23.1
+2026-10-05 14:10:44 [INFO] [http] request=r42 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=25819.5 outcome=completed prompt_tokens=16949 prefill_tokens=16949 generated_tokens=7 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=1.0 ttft_ms=25479.9 prefill_tps=665.9 decode_tps=23.1 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=1097149244 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=1613 host_available_mib=34378
+2026-10-05 14:10:44 [INFO] [http] request=r43 event=received method=POST path=/v1/chat/completions body_bytes=612
+2026-10-05 14:10:45 [INFO] [progress] request=39 phase=prefill tokens=104/111 percentage=93.7 chunk_tps=249.8 avg_tps=249.8
+2026-10-05 14:10:45 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=548488592 tokens=16942 retained_bytes=548660652 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:45 [INFO] [progress] request=39 phase=prefill tokens=111/111 percentage=100.0 chunk_tps=58.3 avg_tps=206.9
+2026-10-05 14:10:45 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=548660652 tokens=16949 retained_bytes=122227320 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:45 [INFO] [progress] request=39 phase=decode tokens=2/32 percentage=6.2 chunk_tps=23.7 avg_tps=23.7
+2026-10-05 14:10:45 [INFO] [http] request=r43 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=658.4 outcome=completed prompt_tokens=111 prefill_tokens=111 generated_tokens=2 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=550.8 prefill_tps=206.9 decode_tps=23.7 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=244669708 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=800 host_available_mib=35191
+2026-10-05 14:10:45 [INFO] [http] request=r44 event=received method=POST path=/v1/chat/completions body_bytes=479
+2026-10-05 14:10:45 [INFO] [progress] request=40 phase=prefill tokens=60/67 percentage=89.6 chunk_tps=197.7 avg_tps=197.7
+2026-10-05 14:10:45 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=122227320 tokens=104 retained_bytes=122442388 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:45 [INFO] [progress] request=40 phase=prefill tokens=67/67 percentage=100.0 chunk_tps=58.8 avg_tps=158.6
+2026-10-05 14:10:45 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=122442388 tokens=111 retained_bytes=120875464 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:45 [INFO] [progress] request=40 phase=decode tokens=1/32 percentage=3.1 chunk_tps=23.1 avg_tps=23.1
+2026-10-05 14:10:45 [INFO] [http] request=r44 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=498.8 outcome=completed prompt_tokens=67 prefill_tokens=67 generated_tokens=1 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=434.6 prefill_tps=158.6 decode_tps=23.1 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=241965996 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35196
+2026-10-05 14:10:45 [INFO] [http] request=r45 event=received method=POST path=/v1/chat/completions body_bytes=456
+2026-10-05 14:10:46 [INFO] [progress] request=41 phase=prefill tokens=56/63 percentage=88.9 chunk_tps=195.1 avg_tps=195.1
+2026-10-05 14:10:46 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120875464 tokens=60 retained_bytes=121090532 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:46 [INFO] [progress] request=41 phase=prefill tokens=63/63 percentage=100.0 chunk_tps=59.2 avg_tps=155.5
+2026-10-05 14:10:46 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121090532 tokens=67 retained_bytes=120752568 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:46 [INFO] [progress] request=41 phase=decode tokens=2/32 percentage=6.2 chunk_tps=23.6 avg_tps=23.6
+2026-10-05 14:10:46 [INFO] [http] request=r45 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=520.9 outcome=completed prompt_tokens=63 prefill_tokens=63 generated_tokens=2 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=417.5 prefill_tps=155.5 decode_tps=23.6 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=241720204 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35182
+2026-10-05 14:10:46 [INFO] [http] request=r46 event=received method=POST path=/v1/chat/completions body_bytes=520
+2026-10-05 14:10:46 [INFO] [progress] request=42 phase=prefill tokens=62/69 percentage=89.9 chunk_tps=206.4 avg_tps=206.4
+2026-10-05 14:10:46 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120752568 tokens=56 retained_bytes=120967636 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:46 [INFO] [progress] request=42 phase=prefill tokens=69/69 percentage=100.0 chunk_tps=59.3 avg_tps=164.9
+2026-10-05 14:10:46 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120967636 tokens=63 retained_bytes=120936912 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:46 [INFO] [progress] request=42 phase=decode tokens=4/32 percentage=12.5 chunk_tps=24.1 avg_tps=24.1
+2026-10-05 14:10:46 [INFO] [http] request=r46 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=611.4 outcome=completed prompt_tokens=69 prefill_tokens=69 generated_tokens=4 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=429.5 prefill_tps=164.9 decode_tps=24.1 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242088892 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35148
+2026-10-05 14:10:46 [INFO] [http] request=r47 event=received method=POST path=/v1/chat/completions body_bytes=519
+2026-10-05 14:10:47 [INFO] [progress] request=43 phase=prefill tokens=64/71 percentage=90.1 chunk_tps=210.5 avg_tps=210.5
+2026-10-05 14:10:47 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120936912 tokens=62 retained_bytes=121151980 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:47 [INFO] [progress] request=43 phase=prefill tokens=71/71 percentage=100.0 chunk_tps=59.3 avg_tps=168.2
+2026-10-05 14:10:47 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121151980 tokens=69 retained_bytes=120998360 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:47 [INFO] [progress] request=43 phase=decode tokens=7/32 percentage=21.9 chunk_tps=24.2 avg_tps=24.2
+2026-10-05 14:10:47 [INFO] [http] request=r47 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=739.7 outcome=completed prompt_tokens=71 prefill_tokens=71 generated_tokens=7 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=432.1 prefill_tps=168.2 decode_tps=24.2 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242211788 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35157
+2026-10-05 14:10:47 [INFO] [http] request=r48 event=received method=POST path=/v1/chat/completions body_bytes=513
+2026-10-05 14:10:47 [INFO] [progress] request=44 phase=prefill tokens=58/65 percentage=89.2 chunk_tps=212.5 avg_tps=212.5
+2026-10-05 14:10:48 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120998360 tokens=64 retained_bytes=121213428 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:48 [INFO] [progress] request=44 phase=prefill tokens=65/65 percentage=100.0 chunk_tps=59.6 avg_tps=166.5
+2026-10-05 14:10:48 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121213428 tokens=71 retained_bytes=120814016 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:48 [INFO] [progress] request=44 phase=decode tokens=5/32 percentage=15.6 chunk_tps=24.0 avg_tps=24.0
+2026-10-05 14:10:48 [INFO] [http] request=r48 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=629.5 outcome=completed prompt_tokens=65 prefill_tokens=65 generated_tokens=5 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=401.6 prefill_tps=166.5 decode_tps=24.0 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=241843100 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35160
+2026-10-05 14:10:48 [INFO] [http] request=r49 event=received method=POST path=/v1/chat/completions body_bytes=565
+2026-10-05 14:10:48 [INFO] [progress] request=45 phase=prefill tokens=75/82 percentage=91.5 chunk_tps=209.7 avg_tps=209.7
+2026-10-05 14:10:48 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=120814016 tokens=58 retained_bytes=121029084 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:48 [INFO] [progress] request=45 phase=prefill tokens=82/82 percentage=100.0 chunk_tps=59.7 avg_tps=172.7
+2026-10-05 14:10:49 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121029084 tokens=65 retained_bytes=121336324 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:49 [INFO] [progress] request=45 phase=decode tokens=19/64 percentage=29.7 chunk_tps=24.1 avg_tps=24.1
+2026-10-05 14:10:49 [INFO] [http] request=r49 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=1296.0 outcome=completed prompt_tokens=82 prefill_tokens=82 generated_tokens=19 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=487.1 prefill_tps=172.7 decode_tps=24.1 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242887716 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=799 host_available_mib=35172
+2026-10-05 14:10:49 [INFO] [http] request=r50 event=received method=POST path=/v1/chat/completions body_bytes=560
+2026-10-05 14:10:50 [INFO] [progress] request=46 phase=prefill tokens=81/88 percentage=92.0 chunk_tps=223.4 avg_tps=223.4
+2026-10-05 14:10:50 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121336324 tokens=75 retained_bytes=121551392 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:50 [INFO] [progress] request=46 phase=prefill tokens=88/88 percentage=100.0 chunk_tps=59.0 avg_tps=182.8
+2026-10-05 14:10:50 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121551392 tokens=82 retained_bytes=121520668 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:50 [INFO] [progress] request=46 phase=decode tokens=5/64 percentage=7.8 chunk_tps=24.0 avg_tps=24.0
+2026-10-05 14:10:50 [INFO] [http] request=r50 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=723.7 outcome=completed prompt_tokens=88 prefill_tokens=88 generated_tokens=5 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=494.7 prefill_tps=182.8 decode_tps=24.0 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=243256404 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=799 host_available_mib=35186
+2026-10-05 14:10:50 [INFO] [http] request=r51 event=received method=POST path=/v1/chat/completions body_bytes=653
+2026-10-05 14:10:50 [INFO] [progress] request=47 phase=prefill tokens=74/81 percentage=91.4 chunk_tps=195.5 avg_tps=195.5
+2026-10-05 14:10:50 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121520668 tokens=81 retained_bytes=121735736 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:50 [INFO] [progress] request=47 phase=prefill tokens=81/81 percentage=100.0 chunk_tps=55.9 avg_tps=160.9
+2026-10-05 14:10:51 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121735736 tokens=88 retained_bytes=121305600 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:51 [INFO] [progress] request=47 phase=decode tokens=8/32 percentage=25.0 chunk_tps=23.6 avg_tps=23.6
+2026-10-05 14:10:51 [INFO] [http] request=r51 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=870.5 outcome=completed prompt_tokens=81 prefill_tokens=81 generated_tokens=8 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=514.7 prefill_tps=160.9 decode_tps=23.6 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242826268 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=799 host_available_mib=35185
+2026-10-05 14:10:51 [INFO] [http] request=r52 event=received method=POST path=/v1/chat/completions body_bytes=573
+2026-10-05 14:10:51 [INFO] [progress] request=48 phase=prefill tokens=70/77 percentage=90.9 chunk_tps=201.1 avg_tps=201.1
+2026-10-05 14:10:51 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121305600 tokens=74 retained_bytes=121520668 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:51 [INFO] [progress] request=48 phase=prefill tokens=77/77 percentage=100.0 chunk_tps=55.7 avg_tps=162.5
+2026-10-05 14:10:51 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121520668 tokens=81 retained_bytes=121182704 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:51 [INFO] [progress] request=48 phase=decode tokens=1/32 percentage=3.1 chunk_tps=22.8 avg_tps=22.8
+2026-10-05 14:10:51 [INFO] [http] request=r52 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=548.1 outcome=completed prompt_tokens=77 prefill_tokens=77 generated_tokens=1 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=486.0 prefill_tps=162.5 decode_tps=22.8 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242580476 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35153
+2026-10-05 14:10:51 [INFO] [http] request=r53 event=received method=POST path=/v1/chat/completions body_bytes=505
+2026-10-05 14:10:52 [INFO] [progress] request=49 phase=prefill tokens=75/82 percentage=91.5 chunk_tps=206.2 avg_tps=206.2
+2026-10-05 14:10:52 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121182704 tokens=70 retained_bytes=121397772 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:52 [INFO] [progress] request=49 phase=prefill tokens=82/82 percentage=100.0 chunk_tps=55.5 avg_tps=167.5
+2026-10-05 14:10:52 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121397772 tokens=77 retained_bytes=121336324 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:52 [INFO] [progress] request=49 phase=decode tokens=6/32 percentage=18.8 chunk_tps=23.6 avg_tps=23.6
+2026-10-05 14:10:52 [INFO] [http] request=r53 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=773.7 outcome=completed prompt_tokens=82 prefill_tokens=82 generated_tokens=6 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.5 ttft_ms=500.9 prefill_tps=167.5 decode_tps=23.6 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242887716 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=799 host_available_mib=35115
+2026-10-05 14:10:52 [INFO] [http] request=r54 event=received method=POST path=/v1/chat/completions body_bytes=547
+2026-10-05 14:10:52 [INFO] [progress] request=50 phase=prefill tokens=70/77 percentage=90.9 chunk_tps=208.4 avg_tps=208.4
+2026-10-05 14:10:52 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121336324 tokens=75 retained_bytes=121551392 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:53 [INFO] [progress] request=50 phase=prefill tokens=77/77 percentage=100.0 chunk_tps=57.8 avg_tps=168.5
+2026-10-05 14:10:53 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121551392 tokens=82 retained_bytes=121182704 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:10:53 [INFO] [progress] request=50 phase=decode tokens=5/32 percentage=15.6 chunk_tps=24.0 avg_tps=24.0
+2026-10-05 14:10:53 [INFO] [http] request=r54 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=696.5 outcome=completed prompt_tokens=77 prefill_tokens=77 generated_tokens=5 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.4 ttft_ms=469.2 prefill_tps=168.5 decode_tps=24.0 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=242580476 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=798 host_available_mib=35149
+2026-10-05 14:10:53 [INFO] [http] request=r55 event=received method=POST path=/v1/chat/completions body_bytes=41895
+2026-10-05 14:10:56 [INFO] [progress] request=51 phase=prefill tokens=2048/16949 percentage=12.1 chunk_tps=716.0 avg_tps=716.0
+2026-10-05 14:10:59 [INFO] [progress] request=51 phase=prefill tokens=4096/16949 percentage=24.2 chunk_tps=693.9 avg_tps=704.8
+2026-10-05 14:11:02 [INFO] [progress] request=51 phase=prefill tokens=6144/16949 percentage=36.2 chunk_tps=684.1 avg_tps=697.8
+2026-10-05 14:11:05 [INFO] [progress] request=51 phase=prefill tokens=8192/16949 percentage=48.3 chunk_tps=670.6 avg_tps=690.8
+2026-10-05 14:11:08 [INFO] [progress] request=51 phase=prefill tokens=10240/16949 percentage=60.4 chunk_tps=669.9 avg_tps=686.5
+2026-10-05 14:11:11 [INFO] [progress] request=51 phase=prefill tokens=12288/16949 percentage=72.5 chunk_tps=729.9 avg_tps=693.4
+2026-10-05 14:11:13 [INFO] [progress] request=51 phase=prefill tokens=14336/16949 percentage=84.6 chunk_tps=759.1 avg_tps=702.1
+2026-10-05 14:11:16 [INFO] [progress] request=51 phase=prefill tokens=16384/16949 percentage=96.7 chunk_tps=760.6 avg_tps=708.9
+2026-10-05 14:11:17 [INFO] [progress] request=51 phase=prefill tokens=16942/16949 percentage=100.0 chunk_tps=524.4 avg_tps=700.8
+2026-10-05 14:11:17 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121182704 tokens=70 retained_bytes=121397772 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:11:17 [INFO] [progress] request=51 phase=prefill tokens=16949/16949 percentage=100.0 chunk_tps=58.0 avg_tps=697.6
+2026-10-05 14:11:17 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=121397772 tokens=77 retained_bytes=548488592 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:11:17 [INFO] [progress] request=51 phase=decode tokens=7/32 percentage=21.9 chunk_tps=22.9 avg_tps=22.9
+2026-10-05 14:11:17 [INFO] [http] request=r55 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=24666.8 outcome=completed prompt_tokens=16949 prefill_tokens=16949 generated_tokens=7 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=1.0 ttft_ms=24327.3 prefill_tps=697.6 decode_tps=22.9 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=1097149244 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=1613 host_available_mib=34392
+2026-10-05 14:11:17 [INFO] [http] request=r56 event=received method=POST path=/v1/chat/completions body_bytes=10196
+2026-10-05 14:11:20 [INFO] [progress] request=52 phase=prefill tokens=2048/4037 percentage=50.7 chunk_tps=715.0 avg_tps=715.0
+2026-10-05 14:11:23 [INFO] [progress] request=52 phase=prefill tokens=4030/4037 percentage=99.8 chunk_tps=673.0 avg_tps=693.7
+2026-10-05 14:11:23 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=548488592 tokens=16942 retained_bytes=548660652 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:11:23 [INFO] [progress] request=52 phase=prefill tokens=4037/4037 percentage=100.0 chunk_tps=52.4 avg_tps=679.3
+2026-10-05 14:11:24 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=548660652 tokens=16949 retained_bytes=221195216 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:11:24 [INFO] [progress] request=52 phase=decode tokens=23/128 percentage=18.0 chunk_tps=23.2 avg_tps=23.2
+2026-10-05 14:11:24 [INFO] [http] request=r56 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=6985.4 outcome=completed prompt_tokens=4037 prefill_tokens=4037 generated_tokens=23 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.6 ttft_ms=5964.6 prefill_tps=679.3 decode_tps=23.2 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=442562492 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=989 host_available_mib=34996
+2026-10-05 14:11:24 [INFO] [http] request=r57 event=received method=POST path=/v1/chat/completions body_bytes=10196
+2026-10-05 14:11:27 [INFO] [progress] request=53 phase=prefill tokens=2048/4037 percentage=50.7 chunk_tps=713.9 avg_tps=713.9
+2026-10-05 14:11:30 [INFO] [progress] request=53 phase=prefill tokens=4030/4037 percentage=99.8 chunk_tps=673.3 avg_tps=693.3
+2026-10-05 14:11:30 [INFO] [progress] request=53 phase=prefill tokens=4037/4037 percentage=100.0 chunk_tps=56.7 avg_tps=680.1
+2026-10-05 14:11:31 [INFO] [progress] request=53 phase=decode tokens=23/128 percentage=18.0 chunk_tps=23.2 avg_tps=23.2
+2026-10-05 14:11:31 [INFO] [http] request=r57 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=6973.5 outcome=completed prompt_tokens=4037 prefill_tokens=4037 generated_tokens=23 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=0.6 ttft_ms=5954.8 prefill_tps=680.1 decode_tps=23.2 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=442562492 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=989 host_available_mib=35007
+2026-10-05 14:11:31 [INFO] [http] request=r58 event=received method=POST path=/v1/chat/completions body_bytes=78155
+2026-10-05 14:11:34 [INFO] [progress] request=54 phase=prefill tokens=2048/31724 percentage=6.5 chunk_tps=715.9 avg_tps=715.9
+2026-10-05 14:11:37 [INFO] [progress] request=54 phase=prefill tokens=4096/31724 percentage=12.9 chunk_tps=693.9 avg_tps=704.8
+2026-10-05 14:11:40 [INFO] [progress] request=54 phase=prefill tokens=6144/31724 percentage=19.4 chunk_tps=689.3 avg_tps=699.5
+2026-10-05 14:11:43 [INFO] [progress] request=54 phase=prefill tokens=8192/31724 percentage=25.8 chunk_tps=679.4 avg_tps=694.4
+2026-10-05 14:11:46 [INFO] [progress] request=54 phase=prefill tokens=10240/31724 percentage=32.3 chunk_tps=694.7 avg_tps=694.4
+2026-10-05 14:11:49 [INFO] [progress] request=54 phase=prefill tokens=12288/31724 percentage=38.7 chunk_tps=763.2 avg_tps=705.0
+2026-10-05 14:11:51 [INFO] [progress] request=54 phase=prefill tokens=14336/31724 percentage=45.2 chunk_tps=772.9 avg_tps=714.0
+2026-10-05 14:11:54 [INFO] [progress] request=54 phase=prefill tokens=16384/31724 percentage=51.6 chunk_tps=771.2 avg_tps=720.7
+2026-10-05 14:11:57 [INFO] [progress] request=54 phase=prefill tokens=18432/31724 percentage=58.1 chunk_tps=762.2 avg_tps=725.1
+2026-10-05 14:12:00 [INFO] [progress] request=54 phase=prefill tokens=20480/31724 percentage=64.6 chunk_tps=765.8 avg_tps=728.9
+2026-10-05 14:12:02 [INFO] [progress] request=54 phase=prefill tokens=22528/31724 percentage=71.0 chunk_tps=756.3 avg_tps=731.3
+2026-10-05 14:12:05 [INFO] [progress] request=54 phase=prefill tokens=24576/31724 percentage=77.5 chunk_tps=759.0 avg_tps=733.6
+2026-10-05 14:12:08 [INFO] [progress] request=54 phase=prefill tokens=26624/31724 percentage=83.9 chunk_tps=753.2 avg_tps=735.0
+2026-10-05 14:12:10 [INFO] [progress] request=54 phase=prefill tokens=28672/31724 percentage=90.4 chunk_tps=752.0 avg_tps=736.2
+2026-10-05 14:12:13 [INFO] [progress] request=54 phase=prefill tokens=30720/31724 percentage=96.8 chunk_tps=738.1 avg_tps=736.3
+2026-10-05 14:12:15 [INFO] [progress] request=54 phase=prefill tokens=31717/31724 percentage=100.0 chunk_tps=615.6 avg_tps=731.8
+2026-10-05 14:12:15 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=221195216 tokens=4030 retained_bytes=221367276 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:12:15 [INFO] [progress] request=54 phase=prefill tokens=31724/31724 percentage=100.0 chunk_tps=54.5 avg_tps=729.8
+2026-10-05 14:12:16 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=221367276 tokens=4037 retained_bytes=922999916 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:12:16 [INFO] [progress] request=54 phase=decode tokens=23/128 percentage=18.0 chunk_tps=22.9 avg_tps=22.9
+2026-10-05 14:12:16 [INFO] [http] request=r58 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=44579.6 outcome=completed prompt_tokens=31724 prefill_tokens=31724 generated_tokens=23 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=1.4 ttft_ms=43526.0 prefill_tps=729.8 decode_tps=22.9 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=1846171892 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=2328 host_available_mib=33649
+2026-10-05 14:12:16 [INFO] [http] request=r59 event=received method=POST path=/v1/chat/completions body_bytes=78155
+2026-10-05 14:12:19 [INFO] [progress] request=55 phase=prefill tokens=2048/31724 percentage=6.5 chunk_tps=709.7 avg_tps=709.7
+2026-10-05 14:12:22 [INFO] [progress] request=55 phase=prefill tokens=4096/31724 percentage=12.9 chunk_tps=690.4 avg_tps=699.9
+2026-10-05 14:12:25 [INFO] [progress] request=55 phase=prefill tokens=6144/31724 percentage=19.4 chunk_tps=692.3 avg_tps=697.3
+2026-10-05 14:12:28 [INFO] [progress] request=55 phase=prefill tokens=8192/31724 percentage=25.8 chunk_tps=678.5 avg_tps=692.5
+2026-10-05 14:12:31 [INFO] [progress] request=55 phase=prefill tokens=10240/31724 percentage=32.3 chunk_tps=672.7 avg_tps=688.5
+2026-10-05 14:12:34 [INFO] [progress] request=55 phase=prefill tokens=12288/31724 percentage=38.7 chunk_tps=676.4 avg_tps=686.4
+2026-10-05 14:12:37 [INFO] [progress] request=55 phase=prefill tokens=14336/31724 percentage=45.2 chunk_tps=666.1 avg_tps=683.4
+2026-10-05 14:12:40 [INFO] [progress] request=55 phase=prefill tokens=16384/31724 percentage=51.6 chunk_tps=631.9 avg_tps=676.5
+2026-10-05 14:12:43 [INFO] [progress] request=55 phase=prefill tokens=18432/31724 percentage=58.1 chunk_tps=719.9 avg_tps=681.1
+2026-10-05 14:12:46 [INFO] [progress] request=55 phase=prefill tokens=20480/31724 percentage=64.6 chunk_tps=761.4 avg_tps=688.4
+2026-10-05 14:12:48 [INFO] [progress] request=55 phase=prefill tokens=22528/31724 percentage=71.0 chunk_tps=762.8 avg_tps=694.5
+2026-10-05 14:12:51 [INFO] [progress] request=55 phase=prefill tokens=24576/31724 percentage=77.5 chunk_tps=759.0 avg_tps=699.5
+2026-10-05 14:12:54 [INFO] [progress] request=55 phase=prefill tokens=26624/31724 percentage=83.9 chunk_tps=751.1 avg_tps=703.2
+2026-10-05 14:12:57 [INFO] [progress] request=55 phase=prefill tokens=28672/31724 percentage=90.4 chunk_tps=750.8 avg_tps=706.4
+2026-10-05 14:12:59 [INFO] [progress] request=55 phase=prefill tokens=30720/31724 percentage=96.8 chunk_tps=746.7 avg_tps=708.9
+2026-10-05 14:13:01 [INFO] [progress] request=55 phase=prefill tokens=31717/31724 percentage=100.0 chunk_tps=633.7 avg_tps=706.3
+2026-10-05 14:13:01 [INFO] [progress] request=55 phase=prefill tokens=31724/31724 percentage=100.0 chunk_tps=56.5 avg_tps=704.5
+2026-10-05 14:13:02 [INFO] [progress] request=55 phase=decode tokens=23/128 percentage=18.0 chunk_tps=23.1 avg_tps=23.1
+2026-10-05 14:13:02 [INFO] [http] request=r59 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=46132.6 outcome=completed prompt_tokens=31724 prefill_tokens=31724 generated_tokens=23 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=1.6 ttft_ms=45083.6 prefill_tps=704.5 decode_tps=23.1 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=1846171892 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=2328 host_available_mib=33609
+2026-10-05 14:13:02 [INFO] [http] request=r60 event=received method=POST path=/v1/chat/completions body_bytes=320831
+2026-10-05 14:13:05 [INFO] [progress] request=56 phase=prefill tokens=2048/130592 percentage=1.6 chunk_tps=716.4 avg_tps=716.4
+2026-10-05 14:13:08 [INFO] [progress] request=56 phase=prefill tokens=4096/130592 percentage=3.1 chunk_tps=687.5 avg_tps=701.7
+2026-10-05 14:13:11 [INFO] [progress] request=56 phase=prefill tokens=6144/130592 percentage=4.7 chunk_tps=683.9 avg_tps=695.6
+2026-10-05 14:13:14 [INFO] [progress] request=56 phase=prefill tokens=8192/130592 percentage=6.3 chunk_tps=671.0 avg_tps=689.3
+2026-10-05 14:13:17 [INFO] [progress] request=56 phase=prefill tokens=10240/130592 percentage=7.8 chunk_tps=664.5 avg_tps=684.2
+2026-10-05 14:13:20 [INFO] [progress] request=56 phase=prefill tokens=12288/130592 percentage=9.4 chunk_tps=663.5 avg_tps=680.7
+2026-10-05 14:13:23 [INFO] [progress] request=56 phase=prefill tokens=14336/130592 percentage=11.0 chunk_tps=658.1 avg_tps=677.3
+2026-10-05 14:13:26 [INFO] [progress] request=56 phase=prefill tokens=16384/130592 percentage=12.5 chunk_tps=673.9 avg_tps=676.9
+2026-10-05 14:13:29 [INFO] [progress] request=56 phase=prefill tokens=18432/130592 percentage=14.1 chunk_tps=740.1 avg_tps=683.4
+2026-10-05 14:13:32 [INFO] [progress] request=56 phase=prefill tokens=20480/130592 percentage=15.7 chunk_tps=748.7 avg_tps=689.4
+2026-10-05 14:13:35 [INFO] [progress] request=56 phase=prefill tokens=22528/130592 percentage=17.3 chunk_tps=754.2 avg_tps=694.8
+2026-10-05 14:13:37 [INFO] [progress] request=56 phase=prefill tokens=24576/130592 percentage=18.8 chunk_tps=747.1 avg_tps=698.9
+2026-10-05 14:13:40 [INFO] [progress] request=56 phase=prefill tokens=26624/130592 percentage=20.4 chunk_tps=751.0 avg_tps=702.7
+2026-10-05 14:13:43 [INFO] [progress] request=56 phase=prefill tokens=28672/130592 percentage=22.0 chunk_tps=755.3 avg_tps=706.2
+2026-10-05 14:13:45 [INFO] [progress] request=56 phase=prefill tokens=30720/130592 percentage=23.5 chunk_tps=745.1 avg_tps=708.6
+2026-10-05 14:13:48 [INFO] [progress] request=56 phase=prefill tokens=32768/130592 percentage=25.1 chunk_tps=743.9 avg_tps=710.8
+2026-10-05 14:13:51 [INFO] [progress] request=56 phase=prefill tokens=34816/130592 percentage=26.7 chunk_tps=741.3 avg_tps=712.5
+2026-10-05 14:13:54 [INFO] [progress] request=56 phase=prefill tokens=36864/130592 percentage=28.2 chunk_tps=743.5 avg_tps=714.1
+2026-10-05 14:13:57 [INFO] [progress] request=56 phase=prefill tokens=38912/130592 percentage=29.8 chunk_tps=744.5 avg_tps=715.7
+2026-10-05 14:13:59 [INFO] [progress] request=56 phase=prefill tokens=40960/130592 percentage=31.4 chunk_tps=747.1 avg_tps=717.2
+2026-10-05 14:14:02 [INFO] [progress] request=56 phase=prefill tokens=43008/130592 percentage=32.9 chunk_tps=741.0 avg_tps=718.3
+2026-10-05 14:14:05 [INFO] [progress] request=56 phase=prefill tokens=45056/130592 percentage=34.5 chunk_tps=739.6 avg_tps=719.2
+2026-10-05 14:14:08 [INFO] [progress] request=56 phase=prefill tokens=47104/130592 percentage=36.1 chunk_tps=741.3 avg_tps=720.2
+2026-10-05 14:14:10 [INFO] [progress] request=56 phase=prefill tokens=49152/130592 percentage=37.6 chunk_tps=737.0 avg_tps=720.8
+2026-10-05 14:14:13 [INFO] [progress] request=56 phase=prefill tokens=51200/130592 percentage=39.2 chunk_tps=736.9 avg_tps=721.5
+2026-10-05 14:14:16 [INFO] [progress] request=56 phase=prefill tokens=53248/130592 percentage=40.8 chunk_tps=735.2 avg_tps=722.0
+2026-10-05 14:14:19 [INFO] [progress] request=56 phase=prefill tokens=55296/130592 percentage=42.3 chunk_tps=734.6 avg_tps=722.4
+2026-10-05 14:14:21 [INFO] [progress] request=56 phase=prefill tokens=57344/130592 percentage=43.9 chunk_tps=737.8 avg_tps=723.0
+2026-10-05 14:14:24 [INFO] [progress] request=56 phase=prefill tokens=59392/130592 percentage=45.5 chunk_tps=727.2 avg_tps=723.1
+2026-10-05 14:14:27 [INFO] [progress] request=56 phase=prefill tokens=61440/130592 percentage=47.0 chunk_tps=722.8 avg_tps=723.1
+2026-10-05 14:14:30 [INFO] [progress] request=56 phase=prefill tokens=63488/130592 percentage=48.6 chunk_tps=729.7 avg_tps=723.3
+2026-10-05 14:14:33 [INFO] [progress] request=56 phase=prefill tokens=65536/130592 percentage=50.2 chunk_tps=721.2 avg_tps=723.3
+2026-10-05 14:14:36 [INFO] [progress] request=56 phase=prefill tokens=67584/130592 percentage=51.8 chunk_tps=719.7 avg_tps=723.2
+2026-10-05 14:14:38 [INFO] [progress] request=56 phase=prefill tokens=69632/130592 percentage=53.3 chunk_tps=715.6 avg_tps=722.9
+2026-10-05 14:14:41 [INFO] [progress] request=56 phase=prefill tokens=71680/130592 percentage=54.9 chunk_tps=716.2 avg_tps=722.7
+2026-10-05 14:14:44 [INFO] [progress] request=56 phase=prefill tokens=73728/130592 percentage=56.5 chunk_tps=722.2 avg_tps=722.7
+2026-10-05 14:14:47 [INFO] [progress] request=56 phase=prefill tokens=75776/130592 percentage=58.0 chunk_tps=727.6 avg_tps=722.9
+2026-10-05 14:14:50 [INFO] [progress] request=56 phase=prefill tokens=77824/130592 percentage=59.6 chunk_tps=726.0 avg_tps=722.9
+2026-10-05 14:14:53 [INFO] [progress] request=56 phase=prefill tokens=79872/130592 percentage=61.2 chunk_tps=725.0 avg_tps=723.0
+2026-10-05 14:14:55 [INFO] [progress] request=56 phase=prefill tokens=81920/130592 percentage=62.7 chunk_tps=722.2 avg_tps=723.0
+2026-10-05 14:14:58 [INFO] [progress] request=56 phase=prefill tokens=83968/130592 percentage=64.3 chunk_tps=721.4 avg_tps=722.9
+2026-10-05 14:15:01 [INFO] [progress] request=56 phase=prefill tokens=86016/130592 percentage=65.9 chunk_tps=723.1 avg_tps=722.9
+2026-10-05 14:15:04 [INFO] [progress] request=56 phase=prefill tokens=88064/130592 percentage=67.4 chunk_tps=715.3 avg_tps=722.8
+2026-10-05 14:15:07 [INFO] [progress] request=56 phase=prefill tokens=90112/130592 percentage=69.0 chunk_tps=714.2 avg_tps=722.6
+2026-10-05 14:15:10 [INFO] [progress] request=56 phase=prefill tokens=92160/130592 percentage=70.6 chunk_tps=715.4 avg_tps=722.4
+2026-10-05 14:15:13 [INFO] [progress] request=56 phase=prefill tokens=94208/130592 percentage=72.1 chunk_tps=706.7 avg_tps=722.0
+2026-10-05 14:15:16 [INFO] [progress] request=56 phase=prefill tokens=96256/130592 percentage=73.7 chunk_tps=702.0 avg_tps=721.6
+2026-10-05 14:15:18 [INFO] [progress] request=56 phase=prefill tokens=98304/130592 percentage=75.3 chunk_tps=699.8 avg_tps=721.1
+2026-10-05 14:15:21 [INFO] [progress] request=56 phase=prefill tokens=100352/130592 percentage=76.8 chunk_tps=693.7 avg_tps=720.6
+2026-10-05 14:15:24 [INFO] [progress] request=56 phase=prefill tokens=102400/130592 percentage=78.4 chunk_tps=697.4 avg_tps=720.1
+2026-10-05 14:15:27 [INFO] [progress] request=56 phase=prefill tokens=104448/130592 percentage=80.0 chunk_tps=694.5 avg_tps=719.6
+2026-10-05 14:15:30 [INFO] [progress] request=56 phase=prefill tokens=106496/130592 percentage=81.5 chunk_tps=691.3 avg_tps=719.0
+2026-10-05 14:15:33 [INFO] [progress] request=56 phase=prefill tokens=108544/130592 percentage=83.1 chunk_tps=684.5 avg_tps=718.3
+2026-10-05 14:15:36 [INFO] [progress] request=56 phase=prefill tokens=110592/130592 percentage=84.7 chunk_tps=693.0 avg_tps=717.8
+2026-10-05 14:15:39 [INFO] [progress] request=56 phase=prefill tokens=112640/130592 percentage=86.3 chunk_tps=694.2 avg_tps=717.4
+2026-10-05 14:15:42 [INFO] [progress] request=56 phase=prefill tokens=114688/130592 percentage=87.8 chunk_tps=693.5 avg_tps=716.9
+2026-10-05 14:15:45 [INFO] [progress] request=56 phase=prefill tokens=116736/130592 percentage=89.4 chunk_tps=692.2 avg_tps=716.5
+2026-10-05 14:15:48 [INFO] [progress] request=56 phase=prefill tokens=118784/130592 percentage=91.0 chunk_tps=705.4 avg_tps=716.3
+2026-10-05 14:15:51 [INFO] [progress] request=56 phase=prefill tokens=120832/130592 percentage=92.5 chunk_tps=696.5 avg_tps=716.0
+2026-10-05 14:15:54 [INFO] [progress] request=56 phase=prefill tokens=122880/130592 percentage=94.1 chunk_tps=702.9 avg_tps=715.7
+2026-10-05 14:15:57 [INFO] [progress] request=56 phase=prefill tokens=124928/130592 percentage=95.7 chunk_tps=702.4 avg_tps=715.5
+2026-10-05 14:16:00 [INFO] [progress] request=56 phase=prefill tokens=126976/130592 percentage=97.2 chunk_tps=698.2 avg_tps=715.2
+2026-10-05 14:16:03 [INFO] [progress] request=56 phase=prefill tokens=129024/130592 percentage=98.8 chunk_tps=699.2 avg_tps=715.0
+2026-10-05 14:16:05 [INFO] [progress] request=56 phase=prefill tokens=130585/130592 percentage=100.0 chunk_tps=649.5 avg_tps=714.1
+2026-10-05 14:16:05 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=922999916 tokens=31717 retained_bytes=923171976 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:16:05 [INFO] [progress] request=56 phase=prefill tokens=130592/130592 percentage=100.0 chunk_tps=53.3 avg_tps=713.6
+2026-10-05 14:16:06 [WARN] [cache] event=snapshot action=removed reason=entry_capacity bytes=923171976 tokens=31724 retained_bytes=3429105980 reserved_bytes=0 capacity_bytes=18780727296
+2026-10-05 14:16:06 [INFO] [progress] request=56 phase=decode tokens=23/128 percentage=18.0 chunk_tps=22.5 avg_tps=22.5
+2026-10-05 14:16:06 [INFO] [http] request=r60 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=184294.1 outcome=completed prompt_tokens=130592 prefill_tokens=130592 generated_tokens=23 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=3.3 ttft_ms=183147.8 prefill_tps=713.6 decode_tps=22.5 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=6858384020 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=7108 host_available_mib=28823
+2026-10-05 14:16:06 [INFO] [http] request=r61 event=received method=POST path=/v1/chat/completions body_bytes=320831
+2026-10-05 14:16:09 [INFO] [progress] request=57 phase=prefill tokens=2048/130592 percentage=1.6 chunk_tps=719.1 avg_tps=719.1
+2026-10-05 14:16:12 [INFO] [progress] request=57 phase=prefill tokens=4096/130592 percentage=3.1 chunk_tps=692.4 avg_tps=705.5
+2026-10-05 14:16:15 [INFO] [progress] request=57 phase=prefill tokens=6144/130592 percentage=4.7 chunk_tps=681.4 avg_tps=697.3
+2026-10-05 14:16:18 [INFO] [progress] request=57 phase=prefill tokens=8192/130592 percentage=6.3 chunk_tps=668.0 avg_tps=689.7
+2026-10-05 14:16:21 [INFO] [progress] request=57 phase=prefill tokens=10240/130592 percentage=7.8 chunk_tps=659.8 avg_tps=683.5
+2026-10-05 14:16:25 [INFO] [progress] request=57 phase=prefill tokens=12288/130592 percentage=9.4 chunk_tps=662.3 avg_tps=679.9
+2026-10-05 14:16:28 [INFO] [progress] request=57 phase=prefill tokens=14336/130592 percentage=11.0 chunk_tps=661.7 avg_tps=677.2
+2026-10-05 14:16:31 [INFO] [progress] request=57 phase=prefill tokens=16384/130592 percentage=12.5 chunk_tps=657.1 avg_tps=674.6
+2026-10-05 14:16:34 [INFO] [progress] request=57 phase=prefill tokens=18432/130592 percentage=14.1 chunk_tps=650.8 avg_tps=671.9
+2026-10-05 14:16:37 [INFO] [progress] request=57 phase=prefill tokens=20480/130592 percentage=15.7 chunk_tps=694.2 avg_tps=674.1
+2026-10-05 14:16:40 [INFO] [progress] request=57 phase=prefill tokens=22528/130592 percentage=17.3 chunk_tps=736.7 avg_tps=679.3
+2026-10-05 14:16:42 [INFO] [progress] request=57 phase=prefill tokens=24576/130592 percentage=18.8 chunk_tps=746.4 avg_tps=684.4
+2026-10-05 14:16:45 [INFO] [progress] request=57 phase=prefill tokens=26624/130592 percentage=20.4 chunk_tps=743.5 avg_tps=688.6
+2026-10-05 14:16:48 [INFO] [progress] request=57 phase=prefill tokens=28672/130592 percentage=22.0 chunk_tps=736.1 avg_tps=691.8
+2026-10-05 14:16:51 [INFO] [progress] request=57 phase=prefill tokens=30720/130592 percentage=23.5 chunk_tps=740.5 avg_tps=694.9
+2026-10-05 14:16:53 [INFO] [progress] request=57 phase=prefill tokens=32768/130592 percentage=25.1 chunk_tps=736.3 avg_tps=697.3
+2026-10-05 14:16:56 [INFO] [progress] request=57 phase=prefill tokens=34816/130592 percentage=26.7 chunk_tps=730.9 avg_tps=699.2
+2026-10-05 14:16:59 [INFO] [progress] request=57 phase=prefill tokens=36864/130592 percentage=28.2 chunk_tps=730.8 avg_tps=700.9
+2026-10-05 14:17:02 [INFO] [progress] request=57 phase=prefill tokens=38912/130592 percentage=29.8 chunk_tps=730.8 avg_tps=702.4
+2026-10-05 14:17:05 [INFO] [progress] request=57 phase=prefill tokens=40960/130592 percentage=31.4 chunk_tps=733.1 avg_tps=703.9
+2026-10-05 14:17:07 [INFO] [progress] request=57 phase=prefill tokens=43008/130592 percentage=32.9 chunk_tps=727.7 avg_tps=705.0
+2026-10-05 14:17:10 [INFO] [progress] request=57 phase=prefill tokens=45056/130592 percentage=34.5 chunk_tps=731.3 avg_tps=706.1
+2026-10-05 14:17:13 [INFO] [progress] request=57 phase=prefill tokens=47104/130592 percentage=36.1 chunk_tps=727.9 avg_tps=707.1
+2026-10-05 14:17:16 [INFO] [progress] request=57 phase=prefill tokens=49152/130592 percentage=37.6 chunk_tps=727.3 avg_tps=707.9
+2026-10-05 14:17:19 [INFO] [progress] request=57 phase=prefill tokens=51200/130592 percentage=39.2 chunk_tps=727.2 avg_tps=708.6
+2026-10-05 14:17:22 [INFO] [progress] request=57 phase=prefill tokens=53248/130592 percentage=40.8 chunk_tps=723.1 avg_tps=709.2
+2026-10-05 14:17:24 [INFO] [progress] request=57 phase=prefill tokens=55296/130592 percentage=42.3 chunk_tps=724.7 avg_tps=709.7
+2026-10-05 14:17:27 [INFO] [progress] request=57 phase=prefill tokens=57344/130592 percentage=43.9 chunk_tps=725.0 avg_tps=710.3
+2026-10-05 14:17:30 [INFO] [progress] request=57 phase=prefill tokens=59392/130592 percentage=45.5 chunk_tps=723.4 avg_tps=710.7
+2026-10-05 14:17:33 [INFO] [progress] request=57 phase=prefill tokens=61440/130592 percentage=47.0 chunk_tps=720.9 avg_tps=711.0
+2026-10-05 14:17:36 [INFO] [progress] request=57 phase=prefill tokens=63488/130592 percentage=48.6 chunk_tps=720.6 avg_tps=711.3
+2026-10-05 14:17:39 [INFO] [progress] request=57 phase=prefill tokens=65536/130592 percentage=50.2 chunk_tps=715.9 avg_tps=711.5
+2026-10-05 14:17:41 [INFO] [progress] request=57 phase=prefill tokens=67584/130592 percentage=51.8 chunk_tps=707.2 avg_tps=711.4
+2026-10-05 14:17:44 [INFO] [progress] request=57 phase=prefill tokens=69632/130592 percentage=53.3 chunk_tps=708.9 avg_tps=711.3
+2026-10-05 14:17:47 [INFO] [progress] request=57 phase=prefill tokens=71680/130592 percentage=54.9 chunk_tps=709.1 avg_tps=711.2
+2026-10-05 14:17:50 [INFO] [progress] request=57 phase=prefill tokens=73728/130592 percentage=56.5 chunk_tps=709.8 avg_tps=711.2
+2026-10-05 14:17:53 [INFO] [progress] request=57 phase=prefill tokens=75776/130592 percentage=58.0 chunk_tps=709.2 avg_tps=711.1
+2026-10-05 14:17:56 [INFO] [progress] request=57 phase=prefill tokens=77824/130592 percentage=59.6 chunk_tps=706.0 avg_tps=711.0
+2026-10-05 14:17:59 [INFO] [progress] request=57 phase=prefill tokens=79872/130592 percentage=61.2 chunk_tps=709.5 avg_tps=711.0
+2026-10-05 14:18:02 [INFO] [progress] request=57 phase=prefill tokens=81920/130592 percentage=62.7 chunk_tps=706.1 avg_tps=710.8
+2026-10-05 14:18:05 [INFO] [progress] request=57 phase=prefill tokens=83968/130592 percentage=64.3 chunk_tps=699.0 avg_tps=710.5
+2026-10-05 14:18:08 [INFO] [progress] request=57 phase=prefill tokens=86016/130592 percentage=65.9 chunk_tps=704.3 avg_tps=710.4
+2026-10-05 14:18:10 [INFO] [progress] request=57 phase=prefill tokens=88064/130592 percentage=67.4 chunk_tps=698.2 avg_tps=710.1
+2026-10-05 14:18:13 [INFO] [progress] request=57 phase=prefill tokens=90112/130592 percentage=69.0 chunk_tps=698.4 avg_tps=709.8
+2026-10-05 14:18:16 [INFO] [progress] request=57 phase=prefill tokens=92160/130592 percentage=70.6 chunk_tps=702.6 avg_tps=709.7
+2026-10-05 14:18:19 [INFO] [progress] request=57 phase=prefill tokens=94208/130592 percentage=72.1 chunk_tps=699.1 avg_tps=709.4
+2026-10-05 14:18:22 [INFO] [progress] request=57 phase=prefill tokens=96256/130592 percentage=73.7 chunk_tps=699.9 avg_tps=709.2
+2026-10-05 14:18:25 [INFO] [progress] request=57 phase=prefill tokens=98304/130592 percentage=75.3 chunk_tps=691.6 avg_tps=708.9
+2026-10-05 14:18:28 [INFO] [progress] request=57 phase=prefill tokens=100352/130592 percentage=76.8 chunk_tps=682.6 avg_tps=708.3
+2026-10-05 14:18:31 [INFO] [progress] request=57 phase=prefill tokens=102400/130592 percentage=78.4 chunk_tps=684.6 avg_tps=707.8
+2026-10-05 14:18:34 [INFO] [progress] request=57 phase=prefill tokens=104448/130592 percentage=80.0 chunk_tps=681.6 avg_tps=707.3
+2026-10-05 14:18:37 [INFO] [progress] request=57 phase=prefill tokens=106496/130592 percentage=81.5 chunk_tps=674.8 avg_tps=706.6
+2026-10-05 14:18:40 [INFO] [progress] request=57 phase=prefill tokens=108544/130592 percentage=83.1 chunk_tps=690.4 avg_tps=706.3
+2026-10-05 14:18:43 [INFO] [progress] request=57 phase=prefill tokens=110592/130592 percentage=84.7 chunk_tps=672.0 avg_tps=705.6
+2026-10-05 14:18:46 [INFO] [progress] request=57 phase=prefill tokens=112640/130592 percentage=86.3 chunk_tps=682.1 avg_tps=705.2
+2026-10-05 14:18:49 [INFO] [progress] request=57 phase=prefill tokens=114688/130592 percentage=87.8 chunk_tps=656.6 avg_tps=704.3
+2026-10-05 14:18:52 [INFO] [progress] request=57 phase=prefill tokens=116736/130592 percentage=89.4 chunk_tps=674.6 avg_tps=703.7
+2026-10-05 14:18:55 [INFO] [progress] request=57 phase=prefill tokens=118784/130592 percentage=91.0 chunk_tps=676.6 avg_tps=703.2
+2026-10-05 14:18:58 [INFO] [progress] request=57 phase=prefill tokens=120832/130592 percentage=92.5 chunk_tps=676.0 avg_tps=702.8
+2026-10-05 14:19:01 [INFO] [progress] request=57 phase=prefill tokens=122880/130592 percentage=94.1 chunk_tps=679.8 avg_tps=702.4
+2026-10-05 14:19:04 [INFO] [progress] request=57 phase=prefill tokens=124928/130592 percentage=95.7 chunk_tps=690.4 avg_tps=702.2
+2026-10-05 14:19:07 [INFO] [progress] request=57 phase=prefill tokens=126976/130592 percentage=97.2 chunk_tps=690.2 avg_tps=702.0
+2026-10-05 14:19:10 [INFO] [progress] request=57 phase=prefill tokens=129024/130592 percentage=98.8 chunk_tps=694.0 avg_tps=701.8
+2026-10-05 14:19:13 [INFO] [progress] request=57 phase=prefill tokens=130585/130592 percentage=100.0 chunk_tps=645.9 avg_tps=701.1
+2026-10-05 14:19:13 [INFO] [progress] request=57 phase=prefill tokens=130592/130592 percentage=100.0 chunk_tps=49.8 avg_tps=700.6
+2026-10-05 14:19:14 [INFO] [progress] request=57 phase=decode tokens=23/128 percentage=18.0 chunk_tps=21.8 avg_tps=21.8
+2026-10-05 14:19:14 [INFO] [http] request=r61 event=completed method=POST path=/v1/chat/completions status=200 duration_ms=187803.8 outcome=completed prompt_tokens=130592 prefill_tokens=130592 generated_tokens=23 finish=stop cache=miss cached_tokens=0 cache_restore_ms=0.0 queue_depth=1 resident_at_admission=1 queue_ms=3.5 ttft_ms=186612.2 prefill_tps=700.6 decode_tps=21.8 batch_width=1 plan=serial-c1 draft_accepted=0 draft_proposed=0 cache_snapshot_bytes=6858384020 cache_miss_reason=disabled common_prefix_tokens=0 nearest_checkpoint_tokens=0 rss_mib=7108 host_available_mib=28644
+2026-10-05 14:19:16 [INFO] [server] event=shutdown_requested signal=15

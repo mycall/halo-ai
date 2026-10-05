@@ -1,0 +1,83 @@
+gufo-mtp quality 1 code-trace-alternating False
+gufo-mtp quality 1 code-slice-semantics False
+gufo-mtp quality 1 reasoning-crt False
+gufo-mtp quality 1 reasoning-probability True
+gufo-mtp quality 1 logic-ordering True
+gufo-mtp quality 1 instruction-exact-format True
+gufo-mtp quality 1 tool-arguments-json True
+gufo-mtp quality 1 json-filter-sort True
+gufo-mtp quality 1 multilingual-literal-retrieval True
+gufo-mtp quality 1 special-token-literals True
+gufo-mtp quality 1 short-distractor-retrieval True
+gufo-mtp quality 1 multi-turn-resynchronization True
+gufo-mtp quality 1 long-context-needle True
+gufo-mtp quality 2 code-trace-alternating False
+gufo-mtp quality 2 code-slice-semantics False
+gufo-mtp quality 2 reasoning-crt False
+gufo-mtp quality 2 reasoning-probability True
+gufo-mtp quality 2 logic-ordering True
+gufo-mtp quality 2 instruction-exact-format True
+gufo-mtp quality 2 tool-arguments-json True
+gufo-mtp quality 2 json-filter-sort True
+gufo-mtp quality 2 multilingual-literal-retrieval True
+gufo-mtp quality 2 special-token-literals True
+gufo-mtp quality 2 short-distractor-retrieval True
+gufo-mtp quality 2 multi-turn-resynchronization True
+gufo-mtp quality 2 long-context-needle True
+gufo-mtp quality 3 code-trace-alternating False
+gufo-mtp quality 3 code-slice-semantics False
+gufo-mtp quality 3 reasoning-crt False
+gufo-mtp quality 3 reasoning-probability True
+gufo-mtp quality 3 logic-ordering True
+gufo-mtp quality 3 instruction-exact-format True
+gufo-mtp quality 3 tool-arguments-json True
+gufo-mtp quality 3 json-filter-sort True
+gufo-mtp quality 3 multilingual-literal-retrieval True
+gufo-mtp quality 3 special-token-literals True
+gufo-mtp quality 3 short-distractor-retrieval True
+gufo-mtp quality 3 multi-turn-resynchronization True
+gufo-mtp quality 3 long-context-needle True
+gufo-mtp performance 120 1 {'prompt_tokens': 4015, 'completion_tokens': 512, 'total_tokens': 4527, 'prompt_tokens_details': {'cached_tokens': 0}, 'cached_tokens': 0, 'prompt_tokens_per_second': 716.9678043618155, 'completion_tokens_per_second': 42.95276365722265, 'draft_tokens': 463, 'draft_tokens_accepted': 378, 'gufo': {'cache_hit': False, 'cache_miss_reason': 'disabled', 'cache_common_prefix_tokens': 0, 'cache_checkpoint_tokens': 0, 'cache_restore_bytes': 0, 'cache_snapshot_bytes': 459004172, 'cache_disk_queued_bytes': 0, 'cache_shared_bytes': 0, 'cache_restore_ms': 0, 'cache_snapshot_ms': 37.053855999999996, 'cache_disk_enqueue_ms': 0, 'cache_disk_hit': False, 'cache_shared_prefix_snapshots': 0, 'cache_shared_prefix_bytes': 0, 'cache_shared_prefix_ms': 0, 'prefill_tokens': 4015, 'prefill_chunks': 3, 'active_decode_prefill_chunks': 0, 'max_prefill_chunk_tokens': 2048, 'queue_depth_at_submit': 1, 'client_queue_depth_at_submit': 1, 'resident_requests_at_admission': 1, 'requested_logical_concurrency': 1, 'physical_execution_width': 1, 'queue_ms': 4.065417, 'prefill_ms': 5599.972517, 'decode_ms': 11920.071176, 'ttft_ms': 5623.195227, 'mean_inter_token_ms': 23.363458706457944, 'max_inter_token_ms': 148.368546, 'execution_plan': 'serial-c1'}} TTFT 5.623952547999579 TPS 42.8021791919885
+gufo-mtp performance 120 2 {'prompt_tokens': 4015, 'completion_tokens': 512, 'total_tokens': 4527, 'prompt_tokens_details': {'cached_tokens': 0}, 'cached_tokens': 0, 'prompt_tokens_per_second': 701.5333226699802, 'completion_tokens_per_second': 43.42931251973806, 'draft_tokens': 463, 'draft_tokens_accepted': 378, 'gufo': {'cache_hit': False, 'cache_miss_reason': 'disabled', 'cache_common_prefix_tokens': 0, 'cache_checkpoint_tokens': 0, 'cache_restore_bytes': 0, 'cache_snapshot_bytes': 459004172, 'cache_disk_queued_bytes': 0, 'cache_shared_bytes': 0, 'cache_restore_ms': 0, 'cache_snapshot_ms': 32.955175, 'cache_disk_enqueue_ms': 0, 'cache_disk_hit': False, 'cache_shared_prefix_snapshots': 0, 'cache_shared_prefix_bytes': 0, 'cache_shared_prefix_ms': 0, 'prefill_tokens': 4015, 'prefill_chunks': 3, 'active_decode_prefill_chunks': 0, 'max_prefill_chunk_tokens': 2048, 'queue_depth_at_submit': 1, 'client_queue_depth_at_submit': 1, 'resident_requests_at_admission': 1, 'requested_logical_concurrency': 1, 'physical_execution_width': 1, 'queue_ms': 10.05608, 'prefill_ms': 5723.177888, 'decode_ms': 11789.272504999995, 'ttft_ms': 5749.249141, 'mean_inter_token_ms': 23.10548215655573, 'max_inter_token_ms': 143.428972, 'execution_plan': 'serial-c1'}} TTFT 5.749887448000663 TPS 43.280149558801575
+gufo-mtp performance 120 3 {'prompt_tokens': 4015, 'completion_tokens': 512, 'total_tokens': 4527, 'prompt_tokens_details': {'cached_tokens': 0}, 'cached_tokens': 0, 'prompt_tokens_per_second': 706.8662606517242, 'completion_tokens_per_second': 42.31046216311491, 'draft_tokens': 463, 'draft_tokens_accepted': 378, 'gufo': {'cache_hit': False, 'cache_miss_reason': 'disabled', 'cache_common_prefix_tokens': 0, 'cache_checkpoint_tokens': 0, 'cache_restore_bytes': 0, 'cache_snapshot_bytes': 459004172, 'cache_disk_queued_bytes': 0, 'cache_shared_bytes': 0, 'cache_restore_ms': 0, 'cache_snapshot_ms': 30.70524, 'cache_disk_enqueue_ms': 0, 'cache_disk_hit': False, 'cache_shared_prefix_snapshots': 0, 'cache_shared_prefix_bytes': 0, 'cache_shared_prefix_ms': 0, 'prefill_tokens': 4015, 'prefill_chunks': 3, 'active_decode_prefill_chunks': 0, 'max_prefill_chunk_tokens': 2048, 'queue_depth_at_submit': 1, 'client_queue_depth_at_submit': 1, 'resident_requests_at_admission': 1, 'requested_logical_concurrency': 1, 'physical_execution_width': 1, 'queue_ms': 9.103258, 'prefill_ms': 5679.999489999999, 'decode_ms': 12101.025935999995, 'ttft_ms': 5704.003588, 'mean_inter_token_ms': 23.713383367906083, 'max_inter_token_ms': 149.106233, 'execution_plan': 'serial-c1'}} TTFT 5.705164551998678 TPS 42.17194089090376
+gufo-mtp retrieval 120 1 True delta-99757,delta-79869,delta-59981
+gufo-mtp retrieval 120 2 True delta-99757,delta-79869,delta-59981
+gufo-mtp retrieval 120 3 True delta-99757,delta-79869,delta-59981
+gufo-mtp performance 959 1 {'prompt_tokens': 31702, 'completion_tokens': 512, 'total_tokens': 32214, 'prompt_tokens_details': {'cached_tokens': 0}, 'cached_tokens': 0, 'prompt_tokens_per_second': 697.1391245470041, 'completion_tokens_per_second': 45.105335108837544, 'draft_tokens': 459, 'draft_tokens_accepted': 390, 'gufo': {'cache_hit': False, 'cache_miss_reason': 'disabled', 'cache_common_prefix_tokens': 0, 'cache_checkpoint_tokens': 0, 'cache_restore_bytes': 0, 'cache_snapshot_bytes': 1979584068, 'cache_disk_queued_bytes': 0, 'cache_shared_bytes': 0, 'cache_restore_ms': 0, 'cache_snapshot_ms': 94.048442, 'cache_disk_enqueue_ms': 0, 'cache_disk_hit': False, 'cache_shared_prefix_snapshots': 0, 'cache_shared_prefix_bytes': 0, 'cache_shared_prefix_ms': 0, 'prefill_tokens': 31702, 'prefill_chunks': 17, 'active_decode_prefill_chunks': 0, 'max_prefill_chunk_tokens': 2048, 'queue_depth_at_submit': 1, 'client_queue_depth_at_submit': 1, 'resident_requests_at_admission': 1, 'requested_logical_concurrency': 1, 'physical_execution_width': 1, 'queue_ms': 5.869476, 'prefill_ms': 45474.42380399999, 'decode_ms': 11351.207097, 'ttft_ms': 45536.158596, 'mean_inter_token_ms': 22.291194986301328, 'max_inter_token_ms': 148.550195, 'execution_plan': 'serial-c1'}} TTFT 45.537082384000314 TPS 44.860907206828095
+gufo-mtp performance 959 2 {'prompt_tokens': 31702, 'completion_tokens': 512, 'total_tokens': 32214, 'prompt_tokens_details': {'cached_tokens': 0}, 'cached_tokens': 0, 'prompt_tokens_per_second': 729.782680988242, 'completion_tokens_per_second': 42.58405457313071, 'draft_tokens': 459, 'draft_tokens_accepted': 390, 'gufo': {'cache_hit': False, 'cache_miss_reason': 'disabled', 'cache_common_prefix_tokens': 0, 'cache_checkpoint_tokens': 0, 'cache_restore_bytes': 0, 'cache_snapshot_bytes': 1979584068, 'cache_disk_queued_bytes': 0, 'cache_shared_bytes': 0, 'cache_restore_ms': 0, 'cache_snapshot_ms': 101.33058299999999, 'cache_disk_enqueue_ms': 0, 'cache_disk_hit': False, 'cache_shared_prefix_snapshots': 0, 'cache_shared_prefix_bytes': 0, 'cache_shared_prefix_ms': 0, 'prefill_tokens': 31702, 'prefill_chunks': 17, 'active_decode_prefill_chunks': 0, 'max_prefill_chunk_tokens': 2048, 'queue_depth_at_submit': 1, 'client_queue_depth_at_submit': 1, 'resident_requests_at_admission': 1, 'requested_logical_concurrency': 1, 'physical_execution_width': 1, 'queue_ms': 9.922418, 'prefill_ms': 43440.32932800001, 'decode_ms': 12023.279726, 'ttft_ms': 43506.113099, 'mean_inter_token_ms': 23.620647641878676, 'max_inter_token_ms': 155.114904, 'execution_plan': 'serial-c1'}} TTFT 43.507916717000626 TPS 42.338275197940895
+gufo-mtp performance 959 3 {'prompt_tokens': 31702, 'completion_tokens': 512, 'total_tokens': 32214, 'prompt_tokens_details': {'cached_tokens': 0}, 'cached_tokens': 0, 'prompt_tokens_per_second': 691.9414505501265, 'completion_tokens_per_second': 42.60947597235972, 'draft_tokens': 459, 'draft_tokens_accepted': 390, 'gufo': {'cache_hit': False, 'cache_miss_reason': 'disabled', 'cache_common_prefix_tokens': 0, 'cache_checkpoint_tokens': 0, 'cache_restore_bytes': 0, 'cache_snapshot_bytes': 1979584068, 'cache_disk_queued_bytes': 0, 'cache_shared_bytes': 0, 'cache_restore_ms': 0, 'cache_snapshot_ms': 101.60114300000001, 'cache_disk_enqueue_ms': 0, 'cache_disk_hit': False, 'cache_shared_prefix_snapshots': 0, 'cache_shared_prefix_bytes': 0, 'cache_shared_prefix_ms': 0, 'prefill_tokens': 31702, 'prefill_chunks': 17, 'active_decode_prefill_chunks': 0, 'max_prefill_chunk_tokens': 2048, 'queue_depth_at_submit': 1, 'client_queue_depth_at_submit': 1, 'resident_requests_at_admission': 1, 'requested_logical_concurrency': 1, 'physical_execution_width': 1, 'queue_ms': 11.534808, 'prefill_ms': 45816.01517700001, 'decode_ms': 12016.106471999998, 'ttft_ms': 45886.835351, 'mean_inter_token_ms': 23.600262645792547, 'max_inter_token_ms': 156.201138, 'execution_plan': 'serial-c1'}} TTFT 45.88789682400056 TPS 42.37273119126597
+gufo-mtp retrieval 959 1 True delta-57034,delta-97930,delta-38826
+gufo-mtp retrieval 959 2 True delta-57034,delta-97930,delta-38826
+gufo-mtp retrieval 959 3 True delta-57034,delta-97930,delta-38826
+gufo-mtp performance 3955 1 {'prompt_tokens': 130570, 'completion_tokens': 512, 'total_tokens': 131082, 'prompt_tokens_details': {'cached_tokens': 0}, 'cached_tokens': 0, 'prompt_tokens_per_second': 707.8941335801392, 'completion_tokens_per_second': 39.84751405791677, 'draft_tokens': 431, 'draft_tokens_accepted': 375, 'gufo': {'cache_hit': False, 'cache_miss_reason': 'disabled', 'cache_common_prefix_tokens': 0, 'cache_checkpoint_tokens': 0, 'cache_restore_bytes': 0, 'cache_snapshot_bytes': 7409414628, 'cache_disk_queued_bytes': 0, 'cache_shared_bytes': 0, 'cache_restore_ms': 0, 'cache_snapshot_ms': 3385.039503, 'cache_disk_enqueue_ms': 0, 'cache_disk_hit': False, 'cache_shared_prefix_snapshots': 0, 'cache_shared_prefix_bytes': 0, 'cache_shared_prefix_ms': 0, 'prefill_tokens': 130570, 'prefill_chunks': 65, 'active_decode_prefill_chunks': 0, 'max_prefill_chunk_tokens': 2048, 'queue_depth_at_submit': 1, 'client_queue_depth_at_submit': 1, 'resident_requests_at_admission': 1, 'requested_logical_concurrency': 1, 'physical_execution_width': 1, 'queue_ms': 19.120979, 'prefill_ms': 184448.48432300004, 'decode_ms': 12848.982228999994, 'ttft_ms': 186288.924605, 'mean_inter_token_ms': 28.21474174363995, 'max_inter_token_ms': 1670.634534, 'execution_plan': 'serial-c1'}} TTFT 186.29345626699978 TPS 35.4426981131926
+gufo-mtp performance 3955 2 {'prompt_tokens': 130570, 'completion_tokens': 512, 'total_tokens': 131082, 'prompt_tokens_details': {'cached_tokens': 0}, 'cached_tokens': 0, 'prompt_tokens_per_second': 706.3051012604569, 'completion_tokens_per_second': 41.62004684572823, 'draft_tokens': 431, 'draft_tokens_accepted': 375, 'gufo': {'cache_hit': False, 'cache_miss_reason': 'disabled', 'cache_common_prefix_tokens': 0, 'cache_checkpoint_tokens': 0, 'cache_restore_bytes': 0, 'cache_snapshot_bytes': 7409414628, 'cache_disk_queued_bytes': 0, 'cache_shared_bytes': 0, 'cache_restore_ms': 0, 'cache_snapshot_ms': 1856.137899, 'cache_disk_enqueue_ms': 0, 'cache_disk_hit': False, 'cache_shared_prefix_snapshots': 0, 'cache_shared_prefix_bytes': 0, 'cache_shared_prefix_ms': 0, 'prefill_tokens': 130570, 'prefill_chunks': 65, 'active_decode_prefill_chunks': 0, 'max_prefill_chunk_tokens': 2048, 'queue_depth_at_submit': 1, 'client_queue_depth_at_submit': 1, 'resident_requests_at_admission': 1, 'requested_logical_concurrency': 1, 'physical_execution_width': 1, 'queue_ms': 11.631688, 'prefill_ms': 184863.453155, 'decode_ms': 12301.764145000001, 'ttft_ms': 185304.504019, 'mean_inter_token_ms': 26.87519291976517, 'max_inter_token_ms': 1599.868976, 'execution_plan': 'serial-c1'}} TTFT 185.30641599500086 TPS 37.209689155976406
+gufo-mtp performance 3955 3 {'prompt_tokens': 130570, 'completion_tokens': 512, 'total_tokens': 131082, 'prompt_tokens_details': {'cached_tokens': 0}, 'cached_tokens': 0, 'prompt_tokens_per_second': 716.7590729249341, 'completion_tokens_per_second': 41.36254402757735, 'draft_tokens': 431, 'draft_tokens_accepted': 375, 'gufo': {'cache_hit': False, 'cache_miss_reason': 'disabled', 'cache_common_prefix_tokens': 0, 'cache_checkpoint_tokens': 0, 'cache_restore_bytes': 0, 'cache_snapshot_bytes': 7409414628, 'cache_disk_queued_bytes': 0, 'cache_shared_bytes': 0, 'cache_restore_ms': 0, 'cache_snapshot_ms': 1672.5701880000001, 'cache_disk_enqueue_ms': 0, 'cache_disk_hit': False, 'cache_shared_prefix_snapshots': 0, 'cache_shared_prefix_bytes': 0, 'cache_shared_prefix_ms': 0, 'prefill_tokens': 130570, 'prefill_chunks': 65, 'active_decode_prefill_chunks': 0, 'max_prefill_chunk_tokens': 2048, 'queue_depth_at_submit': 1, 'client_queue_depth_at_submit': 1, 'resident_requests_at_admission': 1, 'requested_logical_concurrency': 1, 'physical_execution_width': 1, 'queue_ms': 12.636328, 'prefill_ms': 182167.209223, 'decode_ms': 12378.348867000006, 'ttft_ms': 183558.708386, 'mean_inter_token_ms': 24.807913385518578, 'max_inter_token_ms': 395.77397, 'execution_plan': 'serial-c1'}} TTFT 183.56100071400033 TPS 40.31014845628833
+gufo-mtp retrieval 3955 1 False delta-32734,delta-76430,delta-88450
+gufo-mtp retrieval 3955 2 False delta-32734,delta-76430,delta-88450
+gufo-mtp retrieval 3955 3 False delta-32734,delta-76430,delta-88450
+{
+  "quality_passed": 30,
+  "quality_total": 39,
+  "retrieval_passed": 6,
+  "retrieval_total": 9,
+  "performance": [
+    {
+      "records": 120,
+      "median_ttft_seconds": 5.705164551998678,
+      "median_client_decode_tps": 42.8021791919885,
+      "unique_outputs": 1
+    },
+    {
+      "records": 959,
+      "median_ttft_seconds": 45.537082384000314,
+      "median_client_decode_tps": 42.37273119126597,
+      "unique_outputs": 1
+    },
+    {
+      "records": 3955,
+      "median_ttft_seconds": 185.30641599500086,
+      "median_client_decode_tps": 37.209689155976406,
+      "unique_outputs": 1
+    }
+  ]
+}

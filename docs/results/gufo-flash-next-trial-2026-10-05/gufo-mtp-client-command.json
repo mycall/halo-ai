@@ -1,0 +1,8 @@
+[
+  "/usr/bin/python3",
+  "/home/michael/Projects/source/github/halo-ai/tools/gufo_trial.py",
+  "--label",
+  "gufo-mtp",
+  "--output",
+  "/home/michael/Projects/source/github/halo-ai/docs/results/gufo-flash-next-trial-2026-10-05/gufo-mtp.json"
+]

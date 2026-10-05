@@ -1,0 +1,33 @@
+{
+  "recorded_at": "2026-10-05T14:58:13.257595+00:00",
+  "checks": [
+    {
+      "arm": "gufo-ar",
+      "quality_rows": 39,
+      "performance_rows": 9,
+      "retrieval_rows": 9,
+      "container_exit_code": 0
+    },
+    {
+      "arm": "gufo-mtp",
+      "quality_rows": 39,
+      "performance_rows": 9,
+      "retrieval_rows": 9,
+      "container_exit_code": 0
+    }
+  ],
+  "gufo_structural_checks_passed": true,
+  "llamacpp_control_measured": false,
+  "cleanup": {
+    "recorded_at": "2026-10-05T14:57:52.372874+00:00",
+    "trial_container_removed": true,
+    "final_running_containers": [],
+    "control_result": "No measurements: startup exceeded 600-second readiness limit; bounded stop also timed out, then the process exited with 137. Container was subsequently inspected, captured and removed. OOMKilled=false.",
+    "startup_diagnostic": "gdb attach attempted at approximately 14:54:25 UTC; it did not return a stack trace and was killed. The stopped server was resumed with SIGCONT at 14:55:20 UTC. Startup time is therefore not a clean benchmark. No requests ran during this diagnostic."
+  },
+  "kernel_journal_return_code": 0,
+  "kernel_journal_stderr": "",
+  "matching_kernel_errors": [],
+  "final_running_containers": [],
+  "runner_sha256": "a79ed47e165bc17c40dba5465705543d5b7b8f6a49b759577572068e7197f913"
+}

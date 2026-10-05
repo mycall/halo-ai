@@ -1,0 +1,9 @@
+{
+  "recorded_at": "2026-10-05T14:59:41.523361+00:00",
+  "hardware": {
+    "/sys/class/drm/card1/device/mem_info_gtt_used": 131145728,
+    "/sys/class/drm/card1/device/mem_info_vram_used": 860971008,
+    "MemAvailable_bytes": 128181538816,
+    "SwapFree_bytes": 130073378816
+  }
+}

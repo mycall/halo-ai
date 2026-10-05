@@ -2921,3 +2921,101 @@ headroom separately for these bounded profiles. `qwen3.8-fn` and the existing
 `qwen3.8-halogen` alias both select `qwen3.8-flash-next-halogen-262k-vision`
 with the quality overlay, MTP, and vision. The profile retains its experimental
 risk label because near-262K retrieval misses persist with MTP disabled.
+
+### Isolated Gufo experiment — 2026-10-05
+
+The [Kyuz0 Gufo image](https://github.com/kyuz0/amd-strix-halo-toolboxes)
+was tested against the installed Flash-Next UD-Q4_K_XL shards, with the shared
+Q8_0 MTP head for speculative decoding. This remains a standalone experiment;
+no catalog profile, engine adapter, or default alias was added.
+
+The image is pinned to digest
+`sha256:f038ddddd95d1bce9ba2f600e36ca4219d88f3235d0f5640f276bd01475216b7`,
+Gufo revision `6aa87fc6f28a5831a6ebfc355656060e8b3eccfa`. Exact image and
+model provenance, launch arguments, responses, timing telemetry, and sampled
+host memory are in [the trial artifacts](results/gufo-flash-next-trial-2026-10-05/).
+
+The HTTP-only [trial client](../tools/gufo_trial.py) reuses the existing
+13-case quality screen and generates deterministic archive padding for a
+512-token code-generation probe and separate three-code retrieval checks.
+Each case and prompt is repeated three times per mode, with greedy decoding,
+thinking off, seed 1, and cache lookup disabled. Gufo uses a 135,168-token
+capacity; a 32,768-token llama.cpp control with Q8_0 KV was also attempted but
+did not become ready within the startup window. Repetitions share a process
+and engine order is sequential, so these
+are neither independent cold starts nor a stability soak.
+
+**Result: useful MTP acceleration on this fixture; keep Gufo experimental.**
+All entries below are medians with the three-run range in parentheses. Every
+generation response contained 512 tokens. Rates are server-reported decode
+throughput; TTFT is measured at the HTTP client.
+
+| Mode | Actual prompt tokens | Decode tok/s | TTFT seconds |
+| --- | ---: | ---: | ---: |
+| Gufo AR | 4,015 | 23.85 (23.76–23.86) | 5.28 (5.21–5.61) |
+| Gufo MTP | 4,015 | 42.95 (42.31–43.43) | 5.71 (5.62–5.75) |
+| Gufo AR | 31,702 | 23.20 (23.04–23.57) | 42.76 (41.40–43.13) |
+| Gufo MTP | 31,702 | 42.61 (42.58–45.11) | 45.54 (43.51–45.89) |
+| Gufo AR | 130,570 | 22.26 (22.19–22.91) | 180.30 (179.11–182.74) |
+| Gufo MTP | 130,570 | 41.36 (39.85–41.62) | 185.31 (183.56–186.29) |
+
+MTP increased median decode throughput by 80–86%, while slightly increasing
+TTFT. All quality, generation, and retrieval outputs matched AR exactly across
+the repeated requests. Both modes scored **10/13 on every quality round**:
+the alternating-code trace, slice-semantics, and modular-arithmetic cases
+failed consistently. Retrieval passed all three repetitions at 4,037 and
+31,724 prompt tokens. At 130,592 tokens, both modes failed all three
+repetitions with the same middle-code substitution: `delta-76430` instead of
+`delta-60592`; the other two codes were correct. This small deterministic
+screen does not establish broad quality or original-weight fidelity.
+
+Across all requests, peak global GTT was 82.80 GiB for AR and 85.84 GiB for
+MTP; minimum host MemAvailable was 24.77 and 20.50 GiB respectively. These
+counters include the idle desktop and are not engine-only memory budgets.
+Gufo bypassed cache lookup on the measured requests but still populated
+snapshots. Client decode estimates are retained separately; at 128K they are
+lower than engine decode rates. Streaming batches, transport, and snapshot
+work give these measurements different accounting boundaries.
+
+The llama.cpp control exceeded its 600-second readiness limit. A diagnostic
+attach briefly paused startup and produced no stack trace, so this is not a
+clean startup-speed measurement either. Bounded shutdown also timed out;
+the process subsequently exited with code 137, with `OOMKilled=false`. Its
+logs/state were saved and the container removed. **There are no matched
+llama.cpp performance or quality results from this attempt.**
+Both Gufo containers exited normally. Artifact checks verified repetition
+counts, scores, output hashes, 512-token budgets, and zero cached prompt
+tokens. No matching GPU-fault/reset or OOM events appeared in the accessible
+kernel journal. No trial container remains running.
+
+See [summary.json](results/gufo-flash-next-trial-2026-10-05/summary.json),
+[validation.json](results/gufo-flash-next-trial-2026-10-05/validation.json), and
+[cleanup.json](results/gufo-flash-next-trial-2026-10-05/cleanup.json).
+Vision, native tool calls, concurrent requests, cancellation, and persistent
+cache behavior remain outside this trial.
+
+To repeat requests against an already isolated server on loopback port 18080:
+
+```bash
+python3 tools/gufo_trial.py --label gufo-ar --output /tmp/gufo-ar.json
+python3 tools/gufo_trial.py --label gufo-mtp --output /tmp/gufo-mtp.json
+python3 tools/gufo_trial.py --label llamacpp-ar --records 120 959 --output /tmp/llamacpp-ar.json
+```
+
+Start and stop the corresponding server between commands using the recorded
+launch arguments. The first AR run preceded the addition of repeat options;
+`gufo-ar-repeats.json` supplies its two extra quality/retrieval rounds. Combine
+both AR files when evaluating correctness. The final client defaults to all
+three repetitions in one file. Initial and final client hashes are retained
+separately in `environment.json` and `followup-status.json`.
+
+### Strata follow-up candidate — 2026-10-05
+
+[Strata PR #895](https://github.com/Niko1221/Strata/pull/895) is open and reports
+gfx1151 validation on a 128 GB Ryzen AI Max+ 395 system. Its shared-memory
+accounting is particularly relevant: CPU allocations and GPU-addressable GTT
+must share one physical RAM budget. The reported model runs use Q2_0 and
+UD-IQ4_XS. Our installed UD-Q4_K_XL remains documented as experimental
+NVIDIA-only in [Strata's model support table](https://github.com/Niko1221/Strata/blob/main/docs/MODELS.md).
+Treat Strata as a separate, pinned follow-up trial with a supported artifact
+and matched quality checks. It was reviewed, not installed or benchmarked here.

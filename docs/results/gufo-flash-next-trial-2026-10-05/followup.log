@@ -1,0 +1,21 @@
+Waiting for initial Gufo AR matrix
+Gufo AR correctness and retrieval repetitions
+Loading Gufo MTP
+Gufo MTP repeated matrix
+Loading qualified llama.cpp AR control at 32K
+time="2026-10-05T07:57:11-07:00" level=warning msg="StopSignal SIGTERM failed to stop container halo-gufo-trial in 30 seconds, resorting to SIGKILL"
+Error: given PID did not die within timeout
+{
+  "started_at": "2026-10-05T13:56:29.189544+00:00",
+  "stages": [
+    "gufo-ar",
+    "gufo-ar-repeats",
+    "gufo-mtp"
+  ],
+  "stage": "Loading qualified llama.cpp AR control at 32K",
+  "error": "TimeoutError('server startup timeout')",
+  "cleanup_error": "CalledProcessError(125, ['podman', 'stop', '--time', '30', 'halo-gufo-trial'])",
+  "final_running_containers": [],
+  "finished_at": "2026-10-05T14:57:16.068898+00:00",
+  "runner_sha256": "a79ed47e165bc17c40dba5465705543d5b7b8f6a49b759577572068e7197f913"
+}

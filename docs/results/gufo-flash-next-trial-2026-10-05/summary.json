@@ -1,0 +1,647 @@
+{
+  "recorded_at": "2026-10-05T14:58:13.301480+00:00",
+  "arms": {
+    "gufo-ar": {
+      "all_runs_completed": true,
+      "quality": {
+        "passed": 30,
+        "total": 39,
+        "cases": {
+          "code-trace-alternating": {
+            "passed": 0,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "18"
+            ],
+            "expected": "12"
+          },
+          "code-slice-semantics": {
+            "passed": 0,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "e"
+            ],
+            "expected": "put"
+          },
+          "reasoning-crt": {
+            "passed": 0,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "31"
+            ],
+            "expected": "38"
+          },
+          "reasoning-probability": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "3/10"
+            ],
+            "expected": "3/10"
+          },
+          "logic-ordering": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "De,Ada,Bo,Cy"
+            ],
+            "expected": "De,Ada,Bo,Cy"
+          },
+          "instruction-exact-format": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "amber|7|BLUE"
+            ],
+            "expected": "amber|7|BLUE"
+          },
+          "tool-arguments-json": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "{\"city\": \"Kyiv\", \"units\": \"metric\", \"days\": 3}"
+            ],
+            "expected": {
+              "city": "Kyiv",
+              "units": "metric",
+              "days": 3
+            }
+          },
+          "json-filter-sort": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "[2,3]"
+            ],
+            "expected": [
+              2,
+              3
+            ]
+          },
+          "multilingual-literal-retrieval": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "\u041a\u0418\u0407\u0412-482"
+            ],
+            "expected": "\u041a\u0418\u0407\u0412-482"
+          },
+          "special-token-literals": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "2"
+            ],
+            "expected": "2"
+          },
+          "short-distractor-retrieval": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "violet-731"
+            ],
+            "expected": "violet-731"
+          },
+          "multi-turn-resynchronization": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "cedar-29"
+            ],
+            "expected": "cedar-29"
+          },
+          "long-context-needle": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "quartz-8142"
+            ],
+            "expected": "quartz-8142"
+          }
+        }
+      },
+      "performance": [
+        {
+          "records": 120,
+          "runs": 3,
+          "prompt_tokens": [
+            4015,
+            4015,
+            4015
+          ],
+          "completion_tokens": [
+            512,
+            512,
+            512
+          ],
+          "unique_outputs": 1,
+          "client_ttft_seconds": {
+            "median": 5.2842793049994725,
+            "min": 5.212245278999944,
+            "max": 5.613094414999978
+          },
+          "client_decode_tps": {
+            "median": 23.776767639564042,
+            "min": 23.69069302743588,
+            "max": 23.793457950536272
+          },
+          "server_prompt_tps": {
+            "median": 762.8327440520367,
+            "min": 718.0275995799245,
+            "max": 773.3919551927545
+          },
+          "server_decode_tps": {
+            "median": 23.845590239256165,
+            "min": 23.755551344898528,
+            "max": 23.86222441988673
+          },
+          "cached_tokens": [
+            0,
+            0,
+            0
+          ],
+          "draft_proposed": 0,
+          "draft_accepted": 0,
+          "peak_gtt_bytes": 88902434816,
+          "minimum_host_available_bytes": 36147359744
+        },
+        {
+          "records": 959,
+          "runs": 3,
+          "prompt_tokens": [
+            31702,
+            31702,
+            31702
+          ],
+          "completion_tokens": [
+            512,
+            512,
+            512
+          ],
+          "unique_outputs": 1,
+          "client_ttft_seconds": {
+            "median": 42.756150981000246,
+            "min": 41.40370115400037,
+            "max": 43.130898124999476
+          },
+          "client_decode_tps": {
+            "median": 23.093710744547153,
+            "min": 22.953175781346665,
+            "max": 23.480450984586877
+          },
+          "server_prompt_tps": {
+            "median": 742.6658193150932,
+            "min": 735.9978710909389,
+            "max": 767.0438788826425
+          },
+          "server_decode_tps": {
+            "median": 23.201318879914275,
+            "min": 23.043052493922854,
+            "max": 23.573566568319993
+          },
+          "cached_tokens": [
+            0,
+            0,
+            0
+          ],
+          "draft_proposed": 0,
+          "draft_accepted": 0,
+          "peak_gtt_bytes": 88894595072,
+          "minimum_host_available_bytes": 33501868032
+        },
+        {
+          "records": 3955,
+          "runs": 3,
+          "prompt_tokens": [
+            130570,
+            130570,
+            130570
+          ],
+          "completion_tokens": [
+            512,
+            512,
+            512
+          ],
+          "unique_outputs": 1,
+          "client_ttft_seconds": {
+            "median": 180.30489403899992,
+            "min": 179.11365323500013,
+            "max": 182.74112540899932
+          },
+          "client_decode_tps": {
+            "median": 22.10487207346139,
+            "min": 22.03630409799055,
+            "max": 22.634733946702525
+          },
+          "server_prompt_tps": {
+            "median": 725.064346703671,
+            "min": 715.115974545569,
+            "max": 730.7196058360441
+          },
+          "server_decode_tps": {
+            "median": 22.25661490749128,
+            "min": 22.190988653222515,
+            "max": 22.90826833283746
+          },
+          "cached_tokens": [
+            0,
+            0,
+            0
+          ],
+          "draft_proposed": 0,
+          "draft_accepted": 0,
+          "peak_gtt_bytes": 88903753728,
+          "minimum_host_available_bytes": 26808532992
+        }
+      ],
+      "retrieval": [
+        {
+          "records": 120,
+          "passed": 3,
+          "runs": 3,
+          "unique_outputs": 1,
+          "outputs": [
+            "delta-99757,delta-79869,delta-59981"
+          ],
+          "expected": "delta-99757,delta-79869,delta-59981"
+        },
+        {
+          "records": 959,
+          "passed": 3,
+          "runs": 3,
+          "unique_outputs": 1,
+          "outputs": [
+            "delta-57034,delta-97930,delta-38826"
+          ],
+          "expected": "delta-57034,delta-97930,delta-38826"
+        },
+        {
+          "records": 3955,
+          "passed": 0,
+          "runs": 3,
+          "unique_outputs": 1,
+          "outputs": [
+            "delta-32734,delta-76430,delta-88450"
+          ],
+          "expected": "delta-32734,delta-60592,delta-88450"
+        }
+      ],
+      "peak_gtt_bytes": 88909283328,
+      "minimum_host_available_bytes": 26595741696
+    },
+    "gufo-mtp": {
+      "all_runs_completed": true,
+      "quality": {
+        "passed": 30,
+        "total": 39,
+        "cases": {
+          "code-trace-alternating": {
+            "passed": 0,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "18"
+            ],
+            "expected": "12"
+          },
+          "code-slice-semantics": {
+            "passed": 0,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "e"
+            ],
+            "expected": "put"
+          },
+          "reasoning-crt": {
+            "passed": 0,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "31"
+            ],
+            "expected": "38"
+          },
+          "reasoning-probability": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "3/10"
+            ],
+            "expected": "3/10"
+          },
+          "logic-ordering": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "De,Ada,Bo,Cy"
+            ],
+            "expected": "De,Ada,Bo,Cy"
+          },
+          "instruction-exact-format": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "amber|7|BLUE"
+            ],
+            "expected": "amber|7|BLUE"
+          },
+          "tool-arguments-json": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "{\"city\": \"Kyiv\", \"units\": \"metric\", \"days\": 3}"
+            ],
+            "expected": {
+              "city": "Kyiv",
+              "units": "metric",
+              "days": 3
+            }
+          },
+          "json-filter-sort": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "[2,3]"
+            ],
+            "expected": [
+              2,
+              3
+            ]
+          },
+          "multilingual-literal-retrieval": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "\u041a\u0418\u0407\u0412-482"
+            ],
+            "expected": "\u041a\u0418\u0407\u0412-482"
+          },
+          "special-token-literals": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "2"
+            ],
+            "expected": "2"
+          },
+          "short-distractor-retrieval": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "violet-731"
+            ],
+            "expected": "violet-731"
+          },
+          "multi-turn-resynchronization": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "cedar-29"
+            ],
+            "expected": "cedar-29"
+          },
+          "long-context-needle": {
+            "passed": 3,
+            "runs": 3,
+            "unique_outputs": 1,
+            "outputs": [
+              "quartz-8142"
+            ],
+            "expected": "quartz-8142"
+          }
+        }
+      },
+      "performance": [
+        {
+          "records": 120,
+          "runs": 3,
+          "prompt_tokens": [
+            4015,
+            4015,
+            4015
+          ],
+          "completion_tokens": [
+            512,
+            512,
+            512
+          ],
+          "unique_outputs": 1,
+          "client_ttft_seconds": {
+            "median": 5.705164551998678,
+            "min": 5.623952547999579,
+            "max": 5.749887448000663
+          },
+          "client_decode_tps": {
+            "median": 42.8021791919885,
+            "min": 42.17194089090376,
+            "max": 43.280149558801575
+          },
+          "server_prompt_tps": {
+            "median": 706.8662606517242,
+            "min": 701.5333226699802,
+            "max": 716.9678043618155
+          },
+          "server_decode_tps": {
+            "median": 42.95276365722265,
+            "min": 42.31046216311491,
+            "max": 43.42931251973806
+          },
+          "cached_tokens": [
+            0,
+            0,
+            0
+          ],
+          "draft_proposed": 1389,
+          "draft_accepted": 1134,
+          "peak_gtt_bytes": 92166946816,
+          "minimum_host_available_bytes": 32163295232
+        },
+        {
+          "records": 959,
+          "runs": 3,
+          "prompt_tokens": [
+            31702,
+            31702,
+            31702
+          ],
+          "completion_tokens": [
+            512,
+            512,
+            512
+          ],
+          "unique_outputs": 1,
+          "client_ttft_seconds": {
+            "median": 45.537082384000314,
+            "min": 43.507916717000626,
+            "max": 45.88789682400056
+          },
+          "client_decode_tps": {
+            "median": 42.37273119126597,
+            "min": 42.338275197940895,
+            "max": 44.860907206828095
+          },
+          "server_prompt_tps": {
+            "median": 697.1391245470041,
+            "min": 691.9414505501265,
+            "max": 729.782680988242
+          },
+          "server_decode_tps": {
+            "median": 42.60947597235972,
+            "min": 42.5840545731307,
+            "max": 45.105335108837544
+          },
+          "cached_tokens": [
+            0,
+            0,
+            0
+          ],
+          "draft_proposed": 1377,
+          "draft_accepted": 1170,
+          "peak_gtt_bytes": 92145238016,
+          "minimum_host_available_bytes": 30278729728
+        },
+        {
+          "records": 3955,
+          "runs": 3,
+          "prompt_tokens": [
+            130570,
+            130570,
+            130570
+          ],
+          "completion_tokens": [
+            512,
+            512,
+            512
+          ],
+          "unique_outputs": 1,
+          "client_ttft_seconds": {
+            "median": 185.30641599500086,
+            "min": 183.56100071400033,
+            "max": 186.29345626699978
+          },
+          "client_decode_tps": {
+            "median": 37.209689155976406,
+            "min": 35.4426981131926,
+            "max": 40.31014845628833
+          },
+          "server_prompt_tps": {
+            "median": 707.8941335801392,
+            "min": 706.3051012604569,
+            "max": 716.7590729249341
+          },
+          "server_decode_tps": {
+            "median": 41.36254402757735,
+            "min": 39.84751405791677,
+            "max": 41.62004684572823
+          },
+          "cached_tokens": [
+            0,
+            0,
+            0
+          ],
+          "draft_proposed": 1293,
+          "draft_accepted": 1125,
+          "peak_gtt_bytes": 92162760704,
+          "minimum_host_available_bytes": 22010384384
+        }
+      ],
+      "retrieval": [
+        {
+          "records": 120,
+          "passed": 3,
+          "runs": 3,
+          "unique_outputs": 1,
+          "outputs": [
+            "delta-99757,delta-79869,delta-59981"
+          ],
+          "expected": "delta-99757,delta-79869,delta-59981"
+        },
+        {
+          "records": 959,
+          "passed": 3,
+          "runs": 3,
+          "unique_outputs": 1,
+          "outputs": [
+            "delta-57034,delta-97930,delta-38826"
+          ],
+          "expected": "delta-57034,delta-97930,delta-38826"
+        },
+        {
+          "records": 3955,
+          "passed": 0,
+          "runs": 3,
+          "unique_outputs": 1,
+          "outputs": [
+            "delta-32734,delta-76430,delta-88450"
+          ],
+          "expected": "delta-32734,delta-60592,delta-88450"
+        }
+      ],
+      "peak_gtt_bytes": 92166946816,
+      "minimum_host_available_bytes": 22010384384
+    }
+  },
+  "limits": [
+    "One host, one checkpoint and a small fixed task suite; no general model-quality or original-weight parity claim.",
+    "Gufo capacity 135168. Planned llama.cpp control at 32768 with q8_0 KV did not become ready within the startup window; there are no matched llama.cpp measurements.",
+    "Each arm runs sequentially; engine order is not randomized. Cache lookup is disabled, but engines may populate snapshots.",
+    "Global GTT and host-memory counters include unrelated idle desktop allocations.",
+    "Repeated requests within each process, not independent boots or a stability soak.",
+    "No vision, concurrent-user, native tool-calling, cancellation, or persistent-cache qualification in this trial."
+  ],
+  "gufo_mtp_quality_identity": {
+    "code-trace-alternating": true,
+    "code-slice-semantics": true,
+    "reasoning-crt": true,
+    "reasoning-probability": true,
+    "logic-ordering": true,
+    "instruction-exact-format": true,
+    "tool-arguments-json": true,
+    "json-filter-sort": true,
+    "multilingual-literal-retrieval": true,
+    "special-token-literals": true,
+    "short-distractor-retrieval": true,
+    "multi-turn-resynchronization": true,
+    "long-context-needle": true
+  },
+  "gufo_mtp_performance_identity": {
+    "120": true,
+    "959": true,
+    "3955": true
+  },
+  "gufo_mtp_retrieval_identity": {
+    "120": true,
+    "959": true,
+    "3955": true
+  },
+  "llamacpp_control": {
+    "recorded_at": "2026-10-05T14:57:52.372874+00:00",
+    "trial_container_removed": true,
+    "final_running_containers": [],
+    "control_result": "No measurements: startup exceeded 600-second readiness limit; bounded stop also timed out, then the process exited with 137. Container was subsequently inspected, captured and removed. OOMKilled=false.",
+    "startup_diagnostic": "gdb attach attempted at approximately 14:54:25 UTC; it did not return a stack trace and was killed. The stopped server was resumed with SIGCONT at 14:55:20 UTC. Startup time is therefore not a clean benchmark. No requests ran during this diagnostic."
+  }
+}

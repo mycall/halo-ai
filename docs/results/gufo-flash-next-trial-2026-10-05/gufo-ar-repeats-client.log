@@ -1,0 +1,39 @@
+gufo-ar-repeats quality 1 code-trace-alternating False
+gufo-ar-repeats quality 1 code-slice-semantics False
+gufo-ar-repeats quality 1 reasoning-crt False
+gufo-ar-repeats quality 1 reasoning-probability True
+gufo-ar-repeats quality 1 logic-ordering True
+gufo-ar-repeats quality 1 instruction-exact-format True
+gufo-ar-repeats quality 1 tool-arguments-json True
+gufo-ar-repeats quality 1 json-filter-sort True
+gufo-ar-repeats quality 1 multilingual-literal-retrieval True
+gufo-ar-repeats quality 1 special-token-literals True
+gufo-ar-repeats quality 1 short-distractor-retrieval True
+gufo-ar-repeats quality 1 multi-turn-resynchronization True
+gufo-ar-repeats quality 1 long-context-needle True
+gufo-ar-repeats quality 2 code-trace-alternating False
+gufo-ar-repeats quality 2 code-slice-semantics False
+gufo-ar-repeats quality 2 reasoning-crt False
+gufo-ar-repeats quality 2 reasoning-probability True
+gufo-ar-repeats quality 2 logic-ordering True
+gufo-ar-repeats quality 2 instruction-exact-format True
+gufo-ar-repeats quality 2 tool-arguments-json True
+gufo-ar-repeats quality 2 json-filter-sort True
+gufo-ar-repeats quality 2 multilingual-literal-retrieval True
+gufo-ar-repeats quality 2 special-token-literals True
+gufo-ar-repeats quality 2 short-distractor-retrieval True
+gufo-ar-repeats quality 2 multi-turn-resynchronization True
+gufo-ar-repeats quality 2 long-context-needle True
+gufo-ar-repeats retrieval 120 1 True delta-99757,delta-79869,delta-59981
+gufo-ar-repeats retrieval 120 2 True delta-99757,delta-79869,delta-59981
+gufo-ar-repeats retrieval 959 1 True delta-57034,delta-97930,delta-38826
+gufo-ar-repeats retrieval 959 2 True delta-57034,delta-97930,delta-38826
+gufo-ar-repeats retrieval 3955 1 False delta-32734,delta-76430,delta-88450
+gufo-ar-repeats retrieval 3955 2 False delta-32734,delta-76430,delta-88450
+{
+  "quality_passed": 20,
+  "quality_total": 26,
+  "retrieval_passed": 4,
+  "retrieval_total": 6,
+  "performance": []
+}
