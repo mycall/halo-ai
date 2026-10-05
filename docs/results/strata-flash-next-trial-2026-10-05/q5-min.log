@@ -1,0 +1,3 @@
+q5_1 min   row 0: GPU -0.771733, ggml-cpu (quantized sum) -0.771744, (stored sum) -0.759814
+q5_1 min   GPU vs ggml-cpu with s = d*sum(q): rel 7.48e-05; vs s = sum(x) (llama.cpp CUDA's): rel 1.94e-02 (largest per-block sum shift 0.0138)  ok
+native_expert_parity: 0 failures

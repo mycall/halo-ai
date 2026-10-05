@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/build-hip/native_expert_parity",
+    "--synthetic",
+    "q6_K/q8_0"
+  ],
+  "return_code": 1,
+  "stdout": "q6_K/q8_0: not a pair the GPU expert kernels take\nnative_expert_parity: 1 failures\n",
+  "stderr": "",
+  "purpose": "Check the observed Q6_K/Q8_0 routed-expert pair without downloading weights."
+}

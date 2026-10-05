@@ -1,0 +1,31 @@
+{
+  "recorded_at": "2026-10-05T15:22:14.771045+00:00",
+  "halo_ai_revision": "d9cf12559d9e4495d22cbc6af63463532a00ef8a",
+  "source_revision": "598e9a2726948d0b2aa029ef655af26dd70399c1",
+  "upstream_pr": "https://github.com/Niko1221/Strata/pull/895",
+  "sdk": "10.2.0a20261004",
+  "hip_runtime": "7.17.26392",
+  "kernel": "7.2.9-1-cachyos-deckify",
+  "gpu": "gfx1151 / Radeon 8060S",
+  "ctest": {
+    "tests": "65",
+    "failures": "3",
+    "disabled": "0",
+    "skipped": "2",
+    "errors": null,
+    "time": "44"
+  },
+  "setup_amd_tests": 30,
+  "q2_model_downloaded": false,
+  "model_weights_downloaded": true,
+  "existing_model": "unsloth/Qwen3.8-Flash-Next-GGUF UD-Q4_K_XL",
+  "model_revision": "38bb39ee97821de2c9009abb7e93950eec396e66",
+  "pack_notes": "Existing GGUFs read in place; 1.38 GiB compatibility pack generated separately. 264 exact and 196 rounded conversions; expert and PLE table bytes unchanged.",
+  "engine_sha256": "38434633a1cc74514f444c4509558c05fcd5e3baf13c521942682d6cd0a2effa",
+  "benchmark_status": "Completed repeated Q4_K_XL zero-draft/MTP comparison. Both servers exited 0; see comparison.json. Q6/Q8 feasibility reviewed from header prefixes only.",
+  "updated_at": "2026-10-05T16:13:33.191062+00:00",
+  "main_model_weights_downloaded": false,
+  "mtp_weights_downloaded": true,
+  "mtp_download_bytes": 5214301696,
+  "mtp_verified_tensors": 31
+}

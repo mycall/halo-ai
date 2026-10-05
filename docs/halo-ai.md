@@ -3009,7 +3009,7 @@ both AR files when evaluating correctness. The final client defaults to all
 three repetitions in one file. Initial and final client hashes are retained
 separately in `environment.json` and `followup-status.json`.
 
-### Strata follow-up candidate — 2026-10-05
+### Strata HIP evaluation — 2026-10-05
 
 [Strata PR #895](https://github.com/Niko1221/Strata/pull/895) is open and reports
 gfx1151 validation on a 128 GB Ryzen AI Max+ 395 system. Its shared-memory
@@ -3017,5 +3017,138 @@ accounting is particularly relevant: CPU allocations and GPU-addressable GTT
 must share one physical RAM budget. The reported model runs use Q2_0 and
 UD-IQ4_XS. Our installed UD-Q4_K_XL remains documented as experimental
 NVIDIA-only in [Strata's model support table](https://github.com/Niko1221/Strata/blob/main/docs/MODELS.md).
-Treat Strata as a separate, pinned follow-up trial with a supported artifact
-and matched quality checks. It was reviewed, not installed or benchmarked here.
+The isolated preflight pins PR head
+`598e9a2726948d0b2aa029ef655af26dd70399c1`, llama.cpp dependency
+`3cf03257f219afbe7334045ff7c6a06ac68c627d`, and TheRock SDK
+`10.2.0a20261004` (HIP runtime `7.17.26392`). Source, build, Python environment,
+and generated packs live under
+`~/.cache/halo-ai/experiments/strata-2026-10-05/`; host drivers and halo-ai
+aliases are unchanged.
+
+The gfx1151 build, device self-test, and all 30 AMD setup tests passed. Of 65
+CTest cases, 60 passed, two skipped, and three failed because their external
+Q2 PLE/expert fixtures were absent. This is not a complete CTest pass. Additional
+Q4/Q5/Q8 synthetic expert checks, the Q5_1 minimum case, and real expert zero
+from six layers of the installed UD-Q4_K_XL passed. Four hipBLASLt GEMM cases
+also passed with the matching gfx1151/1.5.0 tuning table; the whole table was
+not validated. These checks establish kernel compatibility on the sampled
+inputs, not whole-model answer quality.
+
+The existing Q4_K_XL GGUFs are read in place. A separate 1.38 GiB compatibility
+pack has 264 exact and 196 rounded tensor conversions (including 195 Q8
+projections converted to BF16); expert and PLE table bytes remain unchanged.
+The first HTTP startup attempt with `--spec 0` was rejected before model
+allocation: this native-pack serving path requires a speculative window and
+Strata's own MTP runtime, even for a zero-draft comparison. No end-to-end speed
+or quality result follows from the preflight.
+
+No Q2 main model was downloaded. The separately authorized
+5,214,301,696-byte BF16 MTP subset was downloaded and all 31 tensors passed
+pinned SHA-256 verification. They come from Qwen revision
+`de4b8e4d43b917e7706784d8bb445c9af86a3540`; Strata's downloader checks exact HTTP
+byte ranges and pinned SHA-256 values. Strata prepares this *draft head* as Q2
+experts plus Q8 dense weights; the answer-producing main model stays Q4_K_XL.
+The prepared runtime contains 707,788,800 bytes of experts, 116,099,072 bytes
+of dense weights, and a draft vocabulary/index. Draft precision can affect
+acceptance and throughput; the following checks evaluate this HIP path.
+
+Raw preflight records: [Strata evidence](results/strata-flash-next-trial-2026-10-05/).
+
+#### Repeated Q4_K_XL comparison
+
+Both arms used the same installed target and compatibility pack, 32K maximum
+context, int8 KV, 512-token prefill chunks, 15 pool workers, 8 GiB GPU reserve,
+and the matching hipBLASLt table. Automatic cache sizing placed all 24,576
+experts in a 71.73 GiB GPU cache; the configured 16 GiB host expert budget was
+unused. The zero-draft control used `--spec 2 --mtp-max-t 1`; MTP used
+`--spec 4 --mtp-max-t 4 --spec-min-p 0.5`. Suffix drafting, adaptive expert
+swaps, and prompt-cache reuse were disabled. The head remains loaded in both
+arms because this serving path requires it, so this is not a head-free
+memory comparison. Servers ran sequentially on `127.0.0.1:18081`.
+
+`tools/gufo_trial.py` supplied three repetitions of the existing 13-case
+quality suite, a 4,015-token prompt with 512 generated tokens, and a separate
+4K three-code retrieval check. Greedy sampling, seed 1, thinking off, and
+presence penalty zero match the Gufo screen. The suite includes a
+16,949-token needle case; successful 32K configuration alone is not a full
+32K-context validation.
+
+| Measurement | Zero-draft control | MTP |
+| --- | ---: | ---: |
+| Client decode tok/s, median (range) | 22.82 (22.75–22.90) | 41.27 (41.18–41.30) |
+| First content, median seconds | 33.40 | 33.99 |
+| Total 4K + 512 response, median seconds | 55.72 | 46.40 |
+| Quality score, each of three rounds | 10/13 | 10/13 |
+| Long needle response, median seconds | 131.55 | 134.31 |
+| Peak GTT during requests | 78.85 GiB | 78.86 GiB |
+
+MTP improved median decode throughput by 80.8%, but total response time fell
+only 16.7% because prompt processing dominated. Each generation run accepted
+361 of 421 draft proposals (85.7%). All 39 quality responses and all three
+generation responses were text-identical between modes; the quality responses
+also matched the prior Gufo reference. All three retrieval repetitions passed
+in each mode and matched exactly, giving 45/45 identical paired responses.
+Both servers exited cleanly and the trial port was confirmed closed.
+Both modes consistently failed the same trace, slicing, and CRT cases. This is evidence of preserved outputs in
+this bounded suite, not BF16 fidelity or broad coding/reasoning accuracy.
+
+Gufo's earlier matched 4K workload had a 42.80 tok/s median client decode
+rate, 5.71-second first content, and 17.57-second total response with MTP.
+Strata's tested configuration therefore offers no overall speed improvement
+for the existing Q4 workload. These are sequential experiments with different
+engines and draft formats, not a controlled attribution to any single kernel.
+Startup took 82 seconds for the control and 304 seconds for MTP; those are
+single process starts, not repeated startup statistics or proof that drafting
+caused the difference. No halo-ai defaults or engine adapters were changed.
+
+Machine-readable results and exact output comparisons:
+[comparison.json](results/strata-flash-next-trial-2026-10-05/comparison.json).
+
+#### Q6 and Q8 feasibility
+
+Metadata and GGUF header-prefix inspection of
+[Unsloth revision `38bb39ee`](https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/tree/38bb39ee97821de2c9009abb7e93950eec396e66)
+gives the following sizes. No Q6/Q8 weight shards were downloaded; these are
+storage/tensor counts, not measured runtime footprints.
+
+| Main model | Download GB | File GiB | N-gram table GiB | Routed experts GiB | Other tensors GiB |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| UD-Q6_K_XL | 169.17 | 157.55 | 50.66 | 101.75 | 5.13 |
+| Q8_0 | 188.23 | 175.30 | 50.66 | 119.53 | 5.09 |
+
+GB means 10^9 bytes; GiB means 2^30 bytes. Specifically, Q8's non-PLE
+tensor payload is `(128345702400 + 5468044800) / 2^30 = 124.623764 GiB`.
+Subtracting PLE from total file bytes instead gives 124.634031 GiB because
+the files also include metadata/alignment. Neither number includes MTP or
+runtime overhead. Adding Unsloth's 2,786,568,256-byte **shared** Q8 MTP file
+gives 127.218957 GiB of non-PLE tensor payload plus that sidecar, already
+9.22 GiB above this host's measured 118 GiB GTT capacity. Strata uses its own
+smaller Q2/Q8 draft runtime, not that GGUF sidecar. The approximately 192 GB
+download figure is consistent with the 188.225 GB main shards plus the
+4.137 GB **full** Q8 MTP file (192.362 GB), rather than the shared MTP file.
+
+Strata's on-demand PLE reads can leave the n-gram table on SSD. Its GPU expert
+cache, bounded host-resident expert tier, GGUF mapping, and next-layer page
+prefetch can avoid requiring the entire model in physical RAM. On this APU,
+CPU RAM and GTT share the same physical memory: their capacities cannot be
+added. Q6's roughly 106.87 GiB of non-PLE weights is close enough to the host's
+123 GiB usable RAM to make this approach plausible, but context, MTP, scratch,
+the desktop, and safety headroom still need space. Q8's roughly 124.62 GiB
+outside PLE already exceeds usable RAM and would require expert offloading.
+SSD reads can preserve stored weight precision, but can substantially reduce
+speed, particularly when a long prompt touches many experts.
+
+There is also a specific implementation gap at the pinned Strata revision:
+47 layers in UD-Q6_K_XL use Q6_K gate/up experts and Q8_0 down experts. The
+grouped expert dispatch in `src/kernels/cuda/iq_kernels.cu` omits GGML type 14
+(Q6_K), although the dense MMVQ and BF16 dequantizers support it. A bounded
+`native_expert_parity --synthetic q6_K/q8_0` check confirmed the rejection:
+`not a pair the GPU expert kernels take` (exit 1). The existing
+Q8_0/Q8_0 expert pair passed the earlier synthetic HIP check. Therefore Q6
+needs expert-kernel support and validation before an end-to-end trial; Q8 has
+a more promising expert-format path but remains untested as a full model and
+has the larger memory/I/O burden. Neither is a qualified halo-ai profile.
+
+Evidence: [tensor inventory](results/strata-flash-next-trial-2026-10-05/q6plus-tensor-inventory.json)
+and [repository file metadata](results/strata-flash-next-trial-2026-10-05/q6plus-model-metadata.json),
+plus [Q6 expert support check](results/strata-flash-next-trial-2026-10-05/q6-support-check.json).

@@ -1,0 +1,24 @@
+{
+  "started_at": "2026-10-05T15:19:32.383869+00:00",
+  "stage": "startup",
+  "source_revision": "598e9a2726948d0b2aa029ef655af26dd70399c1",
+  "q2_model_downloaded": false,
+  "server_command": [
+    "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/bin/python",
+    "-m",
+    "serve.server",
+    "--engine",
+    "strata",
+    "--config",
+    "/home/michael/Projects/source/github/halo-ai/docs/results/strata-flash-next-trial-2026-10-05/server-ar-config.json",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "18081"
+  ],
+  "server_pid": 12020,
+  "error": "RuntimeError('server exited 1')",
+  "server_exit_code": 1,
+  "finished_at": "2026-10-05T15:19:34.392127+00:00",
+  "final_mem_available_bytes": 127307124736
+}

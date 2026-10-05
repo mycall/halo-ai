@@ -1,0 +1,48 @@
+{
+  "started_at": "2026-10-05T15:41:01.434021+00:00",
+  "stage": "repeated 4K ar screen",
+  "mode": "ar",
+  "mtp_max_drafts": 0,
+  "source_revision": "598e9a2726948d0b2aa029ef655af26dd70399c1",
+  "q2_model_downloaded": false,
+  "server_command": [
+    "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/bin/python",
+    "-m",
+    "serve.server",
+    "--engine",
+    "strata",
+    "--config",
+    "/home/michael/Projects/source/github/halo-ai/docs/results/strata-flash-next-trial-2026-10-05/server-ar-4k-config.json",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "18081"
+  ],
+  "server_pid": 14103,
+  "health": {
+    "status": "ok",
+    "max_context": 32768,
+    "model": "strata-flash-next-q4-trial",
+    "images": false,
+    "api_key": false,
+    "loaded": true,
+    "service": "strata"
+  },
+  "startup_seconds": 82.0391789829996,
+  "client_command": [
+    "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/bin/python",
+    "/home/michael/Projects/source/github/halo-ai/tools/gufo_trial.py",
+    "--base-url",
+    "http://127.0.0.1:18081",
+    "--label",
+    "strata-ar-4k",
+    "--records",
+    "120",
+    "--output",
+    "/home/michael/Projects/source/github/halo-ai/docs/results/strata-flash-next-trial-2026-10-05/strata-ar-4k.json"
+  ],
+  "completed": true,
+  "server_exit_code": 0,
+  "finished_at": "2026-10-05T15:54:50.414723+00:00",
+  "final_mem_available_bytes": 127008124928
+}

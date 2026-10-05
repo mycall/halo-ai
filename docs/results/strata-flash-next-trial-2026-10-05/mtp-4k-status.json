@@ -1,0 +1,48 @@
+{
+  "started_at": "2026-10-05T15:55:43.301834+00:00",
+  "stage": "repeated 4K mtp screen",
+  "mode": "mtp",
+  "mtp_max_drafts": 3,
+  "source_revision": "598e9a2726948d0b2aa029ef655af26dd70399c1",
+  "q2_model_downloaded": false,
+  "server_command": [
+    "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/bin/python",
+    "-m",
+    "serve.server",
+    "--engine",
+    "strata",
+    "--config",
+    "/home/michael/Projects/source/github/halo-ai/docs/results/strata-flash-next-trial-2026-10-05/server-mtp-4k-config.json",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "18081"
+  ],
+  "server_pid": 17883,
+  "health": {
+    "status": "ok",
+    "max_context": 32768,
+    "model": "strata-flash-next-q4-trial",
+    "images": false,
+    "api_key": false,
+    "loaded": true,
+    "service": "strata"
+  },
+  "startup_seconds": 304.10329753099995,
+  "client_command": [
+    "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/bin/python",
+    "/home/michael/Projects/source/github/halo-ai/tools/gufo_trial.py",
+    "--base-url",
+    "http://127.0.0.1:18081",
+    "--label",
+    "strata-mtp-4k",
+    "--records",
+    "120",
+    "--output",
+    "/home/michael/Projects/source/github/halo-ai/docs/results/strata-flash-next-trial-2026-10-05/strata-mtp-4k.json"
+  ],
+  "completed": true,
+  "server_exit_code": 0,
+  "finished_at": "2026-10-05T16:12:58.398500+00:00",
+  "final_mem_available_bytes": 127858384896
+}

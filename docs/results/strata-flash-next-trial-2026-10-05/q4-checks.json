@@ -1,0 +1,46 @@
+{
+  "recorded_at": "2026-10-05T15:17:06.460089+00:00",
+  "checks": [
+    {
+      "name": "q4-synthetic",
+      "command": [
+        "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/build-hip/native_expert_parity",
+        "--synthetic",
+        "q4_K/q5_1",
+        "q4_K/q8_0",
+        "q5_K/q8_0",
+        "q8_0/q8_0"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "q5-min",
+      "command": [
+        "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/build-hip/native_expert_parity",
+        "--q5_1-min"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "hipblaslt-tuned",
+      "command": [
+        "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/build-hip/hip_prefill_hipblaslt_gemm"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "q4-real-experts",
+      "command": [
+        "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/build-hip/native_expert_parity",
+        "/srv/halo-ai/models/unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+        "0",
+        "2",
+        "4",
+        "30",
+        "46",
+        "47"
+      ],
+      "returncode": 0
+    }
+  ]
+}

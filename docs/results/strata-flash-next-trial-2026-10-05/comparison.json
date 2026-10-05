@@ -1,0 +1,172 @@
+{
+  "recorded_at": "2026-10-05T16:13:33.161009+00:00",
+  "scope": "Repeated greedy, thinking-off, fixed-suite and 4K archive screen. Not a BF16 fidelity test or broad capability benchmark.",
+  "arms": {
+    "ar": {
+      "completed": true,
+      "startup_seconds": 82.0391789829996,
+      "quality_rounds": {
+        "1": {
+          "passed": 10,
+          "total": 13,
+          "failed_cases": [
+            "code-trace-alternating",
+            "code-slice-semantics",
+            "reasoning-crt"
+          ]
+        },
+        "2": {
+          "passed": 10,
+          "total": 13,
+          "failed_cases": [
+            "code-trace-alternating",
+            "code-slice-semantics",
+            "reasoning-crt"
+          ]
+        },
+        "3": {
+          "passed": 10,
+          "total": 13,
+          "failed_cases": [
+            "code-trace-alternating",
+            "code-slice-semantics",
+            "reasoning-crt"
+          ]
+        }
+      },
+      "retrieval_passed": 3,
+      "retrieval_total": 3,
+      "performance": {
+        "wall_seconds": {
+          "median": 55.71970170199984,
+          "min": 55.703137369999695,
+          "max": 56.82530017599993
+        },
+        "client_ttft_seconds": {
+          "median": 33.40379068999982,
+          "min": 33.30698311299966,
+          "max": 34.36356219799973
+        },
+        "client_decode_tps": {
+          "median": 22.818593169476063,
+          "min": 22.75178753041877,
+          "max": 22.900910326099865
+        },
+        "unique_outputs": 1
+      },
+      "long_needle_wall_seconds": {
+        "median": 131.54741196099985,
+        "min": 131.33253408500013,
+        "max": 134.94610860399962
+      },
+      "hardware_extrema_bytes": {
+        "/sys/class/drm/card1/device/mem_info_gtt_used": 84666957824,
+        "/sys/class/drm/card1/device/mem_info_vram_used": 1129521152,
+        "MemAvailable_bytes": 39043772416,
+        "SwapFree_bytes": 131052126208
+      },
+      "performance_engine_lines": [
+        "strata serve: prompt 4015 tokens = 0 reused + 4015 read in 34298 ms (117.1 tok/s), 512 generated in 22503 ms (22.8 tok/s), drafts accepted 0 of 0, 0 checkpoints",
+        "strata serve: prompt 4015 tokens = 0 reused + 4015 read in 33244 ms (120.8 tok/s), 512 generated in 22437 ms (22.8 tok/s), drafts accepted 0 of 0, 0 checkpoints",
+        "strata serve: prompt 4015 tokens = 0 reused + 4015 read in 33341 ms (120.4 tok/s), 512 generated in 22356 ms (22.9 tok/s), drafts accepted 0 of 0, 0 checkpoints"
+      ]
+    },
+    "mtp": {
+      "completed": true,
+      "startup_seconds": 304.10329753099995,
+      "quality_rounds": {
+        "1": {
+          "passed": 10,
+          "total": 13,
+          "failed_cases": [
+            "code-trace-alternating",
+            "code-slice-semantics",
+            "reasoning-crt"
+          ]
+        },
+        "2": {
+          "passed": 10,
+          "total": 13,
+          "failed_cases": [
+            "code-trace-alternating",
+            "code-slice-semantics",
+            "reasoning-crt"
+          ]
+        },
+        "3": {
+          "passed": 10,
+          "total": 13,
+          "failed_cases": [
+            "code-trace-alternating",
+            "code-slice-semantics",
+            "reasoning-crt"
+          ]
+        }
+      },
+      "retrieval_passed": 3,
+      "retrieval_total": 3,
+      "performance": {
+        "wall_seconds": {
+          "median": 46.39860821399998,
+          "min": 46.2319961029998,
+          "max": 46.76275447600028
+        },
+        "client_ttft_seconds": {
+          "median": 33.98845465899967,
+          "min": 33.85728560200005,
+          "max": 34.377318405000096
+        },
+        "client_decode_tps": {
+          "median": 41.26641121363765,
+          "min": 41.18377833609249,
+          "max": 41.302105048688844
+        },
+        "unique_outputs": 1
+      },
+      "long_needle_wall_seconds": {
+        "median": 134.31303868199984,
+        "min": 133.888355477,
+        "max": 145.38730422300023
+      },
+      "hardware_extrema_bytes": {
+        "/sys/class/drm/card1/device/mem_info_gtt_used": 84674490368,
+        "/sys/class/drm/card1/device/mem_info_vram_used": 974540800,
+        "MemAvailable_bytes": 39919931392,
+        "SwapFree_bytes": 130174316544
+      },
+      "performance_engine_lines": [
+        "strata serve: prompt 4015 tokens = 0 reused + 4015 read in 34313 ms (117.0 tok/s), 512 generated in 12425 ms (41.2 tok/s), drafts accepted 361 of 421, 0 checkpoints",
+        "strata serve: prompt 4015 tokens = 0 reused + 4015 read in 33799 ms (118.8 tok/s), 512 generated in 12414 ms (41.2 tok/s), drafts accepted 361 of 421, 0 checkpoints",
+        "strata serve: prompt 4015 tokens = 0 reused + 4015 read in 33929 ms (118.3 tok/s), 512 generated in 12450 ms (41.1 tok/s), drafts accepted 361 of 421, 0 checkpoints"
+      ]
+    }
+  },
+  "same_request_content_identity": {
+    "quality": {
+      "matched": 39,
+      "total": 39,
+      "differences": []
+    },
+    "performance": {
+      "matched": 3,
+      "total": 3,
+      "differences": []
+    },
+    "retrieval": {
+      "matched": 3,
+      "total": 3,
+      "differences": []
+    }
+  },
+  "gufo_ar_quality_content_matches": {
+    "ar": {
+      "matched": 39,
+      "total": 39
+    },
+    "mtp": {
+      "matched": 39,
+      "total": 39
+    }
+  },
+  "fully_completed": true
+}

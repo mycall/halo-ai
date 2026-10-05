@@ -1,0 +1,59 @@
+strata-ar-4k quality 1 code-trace-alternating False
+strata-ar-4k quality 1 code-slice-semantics False
+strata-ar-4k quality 1 reasoning-crt False
+strata-ar-4k quality 1 reasoning-probability True
+strata-ar-4k quality 1 logic-ordering True
+strata-ar-4k quality 1 instruction-exact-format True
+strata-ar-4k quality 1 tool-arguments-json True
+strata-ar-4k quality 1 json-filter-sort True
+strata-ar-4k quality 1 multilingual-literal-retrieval True
+strata-ar-4k quality 1 special-token-literals True
+strata-ar-4k quality 1 short-distractor-retrieval True
+strata-ar-4k quality 1 multi-turn-resynchronization True
+strata-ar-4k quality 1 long-context-needle True
+strata-ar-4k quality 2 code-trace-alternating False
+strata-ar-4k quality 2 code-slice-semantics False
+strata-ar-4k quality 2 reasoning-crt False
+strata-ar-4k quality 2 reasoning-probability True
+strata-ar-4k quality 2 logic-ordering True
+strata-ar-4k quality 2 instruction-exact-format True
+strata-ar-4k quality 2 tool-arguments-json True
+strata-ar-4k quality 2 json-filter-sort True
+strata-ar-4k quality 2 multilingual-literal-retrieval True
+strata-ar-4k quality 2 special-token-literals True
+strata-ar-4k quality 2 short-distractor-retrieval True
+strata-ar-4k quality 2 multi-turn-resynchronization True
+strata-ar-4k quality 2 long-context-needle True
+strata-ar-4k quality 3 code-trace-alternating False
+strata-ar-4k quality 3 code-slice-semantics False
+strata-ar-4k quality 3 reasoning-crt False
+strata-ar-4k quality 3 reasoning-probability True
+strata-ar-4k quality 3 logic-ordering True
+strata-ar-4k quality 3 instruction-exact-format True
+strata-ar-4k quality 3 tool-arguments-json True
+strata-ar-4k quality 3 json-filter-sort True
+strata-ar-4k quality 3 multilingual-literal-retrieval True
+strata-ar-4k quality 3 special-token-literals True
+strata-ar-4k quality 3 short-distractor-retrieval True
+strata-ar-4k quality 3 multi-turn-resynchronization True
+strata-ar-4k quality 3 long-context-needle True
+strata-ar-4k performance 120 1 {'prompt_tokens': 4015, 'completion_tokens': 512, 'total_tokens': 4527, 'prompt_tokens_details': {'cached_tokens': 0}} TTFT 34.36356219799973 TPS 22.75178753041877
+strata-ar-4k performance 120 2 {'prompt_tokens': 4015, 'completion_tokens': 512, 'total_tokens': 4527, 'prompt_tokens_details': {'cached_tokens': 0}} TTFT 33.30698311299966 TPS 22.818593169476063
+strata-ar-4k performance 120 3 {'prompt_tokens': 4015, 'completion_tokens': 512, 'total_tokens': 4527, 'prompt_tokens_details': {'cached_tokens': 0}} TTFT 33.40379068999982 TPS 22.900910326099865
+strata-ar-4k retrieval 120 1 True delta-99757,delta-79869,delta-59981
+strata-ar-4k retrieval 120 2 True delta-99757,delta-79869,delta-59981
+strata-ar-4k retrieval 120 3 True delta-99757,delta-79869,delta-59981
+{
+  "quality_passed": 30,
+  "quality_total": 39,
+  "retrieval_passed": 3,
+  "retrieval_total": 3,
+  "performance": [
+    {
+      "records": 120,
+      "median_ttft_seconds": 33.40379068999982,
+      "median_client_decode_tps": 22.818593169476063,
+      "unique_outputs": 1
+    }
+  ]
+}

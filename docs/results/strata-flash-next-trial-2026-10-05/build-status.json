@@ -1,0 +1,65 @@
+{
+  "started_at": "2026-10-05T15:14:55.719267+00:00",
+  "source_revision": "598e9a2726948d0b2aa029ef655af26dd70399c1",
+  "commands": [
+    [
+      "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/lib/python3.14/site-packages/_rocm_sdk_devel/bin/rocminfo"
+    ],
+    [
+      "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/bin/cmake",
+      "-G",
+      "Ninja",
+      "-S",
+      "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/source",
+      "-B",
+      "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/build-hip",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DSTRATA_ENABLE_HIP=ON",
+      "-DSTRATA_ENABLE_CUDA=OFF",
+      "-DSTRATA_BUILD_TESTS=ON",
+      "-DSTRATA_PREFILL_MMQ=ON",
+      "-DCMAKE_HIP_ARCHITECTURES=gfx1151",
+      "-DCMAKE_HIP_COMPILER=/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/lib/python3.14/site-packages/_rocm_sdk_devel/llvm/bin/clang++",
+      "-DCMAKE_HIP_COMPILER_ROCM_ROOT=/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/lib/python3.14/site-packages/_rocm_sdk_devel",
+      "-DCMAKE_PREFIX_PATH=/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/lib/python3.14/site-packages/_rocm_sdk_devel;/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/lib/python3.14/site-packages/_rocm_sdk_libraries",
+      "-DCMAKE_HIP_FLAGS=--rocm-path=/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/lib/python3.14/site-packages/_rocm_sdk_devel --rocm-device-lib-path=/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/lib/python3.14/site-packages/_rocm_sdk_devel/lib/llvm/amdgcn/bitcode",
+      "-DSTRATA_GGML_DIR=/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/source/third_party/llama.cpp"
+    ],
+    [
+      "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/bin/cmake",
+      "--build",
+      "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/build-hip",
+      "-j",
+      "8"
+    ],
+    [
+      "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/build-hip/strata-device",
+      "--list-devices"
+    ],
+    [
+      "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/build-hip/strata-device",
+      "--selftest"
+    ],
+    [
+      "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/bin/ctest",
+      "--test-dir",
+      "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/build-hip",
+      "--output-on-failure",
+      "--timeout",
+      "120",
+      "-j",
+      "1",
+      "--output-junit",
+      "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/ctest.xml"
+    ]
+  ],
+  "stage": "ctest",
+  "rocminfo_returncode": 0,
+  "configure_returncode": 0,
+  "build_returncode": 0,
+  "device-list_returncode": 0,
+  "device-selftest_returncode": 0,
+  "ctest_returncode": 8,
+  "error": "RuntimeError('ctest exited 8')",
+  "finished_at": "2026-10-05T15:16:35.730126+00:00"
+}

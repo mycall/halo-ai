@@ -1,0 +1,1 @@
+strata generate: /home/michael/.cache/halo-ai/experiments/strata-2026-10-05/packs/ud-q4_k_xl is a native (IQ) pack: it needs --native SHARD1, --spec T (T >= 2) and --prefill CHUNK

@@ -1,0 +1,6 @@
+prefill gemm: hipBLASLt tuning enabled (32 rows, gfx1151, version 100500)
+case dtype=bf16 T=4096 N=48 K=2560 ldy=96 output_offset=0 beta=0.0 relative_l2=2.37906934e-06 max_abs=2.81333923e-05 PASS
+case dtype=bf16 T=37 N=48 K=2560 ldy=96 output_offset=48 beta=1.0 relative_l2=2.21224553e-06 max_abs=1.3589859e-05 PASS
+case dtype=f16 T=4096 N=512 K=2560 ldy=512 output_offset=0 beta=0.0 relative_l2=7.98688643e-06 max_abs=4.76837158e-05 PASS
+case dtype=f16 T=37 N=512 K=2560 ldy=512 output_offset=7 beta=1.0 relative_l2=7.68765003e-06 max_abs=3.57627869e-05 PASS
+smoke test: 4 cases on 2 of the table's 32 rows; outputs match hipBLASEx (solution ids are not verified; see STRATA_HIPBLASLT_VERBOSE)

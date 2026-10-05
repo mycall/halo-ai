@@ -1,0 +1,18 @@
+device 0: AMD Radeon 8060S Graphics
+  HIP arch            gfx1151 wave32 (compiled for gfx1151)
+  multiprocessors     20
+  VRAM total / free   118.000 GiB (126701535232 B) / 117.996 GiB (126697299968 B)
+  driver / runtime    71726392 / 71726392
+
+memory plan  --max-context 20480
+  KV + indexer keys   0.267387 GB
+  recurrent state     0.000000 GB  (GDN recurrence + conv history, NOT evictable)
+  expert cache        5.675613 GB  (4105 slots of 1,382,400 B)
+  VRAM pool           5.943000 GB
+  expert arena (DRAM) 0.000000 GB
+  card free           117.996 GiB (126697299968 B)
+  plan + KV vs free   FITS
+
+selftest: arena 0.062 GiB (67108864 B), used 0.002 GiB (2097152 B) after two 1 MiB allocations
+selftest: over-allocation refused as required
+strata-device selftest OK

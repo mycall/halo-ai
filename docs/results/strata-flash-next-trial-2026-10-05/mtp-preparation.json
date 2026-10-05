@@ -1,0 +1,72 @@
+{
+  "started_at": "2026-10-05T15:30:12.535624+00:00",
+  "authorized_download_bytes": 5214301696,
+  "q2_main_model_downloaded": false,
+  "commands": [
+    {
+      "command": [
+        "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/bin/python",
+        "-u",
+        "tools/mtp_fetch.py",
+        "verify",
+        "--out",
+        "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/mtp-bf16"
+      ],
+      "return_code": 0,
+      "seconds": 2.370396479000192
+    },
+    {
+      "command": [
+        "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/bin/python",
+        "-u",
+        "tools/mtp_pack.py",
+        "--src",
+        "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/mtp-bf16",
+        "--experts",
+        "q2_0",
+        "--out",
+        "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/mtp-bf16/mtp-q2_0.gguf"
+      ],
+      "return_code": 0,
+      "seconds": 67.87513516099989
+    },
+    {
+      "command": [
+        "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/bin/python",
+        "-u",
+        "tools/mtp_rt.py",
+        "--gguf",
+        "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/mtp-bf16/mtp-q2_0.gguf",
+        "--out",
+        "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/mtp-bf16/rt"
+      ],
+      "return_code": 0,
+      "seconds": 0.9338449239999136
+    }
+  ],
+  "stage": "prepared",
+  "runtime_files": [
+    {
+      "path": "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/mtp-bf16/rt/dense.bin",
+      "bytes": 116099072,
+      "sha256": "c724dc0b0822ada5d2977bf5bde821605feabaa64ea2e0045b67ca656329070a"
+    },
+    {
+      "path": "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/mtp-bf16/rt/dense.txt",
+      "bytes": 1851,
+      "sha256": "991456cf4eb266eb8a888c349e548d11bc640f5dbd9149439aa9786af0f732fd"
+    },
+    {
+      "path": "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/mtp-bf16/rt/draft_vocab.bin",
+      "bytes": 425196,
+      "sha256": "b1e1d3a7a9e4bf862dcd5923ce661fb59bbd07907e594df5cf86a62ac235cb91"
+    },
+    {
+      "path": "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/mtp-bf16/rt/experts.bin",
+      "bytes": 707788800,
+      "sha256": "09398406be61f1f54c93861f449e48b8df0bfccbc9ec9b2b7636775a6ea9244f"
+    }
+  ],
+  "completed": true,
+  "finished_at": "2026-10-05T15:40:44.097037+00:00"
+}

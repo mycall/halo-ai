@@ -1,0 +1,11 @@
+{
+  "recorded_at": "2026-10-05T16:13:33.191337+00:00",
+  "trial_port_18081_closed": true,
+  "server_exit_codes": {
+    "ar": 0,
+    "mtp": 0
+  },
+  "main_models_downloaded": false,
+  "model_files_deleted": false,
+  "defaults_changed": false
+}

@@ -1,0 +1,544 @@
+{
+  "recorded_at": "2026-10-05T15:30:30.129461+00:00",
+  "root": "/srv/halo-ai/models",
+  "apparent_bytes": 748938811906,
+  "scope": "File sizes only; no weight hashes or deletions. Strata experiment artifacts outside this root are excluded.",
+  "files": [
+    {
+      "path": "unsloth/qwen3.6-nonthinking.jinja",
+      "bytes": 4333
+    },
+    {
+      "path": "unsloth/qwen3.6-thinking.jinja",
+      "bytes": 4240
+    },
+    {
+      "path": "peonist-ai/._halogen-qwen3.8-flash-next",
+      "bytes": 4096
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/qwen3-embedding-0.6b.hnpw",
+      "bytes": 813032248
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-reranker-0.6b/qwen3-reranker-0.6b.hnpw",
+      "bytes": 813032248
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-reranker-0.6b/tokenizer/tokenizer.json",
+      "bytes": 11422654
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/NOTICE.md",
+      "bytes": 3248
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/consts.hnpb",
+      "bytes": 5086496
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/devices.hnpm",
+      "bytes": 24047
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/u0.elf",
+      "bytes": 4931968
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/u1.elf",
+      "bytes": 5456000
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/u2.elf",
+      "bytes": 6505552
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/u3.elf",
+      "bytes": 6817216
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/u4.elf",
+      "bytes": 7444032
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/u5.elf",
+      "bytes": 7432416
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/u6.elf",
+      "bytes": 4941232
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/u7.elf",
+      "bytes": 5488304
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/u8.elf",
+      "bytes": 4941232
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/devices/u9.elf",
+      "bytes": 5488304
+    },
+    {
+      "path": "halogen-npu/0.16.2/qwen3-embedding-0.6b/tokenizer/tokenizer.json",
+      "bytes": 11423705
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/._tokenizer",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/.gitattributes",
+      "bytes": 1963
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/._.gitattributes",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/halogen.jpg",
+      "bytes": 250572
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/._halogen.jpg",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-mtp.hgn",
+      "bytes": 1523566720
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/._qwen38-flash-next-mtp.hgn",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-vision.hgn",
+      "bytes": 897916416
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/._qwen38-flash-next-vision.hgn",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.hgn",
+      "bytes": 124068083904
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/._qwen38-flash-next-w4b.hgn",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.overlay-speed.hgn",
+      "bytes": 2478095488
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/._qwen38-flash-next-w4b.overlay-speed.hgn",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.overlay.hgn",
+      "bytes": 2572466560
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/._qwen38-flash-next-w4b.overlay.hgn",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/README.md",
+      "bytes": 9592
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/._README.md",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/.qwen38-flash-next-v2.hgn.lock",
+      "bytes": 0
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/.qwen38-flash-next-ngram.hgn.lock",
+      "bytes": 0
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-ngram.hgn",
+      "bytes": 51200246144
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-v2.hgn",
+      "bytes": 66687678432
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/chat_template.jinja",
+      "bytes": 8952
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/._chat_template.jinja",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/generation_config.json",
+      "bytes": 202
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/._generation_config.json",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/merges.txt",
+      "bytes": 3353259
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/._merges.txt",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer.json",
+      "bytes": 12809320
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/._tokenizer.json",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer_config.json",
+      "bytes": 17928
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/._tokenizer_config.json",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/vocab.json",
+      "bytes": 6722759
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/tokenizer/._vocab.json",
+      "bytes": 4096
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/.cache/huggingface/CACHEDIR.TAG",
+      "bytes": 191
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/.cache/huggingface/.gitignore",
+      "bytes": 1
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/.cache/huggingface/trees/3648cf1e6a3143e8946d52301570f26003c0bdb0.json",
+      "bytes": 3948
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/.cache/huggingface/download/qwen38-flash-next-ngram.hgn.lock",
+      "bytes": 0
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/.cache/huggingface/download/qwen38-flash-next-v2.hgn.lock",
+      "bytes": 0
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/.cache/huggingface/download/qwen38-flash-next-ngram.hgn.metadata",
+      "bytes": 125
+    },
+    {
+      "path": "peonist-ai/halogen-qwen3.8-flash-next/.cache/huggingface/download/qwen38-flash-next-v2.hgn.metadata",
+      "bytes": 125
+    },
+    {
+      "path": "ilintar/qwen3.8-27b-gguf-strix-halo/.Qwen3.8-27B-DFlash2-IQ4_XS.gguf.lock",
+      "bytes": 0
+    },
+    {
+      "path": "ilintar/qwen3.8-27b-gguf-strix-halo/Qwen3.8-27B-DFlash2-IQ4_XS.gguf",
+      "bytes": 1038313376
+    },
+    {
+      "path": "incoai/Qwen3.8-27B-DFlash2-GGUF/.Qwen3.8-27B-DFlash2-Q4_K_M.gguf.lock",
+      "bytes": 0
+    },
+    {
+      "path": "incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-Q4_K_M.gguf",
+      "bytes": 1143006752
+    },
+    {
+      "path": "incoai/Qwen3.8-27B-DFlash2-GGUF/.Qwen3.8-27B-DFlash2-BF16.gguf.lock",
+      "bytes": 0
+    },
+    {
+      "path": "incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-BF16.gguf",
+      "bytes": 3860293152
+    },
+    {
+      "path": "incoai/Qwen3.8-27B-DFlash2-GGUF/.Qwen3.8-27B-DFlash2-Q8_0.gguf.lock",
+      "bytes": 0
+    },
+    {
+      "path": "incoai/Qwen3.8-27B-DFlash2-GGUF/Qwen3.8-27B-DFlash2-Q8_0.gguf",
+      "bytes": 2056414752
+    },
+    {
+      "path": "julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP4-FAST.gguf",
+      "bytes": 14562236384
+    },
+    {
+      "path": "julianmb/Qwen-3.8-27B-ROCmFP4-FAST-GGUF/Qwen3.8-27B-ROCmFP8.gguf",
+      "bytes": 28193396704
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/config.json",
+      "bytes": 2716
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/preprocessor_config.json",
+      "bytes": 1776
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/model.safetensors.index.json",
+      "bytes": 210713
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/added_tokens.json",
+      "bytes": 2066
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/special_tokens_map.json",
+      "bytes": 2337
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/generation_config.json",
+      "bytes": 9906948
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/tokenizer_config.json",
+      "bytes": 19667
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/sentencepiece.bpe.model",
+      "bytes": 5165809
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/tokenizer.model",
+      "bytes": 5165809
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/spm_char_lang38_tc.model",
+      "bytes": 368901
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/model-00002-of-00002.safetensors",
+      "bytes": 4238114628
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/model-00001-of-00002.safetensors",
+      "bytes": 4999163080
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/.gitignore",
+      "bytes": 1
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/model-00001-of-00002.safetensors.lock",
+      "bytes": 0
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/model-00002-of-00002.safetensors.lock",
+      "bytes": 0
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/preprocessor_config.json.lock",
+      "bytes": 0
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/sentencepiece.bpe.model.lock",
+      "bytes": 0
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/added_tokens.json.lock",
+      "bytes": 0
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/model.safetensors.index.json.lock",
+      "bytes": 0
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/config.json.lock",
+      "bytes": 0
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/generation_config.json.lock",
+      "bytes": 0
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/config.json.metadata",
+      "bytes": 101
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/special_tokens_map.json.lock",
+      "bytes": 0
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/preprocessor_config.json.metadata",
+      "bytes": 100
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/spm_char_lang38_tc.model.lock",
+      "bytes": 0
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/model.safetensors.index.json.metadata",
+      "bytes": 101
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/tokenizer.model.lock",
+      "bytes": 0
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/added_tokens.json.metadata",
+      "bytes": 101
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/tokenizer_config.json.lock",
+      "bytes": 0
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/special_tokens_map.json.metadata",
+      "bytes": 101
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/generation_config.json.metadata",
+      "bytes": 101
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/tokenizer_config.json.metadata",
+      "bytes": 101
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/sentencepiece.bpe.model.metadata",
+      "bytes": 125
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/tokenizer.model.metadata",
+      "bytes": 125
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/spm_char_lang38_tc.model.metadata",
+      "bytes": 125
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/model-00002-of-00002.safetensors.metadata",
+      "bytes": 125
+    },
+    {
+      "path": "facebook/seamless-m4t-v2-large/.cache/huggingface/download/model-00001-of-00002.safetensors.metadata",
+      "bytes": 125
+    },
+    {
+      "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00001-of-00004.gguf",
+      "bytes": 5257696
+    },
+    {
+      "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/._DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00001-of-00004.gguf",
+      "bytes": 4096
+    },
+    {
+      "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00002-of-00004.gguf",
+      "bytes": 49910532416
+    },
+    {
+      "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/._DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00002-of-00004.gguf",
+      "bytes": 4096
+    },
+    {
+      "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00004-of-00004.gguf",
+      "bytes": 5034198464
+    },
+    {
+      "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/._DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00004-of-00004.gguf",
+      "bytes": 4096
+    },
+    {
+      "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/dspark-DeepSeek-V4-Flash-0731-Q8_0.gguf",
+      "bytes": 10896057440
+    },
+    {
+      "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/._dspark-DeepSeek-V4-Flash-0731-Q8_0.gguf",
+      "bytes": 4096
+    },
+    {
+      "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00003-of-00004.gguf",
+      "bytes": 49257859456
+    },
+    {
+      "path": "unsloth/DeepSeek-V4-Flash-0731-GGUF/._DeepSeek-V4-Flash-0731-UD-IQ3_XXS-00003-of-00004.gguf",
+      "bytes": 4096
+    },
+    {
+      "path": "unsloth/Qwen3.6-27B-MTP-GGUF/mmproj-F32.gguf",
+      "bytes": 1842940480
+    },
+    {
+      "path": "unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q8_K_XL.gguf",
+      "bytes": 35776484480
+    },
+    {
+      "path": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf",
+      "bytes": 39099447584
+    },
+    {
+      "path": "unsloth/Qwen3.8-27B-GGUF/.Qwen3.8-27B-UD-Q6_K_XL.gguf.lock",
+      "bytes": 0
+    },
+    {
+      "path": "unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q6_K_XL.gguf",
+      "bytes": 25299061664
+    },
+    {
+      "path": "unsloth/Qwen3.8-27B-GGUF/.mmproj-BF16.gguf.lock",
+      "bytes": 0
+    },
+    {
+      "path": "unsloth/Qwen3.8-27B-GGUF/mmproj-BF16.gguf",
+      "bytes": 931146432
+    },
+    {
+      "path": "unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+      "bytes": 10946624
+    },
+    {
+      "path": "unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf",
+      "bytes": 49859583136
+    },
+    {
+      "path": "unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf",
+      "bytes": 49376141504
+    },
+    {
+      "path": "unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf",
+      "bytes": 12087983520
+    },
+    {
+      "path": "unsloth/Qwen3.8-Flash-Next-GGUF/mtp-Qwen3.8-Flash-Next-shared-Q4_K_M.gguf",
+      "bytes": 1907151936
+    },
+    {
+      "path": "unsloth/Qwen3.8-Flash-Next-GGUF/.mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf.lock",
+      "bytes": 0
+    },
+    {
+      "path": "unsloth/Qwen3.8-Flash-Next-GGUF/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf",
+      "bytes": 2786568256
+    },
+    {
+      "path": "antirez/deepseek-v4-gguf/DeepSeek-V4-Flash-Layers37-42Q4KExperts-OtherExpertLayersIQ2XXSGateUp-Q2KDown-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-fixed-0731.gguf",
+      "bytes": 97591747456
+    },
+    {
+      "path": "antirez/deepseek-v4-gguf/._DeepSeek-V4-Flash-Layers37-42Q4KExperts-OtherExpertLayersIQ2XXSGateUp-Q2KDown-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-fixed-0731.gguf",
+      "bytes": 4096
+    },
+    {
+      "path": "antirez/deepseek-v4-gguf/DeepSeek-V4-Flash-DSpark-support-0731.gguf",
+      "bytes": 5989114272
+    }
+  ]
+}

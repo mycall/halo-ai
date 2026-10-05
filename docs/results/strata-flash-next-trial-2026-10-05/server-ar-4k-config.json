@@ -1,0 +1,62 @@
+{
+  "exe": "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/build-hip/strata",
+  "args": [
+    "--pack",
+    "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/packs/ud-q4_k_xl",
+    "--native",
+    "/srv/halo-ai/models/unsloth/Qwen3.8-Flash-Next-GGUF/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+    "--resident-budget-gib",
+    "16",
+    "--expert-profile",
+    "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/source/data/expert-profile.bin",
+    "--expert-cache",
+    "auto",
+    "--prefill",
+    "512",
+    "--spec",
+    "2",
+    "--mtp",
+    "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/mtp-bf16/rt",
+    "--mtp-max-t",
+    "1",
+    "--suffix-draft",
+    "0",
+    "--spec-min-p",
+    "0.5",
+    "--max-context",
+    "32768",
+    "--kv",
+    "int8",
+    "--pool-workers",
+    "15",
+    "--adapt-every",
+    "0",
+    "--pcie-frac",
+    "0",
+    "--vram-reserve-mib",
+    "8192",
+    "--prompt-cache",
+    "0"
+  ],
+  "cwd": "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/source",
+  "tokenizer": "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/packs/ud-q4_k_xl/tokenizer",
+  "model_name": "strata-flash-next-q4-trial",
+  "log": "/home/michael/Projects/source/github/halo-ai/docs/results/strata-flash-next-trial-2026-10-05/engine-ar-4k.log",
+  "host": "127.0.0.1",
+  "port": 18081,
+  "backend": "hip",
+  "gpu": 0,
+  "lib_dirs": [
+    "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/lib/python3.14/site-packages/_rocm_sdk_devel/lib",
+    "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/venv/lib/python3.14/site-packages/_rocm_sdk_libraries/lib"
+  ],
+  "env": {
+    "STRATA_HIPBLASLT_TUNING": "/home/michael/.cache/halo-ai/experiments/strata-2026-10-05/source/tools/hip/gfx1151-hipblaslt-100500.txt"
+  },
+  "open_browser": false,
+  "sampling": {
+    "temperature": 0,
+    "seed": 1
+  },
+  "engine_silence_s": 180
+}
