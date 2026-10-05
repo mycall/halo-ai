@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "profile": "qwen3.8-halogen-v2-npu",
+  "initial_state": "stopped",
+  "final_state": "stopped",
+  "contention": {
+    "idle_median_gpu_decode_tps": 50.48,
+    "busy_median_gpu_decode_tps": 39.149,
+    "all_checks_passed": true,
+    "gpu_decode_change_percent": -22.446513470681452,
+    "gpu_output_hashes": 1,
+    "paired_rounds": 5
+  },
+  "ingestion": [
+    {
+      "name": "issue-127-40x10",
+      "workers": 40,
+      "requests": 40,
+      "inputs": 400,
+      "wall_seconds": 33.307570177000116,
+      "status_counts": {
+        "200": 40
+      },
+      "latency_median_seconds": 17.12091453900007,
+      "latency_p95_seconds": 31.644843321000053,
+      "latency_max_seconds": 33.29719208300003,
+      "all_passed": true
+    },
+    {
+      "name": "scifact-188-files-concurrency-12",
+      "workers": 12,
+      "requests": 188,
+      "inputs": 444,
+      "wall_seconds": 74.98146772299992,
+      "status_counts": {
+        "200": 188
+      },
+      "latency_median_seconds": 4.753259087000288,
+      "latency_p95_seconds": 5.201278035000087,
+      "latency_max_seconds": 5.234423786999969,
+      "all_passed": true
+    },
+    {
+      "name": "scifact-188-files-concurrency-40",
+      "workers": 40,
+      "requests": 188,
+      "inputs": 444,
+      "wall_seconds": 74.67090377299974,
+      "status_counts": {
+        "200": 188
+      },
+      "latency_median_seconds": 15.85543530100017,
+      "latency_p95_seconds": 16.210240357999737,
+      "latency_max_seconds": 16.256250624999666,
+      "all_passed": true
+    }
+  ],
+  "scifact": {
+    "completed": true,
+    "corpus_documents": 5183,
+    "test_queries": 300,
+    "metrics": {
+      "embedding": {
+        "ndcg@1": 0.5533333333333333,
+        "recall@1": 0.5241111111111111,
+        "ndcg@5": 0.6767177016730901,
+        "recall@5": 0.7755,
+        "ndcg@10": 0.7000616965692769,
+        "recall@10": 0.8426666666666667,
+        "ndcg@100": 0.7243868994892935,
+        "recall@100": 0.9533333333333334,
+        "mrr@10": 0.6595568783068783
+      },
+      "embedding_reranked": {
+        "ndcg@1": 0.66,
+        "recall@1": 0.6351111111111111,
+        "ndcg@5": 0.7340492503160344,
+        "recall@5": 0.7987222222222222,
+        "ndcg@10": 0.7503593127102536,
+        "recall@10": 0.8426666666666667,
+        "ndcg@100": 0.7746845156302701,
+        "recall@100": 0.9533333333333334,
+        "mrr@10": 0.7251150793650794
+      },
+      "bm25": {
+        "ndcg@1": 0.5333333333333333,
+        "recall@1": 0.5148333333333334,
+        "ndcg@5": 0.6394078598573671,
+        "recall@5": 0.7259444444444444,
+        "ndcg@10": 0.6616762967340877,
+        "recall@10": 0.7909444444444444,
+        "ndcg@100": 0.683598322260253,
+        "recall@100": 0.8858888888888888,
+        "mrr@10": 0.6276177248677248
+      }
+    },
+    "paired_ndcg10_change": {
+      "mean": 0.05029761614097667,
+      "bootstrap_95_percent_interval": [
+        0.029163379465012552,
+        0.07166042584820781
+      ],
+      "improved_queries": 66,
+      "worsened_queries": 28,
+      "bootstrap_seed": 1,
+      "bootstrap_samples": 5000
+    }
+  },
+  "post_load": {
+    "npu_checks_passed": true,
+    "embedding_reference_hash_matches_before_quality": true,
+    "vision_answer": "red",
+    "kernel_matching_faults": [],
+    "container_oom_killed": false
+  },
+  "software_validation": {
+    "command": "./tests/container.sh",
+    "unit_tests": 175,
+    "smoke_suite_passed": true
+  },
+  "limits": [
+    "One fixed GPU prompt with serving cache and prompt lookup enabled; five paired rounds, not a general contention percentage.",
+    "Bounded HTTP ingestion simulation, not an Open WebUI end-to-end test.",
+    "One retrieval dataset and top-ten reranking; no full MTEB or BF16 reference qualification.",
+    "No gaming, suspend/resume, or extended stability soak."
+  ]
+}

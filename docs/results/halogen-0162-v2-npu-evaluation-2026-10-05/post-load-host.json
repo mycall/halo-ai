@@ -1,0 +1,39 @@
+{
+  "since": "2026-10-05T12:32:01.224865+00:00",
+  "checked_at": "2026-10-05T12:51:08.884714+00:00",
+  "journal_exit_code": 0,
+  "journal_stderr": "",
+  "scanned_lines": 3,
+  "matching_fault_lines": [],
+  "match_policy": "GPU/XDNA/IOMMU lines containing fault/error/reset/timeout, plus OOM reports",
+  "container_state": {
+    "OciVersion": "1.3.0",
+    "Status": "running",
+    "Running": true,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 11496,
+    "ConmonPid": 11494,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "2026-10-05T05:31:21.258969504-07:00",
+    "FinishedAt": "0001-01-01T00:00:00Z",
+    "CgroupPath": "/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-f2f7bf2356d494595c2253cdeac17d236e112f38a50ea4017514f8a3e21f4672.scope",
+    "CheckpointedAt": "0001-01-01T00:00:00Z",
+    "RestoredAt": "0001-01-01T00:00:00Z"
+  },
+  "hardware_after": {
+    "HALO_AI_DRM_DEVICE": "/sys/class/drm/card1/device",
+    "HALO_AI_GTT_APERTURE_BYTES": 126701535232,
+    "HALO_AI_GTT_APERTURE_GIB": 118,
+    "HALO_AI_GTT_USED_BYTES": 16524615680,
+    "HALO_AI_VRAM_TOTAL_BYTES": 2147483648,
+    "HALO_AI_VRAM_USED_BYTES": 799420416,
+    "HALO_AI_CPU_MEM_TOTAL_BYTES": 132564344832,
+    "HALO_AI_CPU_MEM_AVAILABLE_BYTES": 106975625216,
+    "HALO_AI_GTT_TARGET_GIB": "auto",
+    "HALO_AI_GTT_PENDING_GIB": ""
+  }
+}

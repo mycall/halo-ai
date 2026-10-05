@@ -1,0 +1,23 @@
+embeddings-shape-normalization-batching-retrieval True
+embedding-dimensions-and-base64 True
+rerank-order-top-n-and-document-objects True
+oversized-inputs-return-400 True
+16-request-embedding-burst True
+GPU probe 1 idle {'prompt_n': 38, 'predicted_n': 512, 'prompt_ms': 427.4, 'predicted_ms': 11066.7, 'prompt_per_second': 88.91, 'predicted_per_second': 46.265, 'cache_n': 0, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'draft_n': 372, 'draft_n_accepted': 336} passed True
+GPU probe 1 busy {'prompt_n': 0, 'predicted_n': 512, 'prompt_ms': 0.2, 'predicted_ms': 12940.6, 'prompt_per_second': 0.0, 'predicted_per_second': 39.565, 'cache_n': 38, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'prefix_n': 38, 'draft_n': 372, 'draft_n_accepted': 336} passed True
+GPU probe 2 busy {'prompt_n': 0, 'predicted_n': 512, 'prompt_ms': 0.2, 'predicted_ms': 13096.7, 'prompt_per_second': 0.0, 'predicted_per_second': 39.094, 'cache_n': 38, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'prefix_n': 38, 'draft_n': 372, 'draft_n_accepted': 336} passed True
+GPU probe 2 idle {'prompt_n': 0, 'predicted_n': 512, 'prompt_ms': 0.3, 'predicted_ms': 10142.6, 'prompt_per_second': 0.0, 'predicted_per_second': 50.48, 'cache_n': 38, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'prefix_n': 38, 'draft_n': 372, 'draft_n_accepted': 336} passed True
+GPU probe 3 idle {'prompt_n': 0, 'predicted_n': 512, 'prompt_ms': 0.2, 'predicted_ms': 8829.1, 'prompt_per_second': 0.0, 'predicted_per_second': 57.99, 'cache_n': 38, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'prefix_n': 38, 'draft_n': 372, 'draft_n_accepted': 336} passed True
+GPU probe 3 busy {'prompt_n': 0, 'predicted_n': 512, 'prompt_ms': 0.1, 'predicted_ms': 13078.1, 'prompt_per_second': 0.0, 'predicted_per_second': 39.149, 'cache_n': 38, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'prefix_n': 38, 'draft_n': 372, 'draft_n_accepted': 336} passed True
+GPU probe 4 busy {'prompt_n': 0, 'predicted_n': 512, 'prompt_ms': 0.2, 'predicted_ms': 13076.0, 'prompt_per_second': 0.0, 'predicted_per_second': 39.156, 'cache_n': 38, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'prefix_n': 38, 'draft_n': 372, 'draft_n_accepted': 336} passed True
+GPU probe 4 idle {'prompt_n': 0, 'predicted_n': 512, 'prompt_ms': 0.2, 'predicted_ms': 10676.5, 'prompt_per_second': 0.0, 'predicted_per_second': 47.956, 'cache_n': 38, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'prefix_n': 38, 'draft_n': 372, 'draft_n_accepted': 336} passed True
+GPU probe 5 idle {'prompt_n': 0, 'predicted_n': 512, 'prompt_ms': 0.2, 'predicted_ms': 9883.0, 'prompt_per_second': 0.0, 'predicted_per_second': 51.806, 'cache_n': 38, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'prefix_n': 38, 'draft_n': 372, 'draft_n_accepted': 336} passed True
+GPU probe 5 busy {'prompt_n': 0, 'predicted_n': 512, 'prompt_ms': 0.1, 'predicted_ms': 13178.6, 'prompt_per_second': 0.0, 'predicted_per_second': 38.851, 'cache_n': 38, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'prefix_n': 38, 'draft_n': 372, 'draft_n_accepted': 336} passed True
+concurrent-gpu-npu-reference-values True
+post-load-embedding-repeat True
+post-load-rerank-repeat True
+{
+  "idle_median_gpu_decode_tps": 50.48,
+  "busy_median_gpu_decode_tps": 39.149,
+  "all_checks_passed": true
+}

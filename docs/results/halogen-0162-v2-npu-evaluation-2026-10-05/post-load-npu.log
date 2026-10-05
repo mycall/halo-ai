@@ -1,0 +1,11 @@
+embeddings-shape-normalization-batching-retrieval True
+embedding-dimensions-and-base64 True
+rerank-order-top-n-and-document-objects True
+oversized-inputs-return-400 True
+16-request-embedding-burst True
+concurrent-gpu-npu-reference-values True
+post-load-embedding-repeat True
+post-load-rerank-repeat True
+{
+  "all_checks_passed": true
+}

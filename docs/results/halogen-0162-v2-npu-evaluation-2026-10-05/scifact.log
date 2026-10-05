@@ -1,0 +1,146 @@
+Embedded 64/5183 documents (5.2s this run)
+Embedded 128/5183 documents (10.2s this run)
+Embedded 192/5183 documents (15.0s this run)
+Embedded 256/5183 documents (19.1s this run)
+Embedded 320/5183 documents (23.6s this run)
+Embedded 384/5183 documents (28.3s this run)
+Embedded 448/5183 documents (33.1s this run)
+Embedded 512/5183 documents (38.5s this run)
+Embedded 576/5183 documents (42.9s this run)
+Embedded 640/5183 documents (48.0s this run)
+Embedded 704/5183 documents (52.1s this run)
+Embedded 768/5183 documents (56.8s this run)
+Embedded 832/5183 documents (62.5s this run)
+Embedded 896/5183 documents (67.4s this run)
+Embedded 960/5183 documents (72.1s this run)
+Embedded 1024/5183 documents (76.8s this run)
+Embedded 1088/5183 documents (81.7s this run)
+Embedded 1152/5183 documents (85.6s this run)
+Embedded 1216/5183 documents (89.8s this run)
+Embedded 1280/5183 documents (94.8s this run)
+Embedded 1344/5183 documents (99.6s this run)
+Embedded 1408/5183 documents (103.9s this run)
+Embedded 1472/5183 documents (108.4s this run)
+Embedded 1536/5183 documents (113.2s this run)
+Embedded 1600/5183 documents (117.0s this run)
+Embedded 1664/5183 documents (121.5s this run)
+Embedded 1728/5183 documents (126.2s this run)
+Embedded 1792/5183 documents (131.0s this run)
+Embedded 1856/5183 documents (135.1s this run)
+Embedded 1920/5183 documents (139.5s this run)
+Embedded 1984/5183 documents (143.7s this run)
+Embedded 2048/5183 documents (148.2s this run)
+Embedded 2112/5183 documents (152.8s this run)
+Embedded 2176/5183 documents (158.1s this run)
+Embedded 2240/5183 documents (163.3s this run)
+Embedded 2304/5183 documents (168.1s this run)
+Embedded 2368/5183 documents (172.6s this run)
+Embedded 2432/5183 documents (176.8s this run)
+Embedded 2496/5183 documents (181.3s this run)
+Embedded 2560/5183 documents (187.0s this run)
+Embedded 2624/5183 documents (191.8s this run)
+Embedded 2688/5183 documents (197.0s this run)
+Embedded 2752/5183 documents (201.2s this run)
+Embedded 2816/5183 documents (205.5s this run)
+Embedded 2880/5183 documents (210.8s this run)
+Embedded 2944/5183 documents (215.7s this run)
+Embedded 3008/5183 documents (220.0s this run)
+Embedded 3072/5183 documents (224.5s this run)
+Embedded 3136/5183 documents (229.0s this run)
+Embedded 3200/5183 documents (233.5s this run)
+Embedded 3264/5183 documents (238.4s this run)
+Embedded 3328/5183 documents (243.0s this run)
+Embedded 3392/5183 documents (247.7s this run)
+Embedded 3456/5183 documents (252.7s this run)
+Embedded 3520/5183 documents (257.4s this run)
+Embedded 3584/5183 documents (263.2s this run)
+Embedded 3648/5183 documents (267.3s this run)
+Embedded 3712/5183 documents (271.5s this run)
+Embedded 3776/5183 documents (276.4s this run)
+Embedded 3840/5183 documents (280.6s this run)
+Embedded 3904/5183 documents (284.7s this run)
+Embedded 3968/5183 documents (288.6s this run)
+Embedded 4032/5183 documents (292.7s this run)
+Embedded 4096/5183 documents (296.9s this run)
+Embedded 4160/5183 documents (302.6s this run)
+Embedded 4224/5183 documents (307.4s this run)
+Embedded 4288/5183 documents (312.2s this run)
+Embedded 4352/5183 documents (317.0s this run)
+Embedded 4416/5183 documents (321.7s this run)
+Embedded 4480/5183 documents (326.3s this run)
+Embedded 4544/5183 documents (330.9s this run)
+Embedded 4608/5183 documents (335.3s this run)
+Embedded 4672/5183 documents (339.5s this run)
+Embedded 4736/5183 documents (343.7s this run)
+Embedded 4800/5183 documents (348.2s this run)
+Embedded 4864/5183 documents (352.1s this run)
+Embedded 4928/5183 documents (355.9s this run)
+Embedded 4992/5183 documents (361.0s this run)
+Embedded 5056/5183 documents (364.5s this run)
+Embedded 5120/5183 documents (369.1s this run)
+Embedded 5183/5183 documents (373.9s this run)
+Reranked 10/300 queries (8.9s)
+Reranked 20/300 queries (19.3s)
+Reranked 30/300 queries (29.5s)
+Reranked 40/300 queries (38.1s)
+Reranked 50/300 queries (46.9s)
+Reranked 60/300 queries (57.0s)
+Reranked 70/300 queries (67.2s)
+Reranked 80/300 queries (78.8s)
+Reranked 90/300 queries (87.8s)
+Reranked 100/300 queries (98.0s)
+Reranked 110/300 queries (107.4s)
+Reranked 120/300 queries (116.5s)
+Reranked 130/300 queries (125.3s)
+Reranked 140/300 queries (134.5s)
+Reranked 150/300 queries (144.6s)
+Reranked 160/300 queries (154.1s)
+Reranked 170/300 queries (162.2s)
+Reranked 180/300 queries (170.9s)
+Reranked 190/300 queries (183.5s)
+Reranked 200/300 queries (193.2s)
+Reranked 210/300 queries (202.6s)
+Reranked 220/300 queries (213.7s)
+Reranked 230/300 queries (222.5s)
+Reranked 240/300 queries (230.7s)
+Reranked 250/300 queries (241.0s)
+Reranked 260/300 queries (249.2s)
+Reranked 270/300 queries (257.5s)
+Reranked 280/300 queries (266.4s)
+Reranked 290/300 queries (276.1s)
+Reranked 300/300 queries (285.9s)
+{
+  "embedding": {
+    "ndcg@1": 0.5533333333333333,
+    "recall@1": 0.5241111111111111,
+    "ndcg@5": 0.6767177016730901,
+    "recall@5": 0.7755,
+    "ndcg@10": 0.7000616965692769,
+    "recall@10": 0.8426666666666667,
+    "ndcg@100": 0.7243868994892935,
+    "recall@100": 0.9533333333333334,
+    "mrr@10": 0.6595568783068783
+  },
+  "embedding_reranked": {
+    "ndcg@1": 0.66,
+    "recall@1": 0.6351111111111111,
+    "ndcg@5": 0.7340492503160344,
+    "recall@5": 0.7987222222222222,
+    "ndcg@10": 0.7503593127102536,
+    "recall@10": 0.8426666666666667,
+    "ndcg@100": 0.7746845156302701,
+    "recall@100": 0.9533333333333334,
+    "mrr@10": 0.7251150793650794
+  },
+  "bm25": {
+    "ndcg@1": 0.5333333333333333,
+    "recall@1": 0.5148333333333334,
+    "ndcg@5": 0.6394078598573671,
+    "recall@5": 0.7259444444444444,
+    "ndcg@10": 0.6616762967340877,
+    "recall@10": 0.7909444444444444,
+    "ndcg@100": 0.683598322260253,
+    "recall@100": 0.8858888888888888,
+    "mrr@10": 0.6276177248677248
+  }
+}

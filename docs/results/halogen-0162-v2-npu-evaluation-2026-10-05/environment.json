@@ -1,0 +1,54 @@
+{
+  "git_revision": "bcfd87ac2a109c851a2160a00fca1d9af1e16e71",
+  "profile": {
+    "id": "qwen3.8-flash-next-halogen-v2-262k-vision-npu",
+    "model": "halogen-qwen3.8-flash-next-v2",
+    "engine": "halogen",
+    "context": 262144,
+    "startup_timeout": 1200,
+    "risk": "experimental",
+    "features": [
+      "mtp",
+      "vision",
+      "external-ngram",
+      "npu"
+    ],
+    "thinking": true,
+    "proposal_policy": "recommended-flash-next-with-known-near-limit-retrieval-misses",
+    "settings": {
+      "kv_pool_positions": 262144,
+      "parallel": 1,
+      "prefill_chunk": 16384,
+      "prompt_cache": 2,
+      "drafter": 1,
+      "reasoning_effort": "medium",
+      "max_tokens_default": 8192,
+      "prompt_lookup": 1,
+      "npu_models": [
+        "qwen3-embedding-0.6b",
+        "qwen3-reranker-0.6b"
+      ]
+    }
+  },
+  "hardware": {
+    "HALO_AI_DRM_DEVICE": "/sys/class/drm/card1/device",
+    "HALO_AI_GTT_APERTURE_BYTES": 126701535232,
+    "HALO_AI_GTT_APERTURE_GIB": 118,
+    "HALO_AI_GTT_USED_BYTES": 16484880384,
+    "HALO_AI_VRAM_TOTAL_BYTES": 2147483648,
+    "HALO_AI_VRAM_USED_BYTES": 695717888,
+    "HALO_AI_CPU_MEM_TOTAL_BYTES": 132564344832,
+    "HALO_AI_CPU_MEM_AVAILABLE_BYTES": 107752861696,
+    "HALO_AI_GTT_TARGET_GIB": "auto",
+    "HALO_AI_GTT_PENDING_GIB": ""
+  },
+  "image": "ghcr.io/peonist-ai/halogen-flash-server@sha256:0c61bf84ac22308a53f5d1ca6b86806702d7039e5ebc51cae4c66621b92fe04a",
+  "image_identity": "sha256:0c61bf84ac22308a53f5d1ca6b86806702d7039e5ebc51cae4c66621b92fe04a",
+  "runner_sha256": "f7b333bb43359855db508a39494d6dda0de5139707dfad8750c30b24ee45cba1",
+  "npu_manifest_sha256": "1a42caa257528074707f25e3611e5b691ce6239c5231c1ba1afdf506025ba880",
+  "python": "3.14.7 (main, Aug 13 2026, 07:40:04) [GCC 16.2.1 20260810]",
+  "numpy": "2.5.3",
+  "platform": "Linux-7.2.9-1-cachyos-deckify-x86_64-with-glibc2.44",
+  "power_profile_observed_during_evaluation": "performance",
+  "cpu_governor_observed_during_evaluation": "performance"
+}

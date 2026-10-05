@@ -140,9 +140,16 @@ an unlimited operator memlock limit, and a 118 GiB GTT aperture. The upstream
 fabric-clock helper holds FCLK at 2000 MHz. Its oneshot service may show
 `inactive (dead)` after success; check `halogen-fabric-clock status`.
 
-**NPU work shares resources with GPU generation.** In the earlier W4B test,
-continuous embedding/reranking load reduced median GPU decode from 54.1 to
-39.9 tok/s (about 26%). That percentage has not been remeasured on v2.
+**NPU work shares resources with GPU generation.** Five alternating v2 probe
+pairs measured median GPU decode of 50.48 tok/s with the NPU idle and 39.149
+tok/s under continuous embedding/reranking traffic: a 22.4% reduction. All ten
+512-token outputs were identical, and concurrent NPU vectors/scores matched
+their idle references. This is one fixed prompt with the serving cache and
+prompt lookup enabled, not a general slowdown estimate. The first idle prompt
+was cold; subsequent probes reused its 38-token prefix. Idle decode ranged
+46.3–58.0 tok/s, versus 38.9–39.6 under load. The earlier W4B test measured
+about 26% slowdown under its own conditions.
+
 Synthetic short-input batches reached about 9,232 embedding tokens/s and
 18.74 rerank pairs/s; longer inputs crossed a much slower execution bucket.
 These are throughput observations, not retrieval-quality scores.
@@ -152,6 +159,101 @@ suspend/resume, and extended stability have not been qualified. IOMMU was
 changed for NPU compatibility; no gaming benefit was measured.
 [Host setup, memlock repair, and detailed NPU results](halogen-flash-history.md#optional-npu-embeddings-and-reranking)
 are retained in the history.
+
+### V2 ingestion follow-up (2026-10-05)
+
+The pinned 0.16.2 v2/vision/NPU profile passed these bounded bursts without
+client retries. The GPU model stayed loaded but was idle during ingestion.
+The 188-file tests used the first 188 SciFact corpus documents in sorted ID
+order, split into at most 120-word chunks (444 inputs total).
+
+| Workload | Successful requests | Total wall time | Request latency p95 |
+| --- | ---: | ---: | ---: |
+| Issue #127 pattern: 40 concurrent requests, 10 inputs each | 40/40 | 33.3 s | 31.6 s |
+| 188 files, 12 concurrent requests | 188/188 | 75.0 s | 5.2 s |
+| 188 files, 40 concurrent requests | 188/188 | 74.7 s | 16.2 s |
+
+Every response had complete, finite, normalized vectors. The issue-pattern
+vectors also matched an idle reference. The service remained healthy with no
+NPU work queued after the test. Increasing concurrency from 12 to 40 bought
+essentially no throughput for this workload and increased request latency.
+This is an HTTP ingestion simulation, not an Open WebUI integration test or
+proof that arbitrary bursts cannot hit the queue timeout.
+
+Evidence: [paired v2 contention](results/halogen-0162-v2-npu-evaluation-2026-10-05/contention.json),
+[ingestion requests and timings](results/halogen-0162-v2-npu-evaluation-2026-10-05/ingestion.json),
+[runtime and hardware](results/halogen-0162-v2-npu-evaluation-2026-10-05/environment.json).
+
+The follow-up runner uses the public
+[BEIR SciFact archive](https://github.com/beir-cellar/beir/wiki/Datasets-available)
+and verifies SHA-256 `536e14446a0ba56ed1398ab1055f39fe852686ecad24a6306c80c490fa8e0165`.
+The archive also matches BEIR's published MD5. Keep the dataset and embedding
+cache outside the checkout. The quality mode requires NumPy; this host already
+had it installed. Run the stages sequentially with no other inference clients:
+
+```bash
+mkdir -p /var/cache/halo-ai/benchmarks/scifact
+curl --fail --location \
+  https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip \
+  --output /var/cache/halo-ai/benchmarks/scifact/scifact.zip
+halo-ai start qwen3.8-halogen-v2-npu --switch
+python3 tools/halogen_npu_validate.py --rounds 5 --output /tmp/v2-contention.json
+python3 tools/halogen_npu_evaluate.py burst --output /tmp/v2-ingestion.json
+python3 tools/halogen_npu_evaluate.py quality --output /tmp/v2-scifact.json
+```
+
+Quality mode embeds the complete corpus and evaluates every test query. Its
+resumable corpus cache is keyed by dataset hash, document formatting, embedding
+model/dimensions, runtime version, and the pinned NPU artifact manifest. Query
+embeddings and reranking are recomputed. Raw rankings and per-query metrics are
+saved with the result; no corpus text or embedding cache is added to this repo.
+
+### NPU retrieval quality: SciFact (2026-10-05)
+
+The full BEIR SciFact test split covers **300 judged queries and 5,183
+documents**. We embedded complete titles and abstracts without truncation,
+used the task instruction "Given a scientific claim, retrieve documents that
+support or refute the claim", and ranked by cosine similarity of normalized
+1024-dimensional NPU vectors. The reranker then reordered each query's top ten
+embedding candidates using the same task instruction. GPU v2 stayed loaded
+but idle. Corpus embedding took 373.9 seconds; mean top-ten reranking request
+latency was 0.947 seconds. No embedding or reranking request failed.
+
+| Method | nDCG@10 | MRR@10 | Recall@10 | Recall@100 |
+| --- | ---: | ---: | ---: | ---: |
+| Local BM25 baseline | 0.6617 | 0.6276 | 79.09% | 88.59% |
+| NPU embeddings | 0.7001 | 0.6596 | 84.27% | 95.33% |
+| NPU embeddings + top-ten reranking | 0.7504 | 0.7251 | 84.27% | 95.33% |
+
+nDCG measures relevance ordering; MRR measures the reciprocal position of the
+first relevant result. Recall is the per-query fraction of judged relevant
+documents retrieved, averaged across queries. Higher is better for each.
+Reranking preserves recall@10 because it only reorders those same candidates.
+It improved nDCG@10 on 66 queries, worsened 28, and left 206 unchanged. The
+mean paired gain was **0.0503**, with a **0.0292–0.0717** percentile bootstrap
+95% interval (5,000 resamples of query differences, seed 1).
+
+This supports the NPU reranker on this dataset. It is not full MTEB
+qualification, a BF16 fidelity test, or a quality result for the Flash-Next
+generation model. The BM25 baseline uses k1=1.2, b=0.75, lowercase Unicode
+word tokens, and no stemming or stopword removal; it is a local comparator,
+not a reproduction of a published BM25 score. Longer candidate lists, other
+domains, and application-specific documents remain unmeasured.
+
+[Complete rankings, per-query scores, and methods](results/halogen-0162-v2-npu-evaluation-2026-10-05/scifact.json)
+are retained for reproduction and failure analysis. The evaluator's metric
+tests and the complete container suite passed: 175 tests plus shell/CLI/
+installer smoke checks.
+
+After the workload, vision returned `red`, all NPU correctness/concurrency
+checks passed again, and the embedding reference hash matched the pre-workload
+value. The kernel journal contained no matching GPU/XDNA/IOMMU fault or OOM
+reports during the evaluation, and the container reported no OOM kill. The
+runtime was stopped afterward to restore its initial stopped state.
+[Evaluation summary](results/halogen-0162-v2-npu-evaluation-2026-10-05/summary.json),
+[post-load NPU checks](results/halogen-0162-v2-npu-evaluation-2026-10-05/post-load-npu.json),
+and [host checks](results/halogen-0162-v2-npu-evaluation-2026-10-05/post-load-host.json)
+record the checks and their scope.
 
 ## Artifacts and runtime pin
 
