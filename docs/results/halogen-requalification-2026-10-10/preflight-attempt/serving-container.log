@@ -1,0 +1,55 @@
+halogen: halogen-flash-server 0.17.3, mode all
+halogen: overlay /models/qwen38-flash-next-w4b.overlay.hgn
+halogen: KV budget 1 slot(s) over one 32768-position pool (each request up to 32768) = 1.0 GiB (~28 KiB/position incl. block scratch + ~115 MiB/slot) + 0.0 GiB prompt cache in RAM, on top of roughly 68.0 GiB (read from the checkpoint) of weights and 11.0 GiB of working memory (HALOGEN_MAX_TOK 16384). Those last two are estimates for this pre-flight check; the engine prints its measured figures once loaded, including the large lookup table it reads from disk and never holds. MemAvailable now 116.9 GiB.
+halogen: GTT in use before this start: 0.1 GiB of 118.0 (117.9 free; this start puts about 8.5 GiB there)
+serve_api: request defaults HALOGEN_MAX_TOKENS_DEFAULT=8192, HALOGEN_TEMPERATURE=1.0, HALOGEN_TOP_P=0.95, HALOGEN_TOP_K=20, HALOGEN_REASONING_EFFORT=medium
+serve_api: chat template /models/tokenizer/chat_template.jinja sha256 c3cf9e34abf4f9e3, thinking control probe passed
+halogen: waiting for engine on 8730 (cold load can take minutes)
+checkpoint: mapped 124.1 GB, NOT pinned (Pin::None)
+checkpoint: mapped 2.6 GB, NOT pinned (Pin::None)
+overlay: 30 tensors upgraded to q8g64 in place of Q4C-P
+overlay: 741 tensors, 2.40 GiB from /models/qwen38-flash-next-w4b.overlay.hgn (HALOGEN_CK_OVERLAY)
+startup [   0.0 s] host memory: 56718 contiguous 2 MiB blocks of host memory free (113436 MiB)
+startup [   0.0 s] pinning weights (reads the checkpoint from disk when it is not already in the page cache; this is usually the slowest step)
+checkpoint: pinned 65.60 GiB in 252 range(s) in 11.7 s (6.0 GB/s), 65.60 GiB of payload, MemAvailable was 116.8 GiB
+checkpoint: pinned 2.40 GiB in 1 range(s) in 0.4 s (6.3 GB/s), 2.40 GiB of payload, MemAvailable was 116.5 GiB
+startup [  12.1 s] weights pinned: 21295 contiguous 2 MiB blocks free (42590 MiB), 0 compaction stalls during that step (0 failed)
+startup [  12.1 s] preparing weights
+startup [  12.3 s] preparing weights, layer 0 of 48
+startup [  12.4 s] preparing weights, layer 8 of 48
+startup [  12.4 s] preparing weights, layer 16 of 48
+startup [  12.4 s] preparing weights, layer 24 of 48
+startup [  12.4 s] preparing weights, layer 32 of 48
+startup [  12.4 s] preparing weights, layer 40 of 48
+startup [  12.4 s] weights ready; reserving working memory
+startup [  12.6 s] reserving the KV pool, 32768 positions (about 0.9 GiB)
+startup [  12.6 s] KV pool reserved: 15158 contiguous 2 MiB blocks free (30316 MiB), 0 compaction stalls during that step (0 failed)
+startup [  12.6 s] model ready
+startup [  12.6 s] memory: 68.0 GiB of weights locked in RAM, 0.9 GiB of KV pool, 10.6 GiB of working memory, 79.5 GiB in all
+startup [  12.6 s] memory: the model's 47.7 GiB lookup table is NOT held in RAM. It is read from disk through the file cache as each request needs it, which is why this server holds less than the checkpoint is large
+startup [  12.6 s] memory: 2.0 GiB of this machine's RAM is carved out for the iGPU in firmware. That is not free memory the OS can lend to the file cache above, and it does not appear anywhere in /proc/meminfo: the machine simply reports itself smaller
+startup [  12.6 s] host memory left for everything else: 15158 contiguous 2 MiB blocks (36.6 GiB total, most of it not contiguous)
+startup [  12.6 s] free(1) and MemAvailable will report about 104.6 GiB instead: the kernel counts this server's locked weights as reclaimable file cache, and they cannot be reclaimed
+startup [  12.6 s] opening the socket
+flash_serve: a prompt admitted beside active streams prefills in pieces of 16384 tokens with a decode tick between them (HALOGEN_ADMIT_CHUNK; 0 = the engine's own chunk, which keeps the admitted prompt bitwise its alone self; -1 = the whole prompt at once)
+flash_serve: listening on 127.0.0.1:8730, 1 slots over ONE 32768-position KV pool, each request up to 32768 (it reserves prompt + max_tokens), max_tok 16384, BATCHED greedy or sampled; MTP depth-2 (up to 3) selectable (drafter 1, speculates while alone)
+halogen: engine listening after 14s
+halogen: engine watchdog on, 180s of silence takes the container down
+serve_api: chat template /models/tokenizer/chat_template.jinja sha256 c3cf9e34abf4f9e3, thinking control probe passed
+/halogen/tools/serve_api.py:4274: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Started server process [118]
+INFO:     Waiting for application startup.
+flash_serve: grammar: vocabulary of 248077 tokens (248044 plain, longest 128 B) in 49 ms
+serve_api: engine at 127.0.0.1:8730, listening on 0.0.0.0:8731
+serve_api: request defaults HALOGEN_MAX_TOKENS_DEFAULT=8192, HALOGEN_TEMPERATURE=1.0, HALOGEN_TOP_P=0.95, HALOGEN_TOP_K=20, HALOGEN_REASONING_EFFORT=medium (a field the request sends wins; temperature 0 in a request is greedy and takes no sampling default)
+serve_api: a sampled request that omits top_k / top_p gets top_k 20, top_p 0.95 (HALOGEN_TOP_K / HALOGEN_TOP_P where set, else the model's generation_config.json)
+serve_api: version 0.17.3, engine version 0.17.3
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8731 (Press CTRL+C to quit)
+INFO:     192.168.49.217:42064 - "GET /health HTTP/1.1" 200 OK

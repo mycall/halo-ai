@@ -1,0 +1,494 @@
+{
+  "runtime_release": "0.17.4",
+  "image": "ghcr.io/peonist-ai/halogen-flash-server@sha256:485cc8cb0adc7159b985772a5bbb368ab73bcb3d201eabbf32abb0cf6b655ca8",
+  "started_at": "2026-10-10T05:46:48.026489+00:00",
+  "finished_at": "2026-10-10T06:18:14.024388+00:00",
+  "method": "Sequential tests, native v2 only, same host and pinned engine. No reset of disk page cache or changes to host tuning. Three alternating serial/MTP timing rounds on v2; retrieval once per prompt length. Serving performance three rounds per prompt/mode/cache pass. Five alternating GPU idle/NPU load pairs. SciFact full corpus freshly embedded in a separate external cache. Restore initial stopped state.",
+  "v2": {
+    "quality": {
+      "cases": 13,
+      "serial_passed": 11,
+      "mtp_passed": 11,
+      "identical_cases": 13,
+      "probe_identical_text": true,
+      "speculative_totals": {
+        "serial": {
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "mtp": {
+          "draft_n": 484,
+          "draft_n_accepted": 425
+        }
+      },
+      "mtp_working": true
+    },
+    "decode_median_tps": {
+      "serial": 34.907,
+      "mtp": 65.688
+    },
+    "decode_identical": true,
+    "retrieval": [
+      {
+        "records": 7910,
+        "correct_codes": 2,
+        "passed": false,
+        "output": "delta-25658,delta-24374,delta-80090",
+        "expected": "delta-68658,delta-24374,delta-80090",
+        "wall_seconds": 265.8205030849995,
+        "messages_sha256": "fc24c93372327c21e6d0cb69b95d226058201249c6e99bb625b8db96d8ae0536",
+        "timings": {
+          "prompt_n": 261107,
+          "predicted_n": 24,
+          "prompt_ms": 264736.1,
+          "predicted_ms": 728.3,
+          "prompt_per_second": 986.292,
+          "predicted_per_second": 32.953,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "usage": {
+          "prompt_tokens": 261107,
+          "completion_tokens": 24,
+          "total_tokens": 261131,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        }
+      },
+      {
+        "records": 959,
+        "correct_codes": 3,
+        "passed": true,
+        "output": "delta-57034,delta-97930,delta-38826",
+        "expected": "delta-57034,delta-97930,delta-38826",
+        "wall_seconds": 35.348919932999706,
+        "messages_sha256": "acfc166777ce7365a515105a020c6ab72fe5094965c998599455642eaa2ec429",
+        "timings": {
+          "prompt_n": 31724,
+          "predicted_n": 24,
+          "prompt_ms": 34555.7,
+          "predicted_ms": 743.2,
+          "prompt_per_second": 918.054,
+          "predicted_per_second": 32.293,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "usage": {
+          "prompt_tokens": 31724,
+          "completion_tokens": 24,
+          "total_tokens": 31748,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        }
+      }
+    ],
+    "engine_memory_gib_at_32k": {
+      "locked_weights": 62.1,
+      "kv_pool": 0.9,
+      "working": 8.1,
+      "total": 71.1
+    }
+  },
+  "serving": {
+    "passed": 14,
+    "total": 14,
+    "failures": []
+  },
+  "performance": [
+    {
+      "records": 0,
+      "mode": "greedy",
+      "cache_pass": "first",
+      "runs": 3,
+      "median_decode_tps": 52.145,
+      "median_wall_seconds": 10.14082386500013,
+      "prompt_tokens": [
+        62,
+        62,
+        62
+      ],
+      "cached_tokens": [
+        0,
+        0,
+        0
+      ],
+      "completion_tokens": [
+        512,
+        512,
+        512
+      ]
+    },
+    {
+      "records": 0,
+      "mode": "greedy",
+      "cache_pass": "repeat",
+      "runs": 3,
+      "median_decode_tps": 51.625,
+      "median_wall_seconds": 9.925814604000152,
+      "prompt_tokens": [
+        62,
+        62,
+        62
+      ],
+      "cached_tokens": [
+        62,
+        62,
+        62
+      ],
+      "completion_tokens": [
+        512,
+        512,
+        512
+      ]
+    },
+    {
+      "records": 0,
+      "mode": "sampled",
+      "cache_pass": "first",
+      "runs": 3,
+      "median_decode_tps": 50.045,
+      "median_wall_seconds": 10.516874977999578,
+      "prompt_tokens": [
+        61,
+        61,
+        61
+      ],
+      "cached_tokens": [
+        0,
+        0,
+        0
+      ],
+      "completion_tokens": [
+        512,
+        512,
+        512
+      ]
+    },
+    {
+      "records": 0,
+      "mode": "sampled",
+      "cache_pass": "repeat",
+      "runs": 3,
+      "median_decode_tps": 51.888,
+      "median_wall_seconds": 9.875677231999362,
+      "prompt_tokens": [
+        61,
+        61,
+        61
+      ],
+      "cached_tokens": [
+        61,
+        61,
+        61
+      ],
+      "completion_tokens": [
+        512,
+        512,
+        512
+      ]
+    },
+    {
+      "records": 959,
+      "mode": "greedy",
+      "cache_pass": "first",
+      "runs": 3,
+      "median_decode_tps": 43.77,
+      "median_wall_seconds": 45.8722366639995,
+      "prompt_tokens": [
+        31711,
+        31711,
+        31711
+      ],
+      "cached_tokens": [
+        0,
+        0,
+        0
+      ],
+      "completion_tokens": [
+        512,
+        512,
+        512
+      ]
+    },
+    {
+      "records": 959,
+      "mode": "greedy",
+      "cache_pass": "repeat",
+      "runs": 3,
+      "median_decode_tps": 44.937,
+      "median_wall_seconds": 11.4096635220003,
+      "prompt_tokens": [
+        31711,
+        31711,
+        31711
+      ],
+      "cached_tokens": [
+        31711,
+        31711,
+        31711
+      ],
+      "completion_tokens": [
+        512,
+        512,
+        512
+      ]
+    },
+    {
+      "records": 959,
+      "mode": "sampled",
+      "cache_pass": "first",
+      "runs": 3,
+      "median_decode_tps": 48.116,
+      "median_wall_seconds": 46.22578850100035,
+      "prompt_tokens": [
+        31710,
+        31710,
+        31710
+      ],
+      "cached_tokens": [
+        0,
+        0,
+        0
+      ],
+      "completion_tokens": [
+        512,
+        512,
+        512
+      ]
+    },
+    {
+      "records": 959,
+      "mode": "sampled",
+      "cache_pass": "repeat",
+      "runs": 3,
+      "median_decode_tps": 48.169,
+      "median_wall_seconds": 10.644124153999655,
+      "prompt_tokens": [
+        31710,
+        31710,
+        31710
+      ],
+      "cached_tokens": [
+        31710,
+        31710,
+        31710
+      ],
+      "completion_tokens": [
+        512,
+        512,
+        512
+      ]
+    }
+  ],
+  "npu_contention": {
+    "idle_median_gpu_decode_tps": 53.023,
+    "busy_median_gpu_decode_tps": 41.604,
+    "all_checks_passed": true,
+    "checks_passed": 8,
+    "checks_total": 8,
+    "probes": 10,
+    "all_gpu_outputs_identical": true,
+    "decode_reduction_percent": 21.535937234784907
+  },
+  "ingestion": [
+    {
+      "name": "issue-127-40x10",
+      "workers": 40,
+      "requests": 40,
+      "inputs": 400,
+      "wall_seconds": 24.206052180999905,
+      "status_counts": {
+        "200": 40
+      },
+      "latency_median_seconds": 12.367298235999897,
+      "latency_p95_seconds": 22.986770852000518,
+      "latency_max_seconds": 24.194797334000214,
+      "all_passed": true
+    },
+    {
+      "name": "scifact-188-files-concurrency-12",
+      "workers": 12,
+      "requests": 188,
+      "inputs": 444,
+      "wall_seconds": 41.46186784400015,
+      "status_counts": {
+        "200": 188
+      },
+      "latency_median_seconds": 2.655807638000624,
+      "latency_p95_seconds": 3.019442524000624,
+      "latency_max_seconds": 3.50379108099969,
+      "all_passed": true
+    },
+    {
+      "name": "scifact-188-files-concurrency-40",
+      "workers": 40,
+      "requests": 188,
+      "inputs": 444,
+      "wall_seconds": 41.50997614100015,
+      "status_counts": {
+        "200": 188
+      },
+      "latency_median_seconds": 8.747109389499656,
+      "latency_p95_seconds": 9.284069664000526,
+      "latency_max_seconds": 9.655502349999551,
+      "all_passed": true
+    }
+  ],
+  "scifact": {
+    "method": {
+      "dataset": "BEIR SciFact test",
+      "corpus_count": 5183,
+      "queries": 300,
+      "documents": "title + newline + abstract, no truncation",
+      "query_instruction": "Given a scientific claim, retrieve documents that support or refute the claim",
+      "embedding_dimensions": 1024,
+      "similarity": "cosine, normalized vectors",
+      "batch_size": 8,
+      "rerank_candidates": 10,
+      "rerank_instruction": "Given a scientific claim, retrieve documents that support or refute the claim",
+      "lexical_baseline": "BM25 k1=1.2 b=0.75; Unicode word tokens, lowercase, no stemming/stopword removal",
+      "limits": "One dataset; no BF16 reference or general MTEB qualification. Reranking changes only top 10; recall@10 cannot increase."
+    },
+    "cache": {
+      "fingerprint": "04441911402ab638758548d13af785c2a412b4a14428e3d6c236c7aedd28019f",
+      "reused_documents": 0
+    },
+    "metrics": {
+      "embedding": {
+        "ndcg@1": 0.5533333333333333,
+        "recall@1": 0.5241111111111111,
+        "ndcg@5": 0.6767177016730901,
+        "recall@5": 0.7755,
+        "ndcg@10": 0.7000616965692769,
+        "recall@10": 0.8426666666666667,
+        "ndcg@100": 0.7243868994892935,
+        "recall@100": 0.9533333333333334,
+        "mrr@10": 0.6595568783068783
+      },
+      "embedding_reranked": {
+        "ndcg@1": 0.66,
+        "recall@1": 0.6351111111111111,
+        "ndcg@5": 0.7340492503160344,
+        "recall@5": 0.7987222222222222,
+        "ndcg@10": 0.7503593127102536,
+        "recall@10": 0.8426666666666667,
+        "ndcg@100": 0.7746845156302701,
+        "recall@100": 0.9533333333333334,
+        "mrr@10": 0.7251150793650794
+      },
+      "bm25": {
+        "ndcg@1": 0.5333333333333333,
+        "recall@1": 0.5148333333333334,
+        "ndcg@5": 0.6394078598573671,
+        "recall@5": 0.7259444444444444,
+        "ndcg@10": 0.6616762967340877,
+        "recall@10": 0.7909444444444444,
+        "ndcg@100": 0.683598322260253,
+        "recall@100": 0.8858888888888888,
+        "mrr@10": 0.6276177248677248
+      }
+    },
+    "paired_ndcg10_change": {
+      "mean": 0.05029761614097667,
+      "bootstrap_95_percent_interval": [
+        0.029163379465012552,
+        0.07166042584820781
+      ],
+      "improved_queries": 66,
+      "worsened_queries": 28,
+      "bootstrap_seed": 1,
+      "bootstrap_samples": 5000
+    },
+    "corpus_embedding_seconds": 375.1902223979996,
+    "mean_rerank_seconds": 0.8902035520133086
+  },
+  "post_load_npu": {
+    "all_checks_passed": true
+  },
+  "container_oom_killed": false,
+  "final_running_containers": [],
+  "hardware": {
+    "max_sampled_gtt_gib": 15.694992065429688,
+    "min_sampled_mem_available_gib": 97.36077499389648,
+    "note": "MemAvailable includes pinned file-cache weights that cannot actually be reclaimed; see engine memory logs. Hardware samples span all phases and are not isolated model allocations.",
+    "power_by_stage": {
+      "v2-diagnostics": {
+        "samples": 231,
+        "minimum_watts": 30.575,
+        "median_watts": 44.997,
+        "maximum_watts": 45.129
+      },
+      "start-serving": {
+        "samples": 5,
+        "minimum_watts": 33.21,
+        "median_watts": 35.735,
+        "maximum_watts": 38.082
+      },
+      "serving-smoke": {
+        "samples": 1,
+        "minimum_watts": 35.454,
+        "median_watts": 35.454,
+        "maximum_watts": 35.454
+      },
+      "serving": {
+        "samples": 7,
+        "minimum_watts": 34.538,
+        "median_watts": 44.903,
+        "maximum_watts": 44.975
+      },
+      "performance": {
+        "samples": 230,
+        "minimum_watts": 38.306,
+        "median_watts": 44.998,
+        "maximum_watts": 45.052
+      },
+      "npu-contention": {
+        "samples": 70,
+        "minimum_watts": 34.226,
+        "median_watts": 44.9985,
+        "maximum_watts": 45.115
+      },
+      "ingestion": {
+        "samples": 54,
+        "minimum_watts": 40.461,
+        "median_watts": 43.417500000000004,
+        "maximum_watts": 44.236
+      },
+      "scifact": {
+        "samples": 331,
+        "minimum_watts": 38.553,
+        "median_watts": 44.427,
+        "maximum_watts": 44.922
+      },
+      "post-load-smoke": {
+        "samples": 1,
+        "minimum_watts": 39.152,
+        "median_watts": 39.152,
+        "maximum_watts": 39.152
+      },
+      "post-load-npu": {
+        "samples": 12,
+        "minimum_watts": 34.112,
+        "median_watts": 44.966499999999996,
+        "maximum_watts": 45.075
+      }
+    },
+    "power_note": "AMDGPU reported SoC power, sampled every two seconds; not a firmware TDP readback. The paired contention screen does not isolate power sharing from memory contention.",
+    "power_observation": {
+      "recorded_at": "2026-10-10T06:07:39.923765+00:00",
+      "operator_confirmation": "45W is normal",
+      "observation": "Reported SoC power stayed near 45 W during diagnostic decode, serving performance, and GPU/NPU contention. No power settings were changed during the run.",
+      "configured_firmware_tdp": "Not directly readable through the available unprivileged sysfs interfaces.",
+      "interpretation": "The paired contention test measures the effect of NPU load at the same host settings, but cannot separate shared power from shared memory resource effects. Cross-release speeds should not be attributed to runtime changes without matched power conditions.",
+      "sensor_documentation": "https://kernel.org/doc/html/latest/gpu/amdgpu/thermal.html"
+    }
+  }
+}

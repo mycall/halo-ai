@@ -1,0 +1,27 @@
+.................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 177 tests in 0.251s
+
+OK
+Preserved pre-11.8.1 Lemonade JSON configuration: /tmp/tmpvo13fjk9/state/lemonade-config-backups/74f8b942e82e6751
+Downloading owner/repo@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/model.gguf from byte 8
+Downloading owner/repo@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/model.gguf from byte 0
+Building isolated speech candidate: fixture (Python 3.14, ROCm 10, gfx1151 wheels)
+{
+  "choices": [
+    {
+      "message": {
+        "content": "halo-ai smoke test passed"
+      }
+    }
+  ],
+  "system_fingerprint": "b213-e87d53e",
+  "reasoning_default_canary": {
+    "default": "medium",
+    "control": "xhigh",
+    "omitted_prompt_sha256": "e8122ccb920b4109f441d5078ccb375d528e144b9708265cca42d426eb03cf56",
+    "explicit_prompt_sha256": "e8122ccb920b4109f441d5078ccb375d528e144b9708265cca42d426eb03cf56",
+    "control_prompt_sha256": "4928e0fffb4e576559bc469f9f97289d8e900c1eca977be886d1b32e68068ce7"
+  }
+}
+halo-ai smoke tests passed

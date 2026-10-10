@@ -1,0 +1,13 @@
+halogen: halogen-flash-server 0.17.3, mode all
+halogen: /models/qwen38-flash-next-v2.hgn carries its own precision choices: no quality sidecar applies and none is looked for
+halogen: KV budget 1 slot(s) over one 32768-position pool (each request up to 32768) = 1.0 GiB (~28 KiB/position incl. block scratch + ~115 MiB/slot) + 0.0 GiB prompt cache in RAM, on top of roughly 62.1 GiB (read from the checkpoint) of weights and 8.2 GiB of working memory (HALOGEN_MAX_TOK 16384). Those last two are estimates for this pre-flight check; the engine prints its measured figures once loaded, including the large lookup table it reads from disk and never holds. MemAvailable now 116.9 GiB.
+halogen: GTT in use before this start: 0.1 GiB of 118.0 (117.9 free; this start puts about 5.4 GiB there)
+serve_api: request defaults HALOGEN_MAX_TOKENS_DEFAULT=8192, HALOGEN_TEMPERATURE=1.0, HALOGEN_TOP_P=0.95, HALOGEN_TOP_K=20, HALOGEN_REASONING_EFFORT=medium
+serve_api: chat template /models/tokenizer/chat_template.jinja sha256 c3cf9e34abf4f9e3, thinking control probe passed
+halogen: waiting for engine on 8730 (cold load can take minutes)
+checkpoint: mapped 66.7 GB, NOT pinned (Pin::None)
+overlay: none needed (this checkpoint carries its own trunk precision)
+checkpoint: mapped 51.2 GB, NOT pinned (Pin::None)
+n-gram table: 47.68 GiB from /models/qwen38-flash-next-ngram.hgn (HALOGEN_NGRAM_TABLE)
+startup [   0.0 s] host memory: 52873 contiguous 2 MiB blocks of host memory free (105746 MiB)
+startup [   0.0 s] pinning weights (reads the checkpoint from disk when it is not already in the page cache; this is usually the slowest step)

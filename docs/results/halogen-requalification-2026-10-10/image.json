@@ -1,0 +1,377 @@
+[
+     {
+          "Id": "7932269a8d698ae5b4522cedacb9c132d58b9b3fdec84c6603a728c34ac384d0",
+          "Digest": "sha256:485cc8cb0adc7159b985772a5bbb368ab73bcb3d201eabbf32abb0cf6b655ca8",
+          "RepoTags": [
+               "ghcr.io/peonist-ai/halogen-flash-server:0.17.4"
+          ],
+          "RepoDigests": [
+               "ghcr.io/peonist-ai/halogen-flash-server@sha256:485cc8cb0adc7159b985772a5bbb368ab73bcb3d201eabbf32abb0cf6b655ca8"
+          ],
+          "Parent": "",
+          "Comment": "debuerreotype 0.17",
+          "Created": "2026-10-10T01:16:41.074749152Z",
+          "Config": {
+               "ExposedPorts": {
+                    "8731/tcp": {}
+               },
+               "Env": [
+                    "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                    "LANG=C.UTF-8",
+                    "GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
+                    "PYTHON_VERSION=3.12.15",
+                    "PYTHON_SHA256=c2c4321961fab0fb999d66e0cecf521c2ab3994c7992873ea99e306c1094fd5a",
+                    "ROCM_SITE=/usr/local/lib/python3.12/site-packages",
+                    "ROCM_PATH=/usr/local/lib/python3.12/site-packages/_rocm_sdk_core",
+                    "HIP_PATH=/usr/local/lib/python3.12/site-packages/_rocm_sdk_core",
+                    "HIP_DEVICE_LIB_PATH=/usr/local/lib/python3.12/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+                    "LD_LIBRARY_PATH=/usr/local/lib/python3.12/site-packages/_rocm_sdk_core/lib:/usr/local/lib/python3.12/site-packages/_rocm_sdk_libraries/lib",
+                    "HALOGEN_ARCH=gfx1151",
+                    "HIP_FORCE_DEV_KERNARG=1",
+                    "PYTHONUNBUFFERED=1",
+                    "HF_HUB_OFFLINE=1",
+                    "TRANSFORMERS_VERBOSITY=error",
+                    "HALOGEN_ATTN_FA=64",
+                    "HALOGEN_PROMPT_CACHE=2",
+                    "HALOGEN_PREFILL_CHUNK=32768",
+                    "HALOGEN_KV_SLOTS=4",
+                    "HALOGEN_CTX=262144",
+                    "HALOGEN_MAX_TOK=32768",
+                    "HALOGEN_MATMUL_ALGOS=1",
+                    "HALOGEN_MATMUL_BUCKET=1",
+                    "HALOGEN_MATMUL_TUNING_FILE=/opt/halogen/flash-tune.plan",
+                    "HALOGEN_DRAFT_VOCAB_FILE=/opt/halogen/draft-vocab.lists",
+                    "HALOGEN_TOKENIZER=/tokenizer",
+                    "HALOGEN_PORT=8730",
+                    "HALOGEN_BIND=127.0.0.1",
+                    "HALOGEN_API_PORT=8731",
+                    "HALOGEN_MAX_TOKENS_CAP=65536",
+                    "HALOGEN_QUEUE_TIMEOUT=3600",
+                    "HALOGEN_IMAGE_VERSION=0.17.4",
+                    "HALOGEN_IMAGE_MODES=all engine api bench sweep convert inspect verify ppl niah"
+               ],
+               "Entrypoint": [
+                    "/usr/local/bin/entrypoint.sh"
+               ],
+               "Cmd": [
+                    "all"
+               ],
+               "Labels": {
+                    "ai.peonist.halogen.modes": "all engine api bench sweep convert inspect verify ppl niah",
+                    "io.buildah.version": "1.43.2",
+                    "org.opencontainers.image.description": "Qwen3.8-Flash-Next inference server for AMD Strix Halo (gfx1151)",
+                    "org.opencontainers.image.documentation": "https://github.com/peonist-ai/halogen-flash-server",
+                    "org.opencontainers.image.licenses": "LicenseRef-Peonist-EULA",
+                    "org.opencontainers.image.revision": "758480184cfc",
+                    "org.opencontainers.image.source": "https://github.com/peonist-ai/halogen-flash-server",
+                    "org.opencontainers.image.title": "halogen-flash-server",
+                    "org.opencontainers.image.vendor": "Peonist",
+                    "org.opencontainers.image.version": "0.17.4"
+               }
+          },
+          "Version": "",
+          "Author": "",
+          "Architecture": "amd64",
+          "Os": "linux",
+          "Size": 3596364097,
+          "VirtualSize": 3596364097,
+          "GraphDriver": {
+               "Name": "overlay",
+               "Data": {
+                    "LowerDir": "/home/michael/.local/share/containers/storage/overlay/65f8c2634744432cb7188316d247a5767e3a610d824bfb37c68e34dbda4a41b3/diff:/home/michael/.local/share/containers/storage/overlay/ab032f3cad9888804657dfde169729792e15fc302a117c2ecdfa66a5ea58050c/diff:/home/michael/.local/share/containers/storage/overlay/3133405ff0487165067edcb847078bc02b50efab319cd2478a490719a6b26b14/diff:/home/michael/.local/share/containers/storage/overlay/e3c8ce4e82d8232179e13c90359c2a92c7e5556311de40f17b2614fad2cd8ce8/diff:/home/michael/.local/share/containers/storage/overlay/8ec50fb7c4864e4635bf0fc1f133125afc6f3a87997f9cfb9f32c5f980f150c0/diff:/home/michael/.local/share/containers/storage/overlay/b06ab11e00c6bc283792a1eba37fa8db3d7ed2ca07d73df5842a73ce4745a43a/diff:/home/michael/.local/share/containers/storage/overlay/3b392782bfa12d2f62a8e226842a611c53da0cdd28f5bb0766fd6a5760f53922/diff:/home/michael/.local/share/containers/storage/overlay/fa3461aa95f37b3036d26711ebbe4f121d86f775601b38c447c59859b267bffb/diff:/home/michael/.local/share/containers/storage/overlay/3a2540ddf71079abb8234091938ed4ec727e4215799e2dac839a7aa22d9771a4/diff:/home/michael/.local/share/containers/storage/overlay/e8a03321cb40296599c5aaac16321863f8a18d7e1bfe7ad511efcbc7838a39a2/diff:/home/michael/.local/share/containers/storage/overlay/fb58468153b0d53a0ad0e9055f33bcf82ee267048f2fcc1397927977d718dc01/diff:/home/michael/.local/share/containers/storage/overlay/ad2cf4f07e27f69b5973c8c7d1bbe69dd4bf4d7251346c15b1863402b30c2d04/diff:/home/michael/.local/share/containers/storage/overlay/71169cc7b519bccaece3dc778513de3127464e3a5bf133953d4e82c9e8de5945/diff:/home/michael/.local/share/containers/storage/overlay/ea8397cec23a8f8f2afe891a7c1df0c7bc4e2aa2e8a76b62752e9c7d0c98fa85/diff:/home/michael/.local/share/containers/storage/overlay/b00e63a50618f48b84bca9181beca377a767a1b709a771606cd9e321d0d7ab7e/diff:/home/michael/.local/share/containers/storage/overlay/adb2097d84e9982af6f25f82ef5b07440a9012794ab7750eb24eff5d2449bbaf/diff:/home/michael/.local/share/containers/storage/overlay/02df2cb671a91bd84fe30b02a258a54e77ceae44012416d2696236d2345575d6/diff:/home/michael/.local/share/containers/storage/overlay/4a9d056df15ca7b36259185f09745aed72fbf142ce2caa8531c36ff0c7223342/diff:/home/michael/.local/share/containers/storage/overlay/954d43b5252b4b8e7614d1cd6c447f889381c3857eefad3af0da72ebb022d341/diff:/home/michael/.local/share/containers/storage/overlay/0f7dfbd157f6efbb8268edef5df24dfeca235d8151cb2baad75868745c8cbcee/diff:/home/michael/.local/share/containers/storage/overlay/15f1c8eb1ab18eae260c7fb6296434cbe1ff0e1e30fd814ae92a80dd54005e62/diff",
+                    "UpperDir": "/home/michael/.local/share/containers/storage/overlay/5016bb9dbdc8cd00cdd64f52916622f0a1ba5f120608b9a10f553c0720cd05ad/diff",
+                    "WorkDir": "/home/michael/.local/share/containers/storage/overlay/5016bb9dbdc8cd00cdd64f52916622f0a1ba5f120608b9a10f553c0720cd05ad/work"
+               }
+          },
+          "RootFS": {
+               "Type": "layers",
+               "Layers": [
+                    "sha256:15f1c8eb1ab18eae260c7fb6296434cbe1ff0e1e30fd814ae92a80dd54005e62",
+                    "sha256:e1fa2746ad6d51e7de9171dfcbb1fe93d01d51c5d8d3623e0c3b223076dc5d23",
+                    "sha256:b361fa3b97940ee89a1aab8fde1027e47ab2c2e700ca2f8d5988ad2c64386e5c",
+                    "sha256:dca2a125b4903477bcb42084172cfc98865299810620ffd617bf6e12dd83d89f",
+                    "sha256:ee97df9e4f94f6bd7978efa7482077d55364b2c77eda490c142b82342b422ba1",
+                    "sha256:ddacae46bb3ed02b7e23831f6fbc6383fe106274fc14b4f5654b86ee73b67dc1",
+                    "sha256:24ac1ba93540fa39cc18cfd941fe314e49e690c223ac25696bb17f604969ede6",
+                    "sha256:6e578abc7cf7b71e626ba12e92651929a081e2ecb20dcba755139aaf8bf293be",
+                    "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+                    "sha256:b8ae1b8d72a8da01fa5e3e447311171fd47c844027629c0f08320f578851583d",
+                    "sha256:586f747b4449ebe9ed6be4a155f1891f1b6f0503a12dadc0fe67c74778dacd34",
+                    "sha256:8fd817b33adfc2e184233186d3fa9cae8ccbe35eda711bc8a6b77f4a77aa5577",
+                    "sha256:72f5c08a53f33654cdf932a244b0d7c809181f16f737b944a6c779f58beb9077",
+                    "sha256:be484241c42531ae2cf3a61b256e561c343eb4a6fdb771a5ec8328b43d40e39d",
+                    "sha256:8e9aa33cccc1ce8f75a64e0e8aec481ca52577b864575d3e9f5bfc73b8018c95",
+                    "sha256:c750c34fd44789b30cd20473992720311a13cf3e07392ff91f5839010a11beca",
+                    "sha256:e1762109046d0f8ce6756e35f58af700764d272a60f3fc61063888c17bde11e5",
+                    "sha256:66e699af7342d80a242f2e419f8c3f5e64bd3d3e60b69e88c12febe59219052d",
+                    "sha256:b6589657723a2de8dc1477b2356b9362dce71f0ce044b20f47f97c14641f0e05",
+                    "sha256:2f3eaf1d192af4b62f78cb02df71f0af72bc128c4f97890c5e7255b6bc0bb966",
+                    "sha256:c4a459643d639d33c58abcdbd7406146d34ab024e3aae6ca04ede0f1ada35cea",
+                    "sha256:121965e1b7989cfe103d16c921dc1c220cd233fb6f05b97c1f695a164c97f46e"
+               ]
+          },
+          "Labels": {
+               "ai.peonist.halogen.modes": "all engine api bench sweep convert inspect verify ppl niah",
+               "io.buildah.version": "1.43.2",
+               "org.opencontainers.image.description": "Qwen3.8-Flash-Next inference server for AMD Strix Halo (gfx1151)",
+               "org.opencontainers.image.documentation": "https://github.com/peonist-ai/halogen-flash-server",
+               "org.opencontainers.image.licenses": "LicenseRef-Peonist-EULA",
+               "org.opencontainers.image.revision": "758480184cfc",
+               "org.opencontainers.image.source": "https://github.com/peonist-ai/halogen-flash-server",
+               "org.opencontainers.image.title": "halogen-flash-server",
+               "org.opencontainers.image.vendor": "Peonist",
+               "org.opencontainers.image.version": "0.17.4"
+          },
+          "Annotations": {
+               "com.docker.official-images.bashbrew.arch": "amd64",
+               "org.opencontainers.image.base.digest": "sha256:2b4f19dae3a777dfc3b76730bda1e82e1f66ab2a2686fa93ca78edbfb4f04ffe",
+               "org.opencontainers.image.base.name": "docker.io/library/python:3.12-slim",
+               "org.opencontainers.image.created": "2026-10-10T01:16:41.074749152Z",
+               "org.opencontainers.image.revision": "2a3b794c223ab067d122719541cdd54a068732a5",
+               "org.opencontainers.image.source": "https://github.com/docker-library/python.git#2a3b794c223ab067d122719541cdd54a068732a5:3.12/slim-trixie",
+               "org.opencontainers.image.url": "https://hub.docker.com/_/python",
+               "org.opencontainers.image.version": "3.12.15-slim-trixie"
+          },
+          "ManifestType": "application/vnd.oci.image.manifest.v1+json",
+          "User": "",
+          "History": [
+               {
+                    "created": "2026-10-05T00:00:00Z",
+                    "created_by": "# debian.sh --arch 'amd64' out/ 'trixie' '@1791158400'",
+                    "comment": "debuerreotype 0.17"
+               },
+               {
+                    "created": "2026-10-06T01:55:57.412766967Z",
+                    "created_by": "ENV PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                    "comment": "buildkit.dockerfile.v0",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-06T01:55:57.412766967Z",
+                    "created_by": "ENV LANG=C.UTF-8",
+                    "comment": "buildkit.dockerfile.v0",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-06T01:55:57.412766967Z",
+                    "created_by": "RUN /bin/sh -c set -eux; \tapt-get update; \tapt-get install -y --no-install-recommends \t\tca-certificates \t\tnetbase \t\ttzdata \t; \tapt-get dist-clean # buildkit",
+                    "comment": "buildkit.dockerfile.v0"
+               },
+               {
+                    "created": "2026-10-06T01:55:57.412766967Z",
+                    "created_by": "ENV GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
+                    "comment": "buildkit.dockerfile.v0",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-06T01:55:57.412766967Z",
+                    "created_by": "ENV PYTHON_VERSION=3.12.15",
+                    "comment": "buildkit.dockerfile.v0",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-06T01:55:57.412766967Z",
+                    "created_by": "ENV PYTHON_SHA256=c2c4321961fab0fb999d66e0cecf521c2ab3994c7992873ea99e306c1094fd5a",
+                    "comment": "buildkit.dockerfile.v0",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-06T02:04:40.79415506Z",
+                    "created_by": "RUN /bin/sh -c set -eux; \t\tsavedAptMark=\"$(apt-mark showmanual)\"; \tapt-get update; \tapt-get install -y --no-install-recommends \t\tdpkg-dev \t\tg++ \t\tgcc \t\tgnupg \t\tlibbluetooth-dev \t\tlibbz2-dev \t\tlibc6-dev \t\tlibdb-dev \t\tlibffi-dev \t\tlibgdbm-dev \t\tliblzma-dev \t\tlibncursesw5-dev \t\tlibreadline-dev \t\tlibsqlite3-dev \t\tlibssl-dev \t\tmake \t\ttk-dev \t\tuuid-dev \t\twget \t\txz-utils \t\tzlib1g-dev \t; \t\twget -O python.tar.xz \"https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz\"; \techo \"$PYTHON_SHA256 *python.tar.xz\" | sha256sum -c -; \twget -O python.tar.xz.asc \"https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc\"; \tGNUPGHOME=\"$(mktemp -d)\"; export GNUPGHOME; \tgpg --batch --keyserver hkps://keys.openpgp.org --recv-keys \"$GPG_KEY\"; \tgpg --batch --verify python.tar.xz.asc python.tar.xz; \tgpgconf --kill all; \trm -rf \"$GNUPGHOME\" python.tar.xz.asc; \tmkdir -p /usr/src/python; \ttar --extract --directory /usr/src/python --strip-components=1 --file python.tar.xz; \trm python.tar.xz; \t\tcd /usr/src/python; \tgnuArch=\"$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)\"; \t./configure \t\t--build=\"$gnuArch\" \t\t--enable-loadable-sqlite-extensions \t\t--enable-optimizations \t\t--enable-option-checking=fatal \t\t--enable-shared \t\t$(test \"${gnuArch%%-*}\" != 'riscv64' && echo '--with-lto') \t\t--with-ensurepip \t; \tnproc=\"$(nproc)\"; \tEXTRA_CFLAGS=\"$(dpkg-buildflags --get CFLAGS)\"; \tLDFLAGS=\"$(dpkg-buildflags --get LDFLAGS)\"; \tLDFLAGS=\"${LDFLAGS:-} -Wl,--strip-all\"; \tarch=\"$(dpkg --print-architecture)\"; arch=\"${arch##*-}\"; \tcase \"$arch\" in \t\tamd64|arm64) \t\t\tEXTRA_CFLAGS=\"${EXTRA_CFLAGS:-} -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer\"; \t\t\t;; \t\ti386) \t\t\t;; \t\t*) \t\t\tEXTRA_CFLAGS=\"${EXTRA_CFLAGS:-} -fno-omit-frame-pointer\"; \t\t\t;; \tesac; \tmake -j \"$nproc\" \t\t\"EXTRA_CFLAGS=${EXTRA_CFLAGS:-}\" \t\t\"LDFLAGS=${LDFLAGS:-}\" \t; \trm python; \tmake -j \"$nproc\" \t\t\"EXTRA_CFLAGS=${EXTRA_CFLAGS:-}\" \t\t\"LDFLAGS=${LDFLAGS:-} -Wl,-rpath='\\$\\$ORIGIN/../lib'\" \t\tpython \t; \tmake install; \t\tcd /; \trm -rf /usr/src/python; \t\tfind /usr/local -depth \t\t\\( \t\t\t\\( -type d -a \\( -name test -o -name tests -o -name idle_test \\) \\) \t\t\t-o \\( -type f -a \\( -name '*.pyc' -o -name '*.pyo' -o -name 'libpython*.a' \\) \\) \t\t\\) -exec rm -rf '{}' + \t; \t\tldconfig; \t\tapt-mark auto '.*' > /dev/null; \tapt-mark manual $savedAptMark; \tfind /usr/local -type f -executable -not \\( -name '*tkinter*' \\) -exec ldd '{}' ';' \t\t| awk '/=>/ { so = $(NF-1); if (index(so, \"/usr/local/\") == 1) { next }; gsub(\"^/(usr/)?\", \"\", so); printf \"*%s\\n\", so }' \t\t| sort -u \t\t| xargs -rt dpkg-query --search \t\t| awk 'sub(\":$\", \"\", $1) { print $1 }' \t\t| sort -u \t\t| xargs -r apt-mark manual \t; \tapt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \tapt-get dist-clean; \t\texport PYTHONDONTWRITEBYTECODE=1; \tpython3 --version; \tpip3 --version # buildkit",
+                    "comment": "buildkit.dockerfile.v0"
+               },
+               {
+                    "created": "2026-10-06T02:04:40.915617827Z",
+                    "created_by": "RUN /bin/sh -c set -eux; \tfor src in idle3 pip3 pydoc3 python3 python3-config; do \t\tdst=\"$(echo \"$src\" | tr -d 3)\"; \t\t[ -s \"/usr/local/bin/$src\" ]; \t\t[ ! -e \"/usr/local/bin/$dst\" ]; \t\tln -svT \"$src\" \"/usr/local/bin/$dst\"; \tdone # buildkit",
+                    "comment": "buildkit.dockerfile.v0"
+               },
+               {
+                    "created": "2026-10-06T02:04:40.915617827Z",
+                    "created_by": "CMD [\"python3\"]",
+                    "comment": "buildkit.dockerfile.v0",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-06T11:32:23.24103958Z",
+                    "created_by": "/bin/sh -c #(nop) ARG ROCM_VERSION",
+                    "comment": "FROM docker.io/library/python:3.12-slim",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-06T11:32:23.264216286Z",
+                    "created_by": "/bin/sh -c #(nop) ARG ROCM_INDEX ROCM_VERSION",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-06T11:36:25.312007676Z",
+                    "created_by": "/bin/sh -c #(nop) ARG REVISION ROCM_INDEX ROCM_VERSION",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-06T11:36:25.339246493Z",
+                    "created_by": "/bin/sh -c #(nop) ARG REVISION ROCM_INDEX ROCM_VERSION VERSION",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-06T11:36:25.364977726Z",
+                    "created_by": "/bin/sh -c #(nop) ARG MODES REVISION ROCM_INDEX ROCM_VERSION VERSION",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-06T11:36:25.399041112Z",
+                    "created_by": "/bin/sh -c #(nop) LABEL org.opencontainers.image.title=\"halogen-flash-server\"       ai.peonist.halogen.modes=\"${MODES}\"       org.opencontainers.image.vendor=\"Peonist\"       org.opencontainers.image.source=\"https://github.com/peonist-ai/halogen-flash-server\"       org.opencontainers.image.documentation=\"https://github.com/peonist-ai/halogen-flash-server\"       org.opencontainers.image.description=\"Qwen3.8-Flash-Next inference server for AMD Strix Halo (gfx1151)\"       org.opencontainers.image.version=\"${VERSION}\"       org.opencontainers.image.revision=\"${REVISION}\"       org.opencontainers.image.licenses=\"LicenseRef-Peonist-EULA\"",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:15:59.174932255Z",
+                    "created_by": "|14 MODES=all engine api bench sweep convert inspect verify ppl niah REVISION=758480184cfc ROCM_INDEX=https://repo.amd.com/rocm/whl-multi-arch/ ROCM_VERSION=7.14.0 VERSION=0.17.4 /bin/sh -c pip install --no-cache-dir --index-url ${ROCM_INDEX}       \"rocm[libraries]==${ROCM_VERSION}\"       \"rocm-sdk-device-gfx1151==${ROCM_VERSION}\""
+               },
+               {
+                    "created": "2026-10-10T01:16:14.523785027Z",
+                    "created_by": "/bin/sh -c #(nop) COPY file:23fd267edab414a1f455813c3980efa74cced4b86596a4f28308bd38e6fd08b7 in /tmp/requirements-api.txt      "
+               },
+               {
+                    "created": "2026-10-10T01:16:32.306147853Z",
+                    "created_by": "|14 MODES=all engine api bench sweep convert inspect verify ppl niah REVISION=758480184cfc ROCM_INDEX=https://repo.amd.com/rocm/whl-multi-arch/ ROCM_VERSION=7.14.0 VERSION=0.17.4 /bin/sh -c pip install --no-cache-dir -r /tmp/requirements-api.txt  && rm /tmp/requirements-api.txt"
+               },
+               {
+                    "created": "2026-10-10T01:16:33.586688121Z",
+                    "created_by": "/bin/sh -c #(nop) ENV ROCM_SITE=/usr/local/lib/python3.12/site-packages",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:34.366817378Z",
+                    "created_by": "|14 MODES=all engine api bench sweep convert inspect verify ppl niah REVISION=758480184cfc ROCM_INDEX=https://repo.amd.com/rocm/whl-multi-arch/ ROCM_VERSION=7.14.0 VERSION=0.17.4 /bin/sh -c set -eux; cd ${ROCM_SITE}/_rocm_sdk_libraries/lib;     rm -f libMIOpen.so* libMIOpenCKGroupedConv_*.so           librocsparse.so* libhipsparse.so*           librocrand.so* libhiprand.so*           librocfft.so* libhipfft.so*           librocsolver.so* libhipsolver.so*           librccl.so* ;     find ${ROCM_SITE} -name \"*.a\" -delete;     find ${ROCM_SITE} -type d -name \"__pycache__\" -prune -exec rm -rf {} +"
+               },
+               {
+                    "created": "2026-10-10T01:16:34.94424026Z",
+                    "created_by": "|14 MODES=all engine api bench sweep convert inspect verify ppl niah REVISION=758480184cfc ROCM_INDEX=https://repo.amd.com/rocm/whl-multi-arch/ ROCM_VERSION=7.14.0 VERSION=0.17.4 /bin/sh -c set -eux;     test -f ${ROCM_SITE}/_rocm_sdk_libraries/lib/libhipblaslt.so.1;     test -f ${ROCM_SITE}/_rocm_sdk_core/lib/libamdhip64.so.7;     test ! -d ${ROCM_SITE}/_rocm_sdk_devel;     ls -d ${ROCM_SITE}/_rocm_sdk_libraries/lib/hipblaslt/library/gfx1151*;     du -sh ${ROCM_SITE}/_rocm_sdk_core ${ROCM_SITE}/_rocm_sdk_libraries"
+               },
+               {
+                    "created": "2026-10-10T01:16:35.053095029Z",
+                    "created_by": "/bin/sh -c #(nop) ENV ROCM_PATH=${ROCM_SITE}/_rocm_sdk_core     HIP_PATH=${ROCM_SITE}/_rocm_sdk_core     HIP_DEVICE_LIB_PATH=${ROCM_SITE}/_rocm_sdk_core/lib/llvm/amdgcn/bitcode     LD_LIBRARY_PATH=${ROCM_SITE}/_rocm_sdk_core/lib:${ROCM_SITE}/_rocm_sdk_libraries/lib     HALOGEN_ARCH=gfx1151     HIP_FORCE_DEV_KERNARG=1     PYTHONUNBUFFERED=1     HF_HUB_OFFLINE=1     TRANSFORMERS_VERBOSITY=error",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:35.130107611Z",
+                    "created_by": "/bin/sh -c #(nop) ENV HALOGEN_ATTN_FA=64",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:35.322483464Z",
+                    "created_by": "/bin/sh -c #(nop) ENV HALOGEN_PROMPT_CACHE=2     HALOGEN_PREFILL_CHUNK=32768",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:35.359936813Z",
+                    "created_by": "/bin/sh -c #(nop) ENV HALOGEN_KV_SLOTS=4     HALOGEN_CTX=262144     HALOGEN_MAX_TOK=32768",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:35.404620353Z",
+                    "created_by": "/bin/sh -c #(nop) ENV HALOGEN_MATMUL_ALGOS=1     HALOGEN_MATMUL_BUCKET=1",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:35.605089649Z",
+                    "created_by": "/bin/sh -c #(nop) COPY file:deb5d8b2c7c7b71905710f7f95d8991ff823d6ed49c13cd2843447ebda782dca in /opt/halogen/flash-tune.plan      "
+               },
+               {
+                    "created": "2026-10-10T01:16:35.827948994Z",
+                    "created_by": "/bin/sh -c #(nop) ENV HALOGEN_MATMUL_TUNING_FILE=/opt/halogen/flash-tune.plan",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:36.032285507Z",
+                    "created_by": "/bin/sh -c #(nop) COPY file:84e59eea4d193d4adc89a4ac750b44b42c0007c605a5ba8f53ef2c7584f61373 in /opt/halogen/draft-vocab.lists      "
+               },
+               {
+                    "created": "2026-10-10T01:16:36.144882508Z",
+                    "created_by": "/bin/sh -c #(nop) ENV HALOGEN_DRAFT_VOCAB_FILE=/opt/halogen/draft-vocab.lists",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:36.413079131Z",
+                    "created_by": "/bin/sh -c #(nop) COPY multi:cd70e05e7def01751287719073f6ce082aff3130c6cbd5ec479687207ab465ea in /licenses/      "
+               },
+               {
+                    "created": "2026-10-10T01:16:36.976715771Z",
+                    "created_by": "/bin/sh -c #(nop) COPY file:dd555b20da968b91694487d0fe0119c16c7b4f379eb41af763b4a07c871fe439 in /usr/local/bin/flash_serve      "
+               },
+               {
+                    "created": "2026-10-10T01:16:37.488287537Z",
+                    "created_by": "/bin/sh -c #(nop) COPY file:356c351154494deb70518b884d7d7c6923a24ab22c2bc2c6e2a1b7dc35e4f98e in /usr/local/bin/halogen-tools      "
+               },
+               {
+                    "created": "2026-10-10T01:16:38.086021133Z",
+                    "created_by": "/bin/sh -c #(nop) COPY multi:9ce6d1891862ac3adfaa9922d3444bd3ece138e661d98cece5ecbf1a9dea4315 in /halogen/tools/      "
+               },
+               {
+                    "created": "2026-10-10T01:16:38.408048495Z",
+                    "created_by": "/bin/sh -c #(nop) COPY file:b63fc305a526e068202ebd16b716ab98e47a98ac4c57a3a905e7addac38aff40 in /usr/local/bin/entrypoint.sh      "
+               },
+               {
+                    "created": "2026-10-10T01:16:38.650908284Z",
+                    "created_by": "/bin/sh -c #(nop) COPY file:58c408a6d5e8f263d80a63fa3faa045db0eed5466dec3555ab166efd46372959 in /usr/local/bin/halogen-healthcheck      "
+               },
+               {
+                    "created": "2026-10-10T01:16:39.098558321Z",
+                    "created_by": "|14 MODES=all engine api bench sweep convert inspect verify ppl niah REVISION=758480184cfc ROCM_INDEX=https://repo.amd.com/rocm/whl-multi-arch/ ROCM_VERSION=7.14.0 VERSION=0.17.4 /bin/sh -c chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/halogen-healthcheck"
+               },
+               {
+                    "created": "2026-10-10T01:16:39.327985557Z",
+                    "created_by": "/bin/sh -c #(nop) ENV HALOGEN_TOKENIZER=/tokenizer     HALOGEN_PORT=8730     HALOGEN_BIND=127.0.0.1     HALOGEN_API_PORT=8731     HALOGEN_MAX_TOKENS_CAP=65536     HALOGEN_QUEUE_TIMEOUT=3600",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:39.393132316Z",
+                    "created_by": "/bin/sh -c #(nop) ENV HALOGEN_IMAGE_VERSION=${VERSION}",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:39.458906765Z",
+                    "created_by": "/bin/sh -c #(nop) ENV HALOGEN_IMAGE_MODES=${MODES}",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:39.68927794Z",
+                    "created_by": "/bin/sh -c #(nop) COPY file:a45a54658d63e21abe9158ca8d4d0851468512fb6b4c2443583d48dec5967f1e in /usr/local/bin/halogen-npu      "
+               },
+               {
+                    "created": "2026-10-10T01:16:40.097699166Z",
+                    "created_by": "/bin/sh -c #(nop) COPY file:b6463801094135c48d0c20f8c768920ab530d5e1e4dc615523a07a5283b98ee2 in /halogen/tools/npu_api.py      "
+               },
+               {
+                    "created": "2026-10-10T01:16:40.356082091Z",
+                    "created_by": "/bin/sh -c #(nop) COPY file:0ab8a036cff54fa742eb0a297fad162d9cfbf58fec5b37308caca65c2b0b75a4 in /opt/halogen/npu/models.txt      "
+               },
+               {
+                    "created": "2026-10-10T01:16:40.632526022Z",
+                    "created_by": "/bin/sh -c #(nop) COPY dir:f86cfedc53660bc572065fa259aa6202a0f14d64c9502e8db22681f015defcc8 in /licenses/npu/      "
+               },
+               {
+                    "created": "2026-10-10T01:16:40.754568162Z",
+                    "created_by": "/bin/sh -c #(nop) EXPOSE 8731",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:40.935251457Z",
+                    "created_by": "/bin/sh -c #(nop) HEALTHCHECK --interval=30s --timeout=35s --start-period=30m --retries=3   CMD [\"/usr/local/bin/halogen-healthcheck\", \"auto\"]",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:41.004775287Z",
+                    "created_by": "/bin/sh -c #(nop) ENTRYPOINT [\"/usr/local/bin/entrypoint.sh\"]",
+                    "empty_layer": true
+               },
+               {
+                    "created": "2026-10-10T01:16:41.075470789Z",
+                    "created_by": "/bin/sh -c #(nop) CMD [\"all\"]",
+                    "empty_layer": true
+               }
+          ],
+          "NamesHistory": [
+               "ghcr.io/peonist-ai/halogen-flash-server:0.17.4"
+          ]
+     }
+]

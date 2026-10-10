@@ -1,0 +1,13 @@
+{
+  "running_profile": "npu",
+  "persistent_profile": "npu",
+  "reboot_pending": false,
+  "running_gtt_gib": 118,
+  "persistent_gtt_gib": 118,
+  "running_cmdline": "quiet nowatchdog splash rw rootflags=subvol=/@ root=UUID=79b59d5a-2791-4c9d-9622-4dfb4886ed43 amdgpu.gttsize=120832 ttm.pages_limit=30932992",
+  "persistent_cmdline": "quiet nowatchdog splash rw rootflags=subvol=/@ root=UUID=79b59d5a-2791-4c9d-9622-4dfb4886ed43 amdgpu.gttsize=120832 ttm.pages_limit=30932992",
+  "persistent_error": "",
+  "iommu_groups_present": true,
+  "amdxdna_bound": true,
+  "npu_device": true
+}

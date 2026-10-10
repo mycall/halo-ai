@@ -1,0 +1,900 @@
+[
+     {
+          "Id": "d227d980a7d2c7cbf07a33d0ef877ab13d334677b559a7d047dc68768b0a331f",
+          "Created": "2026-10-09T22:54:31.670094174-07:00",
+          "Path": "/usr/local/bin/entrypoint.sh",
+          "Args": [
+               "all"
+          ],
+          "State": {
+               "OciVersion": "1.3.0",
+               "Status": "running",
+               "Running": true,
+               "Paused": false,
+               "Restarting": false,
+               "OOMKilled": false,
+               "Dead": false,
+               "Pid": 36044,
+               "ConmonPid": 36042,
+               "ExitCode": 0,
+               "Error": "",
+               "StartedAt": "2026-10-09T22:54:31.706424626-07:00",
+               "FinishedAt": "0001-01-01T00:00:00Z",
+               "CgroupPath": "/user.slice/user-1000.slice/user@1000.service/user.slice/libpod-d227d980a7d2c7cbf07a33d0ef877ab13d334677b559a7d047dc68768b0a331f.scope",
+               "CheckpointedAt": "0001-01-01T00:00:00Z",
+               "RestoredAt": "0001-01-01T00:00:00Z"
+          },
+          "Image": "7932269a8d698ae5b4522cedacb9c132d58b9b3fdec84c6603a728c34ac384d0",
+          "ImageDigest": "sha256:485cc8cb0adc7159b985772a5bbb368ab73bcb3d201eabbf32abb0cf6b655ca8",
+          "ImageName": "ghcr.io/peonist-ai/halogen-flash-server@sha256:485cc8cb0adc7159b985772a5bbb368ab73bcb3d201eabbf32abb0cf6b655ca8",
+          "Rootfs": "",
+          "Pod": "",
+          "ResolvConfPath": "/run/user/1000/containers/overlay-containers/d227d980a7d2c7cbf07a33d0ef877ab13d334677b559a7d047dc68768b0a331f/userdata/resolv.conf",
+          "HostnamePath": "/run/user/1000/containers/overlay-containers/d227d980a7d2c7cbf07a33d0ef877ab13d334677b559a7d047dc68768b0a331f/userdata/hostname",
+          "HostsPath": "/run/user/1000/containers/overlay-containers/d227d980a7d2c7cbf07a33d0ef877ab13d334677b559a7d047dc68768b0a331f/userdata/hosts",
+          "StaticDir": "/home/michael/.local/share/containers/storage/overlay-containers/d227d980a7d2c7cbf07a33d0ef877ab13d334677b559a7d047dc68768b0a331f/userdata",
+          "OCIConfigPath": "/home/michael/.local/share/containers/storage/overlay-containers/d227d980a7d2c7cbf07a33d0ef877ab13d334677b559a7d047dc68768b0a331f/userdata/config.json",
+          "OCIRuntime": "crun",
+          "ConmonPidFile": "/run/user/1000/containers/overlay-containers/d227d980a7d2c7cbf07a33d0ef877ab13d334677b559a7d047dc68768b0a331f/userdata/conmon.pid",
+          "PidFile": "/run/user/1000/containers/overlay-containers/d227d980a7d2c7cbf07a33d0ef877ab13d334677b559a7d047dc68768b0a331f/userdata/pidfile",
+          "Name": "halo-halogen",
+          "RestartCount": 0,
+          "Driver": "overlay",
+          "MountLabel": "",
+          "ProcessLabel": "",
+          "AppArmorProfile": "",
+          "EffectiveCaps": [
+               "CAP_CHOWN",
+               "CAP_DAC_OVERRIDE",
+               "CAP_FOWNER",
+               "CAP_FSETID",
+               "CAP_KILL",
+               "CAP_NET_BIND_SERVICE",
+               "CAP_SETFCAP",
+               "CAP_SETGID",
+               "CAP_SETPCAP",
+               "CAP_SETUID",
+               "CAP_SYS_CHROOT"
+          ],
+          "BoundingCaps": [
+               "CAP_CHOWN",
+               "CAP_DAC_OVERRIDE",
+               "CAP_FOWNER",
+               "CAP_FSETID",
+               "CAP_KILL",
+               "CAP_NET_BIND_SERVICE",
+               "CAP_SETFCAP",
+               "CAP_SETGID",
+               "CAP_SETPCAP",
+               "CAP_SETUID",
+               "CAP_SYS_CHROOT"
+          ],
+          "ExecIDs": [],
+          "GraphDriver": {
+               "Name": "overlay",
+               "Data": {
+                    "LowerDir": "/home/michael/.local/share/containers/storage/overlay/5016bb9dbdc8cd00cdd64f52916622f0a1ba5f120608b9a10f553c0720cd05ad/diff:/home/michael/.local/share/containers/storage/overlay/65f8c2634744432cb7188316d247a5767e3a610d824bfb37c68e34dbda4a41b3/diff:/home/michael/.local/share/containers/storage/overlay/ab032f3cad9888804657dfde169729792e15fc302a117c2ecdfa66a5ea58050c/diff:/home/michael/.local/share/containers/storage/overlay/3133405ff0487165067edcb847078bc02b50efab319cd2478a490719a6b26b14/diff:/home/michael/.local/share/containers/storage/overlay/e3c8ce4e82d8232179e13c90359c2a92c7e5556311de40f17b2614fad2cd8ce8/diff:/home/michael/.local/share/containers/storage/overlay/8ec50fb7c4864e4635bf0fc1f133125afc6f3a87997f9cfb9f32c5f980f150c0/diff:/home/michael/.local/share/containers/storage/overlay/b06ab11e00c6bc283792a1eba37fa8db3d7ed2ca07d73df5842a73ce4745a43a/diff:/home/michael/.local/share/containers/storage/overlay/3b392782bfa12d2f62a8e226842a611c53da0cdd28f5bb0766fd6a5760f53922/diff:/home/michael/.local/share/containers/storage/overlay/fa3461aa95f37b3036d26711ebbe4f121d86f775601b38c447c59859b267bffb/diff:/home/michael/.local/share/containers/storage/overlay/3a2540ddf71079abb8234091938ed4ec727e4215799e2dac839a7aa22d9771a4/diff:/home/michael/.local/share/containers/storage/overlay/e8a03321cb40296599c5aaac16321863f8a18d7e1bfe7ad511efcbc7838a39a2/diff:/home/michael/.local/share/containers/storage/overlay/fb58468153b0d53a0ad0e9055f33bcf82ee267048f2fcc1397927977d718dc01/diff:/home/michael/.local/share/containers/storage/overlay/ad2cf4f07e27f69b5973c8c7d1bbe69dd4bf4d7251346c15b1863402b30c2d04/diff:/home/michael/.local/share/containers/storage/overlay/71169cc7b519bccaece3dc778513de3127464e3a5bf133953d4e82c9e8de5945/diff:/home/michael/.local/share/containers/storage/overlay/ea8397cec23a8f8f2afe891a7c1df0c7bc4e2aa2e8a76b62752e9c7d0c98fa85/diff:/home/michael/.local/share/containers/storage/overlay/b00e63a50618f48b84bca9181beca377a767a1b709a771606cd9e321d0d7ab7e/diff:/home/michael/.local/share/containers/storage/overlay/adb2097d84e9982af6f25f82ef5b07440a9012794ab7750eb24eff5d2449bbaf/diff:/home/michael/.local/share/containers/storage/overlay/02df2cb671a91bd84fe30b02a258a54e77ceae44012416d2696236d2345575d6/diff:/home/michael/.local/share/containers/storage/overlay/4a9d056df15ca7b36259185f09745aed72fbf142ce2caa8531c36ff0c7223342/diff:/home/michael/.local/share/containers/storage/overlay/954d43b5252b4b8e7614d1cd6c447f889381c3857eefad3af0da72ebb022d341/diff:/home/michael/.local/share/containers/storage/overlay/0f7dfbd157f6efbb8268edef5df24dfeca235d8151cb2baad75868745c8cbcee/diff:/home/michael/.local/share/containers/storage/overlay/15f1c8eb1ab18eae260c7fb6296434cbe1ff0e1e30fd814ae92a80dd54005e62/diff",
+                    "MergedDir": "/home/michael/.local/share/containers/storage/overlay/8408d1cd0c0b9370467d66f2cc07240975de29404704faa28114c20724fbdeac/merged",
+                    "UpperDir": "/home/michael/.local/share/containers/storage/overlay/8408d1cd0c0b9370467d66f2cc07240975de29404704faa28114c20724fbdeac/diff",
+                    "WorkDir": "/home/michael/.local/share/containers/storage/overlay/8408d1cd0c0b9370467d66f2cc07240975de29404704faa28114c20724fbdeac/work"
+               }
+          },
+          "Mounts": [
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u3.elf",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/u3.elf",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u6.elf",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/u6.elf",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/usr/lib/libxrt_coreutil.so.2.21.75",
+                    "Destination": "/usr/lib/libxrt_coreutil.so.2",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/consts.hnpb",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/consts.hnpb",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/devices.hnpm",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/devices.hnpm",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/qwen3-embedding-0.6b.hnpw",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/qwen3-embedding-0.6b.hnpw",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-reranker-0.6b/tokenizer/tokenizer.json",
+                    "Destination": "/models/npu/qwen3-reranker-0.6b/tokenizer/tokenizer.json",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/NOTICE.md",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/NOTICE.md",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u10.elf",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/u10.elf",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u2.elf",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/u2.elf",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u7.elf",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/u7.elf",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u8.elf",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/u8.elf",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-reranker-0.6b/qwen3-reranker-0.6b.hnpw",
+                    "Destination": "/models/npu/qwen3-reranker-0.6b/qwen3-reranker-0.6b.hnpw",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/usr/lib/libxrt_driver_xdna.so.2.21.75",
+                    "Destination": "/usr/lib/libxrt_driver_xdna.so.2",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/chat_template.jinja",
+                    "Destination": "/models/tokenizer/chat_template.jinja",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/usr/lib/libxrt_coreutil.so.2.21.75",
+                    "Destination": "/opt/xilinx/xrt/lib/libxrt_coreutil.so.2",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/usr/lib/libxrt_core.so.2.21.75",
+                    "Destination": "/opt/xilinx/xrt/lib/libxrt_core.so.2",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/usr/lib/libxrt_driver_xdna.so.2.21.75",
+                    "Destination": "/opt/xilinx/xrt/lib/libxrt_driver_xdna.so.2",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/generation_config.json",
+                    "Destination": "/models/tokenizer/generation_config.json",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u1.elf",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/u1.elf",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u5.elf",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/u5.elf",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u9.elf",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/u9.elf",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/tokenizer/tokenizer.json",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/tokenizer/tokenizer.json",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/usr/lib/libxrt_core.so.2.21.75",
+                    "Destination": "/usr/lib/libxrt_core.so.2",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer_config.json",
+                    "Destination": "/models/tokenizer/tokenizer_config.json",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-v2.hgn",
+                    "Destination": "/models/qwen38-flash-next-v2.hgn",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-ngram.hgn",
+                    "Destination": "/models/qwen38-flash-next-ngram.hgn",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-vision.hgn",
+                    "Destination": "/models/qwen38-flash-next-vision.hgn",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/merges.txt",
+                    "Destination": "/models/tokenizer/merges.txt",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer.json",
+                    "Destination": "/models/tokenizer/tokenizer.json",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/vocab.json",
+                    "Destination": "/models/tokenizer/vocab.json",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u0.elf",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/u0.elf",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               },
+               {
+                    "Type": "bind",
+                    "Source": "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u4.elf",
+                    "Destination": "/models/npu/qwen3-embedding-0.6b/devices/u4.elf",
+                    "Driver": "",
+                    "Mode": "",
+                    "Options": [
+                         "rbind"
+                    ],
+                    "RW": false,
+                    "Propagation": "rprivate"
+               }
+          ],
+          "Dependencies": [],
+          "NetworkSettings": {
+               "EndpointID": "",
+               "Gateway": "",
+               "IPAddress": "",
+               "IPPrefixLen": 0,
+               "IPv6Gateway": "",
+               "GlobalIPv6Address": "",
+               "GlobalIPv6PrefixLen": 0,
+               "MacAddress": "",
+               "Bridge": "",
+               "SandboxID": "",
+               "HairpinMode": false,
+               "LinkLocalIPv6Address": "",
+               "LinkLocalIPv6PrefixLen": 0,
+               "Ports": {
+                    "8731/tcp": [
+                         {
+                              "HostIp": "127.0.0.1",
+                              "HostPort": "8731"
+                         }
+                    ]
+               },
+               "SandboxKey": "/run/user/1000/netns/netns-c3dcf053-7ab1-b5eb-0d07-ec8aeb899836"
+          },
+          "Namespace": "",
+          "IsInfra": false,
+          "IsService": false,
+          "KubeExitCodePropagation": "invalid",
+          "lockNumber": 13,
+          "Config": {
+               "Hostname": "d227d980a7d2",
+               "Domainname": "",
+               "User": "",
+               "AttachStdin": false,
+               "AttachStdout": false,
+               "AttachStderr": false,
+               "Tty": false,
+               "OpenStdin": false,
+               "StdinOnce": false,
+               "Env": [
+                    "PYTHON_VERSION=3.12.15",
+                    "HALOGEN_BIND=127.0.0.1",
+                    "HTTPS_PROXY=http://192.168.49.1:8282",
+                    "HALOGEN_TOP_P=0.95",
+                    "HALOGEN_KV_POOL_POSITIONS=262144",
+                    "HALOGEN_PLD=3,3",
+                    "HTTP_PROXY=http://192.168.49.1:8282",
+                    "HALOGEN_ARCH=gfx1151",
+                    "TRANSFORMERS_VERBOSITY=error",
+                    "PYTHON_SHA256=c2c4321961fab0fb999d66e0cecf521c2ab3994c7992873ea99e306c1094fd5a",
+                    "ROCM_SITE=/usr/local/lib/python3.12/site-packages",
+                    "HALOGEN_API_PORT=8731",
+                    "no_proxy=127.0.0.1,localhost",
+                    "HALOGEN_CTX=262144",
+                    "HALOGEN_MATMUL_ALGOS=1",
+                    "HALOGEN_TEMPERATURE=1.0",
+                    "HALOGEN_NGRAM_TABLE=/models/qwen38-flash-next-ngram.hgn",
+                    "HALOGEN_DRAFTER_DEFAULT=1",
+                    "HALOGEN_TOKENIZER=/models/tokenizer",
+                    "LANG=C.UTF-8",
+                    "HALOGEN_MATMUL_TUNING_FILE=/opt/halogen/flash-tune.plan",
+                    "HALOGEN_MAX_TOKENS_CAP=65536",
+                    "HALOGEN_NPU_MODELS=qwen3-embedding-0.6b,qwen3-reranker-0.6b",
+                    "HALOGEN_CHECKPOINT=/models/qwen38-flash-next-v2.hgn",
+                    "HALOGEN_MAX_TOKENS_DEFAULT=8192",
+                    "HALOGEN_MODEL_ID=halogen-qwen3.8-flash-next-v2",
+                    "NO_PROXY=127.0.0.1,localhost",
+                    "ROCM_PATH=/usr/local/lib/python3.12/site-packages/_rocm_sdk_core",
+                    "HALOGEN_REASONING_EFFORT=medium",
+                    "PYTHONUNBUFFERED=1",
+                    "HALOGEN_PORT=8730",
+                    "HIP_FORCE_DEV_KERNARG=1",
+                    "LD_LIBRARY_PATH=/usr/local/lib/python3.12/site-packages/_rocm_sdk_core/lib:/usr/local/lib/python3.12/site-packages/_rocm_sdk_libraries/lib",
+                    "HALOGEN_MAX_TOK=16384",
+                    "HALOGEN_QUEUE_TIMEOUT=3600",
+                    "HALOGEN_TOP_K=20",
+                    "HIP_DEVICE_LIB_PATH=/usr/local/lib/python3.12/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+                    "HALOGEN_IMAGE_VERSION=0.17.4",
+                    "HALOGEN_IMAGE_MODES=all engine api bench sweep convert inspect verify ppl niah",
+                    "HALOGEN_PROMPT_CACHE=2",
+                    "HALOGEN_MATMUL_BUCKET=1",
+                    "HALOGEN_VISION_TOWER=/models/qwen38-flash-next-vision.hgn",
+                    "container=podman",
+                    "GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
+                    "HIP_PATH=/usr/local/lib/python3.12/site-packages/_rocm_sdk_core",
+                    "HALOGEN_PREFILL_CHUNK=32768",
+                    "HF_HUB_OFFLINE=1",
+                    "HALOGEN_DRAFT_VOCAB_FILE=/opt/halogen/draft-vocab.lists",
+                    "HALOGEN_KV_SLOTS=1",
+                    "HALOGEN_ATTN_FA=64",
+                    "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                    "HOME=/root",
+                    "HOSTNAME=d227d980a7d2"
+               ],
+               "Cmd": [
+                    "all"
+               ],
+               "Image": "ghcr.io/peonist-ai/halogen-flash-server@sha256:485cc8cb0adc7159b985772a5bbb368ab73bcb3d201eabbf32abb0cf6b655ca8",
+               "Volumes": null,
+               "WorkingDir": "/",
+               "Entrypoint": [
+                    "/usr/local/bin/entrypoint.sh"
+               ],
+               "OnBuild": null,
+               "Labels": {
+                    "ai.peonist.halogen.modes": "all engine api bench sweep convert inspect verify ppl niah",
+                    "io.buildah.version": "1.43.2",
+                    "local.halo-ai.engine": "halogen",
+                    "local.halo-ai.managed": "true",
+                    "local.halo-ai.profile": "qwen3.8-flash-next-halogen-v2-262k-vision-npu",
+                    "org.opencontainers.image.description": "Qwen3.8-Flash-Next inference server for AMD Strix Halo (gfx1151)",
+                    "org.opencontainers.image.documentation": "https://github.com/peonist-ai/halogen-flash-server",
+                    "org.opencontainers.image.licenses": "LicenseRef-Peonist-EULA",
+                    "org.opencontainers.image.revision": "758480184cfc",
+                    "org.opencontainers.image.source": "https://github.com/peonist-ai/halogen-flash-server",
+                    "org.opencontainers.image.title": "halogen-flash-server",
+                    "org.opencontainers.image.vendor": "Peonist",
+                    "org.opencontainers.image.version": "0.17.4"
+               },
+               "Annotations": {
+                    "io.container.manager": "libpod",
+                    "org.opencontainers.image.stopSignal": "15",
+                    "org.systemd.property.KillSignal": "15",
+                    "org.systemd.property.TimeoutStopUSec": "uint64 10000000",
+                    "run.oci.keep_original_groups": "1"
+               },
+               "StopSignal": "SIGTERM",
+               "HealthcheckOnFailureAction": "none",
+               "HealthLogDestination": "local",
+               "HealthcheckMaxLogCount": 5,
+               "HealthcheckMaxLogSize": 500,
+               "CreateCommand": [
+                    "podman",
+                    "run",
+                    "-d",
+                    "--name",
+                    "halo-halogen",
+                    "--label",
+                    "local.halo-ai.managed=true",
+                    "--label",
+                    "local.halo-ai.engine=halogen",
+                    "--label",
+                    "local.halo-ai.profile=qwen3.8-flash-next-halogen-v2-262k-vision-npu",
+                    "-p",
+                    "127.0.0.1:8731:8731",
+                    "--device=/dev/kfd",
+                    "--device=/dev/dri",
+                    "--group-add",
+                    "keep-groups",
+                    "--ipc=host",
+                    "--ulimit",
+                    "memlock=-1:-1",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-vision.hgn,dst=/models/qwen38-flash-next-vision.hgn,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/chat_template.jinja,dst=/models/tokenizer/chat_template.jinja,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/generation_config.json,dst=/models/tokenizer/generation_config.json,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/merges.txt,dst=/models/tokenizer/merges.txt,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer.json,dst=/models/tokenizer/tokenizer.json,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer_config.json,dst=/models/tokenizer/tokenizer_config.json,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/vocab.json,dst=/models/tokenizer/vocab.json,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-v2.hgn,dst=/models/qwen38-flash-next-v2.hgn,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-ngram.hgn,dst=/models/qwen38-flash-next-ngram.hgn,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/NOTICE.md,dst=/models/npu/qwen3-embedding-0.6b/devices/NOTICE.md,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/consts.hnpb,dst=/models/npu/qwen3-embedding-0.6b/devices/consts.hnpb,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/devices.hnpm,dst=/models/npu/qwen3-embedding-0.6b/devices/devices.hnpm,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u0.elf,dst=/models/npu/qwen3-embedding-0.6b/devices/u0.elf,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u1.elf,dst=/models/npu/qwen3-embedding-0.6b/devices/u1.elf,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u10.elf,dst=/models/npu/qwen3-embedding-0.6b/devices/u10.elf,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u2.elf,dst=/models/npu/qwen3-embedding-0.6b/devices/u2.elf,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u3.elf,dst=/models/npu/qwen3-embedding-0.6b/devices/u3.elf,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u4.elf,dst=/models/npu/qwen3-embedding-0.6b/devices/u4.elf,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u5.elf,dst=/models/npu/qwen3-embedding-0.6b/devices/u5.elf,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u6.elf,dst=/models/npu/qwen3-embedding-0.6b/devices/u6.elf,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u7.elf,dst=/models/npu/qwen3-embedding-0.6b/devices/u7.elf,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u8.elf,dst=/models/npu/qwen3-embedding-0.6b/devices/u8.elf,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u9.elf,dst=/models/npu/qwen3-embedding-0.6b/devices/u9.elf,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/qwen3-embedding-0.6b.hnpw,dst=/models/npu/qwen3-embedding-0.6b/qwen3-embedding-0.6b.hnpw,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/tokenizer/tokenizer.json,dst=/models/npu/qwen3-embedding-0.6b/tokenizer/tokenizer.json,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-reranker-0.6b/qwen3-reranker-0.6b.hnpw,dst=/models/npu/qwen3-reranker-0.6b/qwen3-reranker-0.6b.hnpw,ro",
+                    "--mount",
+                    "type=bind,src=/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-reranker-0.6b/tokenizer/tokenizer.json,dst=/models/npu/qwen3-reranker-0.6b/tokenizer/tokenizer.json,ro",
+                    "--device",
+                    "/dev/accel/accel0",
+                    "--mount",
+                    "type=bind,src=/usr/lib/libxrt_coreutil.so.2.21.75,dst=/opt/xilinx/xrt/lib/libxrt_coreutil.so.2,ro",
+                    "--mount",
+                    "type=bind,src=/usr/lib/libxrt_coreutil.so.2.21.75,dst=/usr/lib/libxrt_coreutil.so.2,ro",
+                    "--mount",
+                    "type=bind,src=/usr/lib/libxrt_core.so.2.21.75,dst=/opt/xilinx/xrt/lib/libxrt_core.so.2,ro",
+                    "--mount",
+                    "type=bind,src=/usr/lib/libxrt_core.so.2.21.75,dst=/usr/lib/libxrt_core.so.2,ro",
+                    "--mount",
+                    "type=bind,src=/usr/lib/libxrt_driver_xdna.so.2.21.75,dst=/opt/xilinx/xrt/lib/libxrt_driver_xdna.so.2,ro",
+                    "--mount",
+                    "type=bind,src=/usr/lib/libxrt_driver_xdna.so.2.21.75,dst=/usr/lib/libxrt_driver_xdna.so.2,ro",
+                    "-e",
+                    "HALOGEN_API_PORT=8731",
+                    "-e",
+                    "HALOGEN_BIND=127.0.0.1",
+                    "-e",
+                    "HALOGEN_CHECKPOINT=/models/qwen38-flash-next-v2.hgn",
+                    "-e",
+                    "HALOGEN_CTX=262144",
+                    "-e",
+                    "HALOGEN_DRAFTER_DEFAULT=1",
+                    "-e",
+                    "HALOGEN_KV_POOL_POSITIONS=262144",
+                    "-e",
+                    "HALOGEN_KV_SLOTS=1",
+                    "-e",
+                    "HALOGEN_MAX_TOK=16384",
+                    "-e",
+                    "HALOGEN_MAX_TOKENS_DEFAULT=8192",
+                    "-e",
+                    "HALOGEN_MODEL_ID=halogen-qwen3.8-flash-next-v2",
+                    "-e",
+                    "HALOGEN_NGRAM_TABLE=/models/qwen38-flash-next-ngram.hgn",
+                    "-e",
+                    "HALOGEN_NPU_MODELS=qwen3-embedding-0.6b,qwen3-reranker-0.6b",
+                    "-e",
+                    "HALOGEN_PLD=3,3",
+                    "-e",
+                    "HALOGEN_PROMPT_CACHE=2",
+                    "-e",
+                    "HALOGEN_REASONING_EFFORT=medium",
+                    "-e",
+                    "HALOGEN_TEMPERATURE=1.0",
+                    "-e",
+                    "HALOGEN_TOKENIZER=/models/tokenizer",
+                    "-e",
+                    "HALOGEN_TOP_K=20",
+                    "-e",
+                    "HALOGEN_TOP_P=0.95",
+                    "-e",
+                    "HALOGEN_VISION_TOWER=/models/qwen38-flash-next-vision.hgn",
+                    "ghcr.io/peonist-ai/halogen-flash-server@sha256:485cc8cb0adc7159b985772a5bbb368ab73bcb3d201eabbf32abb0cf6b655ca8"
+               ],
+               "Umask": "0022",
+               "Timeout": 0,
+               "StopTimeout": 10,
+               "Passwd": true,
+               "sdNotifyMode": "container",
+               "ExposedPorts": {
+                    "8731/tcp": {}
+               }
+          },
+          "HostConfig": {
+               "Binds": [
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u3.elf:/models/npu/qwen3-embedding-0.6b/devices/u3.elf:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u6.elf:/models/npu/qwen3-embedding-0.6b/devices/u6.elf:ro,rprivate,rbind",
+                    "/usr/lib/libxrt_coreutil.so.2.21.75:/usr/lib/libxrt_coreutil.so.2:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/consts.hnpb:/models/npu/qwen3-embedding-0.6b/devices/consts.hnpb:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/devices.hnpm:/models/npu/qwen3-embedding-0.6b/devices/devices.hnpm:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/qwen3-embedding-0.6b.hnpw:/models/npu/qwen3-embedding-0.6b/qwen3-embedding-0.6b.hnpw:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-reranker-0.6b/tokenizer/tokenizer.json:/models/npu/qwen3-reranker-0.6b/tokenizer/tokenizer.json:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/NOTICE.md:/models/npu/qwen3-embedding-0.6b/devices/NOTICE.md:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u10.elf:/models/npu/qwen3-embedding-0.6b/devices/u10.elf:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u2.elf:/models/npu/qwen3-embedding-0.6b/devices/u2.elf:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u7.elf:/models/npu/qwen3-embedding-0.6b/devices/u7.elf:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u8.elf:/models/npu/qwen3-embedding-0.6b/devices/u8.elf:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-reranker-0.6b/qwen3-reranker-0.6b.hnpw:/models/npu/qwen3-reranker-0.6b/qwen3-reranker-0.6b.hnpw:ro,rprivate,rbind",
+                    "/usr/lib/libxrt_driver_xdna.so.2.21.75:/usr/lib/libxrt_driver_xdna.so.2:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/chat_template.jinja:/models/tokenizer/chat_template.jinja:ro,rprivate,rbind",
+                    "/usr/lib/libxrt_coreutil.so.2.21.75:/opt/xilinx/xrt/lib/libxrt_coreutil.so.2:ro,rprivate,rbind",
+                    "/usr/lib/libxrt_core.so.2.21.75:/opt/xilinx/xrt/lib/libxrt_core.so.2:ro,rprivate,rbind",
+                    "/usr/lib/libxrt_driver_xdna.so.2.21.75:/opt/xilinx/xrt/lib/libxrt_driver_xdna.so.2:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/generation_config.json:/models/tokenizer/generation_config.json:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u1.elf:/models/npu/qwen3-embedding-0.6b/devices/u1.elf:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u5.elf:/models/npu/qwen3-embedding-0.6b/devices/u5.elf:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u9.elf:/models/npu/qwen3-embedding-0.6b/devices/u9.elf:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/tokenizer/tokenizer.json:/models/npu/qwen3-embedding-0.6b/tokenizer/tokenizer.json:ro,rprivate,rbind",
+                    "/usr/lib/libxrt_core.so.2.21.75:/usr/lib/libxrt_core.so.2:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer_config.json:/models/tokenizer/tokenizer_config.json:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-v2.hgn:/models/qwen38-flash-next-v2.hgn:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-ngram.hgn:/models/qwen38-flash-next-ngram.hgn:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-vision.hgn:/models/qwen38-flash-next-vision.hgn:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/merges.txt:/models/tokenizer/merges.txt:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/tokenizer.json:/models/tokenizer/tokenizer.json:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/tokenizer/vocab.json:/models/tokenizer/vocab.json:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u0.elf:/models/npu/qwen3-embedding-0.6b/devices/u0.elf:ro,rprivate,rbind",
+                    "/srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/u4.elf:/models/npu/qwen3-embedding-0.6b/devices/u4.elf:ro,rprivate,rbind"
+               ],
+               "CgroupManager": "systemd",
+               "CgroupMode": "private",
+               "ContainerIDFile": "",
+               "LogConfig": {
+                    "Type": "journald",
+                    "Config": null,
+                    "Path": "",
+                    "Tag": "",
+                    "Size": "-1B"
+               },
+               "NetworkMode": "pasta",
+               "PortBindings": {
+                    "8731/tcp": [
+                         {
+                              "HostIp": "127.0.0.1",
+                              "HostPort": "8731"
+                         }
+                    ]
+               },
+               "RestartPolicy": {
+                    "Name": "no",
+                    "MaximumRetryCount": 0
+               },
+               "AutoRemove": false,
+               "AutoRemoveImage": false,
+               "Annotations": {
+                    "io.container.manager": "libpod",
+                    "org.opencontainers.image.stopSignal": "15",
+                    "org.systemd.property.KillSignal": "15",
+                    "org.systemd.property.TimeoutStopUSec": "uint64 10000000",
+                    "run.oci.keep_original_groups": "1"
+               },
+               "VolumeDriver": "",
+               "VolumesFrom": null,
+               "CapAdd": [],
+               "CapDrop": [],
+               "Dns": [],
+               "DnsOptions": null,
+               "DnsSearch": null,
+               "ExtraHosts": null,
+               "HostsFile": "",
+               "GroupAdd": null,
+               "IpcMode": "host",
+               "Cgroup": "",
+               "Cgroups": "default",
+               "Links": null,
+               "OomScoreAdj": 0,
+               "PidMode": "private",
+               "Privileged": false,
+               "PublishAllPorts": false,
+               "ReadonlyRootfs": false,
+               "SecurityOpt": [],
+               "Tmpfs": {},
+               "UTSMode": "private",
+               "UsernsMode": "",
+               "ShmSize": 65536000,
+               "Runtime": "oci",
+               "ConsoleSize": [
+                    0,
+                    0
+               ],
+               "Isolation": "",
+               "CpuShares": 0,
+               "Memory": 0,
+               "NanoCpus": 0,
+               "CgroupParent": "user.slice",
+               "BlkioWeight": 0,
+               "BlkioWeightDevice": null,
+               "BlkioDeviceReadBps": null,
+               "BlkioDeviceWriteBps": null,
+               "BlkioDeviceReadIOps": null,
+               "BlkioDeviceWriteIOps": null,
+               "CpuPeriod": 0,
+               "CpuQuota": 0,
+               "CpuRealtimePeriod": 0,
+               "CpuRealtimeRuntime": 0,
+               "CpusetCpus": "",
+               "CpusetMems": "",
+               "Devices": [],
+               "DiskQuota": 0,
+               "KernelMemory": 0,
+               "MemoryReservation": 0,
+               "MemorySwap": 0,
+               "MemorySwappiness": null,
+               "OomKillDisable": false,
+               "PidsLimit": 2048,
+               "Ulimits": [
+                    {
+                         "Name": "RLIMIT_MEMLOCK",
+                         "Soft": -1,
+                         "Hard": -1
+                    },
+                    {
+                         "Name": "RLIMIT_NOFILE",
+                         "Soft": 1048576,
+                         "Hard": 1048576
+                    },
+                    {
+                         "Name": "RLIMIT_NPROC",
+                         "Soft": 505433,
+                         "Hard": 505433
+                    }
+               ],
+               "CpuCount": 0,
+               "CpuPercent": 0,
+               "IOMaximumIOps": 0,
+               "IOMaximumBandwidth": 0,
+               "CgroupConf": null
+          },
+          "UseImageHosts": false,
+          "UseImageHostname": false
+     }
+]

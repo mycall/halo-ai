@@ -1,0 +1,1 @@
+Linux gpdwin5 7.2.9-1-cachyos-deckify #1 SMP PREEMPT_DYNAMIC Sun, 04 Oct 2026 09:27:37 +0000 x86_64 GNU/Linux

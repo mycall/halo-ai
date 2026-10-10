@@ -1,0 +1,810 @@
+{
+  "recorded_at": "2026-10-10T06:17:51.088969+00:00",
+  "health_before": {
+    "status": "ok",
+    "model": "halogen-qwen3.8-flash-next-v2",
+    "endpoints": [
+      "/v1/chat/completions",
+      "/v1/completions",
+      "/v1/embeddings",
+      "/v1/images/generations",
+      "/v1/messages",
+      "/v1/messages/count_tokens",
+      "/v1/models",
+      "/v1/moderations",
+      "/v1/rerank",
+      "/v1/responses",
+      "/v1/systemone"
+    ],
+    "cache_counters": "/cache",
+    "metrics": "/metrics",
+    "context": 262144,
+    "capability_probe": "ok",
+    "rope_scaling": null,
+    "indexer_budget": 2048,
+    "vision": {
+      "enabled": true,
+      "endpoints": [
+        "/v1/chat/completions",
+        "/v1/messages",
+        "/v1/responses"
+      ],
+      "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+      "max_pixels": 3686400,
+      "size_multiple": 32
+    },
+    "version": {
+      "api": "0.17.4",
+      "engine": "0.17.4",
+      "match": true
+    },
+    "modes": [
+      "all",
+      "engine",
+      "api",
+      "bench",
+      "sweep",
+      "convert",
+      "inspect",
+      "verify",
+      "ppl",
+      "niah"
+    ],
+    "checkpoint_format": "hgn",
+    "chat_template": {
+      "path": "/models/tokenizer/chat_template.jinja",
+      "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+      "probe": "passed",
+      "thinking_control": true
+    },
+    "engine": {
+      "responds": true,
+      "probe_s": 1.001
+    },
+    "busy": false,
+    "slots": 1,
+    "slot_ctx": 262144,
+    "kv_pool_positions": 262144,
+    "in_flight": 0,
+    "busy_for_s": 0,
+    "queued": 0,
+    "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+    "drafters_available": [
+      "serial",
+      "mtp"
+    ],
+    "drafter_default": "mtp",
+    "prompt_lookup": {
+      "ngram": 3,
+      "chain": 3,
+      "applies_to": "greedy requests with the mtp drafter"
+    },
+    "shortlist_draft_head": false,
+    "drafter_weights_loaded": true,
+    "prompt_cache": {
+      "enabled": true,
+      "cap_mb": 110,
+      "mode": 2,
+      "snapshot_align": 64,
+      "bitwise_identical_to_cold": false
+    },
+    "composable_context": {
+      "enabled": false
+    },
+    "tool_calls": {
+      "wire_format": "qwen-xml (<function=>/<parameter=>)",
+      "streaming": true,
+      "tool_choice": [
+        "auto",
+        "none",
+        "required",
+        "{type: function, function: {name}}"
+      ],
+      "forced_call_is_a_prefill": true,
+      "required_is_exact": "named tool_choice, or one tool",
+      "parallel_tool_calls": true,
+      "constrained_decoding": false,
+      "forced_call_disables_thinking": true,
+      "argument_types_need_schema": true
+    },
+    "supported": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking",
+      "max_thinking_tokens",
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning",
+      "thinking",
+      "tools",
+      "tool_choice",
+      "parallel_tool_calls",
+      "stop",
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens",
+      "stream",
+      "stream_options"
+    ],
+    "token_budget_aliases": [
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens"
+    ],
+    "max_tokens_default": 8192,
+    "reasoning_effort_default": "medium",
+    "reasoning_effort_values": [
+      "high",
+      "low",
+      "max",
+      "medium",
+      "minimal",
+      "none",
+      "xhigh"
+    ],
+    "token_budget_covers_reasoning": true,
+    "max_thinking_tokens_default": null,
+    "thinking_answer_room": "max(1024, 15% of max_tokens)",
+    "end_of_turn_guard": true,
+    "thinking_control_aliases": [
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning.{enabled,effort,max_tokens}",
+      "thinking.{type,budget_tokens}"
+    ],
+    "server_defaults": {
+      "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+      "HALOGEN_TEMPERATURE": 1.0,
+      "HALOGEN_TOP_P": 0.95,
+      "HALOGEN_TOP_K": 20,
+      "HALOGEN_REASONING_EFFORT": "medium"
+    },
+    "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+    "chat_template_kwargs": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking"
+    ],
+    "error_format": "openai",
+    "accepted_but_ignored": [
+      "n"
+    ],
+    "not_implemented": [],
+    "structured_output": {
+      "enabled": true,
+      "reason": null,
+      "response_format": [
+        "json_schema",
+        "json_object"
+      ],
+      "text.format": [
+        "json_schema",
+        "json_object"
+      ],
+      "routes": [
+        "/v1/chat/completions",
+        "/v1/completions",
+        "/v1/responses",
+        "/v1/messages"
+      ],
+      "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+      "images": "a schema with images is a 400",
+      "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+      "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+      "keys": "object keys are emitted in schema order",
+      "enforced": [
+        "type",
+        "properties",
+        "required",
+        "additionalProperties",
+        "items",
+        "minItems",
+        "maxItems",
+        "minLength",
+        "maxLength",
+        "enum",
+        "const",
+        "anyOf",
+        "oneOf (as anyOf)",
+        "type: [..., \"null\"]",
+        "$ref",
+        "$defs"
+      ],
+      "accepted_not_enforced": [
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "title",
+        "description",
+        "default",
+        "examples"
+      ],
+      "refused": [
+        "pattern",
+        "format",
+        "allOf",
+        "not",
+        "if",
+        "then",
+        "else",
+        "patternProperties",
+        "dependentRequired",
+        "dependentSchemas",
+        "uniqueItems",
+        "contains",
+        "propertyNames",
+        "unevaluatedProperties",
+        "unevaluatedItems",
+        "minProperties",
+        "maxProperties",
+        "prefixItems"
+      ]
+    },
+    "sampling": {
+      "implemented": [
+        "temperature",
+        "top_p",
+        "top_k",
+        "min_p",
+        "seed",
+        "presence_penalty",
+        "frequency_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ],
+      "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+      "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter. A sampled request that omits top_k or top_p takes the operator's default, else the model's (filter_defaults)",
+      "filter_defaults": {
+        "top_k": 20,
+        "top_p": 0.95,
+        "source": "generation_config.json"
+      },
+      "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+      "penalties": "presence and frequency count GENERATED tokens only; repetition_penalty scales every id in the prompt or the output (vLLM's rule); applied on both drafters",
+      "logprobs": "a sampled request carries the chosen token's logprob on every token; at temperature 0, and with top_logprobs (up to 20) at any temperature, the first generated token only, so those need max_tokens 1",
+      "not_implemented": [
+        "logprobs with stream=true",
+        "logprobs past the first token at temperature 0",
+        "n > 1"
+      ]
+    },
+    "max_tokens_cap": 65536,
+    "max_tokens_over_cap": "400",
+    "npu": {
+      "status": "ok",
+      "models": [
+        "qwen3-embedding-0.6b",
+        "qwen3-reranker-0.6b"
+      ],
+      "loaded": [],
+      "queued": 0,
+      "passes": 2364,
+      "contexts": 4
+    }
+  },
+  "models": {
+    "object": "list",
+    "has_more": false,
+    "first_id": "halogen-qwen3.8-flash-next-v2",
+    "last_id": "qwen3-reranker-0.6b",
+    "data": [
+      {
+        "id": "halogen-qwen3.8-flash-next-v2",
+        "object": "model",
+        "type": "model",
+        "display_name": "halogen-qwen3.8-flash-next-v2",
+        "created_at": "1970-01-01T00:00:00Z",
+        "owned_by": "halogen",
+        "created": 0,
+        "max_model_len": 262144,
+        "context_length": 262144,
+        "meta": {
+          "n_ctx_train": 262144,
+          "n_ctx": 262144
+        },
+        "max_tokens_cap": 65536,
+        "max_tokens_default": 8192
+      },
+      {
+        "id": "qwen3-embedding-0.6b",
+        "object": "model",
+        "type": "model",
+        "display_name": "qwen3-embedding-0.6b",
+        "created_at": "1970-01-01T00:00:00Z",
+        "owned_by": "halogen",
+        "created": 0,
+        "max_model_len": 4096,
+        "context_length": 4096,
+        "backend": "npu",
+        "task": "embedding",
+        "source": "Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "id": "qwen3-reranker-0.6b",
+        "object": "model",
+        "type": "model",
+        "display_name": "qwen3-reranker-0.6b",
+        "created_at": "1970-01-01T00:00:00Z",
+        "owned_by": "halogen",
+        "created": 0,
+        "max_model_len": 4096,
+        "context_length": 4096,
+        "backend": "npu",
+        "task": "score",
+        "source": "Qwen/Qwen3-Reranker-0.6B@e61197ed45024b0ed8a2d74b80b4d909f1255473"
+      }
+    ]
+  },
+  "method": "Synthetic API checks plus alternating paired GPU decode probes with the NPU idle or continuously embedding/reranking. Same running process, cache mode 2, greedy and thinking off. Bounded stress observations; not model-quality, gaming, or long-term stability qualification.",
+  "checks": [
+    {
+      "name": "embeddings-shape-normalization-batching-retrieval",
+      "passed": true,
+      "evidence": {
+        "dimensions": 1024,
+        "unit_norm": true,
+        "batch_single_max_abs_difference": 0.0,
+        "retrieval_scores_fruit_then_paris": [
+          0.30222365659943723,
+          0.6043177045606094
+        ],
+        "vector_sha256": "8e68851697ac97fe0f316c8b73c422f10d1c0edf96314addb3a15b0493169347"
+      },
+      "wall_seconds": 0.27692892699997174
+    },
+    {
+      "name": "embedding-dimensions-and-base64",
+      "passed": true,
+      "evidence": {
+        "reduced_dimensions": 128,
+        "prefix_renormalization_max_difference": 8.264320033868344e-09,
+        "base64_float_max_difference": 0.0
+      },
+      "wall_seconds": 0.13115929400009918
+    },
+    {
+      "name": "rerank-order-top-n-and-document-objects",
+      "passed": true,
+      "evidence": {
+        "all_results": [
+          {
+            "index": 1,
+            "relevance_score": 0.9976816643874981
+          },
+          {
+            "index": 2,
+            "relevance_score": 0.0001807984940164551
+          },
+          {
+            "index": 0,
+            "relevance_score": 1.6305179523701447e-05
+          }
+        ],
+        "top_document": [
+          {
+            "index": 1,
+            "relevance_score": 0.9976816643874981,
+            "document": {
+              "text": "Paris is the capital of France."
+            }
+          }
+        ]
+      },
+      "wall_seconds": 0.39849778000007063
+    },
+    {
+      "name": "oversized-inputs-return-400",
+      "passed": true,
+      "evidence": [
+        {
+          "route": "/v1/embeddings",
+          "status": 400,
+          "body": "{\"error\":{\"message\":\"input 0 is 6002 tokens; qwen3-embedding-0.6b takes at most 4096\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"context_length_exceeded\"}}"
+        },
+        {
+          "route": "/v1/rerank",
+          "status": 400,
+          "body": "{\"error\":{\"message\":\"document 0 makes a 6074-token pair; qwen3-reranker-0.6b takes at most 4096\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"context_length_exceeded\"}}"
+        }
+      ],
+      "wall_seconds": 0.018713261000812054
+    },
+    {
+      "name": "16-request-embedding-burst",
+      "passed": true,
+      "evidence": {
+        "requests": 16,
+        "inputs_per_request": 8,
+        "median_seconds": 3.6256593784996767,
+        "max_seconds": 6.787594903999889,
+        "all_vectors_match_single": true
+      },
+      "wall_seconds": 6.794389353000042
+    },
+    {
+      "name": "concurrent-gpu-npu-reference-values",
+      "passed": true,
+      "evidence": {
+        "requests": {
+          "embedding": 13,
+          "rerank": 13
+        },
+        "max_absolute_differences_from_idle": {
+          "embedding": 0.0,
+          "rerank": 0.0
+        },
+        "gpu": {
+          "wall_seconds": 11.816848636999566,
+          "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 38,
+            "completion_tokens": 512,
+            "total_tokens": 550,
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          },
+          "timings": {
+            "prompt_n": 38,
+            "predicted_n": 512,
+            "prompt_ms": 281.4,
+            "predicted_ms": 11530.0,
+            "prompt_per_second": 135.039,
+            "predicted_per_second": 44.406,
+            "cache_n": 0,
+            "disk_restore_n": 0,
+            "disk_restore_ms": 0.0,
+            "prefix_n": 38,
+            "draft_n": 425,
+            "draft_n_accepted": 363
+          }
+        }
+      },
+      "wall_seconds": 12.237731977000294
+    },
+    {
+      "name": "post-load-embedding-repeat",
+      "passed": true,
+      "evidence": {
+        "dimensions": 1024,
+        "unit_norm": true,
+        "batch_single_max_abs_difference": 0.0,
+        "retrieval_scores_fruit_then_paris": [
+          0.30222365659943723,
+          0.6043177045606094
+        ],
+        "vector_sha256": "8e68851697ac97fe0f316c8b73c422f10d1c0edf96314addb3a15b0493169347"
+      },
+      "wall_seconds": 0.27291813800002274
+    },
+    {
+      "name": "post-load-rerank-repeat",
+      "passed": true,
+      "evidence": {
+        "all_results": [
+          {
+            "index": 1,
+            "relevance_score": 0.9976816643874981
+          },
+          {
+            "index": 2,
+            "relevance_score": 0.0001807984940164551
+          },
+          {
+            "index": 0,
+            "relevance_score": 1.6305179523701447e-05
+          }
+        ],
+        "top_document": [
+          {
+            "index": 1,
+            "relevance_score": 0.9976816643874981,
+            "document": {
+              "text": "Paris is the capital of France."
+            }
+          }
+        ]
+      },
+      "wall_seconds": 0.40890674900037993
+    }
+  ],
+  "probes": [],
+  "health_after": {
+    "status": "ok",
+    "model": "halogen-qwen3.8-flash-next-v2",
+    "endpoints": [
+      "/v1/chat/completions",
+      "/v1/completions",
+      "/v1/embeddings",
+      "/v1/images/generations",
+      "/v1/messages",
+      "/v1/messages/count_tokens",
+      "/v1/models",
+      "/v1/moderations",
+      "/v1/rerank",
+      "/v1/responses",
+      "/v1/systemone"
+    ],
+    "cache_counters": "/cache",
+    "metrics": "/metrics",
+    "context": 262144,
+    "capability_probe": "ok",
+    "rope_scaling": null,
+    "indexer_budget": 2048,
+    "vision": {
+      "enabled": true,
+      "endpoints": [
+        "/v1/chat/completions",
+        "/v1/messages",
+        "/v1/responses"
+      ],
+      "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+      "max_pixels": 3686400,
+      "size_multiple": 32
+    },
+    "version": {
+      "api": "0.17.4",
+      "engine": "0.17.4",
+      "match": true
+    },
+    "modes": [
+      "all",
+      "engine",
+      "api",
+      "bench",
+      "sweep",
+      "convert",
+      "inspect",
+      "verify",
+      "ppl",
+      "niah"
+    ],
+    "checkpoint_format": "hgn",
+    "chat_template": {
+      "path": "/models/tokenizer/chat_template.jinja",
+      "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+      "probe": "passed",
+      "thinking_control": true
+    },
+    "engine": {
+      "responds": true,
+      "probe_s": 1.001
+    },
+    "busy": false,
+    "slots": 1,
+    "slot_ctx": 262144,
+    "kv_pool_positions": 262144,
+    "in_flight": 0,
+    "busy_for_s": 0,
+    "queued": 0,
+    "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+    "drafters_available": [
+      "serial",
+      "mtp"
+    ],
+    "drafter_default": "mtp",
+    "prompt_lookup": {
+      "ngram": 3,
+      "chain": 3,
+      "applies_to": "greedy requests with the mtp drafter"
+    },
+    "shortlist_draft_head": false,
+    "drafter_weights_loaded": true,
+    "prompt_cache": {
+      "enabled": true,
+      "cap_mb": 110,
+      "mode": 2,
+      "snapshot_align": 64,
+      "bitwise_identical_to_cold": false
+    },
+    "composable_context": {
+      "enabled": false
+    },
+    "tool_calls": {
+      "wire_format": "qwen-xml (<function=>/<parameter=>)",
+      "streaming": true,
+      "tool_choice": [
+        "auto",
+        "none",
+        "required",
+        "{type: function, function: {name}}"
+      ],
+      "forced_call_is_a_prefill": true,
+      "required_is_exact": "named tool_choice, or one tool",
+      "parallel_tool_calls": true,
+      "constrained_decoding": false,
+      "forced_call_disables_thinking": true,
+      "argument_types_need_schema": true
+    },
+    "supported": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking",
+      "max_thinking_tokens",
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning",
+      "thinking",
+      "tools",
+      "tool_choice",
+      "parallel_tool_calls",
+      "stop",
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens",
+      "stream",
+      "stream_options"
+    ],
+    "token_budget_aliases": [
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens"
+    ],
+    "max_tokens_default": 8192,
+    "reasoning_effort_default": "medium",
+    "reasoning_effort_values": [
+      "high",
+      "low",
+      "max",
+      "medium",
+      "minimal",
+      "none",
+      "xhigh"
+    ],
+    "token_budget_covers_reasoning": true,
+    "max_thinking_tokens_default": null,
+    "thinking_answer_room": "max(1024, 15% of max_tokens)",
+    "end_of_turn_guard": true,
+    "thinking_control_aliases": [
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning.{enabled,effort,max_tokens}",
+      "thinking.{type,budget_tokens}"
+    ],
+    "server_defaults": {
+      "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+      "HALOGEN_TEMPERATURE": 1.0,
+      "HALOGEN_TOP_P": 0.95,
+      "HALOGEN_TOP_K": 20,
+      "HALOGEN_REASONING_EFFORT": "medium"
+    },
+    "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+    "chat_template_kwargs": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking"
+    ],
+    "error_format": "openai",
+    "accepted_but_ignored": [
+      "n"
+    ],
+    "not_implemented": [],
+    "structured_output": {
+      "enabled": true,
+      "reason": null,
+      "response_format": [
+        "json_schema",
+        "json_object"
+      ],
+      "text.format": [
+        "json_schema",
+        "json_object"
+      ],
+      "routes": [
+        "/v1/chat/completions",
+        "/v1/completions",
+        "/v1/responses",
+        "/v1/messages"
+      ],
+      "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+      "images": "a schema with images is a 400",
+      "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+      "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+      "keys": "object keys are emitted in schema order",
+      "enforced": [
+        "type",
+        "properties",
+        "required",
+        "additionalProperties",
+        "items",
+        "minItems",
+        "maxItems",
+        "minLength",
+        "maxLength",
+        "enum",
+        "const",
+        "anyOf",
+        "oneOf (as anyOf)",
+        "type: [..., \"null\"]",
+        "$ref",
+        "$defs"
+      ],
+      "accepted_not_enforced": [
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "title",
+        "description",
+        "default",
+        "examples"
+      ],
+      "refused": [
+        "pattern",
+        "format",
+        "allOf",
+        "not",
+        "if",
+        "then",
+        "else",
+        "patternProperties",
+        "dependentRequired",
+        "dependentSchemas",
+        "uniqueItems",
+        "contains",
+        "propertyNames",
+        "unevaluatedProperties",
+        "unevaluatedItems",
+        "minProperties",
+        "maxProperties",
+        "prefixItems"
+      ]
+    },
+    "sampling": {
+      "implemented": [
+        "temperature",
+        "top_p",
+        "top_k",
+        "min_p",
+        "seed",
+        "presence_penalty",
+        "frequency_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ],
+      "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+      "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter. A sampled request that omits top_k or top_p takes the operator's default, else the model's (filter_defaults)",
+      "filter_defaults": {
+        "top_k": 20,
+        "top_p": 0.95,
+        "source": "generation_config.json"
+      },
+      "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+      "penalties": "presence and frequency count GENERATED tokens only; repetition_penalty scales every id in the prompt or the output (vLLM's rule); applied on both drafters",
+      "logprobs": "a sampled request carries the chosen token's logprob on every token; at temperature 0, and with top_logprobs (up to 20) at any temperature, the first generated token only, so those need max_tokens 1",
+      "not_implemented": [
+        "logprobs with stream=true",
+        "logprobs past the first token at temperature 0",
+        "n > 1"
+      ]
+    },
+    "max_tokens_cap": 65536,
+    "max_tokens_over_cap": "400",
+    "npu": {
+      "status": "ok",
+      "models": [
+        "qwen3-embedding-0.6b",
+        "qwen3-reranker-0.6b"
+      ],
+      "loaded": [],
+      "queued": 0,
+      "passes": 2403,
+      "contexts": 4
+    }
+  },
+  "summary": {
+    "all_checks_passed": true
+  }
+}

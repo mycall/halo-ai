@@ -1,0 +1,28 @@
+Reusing verified artifact: /srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/devices/NOTICE.md
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/consts.hnpb from byte 0
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/devices.hnpm from byte 0
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/u0.elf from byte 0
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/u1.elf from byte 0
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/u10.elf from byte 0
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/u2.elf from byte 0
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/u3.elf from byte 0
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/u4.elf from byte 0
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/u5.elf from byte 0
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/u6.elf from byte 0
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/u7.elf from byte 0
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/u8.elf from byte 0
+Downloading peonist-ai/halogen-npu-qwen3-embedding-0.6b@d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5/u9.elf from byte 0
+Reusing verified artifact: /srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/qwen3-embedding-0.6b.hnpw
+Reusing verified artifact: /srv/halo-ai/models/halogen-npu/0.17.4/qwen3-embedding-0.6b/tokenizer/tokenizer.json
+Reusing verified artifact: /srv/halo-ai/models/halogen-npu/0.17.4/qwen3-reranker-0.6b/qwen3-reranker-0.6b.hnpw
+Reusing verified artifact: /srv/halo-ai/models/halogen-npu/0.17.4/qwen3-reranker-0.6b/tokenizer/tokenizer.json
+{
+  "release": "0.17.4",
+  "models": [
+    "qwen3-embedding-0.6b",
+    "qwen3-reranker-0.6b"
+  ],
+  "file_errors": [],
+  "host_errors": [],
+  "ready": true
+}

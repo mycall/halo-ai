@@ -1,0 +1,10 @@
+{
+  "release": "0.17.3",
+  "models": [
+    "qwen3-embedding-0.6b",
+    "qwen3-reranker-0.6b"
+  ],
+  "file_errors": [],
+  "host_errors": [],
+  "ready": true
+}

@@ -1,0 +1,8 @@
+{
+  "recorded_at": "2026-10-10T06:07:39.923765+00:00",
+  "operator_confirmation": "45W is normal",
+  "observation": "Reported SoC power stayed near 45 W during diagnostic decode, serving performance, and GPU/NPU contention. No power settings were changed during the run.",
+  "configured_firmware_tdp": "Not directly readable through the available unprivileged sysfs interfaces.",
+  "interpretation": "The paired contention test measures the effect of NPU load at the same host settings, but cannot separate shared power from shared memory resource effects. Cross-release speeds should not be attributed to runtime changes without matched power conditions.",
+  "sensor_documentation": "https://kernel.org/doc/html/latest/gpu/amdgpu/thermal.html"
+}

@@ -3,10 +3,9 @@
 [Reference manual](README.md) · [Profiles](profiles.md)
 
 Halogen serves Flash-Next with MTP, vision, and optional NPU embeddings and
-reranking. The recommended aliases select the v2 checkpoint on pinned runtime
-**0.17.3**. V2 reduces resident memory relative to W4B; broader generation quality
-and reliable near-limit retrieval remain unqualified. Explicit W4B profiles are
-retained for reference comparisons and are deprecated upstream.
+reranking. The recommended aliases select the v2 checkpoint on the pinned
+runtime. V2 uses a separate demand-paged n-gram table; broader generation quality
+and reliable near-limit retrieval require workload-specific evaluation.
 
 ## Run and select a profile
 
@@ -14,8 +13,11 @@ retained for reference comparisons and are deprecated upstream.
 | --- | --- | ---: | --- | --- |
 | `qwen3.8-fn` / `qwen3.8-halogen` / `qwen3.8-halogen-v2` | V2 | 262,144 | Yes | Off |
 | `qwen3.8-halogen-npu` / `qwen3.8-halogen-v2-npu` | V2 | 262,144 | Yes | Embeddings + reranking |
-| `qwen3.8-flash-next-halogen-262k-vision` | W4B + quality overlay | 262,144 | Yes | Off |
-| `qwen3.8-flash-next-halogen-262k-vision-npu` | W4B + quality overlay | 262,144 | Yes | Embeddings + reranking |
+
+Legacy W4B profiles remain in the catalog for historical use, but their checkpoint
+and overlays are not dependencies of the recommended v2 profiles. The upstream
+[model card](https://huggingface.co/peonist-ai/halogen-qwen3.8-flash-next)
+identifies v2 as the default and W4B as legacy.
 
 Complete [installation](installation.md), then acquire and test the GPU profile:
 
@@ -53,6 +55,12 @@ Explicit request fields override serving defaults. Reasoning consumes the
 completion budget. Diagnostic profiles disable cache and prompt lookup to
 isolate MTP behavior. Runtime startup is explicit, not automatic at boot.
 
+The prefill chunk controls how much prompt input is processed at a time;
+longer prompts span multiple chunks within the 262,144-token context window.
+The 16,384-token setting limits temporary working memory and leaves desktop
+headroom. It is a configured default, not a measured optimum or an input-length
+limit.
+
 Embedding vectors have 1024 dimensions and are normalized. Format retrieval
 queries as `Instruct: ...\nQuery:...`. The rerank 4096-token limit includes the
 query, document, and template. Oversized NPU inputs are rejected.
@@ -65,9 +73,16 @@ and every selected model in both health information and `/v1/models`.
 
 ## NPU and host constraints
 
-NPU service requires firmware IOMMU enabled, the `npu` boot profile, the
-`amdxdna` driver, XRT libraries, an unlimited operator memlock limit, and the
-fabric-clock helper. The reference configuration retains 118 GiB GTT.
+NPU service requires:
+
+- firmware IOMMU enabled
+- the `npu` boot profile
+- `amdxdna` driver
+- XRT libraries
+- unlimited operator memlock limit
+- fabric-clock helper.
+
+The reference configuration retains 118 GiB GTT.
 
 After host installation, preview and apply preparation:
 
@@ -115,12 +130,9 @@ the bounded inference checks.
 ## Artifacts and runtime pin
 
 The authoritative runtime pin is in the [configuration template](../config/halo-ai.env.example)
-and [engine policy](../lib/halo_ai/engine_halogen.py):
-
-```text
-Halogen 0.17.3
-ghcr.io/peonist-ai/halogen-flash-server@sha256:3bca0132db3c859c997d52d148e6ea4b7b497b8a695c5ccab97135193fde592a
-```
+and [engine policy](../lib/halo_ai/engine_halogen.py). These record the release
+and immutable image digest used by this checkout. Use `halo-ai status` to
+inspect the configured image and running service.
 
 Model directory: `/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/`.
 
@@ -129,37 +141,51 @@ Model directory: `/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/`.
 | `qwen38-flash-next-v2.hgn` | 66,687,678,432 bytes |
 | `qwen38-flash-next-ngram.hgn` | 51,200,246,144 bytes |
 
-V2 uses the external n-gram table and shared tokenizer/vision artifacts, without
-the W4B overlay. Both native checkpoint formats include their own MTP head;
-the separate MTP HGN serves the GGUF path. Sizes and hashes are recorded in the
+V2 uses the external n-gram table and shared tokenizer/vision artifacts. Keep
+the n-gram file alongside the checkpoint. The native v2 checkpoint includes its
+own MTP head; the separate MTP HGN serves the GGUF path. Sizes and hashes are recorded in the
 [catalog](../config/models.d/halogen.json) and [expected-file manifest](halo-ai.md#expected-file-manifest).
 Use profile acquisition to select the required files instead of downloading
 all catalog entries.
 
-The NPU manifest distinguishes runtime 0.17.3 from artifact release 0.16.2.
-Artifact sizes and hashes match the runtime manifest, so files remain under
-`/srv/halo-ai/models/halogen-npu/0.16.2`. That directory name does not select an
-older server image. The engine is closed source; public deployment code and
-local validation establish the integration boundary.
+The [NPU manifest](../lib/halo_ai/halogen_npu_models.json) tracks runtime and
+artifact releases separately. NPU files live under
+`/srv/halo-ai/models/halogen-npu/<artifact_release>`, using the manifest's
+`artifact_release` value. Runtime upgrades can require new device programs even
+when model weights are unchanged; acquire the profile before starting the new
+runtime. The engine is closed source; public deployment code and local validation
+establish the integration boundary.
 
 ## Qualification and limitations
 
-| Area | Established result | Limit |
-| --- | --- | --- |
-| Serving on 0.17.3 | 14/14 serving checks and 8/8 NPU checks passed | Bounded API fixtures, not arbitrary client workflows |
-| Diagnostic MTP on 0.17.3 | Serial/MTP text matched on 13 fixed cases and a 512-token probe; both scored 11/13 | Two code-question failures remain; no general coding-quality claim |
-| V2 memory on 0.16.2 | 70.8 GiB engine memory at 32K versus W4B's 79.5 GiB | Excludes demand-paged table and other processes; not total 262K/NPU memory |
-| Checkpoint speed on 0.16.2 | Serial medians both 35.6 tok/s; MTP 57.5 v2 versus 58.6 W4B | One prompt, three runs, overlapping ranges |
-| Retrieval on 0.16.2 | Both checkpoints recovered 3/3 codes at 31,724 tokens and 2/3 at 261,107 | Near-limit miss unresolved; not rerun on 0.17.3 |
-| Concurrent GPU/NPU on 0.16.2 v2 | Five paired probes showed 22.4% median GPU decode reduction under continuous NPU load | One prompt with cache and prompt lookup; not a universal slowdown |
-| NPU ingestion on 0.16.2 | Bounded 188-file bursts passed at concurrency 12 and 40 | Higher concurrency increased latency without useful throughput gain; not an Open WebUI integration test |
-| SciFact on 0.16.2 | Embedding nDCG@10 0.7001; top-ten reranking 0.7504 across 300 queries / 5,183 documents | One retrieval dataset, not full MTEB or generation-model quality |
+The current qualification uses the pinned runtime and native v2 checkpoint on
+the reference 128 GiB host, with 118 GiB GTT, 2 GiB firmware VRAM, the performance
+power profile, and FCLK held at 2000 MHz. The evidence records the exact release,
+image digest, settings, and methods. Rerun the relevant checks after changing the
+runtime, artifacts, host, or profile.
 
-The 0.17.3 runtime comparison measured 8.7–21.2% higher median decode throughput
-than 0.16.2 across short/31.7K greedy and sampled code prompts. Each cell had
-four 512-token outputs; the older runtime ran first, and disk page cache was not
-reset. This supports bounded throughput and compatibility gains, not general
-performance at 262K.
+Reported SoC power stayed near 45 W during GPU load. This is observed power,
+not a readback of the firmware TDP setting. Treat these speeds as specific to
+that power envelope; comparisons with earlier runs at unverified power limits
+cannot isolate runtime performance changes. The concurrent GPU/NPU test keeps
+the same host settings, but does not separate power sharing from memory contention.
+
+| Area | Measured result | Qualification boundary |
+| --- | --- | --- |
+| Serving | All 14 serving checks passed | Passing fixtures does not qualify arbitrary client workflows |
+| Diagnostic MTP | Serial and MTP matched on all 13 cases and the 512-token probe; both scored 11/13, with active draft acceptance | The alternating-code trace and slice-semantics questions still failed; agreement does not establish general coding quality |
+| Diagnostic decode | Three paired 512-token runs measured median 34.9 tokens/s serial and 65.7 tokens/s MTP, with identical output | Cache, prompt lookup, vision, NPU, and thinking were off; this is one fixed prompt at 32K configured context |
+| Serving performance | Median decode was 50–52 tokens/s for short prompts and 44–48 tokens/s for 31.7K prompts; long-prompt wall time fell from about 46 seconds to 11 seconds on cache repeats | Three rounds per prompt length, sampling mode, and cache pass; 512 output tokens, thinking off, vision/NPU loaded but idle |
+| Engine memory | At 32K: 62.1 GiB locked weights + 0.9 GiB KV + 8.1 GiB working memory = 71.1 GiB | Excludes the 47.7 GiB demand-paged n-gram table and other host processes; this is not total 262K/NPU memory |
+| Long-context retrieval | 31,724-token control: 3/3 codes; 261,107-token near-limit prompt: 2/3 | One request at each depth; the near-limit miss persists, so configured context is not a retrieval guarantee |
+| Concurrent GPU/NPU | All 8 NPU checks and 10 GPU probes passed; median decode fell from 53.0 to 41.6 tokens/s under continuous NPU load, about 22% | Five alternating idle/busy pairs on one prompt; contention depends on prompt, cache, and NPU workload |
+| NPU ingestion | All 416 requests passed. Embedding 188 chunked abstracts took 41.5 seconds at both 12 and 40 workers; median request latency rose from 2.66 to 8.75 seconds | More concurrency gave no useful throughput gain in this workload; application integration needs separate testing |
+| Retrieval quality | On 300 SciFact queries over 5,183 freshly embedded documents, nDCG@10 was 0.700 for embeddings and 0.750 after top-ten reranking; BM25 scored 0.662 | One dataset, not full MTEB or generation-model quality; reranking the same ten candidates cannot improve recall@10 |
+
+Performance screens measure a small set of prompts, output lengths, and cache
+conditions. Their results do not establish general throughput or quality at the
+context limit. Exact timings, scores, and comparison methods remain in the
+evidence records below.
 
 ## Validation commands and evidence
 
@@ -172,11 +198,27 @@ python3 tools/halogen_performance_validate.py --rounds 2 --output /tmp/halogen-p
 python3 tools/halogen_npu_validate.py --rounds 5 --output /tmp/halogen-npu.json
 ```
 
-The checkpoint comparator temporarily switches models, then restores v2 with
-NPU services. It needs both checkpoints and a prepared NPU host:
+For a focused MTP check, switch to the v2 diagnostic profile. This disables
+vision, NPU services, cache, and prompt lookup while comparing serial and MTP
+on the fixed quality suite:
 
 ```bash
-python3 tools/halogen_checkpoint_compare.py --output-dir /tmp/halogen-checkpoint-comparison
+halo-ai start qwen3.8-flash-next-halogen-v2-32k-mtp --switch
+python3 tools/halogen_validate.py --output /tmp/halogen-mtp.json
+halo-ai start qwen3.8-halogen-v2-npu --switch
+```
+
+The complete [requalification runner](results/halogen-requalification-2026-10-10/run.py)
+also measures near-limit retrieval, repeated decode, GPU/NPU contention, ingestion,
+and SciFact. It requires an idle container host, the prepared NPU host and dataset,
+and acquired v2 artifacts. It uses the checkout's `.halo-ai-workspace.env` and
+stops the runtime afterward. Choose a fresh output directory:
+
+```bash
+python3 docs/results/halogen-requalification-2026-10-10/run.py \
+  --output-dir /tmp/halogen-requalification
+python3 docs/results/halogen-requalification-2026-10-10/summarize.py \
+  --input-dir /tmp/halogen-requalification
 ```
 
 For dataset acquisition and NPU evaluation, see [Benchmarks](benchmarking.md#npu-retrieval-evaluation).
@@ -184,8 +226,10 @@ These screens do not run broader coding or long-context quality benchmarks.
 
 | Evidence | Record |
 | --- | --- |
-| 0.17.3 runtime, serving, MTP, and NPU comparison | [Upgrade summary](results/halogen-0173-upgrade-2026-10-09/summary.json) |
-| W4B/v2 memory, speed, quality, and retrieval | [Checkpoint comparison](results/halogen-0162-checkpoint-comparison-2026-10-05/comparison.json) |
-| V2 GPU/NPU contention | [Paired measurements](results/halogen-0162-v2-npu-evaluation-2026-10-05/contention.json) |
-| NPU ingestion bursts | [Request timings](results/halogen-0162-v2-npu-evaluation-2026-10-05/ingestion.json) |
-| SciFact methods, rankings, and per-query scores | [Evaluation](results/halogen-0162-v2-npu-evaluation-2026-10-05/scifact.json) |
+| Runtime, host, method, and completion status | [Run record](results/halogen-requalification-2026-10-10/run-state.json) |
+| Consolidated measurements | [Summary](results/halogen-requalification-2026-10-10/summary.json) |
+| V2 MTP, decode, memory, and retrieval | [Diagnostics](results/halogen-requalification-2026-10-10/v2-diagnostics/summary.json), [memory log](results/halogen-requalification-2026-10-10/v2-diagnostics/32k-container.log) |
+| Serving and cache performance | [API checks](results/halogen-requalification-2026-10-10/serving.json), [request timings](results/halogen-requalification-2026-10-10/performance.json) |
+| V2 GPU/NPU contention | [Paired measurements](results/halogen-requalification-2026-10-10/npu-contention.json) |
+| NPU ingestion bursts | [Request timings](results/halogen-requalification-2026-10-10/ingestion.json) |
+| SciFact methods, rankings, and per-query scores | [Evaluation](results/halogen-requalification-2026-10-10/scifact.json) |

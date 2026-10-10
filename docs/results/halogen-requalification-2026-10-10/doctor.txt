@@ -1,0 +1,17 @@
+halo-ai 0.1.0 doctor
+PASS  GPU: /sys/class/drm/card1/device
+PASS  GTT aperture: 118 GiB
+PASS  GTT backing topology: 123.5 GiB CPU-visible for 118 GiB aperture
+PASS  /dev/kfd: present
+PASS  /dev/dri: present
+PASS  Podman: /usr/bin/podman
+PASS  Model root: /srv/halo-ai/models
+PASS  Podman mode: rootless
+PASS  CPU MemAvailable: 117.1 GiB
+PASS  TTM pages_limit: 30932992
+PASS  GTT candidate baseline: [112, 116, 118]
+INFO  catalog: 15 models, 59 profiles, 10 aliases
+INFO  cmdline: quiet nowatchdog splash rw rootflags=subvol=/@ root=UUID=79b59d5a-2791-4c9d-9622-4dfb4886ed43 amdgpu.gttsize=120832 ttm.pages_limit=30932992
+INFO  NPU: active
+WARN  19 model files are executable; permissions were not changed
+WARN  41 model files are world-readable; permissions were not changed

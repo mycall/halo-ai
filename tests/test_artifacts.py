@@ -67,8 +67,8 @@ class ArtifactContractTests(unittest.TestCase):
                     self.assertEqual('external-ngram' in plan['selected_artifact_classes'], 'external-ngram' in profile['features'])
                     self.assertEqual('npu' in plan['selected_artifact_classes'], 'npu' in profile['features'])
                     if closure.auxiliary:
-                        self.assertEqual(sum(a.bytes for a in closure.auxiliary), 1713470902)
-                        self.assertEqual(engine_halogen.npu_memory_bytes(closure.auxiliary), 1713470902 + 2 * 1024**3)
+                        self.assertEqual(sum(a.bytes for a in closure.auxiliary), 1722419002)
+                        self.assertEqual(engine_halogen.npu_memory_bytes(closure.auxiliary), 1722419002 + 2 * 1024**3)
 
     def test_npu_acquire_dry_run_never_downloads_or_installs(self):
         profile = cli.resolve_profile(self.catalog, 'qwen3.8-halogen-v2-npu')
@@ -178,6 +178,7 @@ class ArtifactContractTests(unittest.TestCase):
 
     def test_runtime_upgrade_reuses_existing_npu_artifact_directory(self):
         profile = cli.resolve_profile(self.catalog, 'qwen3.8-halogen-v2-npu')
-        closure = cli.resolve_artifacts(self.config, self.catalog, profile)
-        self.assertEqual(closure.auxiliary_root, self.root / 'halogen-npu' / '0.16.2')
+        with mock.patch.dict(cli.halogen_npu.MANIFEST, {'release': 'future-runtime'}):
+            closure = cli.resolve_artifacts(self.config, self.catalog, profile)
+        self.assertEqual(closure.auxiliary_root, self.root / 'halogen-npu' / '0.17.4')
         self.assertTrue(all(a.destination.is_relative_to(closure.auxiliary_root) for a in closure.auxiliary))

@@ -1,0 +1,26 @@
+{
+  "recorded_at": "2026-10-10T05:44:00.855240+00:00",
+  "reason": "User authorized reclaiming obsolete W4B checkpoint and its two overlays; current aliases and requalification use native v2.",
+  "files": [
+    {
+      "path": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.hgn",
+      "bytes": 124068083904,
+      "catalog_sha256": "9c116bbc01f77b7a15464c1a124eb3325b286089b8a2a6f2856c9b246a235bd6"
+    },
+    {
+      "path": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.overlay.hgn",
+      "bytes": 2572466560,
+      "catalog_sha256": "1cdfc3a9f988955bfe9a71bb808d393030abbf9f99d34ffa1ef93815a49b39ab"
+    },
+    {
+      "path": "/srv/halo-ai/models/peonist-ai/halogen-qwen3.8-flash-next/qwen38-flash-next-w4b.overlay-speed.hgn",
+      "bytes": 2478095488,
+      "catalog_sha256": "f49c8d14fa972c1db5115c714981e399585a6a98106a1a055d9e77026bb6de4c"
+    }
+  ],
+  "available_before_bytes": 728598867968,
+  "available_after_bytes": 855386243072,
+  "removed_file_bytes": 129118645952,
+  "removed_file_gib": 120.25110977888107,
+  "all_removed": true
+}

@@ -1,0 +1,163 @@
+halogen: halogen-flash-server 0.17.4, mode all
+halogen: /models/qwen38-flash-next-v2.hgn carries its own precision choices: no quality sidecar applies and none is looked for
+halogen: KV budget 1 slot(s) over one 32768-position pool (each request up to 32768) = 1.0 GiB (~28 KiB/position incl. block scratch + ~115 MiB/slot) + 0.0 GiB prompt cache in RAM, on top of roughly 62.1 GiB (read from the checkpoint) of weights and 8.2 GiB of working memory (HALOGEN_MAX_TOK 16384). Those last two are estimates for this pre-flight check; the engine prints its measured figures once loaded, including the large lookup table it reads from disk and never holds. MemAvailable now 117.0 GiB.
+halogen: GTT in use before this start: 0.1 GiB of 118.0 (117.9 free; this start puts about 5.4 GiB there)
+serve_api: request defaults HALOGEN_MAX_TOKENS_DEFAULT=8192, HALOGEN_TEMPERATURE=1.0, HALOGEN_TOP_P=0.95, HALOGEN_TOP_K=20, HALOGEN_REASONING_EFFORT=medium
+serve_api: chat template /models/tokenizer/chat_template.jinja sha256 c3cf9e34abf4f9e3, thinking control probe passed
+halogen: waiting for engine on 8730 (cold load can take minutes)
+checkpoint: mapped 66.7 GB, NOT pinned (Pin::None)
+overlay: none needed (this checkpoint carries its own trunk precision)
+checkpoint: mapped 51.2 GB, NOT pinned (Pin::None)
+n-gram table: 47.68 GiB from /models/qwen38-flash-next-ngram.hgn (HALOGEN_NGRAM_TABLE)
+startup [   0.0 s] host memory: 21030 contiguous 2 MiB blocks of host memory free (42060 MiB)
+startup [   0.0 s] pinning weights (reads the checkpoint from disk when it is not already in the page cache; this is usually the slowest step)
+checkpoint: pinned 62.11 GiB in 1 range(s) in 0.8 s (84.6 GB/s), 62.11 GiB of payload, MemAvailable was 116.8 GiB
+startup [   0.8 s] weights pinned: 20973 contiguous 2 MiB blocks free (41946 MiB), 0 compaction stalls during that step (0 failed)
+startup [   0.8 s] preparing weights
+startup [   1.1 s] preparing weights, layer 0 of 48
+startup [   1.1 s] preparing weights, layer 8 of 48
+startup [   1.1 s] preparing weights, layer 16 of 48
+startup [   1.1 s] preparing weights, layer 24 of 48
+startup [   1.1 s] preparing weights, layer 32 of 48
+startup [   1.1 s] preparing weights, layer 40 of 48
+startup [   1.3 s] weights ready; reserving working memory
+startup [   1.3 s] reserving the KV pool, 32768 positions (about 0.9 GiB)
+startup [   1.4 s] KV pool reserved: 16221 contiguous 2 MiB blocks free (32442 MiB), 0 compaction stalls during that step (0 failed)
+startup [   1.4 s] model ready
+startup [   1.4 s] memory: 62.1 GiB of weights locked in RAM, 0.9 GiB of KV pool, 8.1 GiB of working memory, 71.1 GiB in all
+startup [   1.4 s] memory: the model's 47.7 GiB lookup table is NOT held in RAM. It is read from disk through the file cache as each request needs it, which is why this server holds less than the checkpoint is large
+startup [   1.4 s] memory: 2.0 GiB of this machine's RAM is carved out for the iGPU in firmware. That is not free memory the OS can lend to the file cache above, and it does not appear anywhere in /proc/meminfo: the machine simply reports itself smaller
+startup [   1.4 s] host memory left for everything else: 16221 contiguous 2 MiB blocks (45.2 GiB total, most of it not contiguous)
+startup [   1.4 s] free(1) and MemAvailable will report about 107.3 GiB instead: the kernel counts this server's locked weights as reclaimable file cache, and they cannot be reclaimed
+startup [   1.4 s] opening the socket
+flash_serve: a prompt admitted beside active streams prefills in pieces of 16384 tokens with a decode tick between them (HALOGEN_ADMIT_CHUNK; 0 = the engine's own chunk, which keeps the admitted prompt bitwise its alone self; -1 = the whole prompt at once)
+flash_serve: listening on 127.0.0.1:8730, 1 slots over ONE 32768-position KV pool, each request up to 32768 (it reserves prompt + max_tokens), max_tok 16384, BATCHED greedy or sampled; MTP depth-2 (up to 3) selectable (drafter 1, speculates while alone)
+halogen: engine listening after 2s
+halogen: engine watchdog on, 180s of silence takes the container down
+serve_api: chat template /models/tokenizer/chat_template.jinja sha256 c3cf9e34abf4f9e3, thinking control probe passed
+/halogen/tools/serve_api.py:4482: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Started server process [106]
+INFO:     Waiting for application startup.
+flash_serve: grammar: vocabulary of 248077 tokens (248044 plain, longest 128 B) in 51 ms
+serve_api: engine at 127.0.0.1:8730, listening on 0.0.0.0:8731
+serve_api: request defaults HALOGEN_MAX_TOKENS_DEFAULT=8192, HALOGEN_TEMPERATURE=1.0, HALOGEN_TOP_P=0.95, HALOGEN_TOP_K=20, HALOGEN_REASONING_EFFORT=medium (a field the request sends wins; temperature 0 in a request is greedy and takes no sampling default)
+serve_api: a sampled request that omits top_k / top_p gets top_k 20, top_p 0.95 (HALOGEN_TOP_K / HALOGEN_TOP_P where set, else the model's generation_config.json)
+serve_api: version 0.17.4, engine version 0.17.4
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8731 (Press CTRL+C to quit)
+INFO:     192.168.49.217:42830 - "GET /health HTTP/1.1" 200 OK
+INFO:     192.168.49.217:42844 - "GET /health HTTP/1.1" 200 OK
+INFO:     192.168.49.217:42846 - "GET /health HTTP/1.1" 200 OK
+INFO:     192.168.49.217:42854 - "GET /health HTTP/1.1" 200 OK
+flash_serve: req 1 generated 2 tokens, 0.0 s
+serve_api: batch 512 tok in 16.79s = 30.49 t/s | prompt 38, prefill 0.31s (38 new) | detok 24us/tok | pool 768/32768 2% | think off
+INFO:     192.168.49.217:42864 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 2 generated 2 tokens, 0.1 s
+serve_api: mtp 512 tok in 9.00s = 56.87 t/s | 144 rounds, commit 3.55/round | prompt 38, prefill 0.20s (38 new) | detok 14us/tok | pool 768/32768 2% | think off
+INFO:     192.168.49.217:45098 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 3 generated 2 tokens, 0.0 s
+serve_api: batch 2 tok in 0.03s = 57.31 t/s | prompt 111, prefill 0.41s (111 new) | detok 72us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:45110 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 4 generated 2 tokens, 0.1 s
+serve_api: mtp 2 tok in 0.06s = 35.59 t/s | 1 rounds, commit 1.00/round | prompt 111, prefill 0.37s (111 new) | detok 56us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56104 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 5 generated 2 tokens, 0.1 s
+serve_api: mtp 3 tok in 0.11s = 27.08 t/s | 2 rounds, commit 2.00/round | prompt 67, prefill 0.30s (67 new) | detok 50us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56112 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 6 generated 2 tokens, 0.0 s
+serve_api: batch 3 tok in 0.06s = 46.58 t/s | prompt 67, prefill 0.27s (67 new) | detok 35us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56122 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 7 generated 2 tokens, 0.0 s
+serve_api: batch 3 tok in 0.07s = 44.38 t/s | prompt 63, prefill 0.26s (63 new) | detok 39us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56124 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 8 generated 2 tokens, 0.1 s
+serve_api: mtp 3 tok in 0.11s = 27.08 t/s | 2 rounds, commit 2.00/round | prompt 63, prefill 0.29s (63 new) | detok 42us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56126 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 9 generated 2 tokens, 0.1 s
+serve_api: mtp 5 tok in 0.11s = 44.09 t/s | 2 rounds, commit 3.00/round | prompt 69, prefill 0.30s (69 new) | detok 39us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56140 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 10 generated 2 tokens, 0.0 s
+serve_api: batch 5 tok in 0.13s = 38.08 t/s | prompt 69, prefill 0.28s (69 new) | detok 40us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56156 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 11 generated 2 tokens, 0.0 s
+serve_api: batch 8 tok in 0.24s = 34.03 t/s | prompt 71, prefill 0.28s (71 new) | detok 35us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56170 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 12 generated 2 tokens, 0.1 s
+serve_api: mtp 8 tok in 0.17s = 48.34 t/s | 3 rounds, commit 2.67/round | prompt 71, prefill 0.29s (71 new) | detok 20us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56184 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 13 generated 2 tokens, 0.1 s
+serve_api: mtp 6 tok in 0.17s = 35.82 t/s | 3 rounds, commit 2.33/round | prompt 65, prefill 0.27s (65 new) | detok 26us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56198 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 14 generated 2 tokens, 0.0 s
+serve_api: batch 6 tok in 0.16s = 37.43 t/s | prompt 65, prefill 0.25s (65 new) | detok 26us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56212 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 15 generated 2 tokens, 0.0 s
+serve_api: batch 20 tok in 0.63s = 31.67 t/s | prompt 82, prefill 0.30s (82 new) | detok 23us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56228 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 16 generated 2 tokens, 0.1 s
+serve_api: mtp 20 tok in 0.40s = 49.98 t/s | 7 rounds, commit 3.14/round | prompt 82, prefill 0.32s (82 new) | detok 19us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56244 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 17 generated 2 tokens, 0.1 s
+serve_api: mtp 6 tok in 0.17s = 35.93 t/s | 3 rounds, commit 2.33/round | prompt 88, prefill 0.32s (88 new) | detok 26us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56252 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 18 generated 2 tokens, 0.0 s
+serve_api: batch 6 tok in 0.16s = 36.67 t/s | prompt 88, prefill 0.31s (88 new) | detok 33us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56262 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 19 generated 2 tokens, 0.0 s
+serve_api: batch 9 tok in 0.26s = 33.99 t/s | prompt 81, prefill 0.31s (81 new) | detok 33us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56274 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 20 generated 2 tokens, 0.1 s
+serve_api: mtp 9 tok in 0.18s = 50.73 t/s | 3 rounds, commit 3.00/round | prompt 81, prefill 0.32s (81 new) | detok 20us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56284 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 21 generated 2 tokens, 0.1 s
+serve_api: mtp 2 tok in 0.06s = 35.34 t/s | 1 rounds, commit 3.00/round | prompt 77, prefill 0.30s (77 new) | detok 57us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56290 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 22 generated 2 tokens, 0.0 s
+serve_api: batch 2 tok in 0.03s = 60.98 t/s | prompt 77, prefill 0.28s (77 new) | detok 45us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56296 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 23 generated 2 tokens, 0.0 s
+serve_api: batch 7 tok in 0.20s = 35.19 t/s | prompt 82, prefill 0.31s (82 new) | detok 30us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56310 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 24 generated 2 tokens, 0.1 s
+serve_api: mtp 7 tok in 0.11s = 64.22 t/s | 2 rounds, commit 3.00/round | prompt 82, prefill 0.31s (82 new) | detok 22us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:56322 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 25 generated 2 tokens, 0.1 s
+serve_api: mtp 6 tok in 0.12s = 50.51 t/s | 2 rounds, commit 3.00/round | prompt 77, prefill 0.29s (77 new) | detok 27us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:35194 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 26 generated 2 tokens, 0.0 s
+serve_api: batch 6 tok in 0.17s = 36.36 t/s | prompt 77, prefill 0.27s (77 new) | detok 28us/tok | pool 256/32768 1% | think off
+INFO:     192.168.49.217:35200 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 27 prefill 0/16949 tokens, 0.0 s
+flash_serve: req 27 prefill 16384/16949 tokens, 16.6 s
+flash_serve: req 27 generated 2 tokens, 0.0 s
+serve_api: batch 8 tok in 0.24s = 33.02 t/s | prompt 16949, prefill 17.48s = 970 t/s | detok 29us/tok | pool 17152/32768 52% | think off
+INFO:     192.168.49.217:35212 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 28 prefill 0/16949 tokens, 0.0 s
+flash_serve: req 28 prefill 16384/16949 tokens, 16.8 s
+flash_serve: req 28 generated 2 tokens, 0.0 s
+serve_api: mtp 8 tok in 0.15s = 52.42 t/s | 3 rounds, commit 3.00/round | prompt 16949, prefill 17.70s = 958 t/s | detok 27us/tok | pool 17152/32768 52% | think off
+INFO:     192.168.49.217:54486 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 29 generated 2 tokens, 0.0 s
+serve_api: batch 512 tok in 16.61s = 30.82 t/s | prompt 38, prefill 0.18s (38 new) | detok 21us/tok | pool 768/32768 2% | think off
+INFO:     192.168.49.217:43056 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 30 generated 2 tokens, 0.1 s
+serve_api: mtp 512 tok in 8.18s = 62.62 t/s | 144 rounds, commit 3.55/round | prompt 38, prefill 0.21s (38 new) | detok 14us/tok | pool 768/32768 2% | think off
+INFO:     192.168.49.217:55240 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 31 generated 2 tokens, 0.0 s
+serve_api: mtp 512 tok in 7.71s = 66.42 t/s | 144 rounds, commit 3.55/round | prompt 38, prefill 0.19s (38 new) | detok 23us/tok | pool 768/32768 2% | think off
+INFO:     192.168.49.217:55304 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 32 generated 2 tokens, 0.0 s
+serve_api: batch 512 tok in 14.67s = 34.91 t/s | prompt 38, prefill 0.17s (38 new) | detok 39us/tok | pool 768/32768 2% | think off
+INFO:     192.168.49.217:55320 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 33 generated 2 tokens, 0.0 s
+serve_api: batch 512 tok in 14.62s = 35.01 t/s | prompt 38, prefill 0.18s (38 new) | detok 37us/tok | pool 768/32768 2% | think off
+INFO:     192.168.49.217:48432 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+flash_serve: req 34 generated 2 tokens, 0.0 s
+serve_api: mtp 512 tok in 7.79s = 65.69 t/s | 144 rounds, commit 3.55/round | prompt 38, prefill 0.19s (38 new) | detok 21us/tok | pool 768/32768 2% | think off
+INFO:     192.168.49.217:39196 - "POST /v1/chat/completions HTTP/1.1" 200 OK

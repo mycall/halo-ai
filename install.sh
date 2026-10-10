@@ -308,7 +308,9 @@ migrate_halogen_image() {
         ghcr.io/peonist-ai/halogen-flash-server:0.12.2|\
         ghcr.io/peonist-ai/halogen-flash-server@sha256:8f4c75fc15a0e2f2c023241389c4c946a60fa4fb4cd6d350dfcea17e22d119f9|\
         ghcr.io/peonist-ai/halogen-flash-server:0.16.2|\
-        ghcr.io/peonist-ai/halogen-flash-server@sha256:0c61bf84ac22308a53f5d1ca6b86806702d7039e5ebc51cae4c66621b92fe04a) ;;
+        ghcr.io/peonist-ai/halogen-flash-server@sha256:0c61bf84ac22308a53f5d1ca6b86806702d7039e5ebc51cae4c66621b92fe04a|\
+        ghcr.io/peonist-ai/halogen-flash-server:0.17.3|\
+        ghcr.io/peonist-ai/halogen-flash-server@sha256:3bca0132db3c859c997d52d148e6ea4b7b497b8a695c5ccab97135193fde592a) ;;
         *) return 0 ;;
     esac
     if "$dry_run"; then

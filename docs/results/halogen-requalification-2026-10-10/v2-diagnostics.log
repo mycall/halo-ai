@@ -1,0 +1,51 @@
+START qwen3.8-flash-next-halogen-v2-32k-mtp
+halo-halogen
+0d41431396c9e8ecf5813485a22682c56155950fefcf33b1c68d01351d2e179b
+probe serial: {'prompt_n': 38, 'predicted_n': 512, 'prompt_ms': 305.5, 'predicted_ms': 16793.0, 'prompt_per_second': 124.386, 'predicted_per_second': 30.489, 'cache_n': 0, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'draft_n': 0, 'draft_n_accepted': 0}
+probe default_mtp: {'prompt_n': 38, 'predicted_n': 512, 'prompt_ms': 198.9, 'predicted_ms': 9002.8, 'prompt_per_second': 191.051, 'predicted_per_second': 56.871, 'cache_n': 0, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'draft_n': 415, 'draft_n_accepted': 367}
+1/13 code-trace-alternating: identical=True serial=False mtp=False
+2/13 code-slice-semantics: identical=True serial=False mtp=False
+3/13 reasoning-crt: identical=True serial=True mtp=True
+4/13 reasoning-probability: identical=True serial=True mtp=True
+5/13 logic-ordering: identical=True serial=True mtp=True
+6/13 instruction-exact-format: identical=True serial=True mtp=True
+7/13 tool-arguments-json: identical=True serial=True mtp=True
+8/13 json-filter-sort: identical=True serial=True mtp=True
+9/13 multilingual-literal-retrieval: identical=True serial=True mtp=True
+10/13 special-token-literals: identical=True serial=True mtp=True
+11/13 short-distractor-retrieval: identical=True serial=True mtp=True
+12/13 multi-turn-resynchronization: identical=True serial=True mtp=True
+13/13 long-context-needle: identical=True serial=True mtp=True
+{
+  "cases": 13,
+  "serial_passed": 11,
+  "mtp_passed": 11,
+  "identical_cases": 13,
+  "probe_identical_text": true,
+  "speculative_totals": {
+    "serial": {
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "mtp": {
+      "draft_n": 484,
+      "draft_n_accepted": 425
+    }
+  },
+  "mtp_working": true
+}
+Started qwen3.8-flash-next-halogen-v2-32k-mtp on 127.0.0.1:8731
+1/3 serial: 30.822 tok/s
+1/3 mtp: 62.618 tok/s
+2/3 mtp: 66.416 tok/s
+2/3 serial: 34.907 tok/s
+3/3 serial: 35.01 tok/s
+3/3 mtp: 65.688 tok/s
+START halogen-v2-requalification-262k
+halo-halogen
+cf6ab812e30367664b7e5b6fba43cd3b87122f59f5a8e6555c6e45496e8a156d
+Starting 7910 records
+7910: delta-25658,delta-24374,delta-80090; 2/3
+Starting 959 records
+959: delta-57034,delta-97930,delta-38826; 3/3
+Started halogen-v2-requalification-262k on 127.0.0.1:8731

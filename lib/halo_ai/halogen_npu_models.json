@@ -1,7 +1,7 @@
 {
-  "release": "0.17.3",
-  "artifact_release": "0.16.2",
-  "image_digest": "sha256:3bca0132db3c859c997d52d148e6ea4b7b497b8a695c5ccab97135193fde592a",
+  "release": "0.17.4",
+  "artifact_release": "0.17.4",
+  "image_digest": "sha256:485cc8cb0adc7159b985772a5bbb368ab73bcb3d201eabbf32abb0cf6b655ca8",
   "models": {
     "decider-0.8b": {
       "repo": "peonist-ai/halogen-npu-decider-0.8b",
@@ -64,7 +64,7 @@
     },
     "qwen3-embedding-0.6b": {
       "repo": "peonist-ai/halogen-npu-qwen3-embedding-0.6b",
-      "revision": "4960fd9d4423dd15373ad21c83db48dbdb3b2798",
+      "revision": "d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5",
       "task": "embedding",
       "source": "Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3",
       "license": "apache-2.0",
@@ -76,63 +76,68 @@
         },
         {
           "path": "devices/consts.hnpb",
-          "bytes": 5086496,
-          "sha256": "ae430e41545a0b1012938cda373b0c450364d3be631111cca3a8c43679f93336"
+          "bytes": 5365360,
+          "sha256": "8c86cabd4e964d34ed782dc53291cc7ee9575254e41f5e3dcb7675dc5259faf4"
         },
         {
           "path": "devices/devices.hnpm",
-          "bytes": 24047,
-          "sha256": "4e9bca9d95d084fb89ce5b99f579a00666c8ca1efae2613c53e3a4878cc9f174"
+          "bytes": 26435,
+          "sha256": "655c968912f3217b064090e9e230c0e4e60d286f8ecf5e7e747a2bbb9686f0cc"
         },
         {
           "path": "devices/u0.elf",
           "bytes": 4931968,
-          "sha256": "b38f165886cb037b7d3951d9cb878473eaba58a432acd45416ff85fd88aa4e46"
+          "sha256": "a0536b8f840b422fbad3bf254f96e53e961cb6ff830db48addb5f6941cd67fde"
         },
         {
           "path": "devices/u1.elf",
           "bytes": 5456000,
-          "sha256": "b1811feee851b8af833b37721da92099d89772110815bbbe2c3fa1c276f0ff42"
+          "sha256": "1c29306895a29311fdd210b43380a00f8fdeae1d54ffc4b8a3ba1c588b546225"
+        },
+        {
+          "path": "devices/u10.elf",
+          "bytes": 5488304,
+          "sha256": "734298f29449c48ce42a4e4fee92c2e029d25d95c26a9dbadf0f4cdd9da0e75b"
         },
         {
           "path": "devices/u2.elf",
           "bytes": 6505552,
-          "sha256": "406ea9a95b470628a7382e376f4a72cdf4d7aa4c59b4ddf0a4bdd139d63d6ff2"
+          "sha256": "b7e15b4d8e03cfd9d1e57549744d438fcbd603a20d2b14aa519139587cc61e25"
         },
         {
           "path": "devices/u3.elf",
           "bytes": 6817216,
-          "sha256": "bc205d51b523d770151a0c61968f7c70bf624412827580bb6fe0aaf4650dc2ee"
+          "sha256": "e9e1fb58c2a64bb95a03387640ed976cf2599be98e1b01abe52c1a23ec64517a"
         },
         {
           "path": "devices/u4.elf",
           "bytes": 7444032,
-          "sha256": "a5a91338a2603acdcd5c11df532033fda2d3f5479ea44ae87f98fafbdff9a62d"
+          "sha256": "9469ab1161d5abfba32fd2f27845733fdb64ce4a18edeb1c99aee47ab3013f9a"
         },
         {
           "path": "devices/u5.elf",
           "bytes": 7432416,
-          "sha256": "6c2bf41835569e0eba25ded7c05c7264ae69c6700bdeb4791057d884f2a4c126"
+          "sha256": "014bb8b66774310ebee94244a5d1f84027f5d54436edde77ea725906973a98c3"
         },
         {
           "path": "devices/u6.elf",
-          "bytes": 4941232,
-          "sha256": "919d0038ca088eafddf195f3466ff38db27d3635be1cffa5d4d4b5140902a68e"
+          "bytes": 8666848,
+          "sha256": "fc129ae48c6c83d99c369be45141634addf0228890b3079a399ad630acab7282"
         },
         {
           "path": "devices/u7.elf",
-          "bytes": 5488304,
-          "sha256": "d904cf8afae9428dd167960549e18cce5441745f18c62f8c50975dffc077d3c2"
+          "bytes": 4941232,
+          "sha256": "058a5e33b7a8a6cdddf5528eb015fc3947a82e5b56af07cf0bf536ba75c24727"
         },
         {
           "path": "devices/u8.elf",
-          "bytes": 4941232,
-          "sha256": "db3aef69b17825854ee0dd2df475125a3f5c872f95c686793d6af1ee83596fa7"
+          "bytes": 5488304,
+          "sha256": "b4e0d81fa34c2aa27a56f629e8620e09537de3a71640a336ae800749b20ca980"
         },
         {
           "path": "devices/u9.elf",
-          "bytes": 5488304,
-          "sha256": "d182727e551084db8fb9600441d8aa373c7f09a3d267ae0a5e921ef92326db1c"
+          "bytes": 4941232,
+          "sha256": "7184cea3c3c2ee8afe58c63e230f69a3b7ad020631c432afdf96eb558fcd7257"
         },
         {
           "path": "qwen3-embedding-0.6b.hnpw",

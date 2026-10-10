@@ -1,0 +1,174 @@
+{
+  "runtime": "0.17.4",
+  "image_digest": "sha256:485cc8cb0adc7159b985772a5bbb368ab73bcb3d201eabbf32abb0cf6b655ca8",
+  "checks": [
+    {
+      "model": "decider-0.8b",
+      "unchanged_weights": true,
+      "changed_device_files": [],
+      "old_revision": "38adff38bebe32151b2c32b1cb5a18da4ca516f1",
+      "new_revision": "38adff38bebe32151b2c32b1cb5a18da4ca516f1"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "unchanged_weights": true,
+      "changed_device_files": [
+        "devices/consts.hnpb",
+        "devices/devices.hnpm",
+        "devices/u0.elf",
+        "devices/u1.elf",
+        "devices/u10.elf",
+        "devices/u2.elf",
+        "devices/u3.elf",
+        "devices/u4.elf",
+        "devices/u5.elf",
+        "devices/u6.elf",
+        "devices/u7.elf",
+        "devices/u8.elf",
+        "devices/u9.elf"
+      ],
+      "old_revision": "4960fd9d4423dd15373ad21c83db48dbdb3b2798",
+      "new_revision": "d1a0c4b593403dad94c7d1d8dcdeaee14029b5f5"
+    },
+    {
+      "model": "qwen3-reranker-0.6b",
+      "unchanged_weights": true,
+      "changed_device_files": [],
+      "old_revision": "56c8cfa84a67f07577d0e26c2f67f18e39d2516e",
+      "new_revision": "56c8cfa84a67f07577d0e26c2f67f18e39d2516e"
+    },
+    {
+      "model": "qwen3guard-gen-0.6b",
+      "unchanged_weights": true,
+      "changed_device_files": [],
+      "old_revision": "36e9db2f0405b0a9e86e5615b36b8a8db0229a30",
+      "new_revision": "36e9db2f0405b0a9e86e5615b36b8a8db0229a30"
+    },
+    {
+      "model": "qwen3.5-2b",
+      "unchanged_weights": true,
+      "changed_device_files": [],
+      "old_revision": "4c2e071d641b12215d868957394ac7616aecb94e",
+      "new_revision": "4c2e071d641b12215d868957394ac7616aecb94e"
+    }
+  ],
+  "new_upstream_models_not_selected": [
+    "decider-4b",
+    "flux2-klein-4b",
+    "qwen3-embedding-4b",
+    "qwen3-reranker-4b"
+  ],
+  "reused_files": [
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/NOTICE.md",
+      "bytes": 3248,
+      "sha256": "0f267b3d2523ddf14997ee58660a492a9eaf10ccf6b08bf19dfdc85b9a478b91"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "qwen3-embedding-0.6b.hnpw",
+      "bytes": 813032248,
+      "sha256": "b9f9901429df7b46ec17153aa3899f738adbea8e4356080da0c6e6586fb750d1"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "tokenizer/tokenizer.json",
+      "bytes": 11423705,
+      "sha256": "def76fb086971c7867b829c23a26261e38d9d74e02139253b38aeb9df8b4b50a"
+    },
+    {
+      "model": "qwen3-reranker-0.6b",
+      "path": "qwen3-reranker-0.6b.hnpw",
+      "bytes": 813032248,
+      "sha256": "57e4f9bd3b25aa9bd2eb1784dae6dcc64cadbd908236ea9ba4d03feee8a171fe"
+    },
+    {
+      "model": "qwen3-reranker-0.6b",
+      "path": "tokenizer/tokenizer.json",
+      "bytes": 11422654,
+      "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+    }
+  ],
+  "required_download_files": [
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/consts.hnpb",
+      "bytes": 5365360,
+      "sha256": "8c86cabd4e964d34ed782dc53291cc7ee9575254e41f5e3dcb7675dc5259faf4"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/devices.hnpm",
+      "bytes": 26435,
+      "sha256": "655c968912f3217b064090e9e230c0e4e60d286f8ecf5e7e747a2bbb9686f0cc"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/u0.elf",
+      "bytes": 4931968,
+      "sha256": "a0536b8f840b422fbad3bf254f96e53e961cb6ff830db48addb5f6941cd67fde"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/u1.elf",
+      "bytes": 5456000,
+      "sha256": "1c29306895a29311fdd210b43380a00f8fdeae1d54ffc4b8a3ba1c588b546225"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/u10.elf",
+      "bytes": 5488304,
+      "sha256": "734298f29449c48ce42a4e4fee92c2e029d25d95c26a9dbadf0f4cdd9da0e75b"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/u2.elf",
+      "bytes": 6505552,
+      "sha256": "b7e15b4d8e03cfd9d1e57549744d438fcbd603a20d2b14aa519139587cc61e25"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/u3.elf",
+      "bytes": 6817216,
+      "sha256": "e9e1fb58c2a64bb95a03387640ed976cf2599be98e1b01abe52c1a23ec64517a"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/u4.elf",
+      "bytes": 7444032,
+      "sha256": "9469ab1161d5abfba32fd2f27845733fdb64ce4a18edeb1c99aee47ab3013f9a"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/u5.elf",
+      "bytes": 7432416,
+      "sha256": "014bb8b66774310ebee94244a5d1f84027f5d54436edde77ea725906973a98c3"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/u6.elf",
+      "bytes": 8666848,
+      "sha256": "fc129ae48c6c83d99c369be45141634addf0228890b3079a399ad630acab7282"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/u7.elf",
+      "bytes": 4941232,
+      "sha256": "058a5e33b7a8a6cdddf5528eb015fc3947a82e5b56af07cf0bf536ba75c24727"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/u8.elf",
+      "bytes": 5488304,
+      "sha256": "b4e0d81fa34c2aa27a56f629e8620e09537de3a71640a336ae800749b20ca980"
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "path": "devices/u9.elf",
+      "bytes": 4941232,
+      "sha256": "7184cea3c3c2ee8afe58c63e230f69a3b7ad020631c432afdf96eb558fcd7257"
+    }
+  ],
+  "required_download_bytes": 73504899
+}

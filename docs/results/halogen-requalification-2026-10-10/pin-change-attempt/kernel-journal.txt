@@ -1,0 +1,3 @@
+Oct 09 22:44:26 gpdwin5 kernel: overlayfs: upper fs does not support file handles, falling back to index=off.
+Oct 09 22:44:26 gpdwin5 kernel: overlayfs: fs on '/home/michael/.local/share/containers/storage/overlay/c537aa8549e24336ef036eeba76b9c8644f3966cf18c3ca39411c9bcc1834e4f/diff' does not support file handles, falling back to xino=off.
+Oct 09 22:44:34 gpdwin5 kernel: [UFW BLOCK] IN=wlan0 OUT= MAC=40:d1:33:2a:db:90:ba:fa:39:59:86:cd:08:00 SRC=192.168.49.1 DST=192.168.49.217 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=63538 DF PROTO=TCP SPT=8282 DPT=39506 WINDOW=141 RES=0x00 ACK FIN URGP=0 

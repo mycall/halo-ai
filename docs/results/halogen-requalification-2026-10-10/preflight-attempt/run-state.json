@@ -1,0 +1,70 @@
+{
+  "started_at": "2026-10-10T05:34:58.735729+00:00",
+  "completed": false,
+  "initial_running_containers": [],
+  "runtime_release": "0.17.3",
+  "image": "ghcr.io/peonist-ai/halogen-flash-server@sha256:3bca0132db3c859c997d52d148e6ea4b7b497b8a695c5ccab97135193fde592a",
+  "source_commit": "b1aadfeff136632f694de5c065695bca351be8fc",
+  "config": ".halo-ai-workspace.env",
+  "config_sha256": "16e0aed4edc77e48496925dc19c00990b24ea62115c0e3fdfae28c0f10494e43",
+  "method": "Sequential tests, W4B before v2, same host and pinned engine. No reset of disk page cache or changes to host tuning. Three alternating serial/MTP timing rounds per checkpoint; retrieval once per checkpoint and prompt length. Serving performance three rounds per prompt/mode/cache pass. Five alternating GPU idle/NPU load pairs. SciFact full corpus freshly embedded in a separate external cache. Restore initial stopped state.",
+  "tools_sha256": {
+    "halogen_validate.py": "2aa8919ff54e406fad6937c287c25ccb445d495368564a86de068213aeabc0c3",
+    "halogen_npu_prepare.py": "d5f48a67c1d6284f526d3f3a549f9703fdc73a2a87c7974abf26ad7ac6d56e64",
+    "halogen_serving_validate.py": "4ff2a599001470405d71ecce7792e23f7cfed016e2c3ea74c56a6d9c49d620b9",
+    "halogen_retrieval_validate.py": "b9dca7cd770ed0f8d3b3bd313dc669e64e08157c4c0ccf27696a1ea1dfc18500",
+    "halogen_memlock_setup.py": "9dfee679c653921113a52014226ce632f45b53a88bb38dbd3836832ef8efc4d8",
+    "halogen_npu_validate.py": "035e716e184068a05f63f9a29897a56d430f48e32aff1042cc08ac07e5162669",
+    "halogen_npu_bench.py": "d351029b9a0736bc48a43467388c21b2539a55ad10237d873c3f92566cc1d687",
+    "halogen_checkpoint_compare.py": "53975b22bca8d64d0cf73754a88565d8b7746493e20668347e0bb396bb21e661",
+    "halogen_npu_evaluate.py": "cd82dec16f3f962d515196d851e29046efde900a0bfd75569502276fff5c6209",
+    "halogen_performance_validate.py": "01a41b3883296932bc0a00b89084d9c5f5412459cdf65dc8e4a394ac1e322152"
+  },
+  "stages": [
+    {
+      "name": "checkpoint-comparison",
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "import sys; from pathlib import Path; root=Path.cwd(); sys.path.insert(0,str(root/'tools')); import halogen_checkpoint_compare as c; original=c.cli.load_config; c.cli.load_config=lambda _:original(str(root/'.halo-ai-workspace.env')); raise SystemExit(c.main())",
+        "--rounds",
+        "3",
+        "--output-dir",
+        "/home/michael/Projects/source/github/halo-ai/docs/results/halogen-requalification-2026-10-10/checkpoints"
+      ],
+      "started_at": "2026-10-10T05:34:59.451160+00:00",
+      "returncode": -15,
+      "elapsed_seconds": 107.37047275699933,
+      "finished_at": "2026-10-10T05:36:46.822010+00:00"
+    }
+  ],
+  "hardware_before": {
+    "HALO_AI_DRM_DEVICE": "/sys/class/drm/card1/device",
+    "HALO_AI_GTT_APERTURE_BYTES": 126701535232,
+    "HALO_AI_GTT_APERTURE_GIB": 118,
+    "HALO_AI_GTT_USED_BYTES": 140734464,
+    "HALO_AI_VRAM_TOTAL_BYTES": 2147483648,
+    "HALO_AI_VRAM_USED_BYTES": 940654592,
+    "HALO_AI_CPU_MEM_TOTAL_BYTES": 132564340736,
+    "HALO_AI_CPU_MEM_AVAILABLE_BYTES": 125518725120,
+    "HALO_AI_GTT_TARGET_GIB": "auto",
+    "HALO_AI_GTT_PENDING_GIB": ""
+  },
+  "boot_id": "301b065a-4f1d-49cc-88ae-abe4b654951e",
+  "error": "RuntimeError('checkpoint-comparison failed: -15; inspect its log')",
+  "stop_returncode": 0,
+  "hardware_after": {
+    "HALO_AI_DRM_DEVICE": "/sys/class/drm/card1/device",
+    "HALO_AI_GTT_APERTURE_BYTES": 126701535232,
+    "HALO_AI_GTT_APERTURE_GIB": 118,
+    "HALO_AI_GTT_USED_BYTES": 138633216,
+    "HALO_AI_VRAM_TOTAL_BYTES": 2147483648,
+    "HALO_AI_VRAM_USED_BYTES": 1129947136,
+    "HALO_AI_CPU_MEM_TOTAL_BYTES": 132564340736,
+    "HALO_AI_CPU_MEM_AVAILABLE_BYTES": 125664649216,
+    "HALO_AI_GTT_TARGET_GIB": "auto",
+    "HALO_AI_GTT_PENDING_GIB": ""
+  },
+  "final_running_containers": [],
+  "finished_at": "2026-10-10T05:36:48.208586+00:00"
+}

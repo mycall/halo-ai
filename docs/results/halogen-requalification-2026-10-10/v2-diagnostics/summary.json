@@ -1,0 +1,761 @@
+{
+  "recorded_at": "2026-10-10T05:46:48.790343+00:00",
+  "completed": true,
+  "image": "ghcr.io/peonist-ai/halogen-flash-server@sha256:485cc8cb0adc7159b985772a5bbb368ab73bcb3d201eabbf32abb0cf6b655ca8",
+  "rounds": 3,
+  "method": "V2 only. Cache and prompt lookup off, NPU and vision off. Temperature zero, seed 1, thinking off. Fixed quality suite warms runtime before three alternating serial/MTP 512-token pairs. One retrieval request at each depth; no general quality claim.",
+  "profile": {
+    "id": "qwen3.8-flash-next-halogen-v2-32k-mtp",
+    "model": "halogen-qwen3.8-flash-next-v2",
+    "engine": "halogen",
+    "context": 32768,
+    "startup_timeout": 1200,
+    "risk": "experimental",
+    "features": [
+      "mtp",
+      "external-ngram"
+    ],
+    "thinking": true,
+    "proposal_policy": "candidate-not-qualified-as-default",
+    "settings": {
+      "kv_pool_positions": 32768,
+      "parallel": 1,
+      "prefill_chunk": 16384,
+      "prompt_cache": 0,
+      "drafter": 1,
+      "reasoning_effort": "medium",
+      "max_tokens_default": 8192,
+      "prompt_lookup": 0
+    }
+  },
+  "health": {
+    "status": "ok",
+    "model": "halogen-qwen3.8-flash-next-v2",
+    "endpoints": [
+      "/v1/chat/completions",
+      "/v1/completions",
+      "/v1/messages",
+      "/v1/messages/count_tokens",
+      "/v1/models",
+      "/v1/responses"
+    ],
+    "cache_counters": "/cache",
+    "metrics": "/metrics",
+    "context": 32768,
+    "capability_probe": "ok",
+    "rope_scaling": null,
+    "indexer_budget": 2048,
+    "vision": {
+      "enabled": false,
+      "endpoints": [
+        "/v1/chat/completions",
+        "/v1/messages",
+        "/v1/responses"
+      ],
+      "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+      "max_pixels": 3686400,
+      "size_multiple": 32,
+      "disabled_because": [
+        "the engine was started without a vision tower (HALOGEN_VISION_TOWER)"
+      ]
+    },
+    "version": {
+      "api": "0.17.4",
+      "engine": "0.17.4",
+      "match": true
+    },
+    "modes": [
+      "all",
+      "engine",
+      "api",
+      "bench",
+      "sweep",
+      "convert",
+      "inspect",
+      "verify",
+      "ppl",
+      "niah"
+    ],
+    "checkpoint_format": "hgn",
+    "chat_template": {
+      "path": "/models/tokenizer/chat_template.jinja",
+      "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+      "probe": "passed",
+      "thinking_control": true
+    },
+    "engine": {
+      "responds": true,
+      "probe_s": 1.001
+    },
+    "busy": false,
+    "slots": 1,
+    "slot_ctx": 32768,
+    "kv_pool_positions": 32768,
+    "in_flight": 0,
+    "busy_for_s": 0,
+    "queued": 0,
+    "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+    "drafters_available": [
+      "serial",
+      "mtp"
+    ],
+    "drafter_default": "mtp",
+    "prompt_lookup": "off",
+    "shortlist_draft_head": false,
+    "drafter_weights_loaded": true,
+    "prompt_cache": {
+      "enabled": false,
+      "cap_mb": 0,
+      "mode": 0,
+      "snapshot_align": 0,
+      "bitwise_identical_to_cold": false
+    },
+    "composable_context": {
+      "enabled": false
+    },
+    "tool_calls": {
+      "wire_format": "qwen-xml (<function=>/<parameter=>)",
+      "streaming": true,
+      "tool_choice": [
+        "auto",
+        "none",
+        "required",
+        "{type: function, function: {name}}"
+      ],
+      "forced_call_is_a_prefill": true,
+      "required_is_exact": "named tool_choice, or one tool",
+      "parallel_tool_calls": true,
+      "constrained_decoding": false,
+      "forced_call_disables_thinking": true,
+      "argument_types_need_schema": true
+    },
+    "supported": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking",
+      "max_thinking_tokens",
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning",
+      "thinking",
+      "tools",
+      "tool_choice",
+      "parallel_tool_calls",
+      "stop",
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens",
+      "stream",
+      "stream_options"
+    ],
+    "token_budget_aliases": [
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens"
+    ],
+    "max_tokens_default": 8192,
+    "reasoning_effort_default": "medium",
+    "reasoning_effort_values": [
+      "high",
+      "low",
+      "max",
+      "medium",
+      "minimal",
+      "none",
+      "xhigh"
+    ],
+    "token_budget_covers_reasoning": true,
+    "max_thinking_tokens_default": null,
+    "thinking_answer_room": "max(1024, 15% of max_tokens)",
+    "end_of_turn_guard": true,
+    "thinking_control_aliases": [
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning.{enabled,effort,max_tokens}",
+      "thinking.{type,budget_tokens}"
+    ],
+    "server_defaults": {
+      "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+      "HALOGEN_TEMPERATURE": 1.0,
+      "HALOGEN_TOP_P": 0.95,
+      "HALOGEN_TOP_K": 20,
+      "HALOGEN_REASONING_EFFORT": "medium"
+    },
+    "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+    "chat_template_kwargs": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking"
+    ],
+    "error_format": "openai",
+    "accepted_but_ignored": [
+      "n"
+    ],
+    "not_implemented": [],
+    "structured_output": {
+      "enabled": true,
+      "reason": null,
+      "response_format": [
+        "json_schema",
+        "json_object"
+      ],
+      "text.format": [
+        "json_schema",
+        "json_object"
+      ],
+      "routes": [
+        "/v1/chat/completions",
+        "/v1/completions",
+        "/v1/responses",
+        "/v1/messages"
+      ],
+      "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+      "images": "a schema with images is a 400",
+      "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+      "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+      "keys": "object keys are emitted in schema order",
+      "enforced": [
+        "type",
+        "properties",
+        "required",
+        "additionalProperties",
+        "items",
+        "minItems",
+        "maxItems",
+        "minLength",
+        "maxLength",
+        "enum",
+        "const",
+        "anyOf",
+        "oneOf (as anyOf)",
+        "type: [..., \"null\"]",
+        "$ref",
+        "$defs"
+      ],
+      "accepted_not_enforced": [
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "title",
+        "description",
+        "default",
+        "examples"
+      ],
+      "refused": [
+        "pattern",
+        "format",
+        "allOf",
+        "not",
+        "if",
+        "then",
+        "else",
+        "patternProperties",
+        "dependentRequired",
+        "dependentSchemas",
+        "uniqueItems",
+        "contains",
+        "propertyNames",
+        "unevaluatedProperties",
+        "unevaluatedItems",
+        "minProperties",
+        "maxProperties",
+        "prefixItems"
+      ]
+    },
+    "sampling": {
+      "implemented": [
+        "temperature",
+        "top_p",
+        "top_k",
+        "min_p",
+        "seed",
+        "presence_penalty",
+        "frequency_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ],
+      "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+      "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter. A sampled request that omits top_k or top_p takes the operator's default, else the model's (filter_defaults)",
+      "filter_defaults": {
+        "top_k": 20,
+        "top_p": 0.95,
+        "source": "generation_config.json"
+      },
+      "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+      "penalties": "presence and frequency count GENERATED tokens only; repetition_penalty scales every id in the prompt or the output (vLLM's rule); applied on both drafters",
+      "logprobs": "a sampled request carries the chosen token's logprob on every token; at temperature 0, and with top_logprobs (up to 20) at any temperature, the first generated token only, so those need max_tokens 1",
+      "not_implemented": [
+        "logprobs with stream=true",
+        "logprobs past the first token at temperature 0",
+        "n > 1"
+      ]
+    },
+    "max_tokens_cap": 65536,
+    "max_tokens_over_cap": "400"
+  },
+  "quality_summary": {
+    "cases": 13,
+    "serial_passed": 11,
+    "mtp_passed": 11,
+    "identical_cases": 13,
+    "probe_identical_text": true,
+    "speculative_totals": {
+      "serial": {
+        "draft_n": 0,
+        "draft_n_accepted": 0
+      },
+      "mtp": {
+        "draft_n": 484,
+        "draft_n_accepted": 425
+      }
+    },
+    "mtp_working": true
+  },
+  "decode_runs": [
+    {
+      "round": 1,
+      "drafter": "serial",
+      "wall_seconds": 16.79959127100028,
+      "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+      "request": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a Python LinkedList class with push, pop, reverse, __len__, and __iter__. Include docstrings and type hints."
+          }
+        ],
+        "max_tokens": 512,
+        "temperature": 0,
+        "seed": 1,
+        "reasoning_effort": "none",
+        "stream": false,
+        "drafter": "serial"
+      },
+      "response": {
+        "id": "chatcmpl-3145f6820e924cdfbc103ee6",
+        "created": 1791611289,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\nfrom typing import Optional, Iterator, TypeVar, Generic\n\nT = TypeVar('T')\n\n\nclass Node(Generic[T]):\n    \"\"\"A node in a linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional['Node[T]'] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the list, or None if this is the last node.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList(Generic[T]):\n    \"\"\"A generic singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Push data onto the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Pop data from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The number of elements in the list.\n        \"\"\"\n       "
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 38,
+          "completion_tokens": 512,
+          "total_tokens": 550,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 38,
+          "predicted_n": 512,
+          "prompt_ms": 183.6,
+          "predicted_ms": 16611.5,
+          "prompt_per_second": 206.972,
+          "predicted_per_second": 30.822,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        }
+      }
+    },
+    {
+      "round": 1,
+      "drafter": "mtp",
+      "wall_seconds": 8.387610544999916,
+      "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+      "request": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a Python LinkedList class with push, pop, reverse, __len__, and __iter__. Include docstrings and type hints."
+          }
+        ],
+        "max_tokens": 512,
+        "temperature": 0,
+        "seed": 1,
+        "reasoning_effort": "none",
+        "stream": false,
+        "drafter": "mtp"
+      },
+      "response": {
+        "id": "chatcmpl-36968e175dba45deaadf56f6",
+        "created": 1791611306,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\nfrom typing import Optional, Iterator, TypeVar, Generic\n\nT = TypeVar('T')\n\n\nclass Node(Generic[T]):\n    \"\"\"A node in a linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional['Node[T]'] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the list, or None if this is the last node.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList(Generic[T]):\n    \"\"\"A generic singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Push data onto the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Pop data from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The number of elements in the list.\n        \"\"\"\n       "
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 38,
+          "completion_tokens": 512,
+          "total_tokens": 550,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 38,
+          "predicted_n": 512,
+          "prompt_ms": 205.5,
+          "predicted_ms": 8176.6,
+          "prompt_per_second": 184.915,
+          "predicted_per_second": 62.618,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "draft_n": 415,
+          "draft_n_accepted": 367
+        }
+      }
+    },
+    {
+      "round": 2,
+      "drafter": "mtp",
+      "wall_seconds": 7.903527088999908,
+      "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+      "request": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a Python LinkedList class with push, pop, reverse, __len__, and __iter__. Include docstrings and type hints."
+          }
+        ],
+        "max_tokens": 512,
+        "temperature": 0,
+        "seed": 1,
+        "reasoning_effort": "none",
+        "stream": false,
+        "drafter": "mtp"
+      },
+      "response": {
+        "id": "chatcmpl-88020342893945e9ae0b1c21",
+        "created": 1791611314,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\nfrom typing import Optional, Iterator, TypeVar, Generic\n\nT = TypeVar('T')\n\n\nclass Node(Generic[T]):\n    \"\"\"A node in a linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional['Node[T]'] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the list, or None if this is the last node.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList(Generic[T]):\n    \"\"\"A generic singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Push data onto the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Pop data from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The number of elements in the list.\n        \"\"\"\n       "
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 38,
+          "completion_tokens": 512,
+          "total_tokens": 550,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 38,
+          "predicted_n": 512,
+          "prompt_ms": 188.3,
+          "predicted_ms": 7709.0,
+          "prompt_per_second": 201.806,
+          "predicted_per_second": 66.416,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "draft_n": 415,
+          "draft_n_accepted": 367
+        }
+      }
+    },
+    {
+      "round": 2,
+      "drafter": "serial",
+      "wall_seconds": 14.839313821999895,
+      "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+      "request": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a Python LinkedList class with push, pop, reverse, __len__, and __iter__. Include docstrings and type hints."
+          }
+        ],
+        "max_tokens": 512,
+        "temperature": 0,
+        "seed": 1,
+        "reasoning_effort": "none",
+        "stream": false,
+        "drafter": "serial"
+      },
+      "response": {
+        "id": "chatcmpl-7d97547647aa48ffac4a178e",
+        "created": 1791611322,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\nfrom typing import Optional, Iterator, TypeVar, Generic\n\nT = TypeVar('T')\n\n\nclass Node(Generic[T]):\n    \"\"\"A node in a linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional['Node[T]'] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the list, or None if this is the last node.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList(Generic[T]):\n    \"\"\"A generic singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Push data onto the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Pop data from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The number of elements in the list.\n        \"\"\"\n       "
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 38,
+          "completion_tokens": 512,
+          "total_tokens": 550,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 38,
+          "predicted_n": 512,
+          "prompt_ms": 165.9,
+          "predicted_ms": 14667.4,
+          "prompt_per_second": 229.054,
+          "predicted_per_second": 34.907,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        }
+      }
+    },
+    {
+      "round": 3,
+      "drafter": "serial",
+      "wall_seconds": 14.812851818000127,
+      "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+      "request": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a Python LinkedList class with push, pop, reverse, __len__, and __iter__. Include docstrings and type hints."
+          }
+        ],
+        "max_tokens": 512,
+        "temperature": 0,
+        "seed": 1,
+        "reasoning_effort": "none",
+        "stream": false,
+        "drafter": "serial"
+      },
+      "response": {
+        "id": "chatcmpl-899f22004c224aeb9190b2ec",
+        "created": 1791611337,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\nfrom typing import Optional, Iterator, TypeVar, Generic\n\nT = TypeVar('T')\n\n\nclass Node(Generic[T]):\n    \"\"\"A node in a linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional['Node[T]'] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the list, or None if this is the last node.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList(Generic[T]):\n    \"\"\"A generic singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Push data onto the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Pop data from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The number of elements in the list.\n        \"\"\"\n       "
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 38,
+          "completion_tokens": 512,
+          "total_tokens": 550,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 38,
+          "predicted_n": 512,
+          "prompt_ms": 182.2,
+          "predicted_ms": 14624.5,
+          "prompt_per_second": 208.562,
+          "predicted_per_second": 35.01,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        }
+      }
+    },
+    {
+      "round": 3,
+      "drafter": "mtp",
+      "wall_seconds": 7.992032001999178,
+      "sha256": "1e8fb2d870c620088433c08b9fa464e03d0f47d3cad3a5188125b26fc8f45acf",
+      "request": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a Python LinkedList class with push, pop, reverse, __len__, and __iter__. Include docstrings and type hints."
+          }
+        ],
+        "max_tokens": 512,
+        "temperature": 0,
+        "seed": 1,
+        "reasoning_effort": "none",
+        "stream": false,
+        "drafter": "mtp"
+      },
+      "response": {
+        "id": "chatcmpl-b3edd2d8e64b45268dddb834",
+        "created": 1791611352,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\nfrom typing import Optional, Iterator, TypeVar, Generic\n\nT = TypeVar('T')\n\n\nclass Node(Generic[T]):\n    \"\"\"A node in a linked list.\"\"\"\n\n    def __init__(self, data: T, next_node: Optional['Node[T]'] = None) -> None:\n        \"\"\"Initialize a node with data and an optional next node.\n\n        Args:\n            data: The data to store in the node.\n            next_node: The next node in the list, or None if this is the last node.\n        \"\"\"\n        self.data: T = data\n        self.next: Optional[Node[T]] = next_node\n\n\nclass LinkedList(Generic[T]):\n    \"\"\"A generic singly linked list implementation.\n\n    Supports push, pop, reverse, len, and iteration.\n    \"\"\"\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty linked list.\"\"\"\n        self.head: Optional[Node[T]] = None\n        self._size: int = 0\n\n    def push(self, data: T) -> None:\n        \"\"\"Push data onto the front of the linked list.\n\n        Args:\n            data: The data to add to the front of the list.\n        \"\"\"\n        new_node = Node(data, self.head)\n        self.head = new_node\n        self._size += 1\n\n    def pop(self) -> T:\n        \"\"\"Pop data from the front of the linked list.\n\n        Returns:\n            The data from the front node.\n\n        Raises:\n            IndexError: If the list is empty.\n        \"\"\"\n        if self.head is None:\n            raise IndexError(\"pop from empty linked list\")\n        data = self.head.data\n        self.head = self.head.next\n        self._size -= 1\n        return data\n\n    def reverse(self) -> None:\n        \"\"\"Reverse the linked list in place.\"\"\"\n        prev: Optional[Node[T]] = None\n        current: Optional[Node[T]] = self.head\n        while current is not None:\n            next_node = current.next\n            current.next = prev\n            prev = current\n            current = next_node\n        self.head = prev\n\n    def __len__(self) -> int:\n        \"\"\"Return the number of elements in the linked list.\n\n        Returns:\n            The number of elements in the list.\n        \"\"\"\n       "
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 38,
+          "completion_tokens": 512,
+          "total_tokens": 550,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 38,
+          "predicted_n": 512,
+          "prompt_ms": 191.2,
+          "predicted_ms": 7794.4,
+          "prompt_per_second": 198.745,
+          "predicted_per_second": 65.688,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "draft_n": 415,
+          "draft_n_accepted": 367
+        }
+      }
+    }
+  ],
+  "decode_median_tps": {
+    "serial": 34.907,
+    "mtp": 65.688
+  },
+  "decode_identical": true,
+  "retrieval_profile": {
+    "id": "halogen-v2-requalification-262k",
+    "model": "halogen-qwen3.8-flash-next-v2",
+    "engine": "halogen",
+    "context": 262144,
+    "startup_timeout": 1200,
+    "risk": "experimental",
+    "features": [
+      "mtp",
+      "external-ngram"
+    ],
+    "thinking": true,
+    "proposal_policy": "candidate-not-qualified-as-default",
+    "settings": {
+      "kv_pool_positions": 262144,
+      "parallel": 1,
+      "prefill_chunk": 16384,
+      "prompt_cache": 0,
+      "drafter": 1,
+      "reasoning_effort": "medium",
+      "max_tokens_default": 8192,
+      "prompt_lookup": 0
+    }
+  },
+  "retrieval": [
+    {
+      "records": 7910,
+      "correct_codes": 2,
+      "passed": false,
+      "output": "delta-25658,delta-24374,delta-80090",
+      "expected": "delta-68658,delta-24374,delta-80090",
+      "wall_seconds": 265.8205030849995,
+      "messages_sha256": "fc24c93372327c21e6d0cb69b95d226058201249c6e99bb625b8db96d8ae0536",
+      "timings": {
+        "prompt_n": 261107,
+        "predicted_n": 24,
+        "prompt_ms": 264736.1,
+        "predicted_ms": 728.3,
+        "prompt_per_second": 986.292,
+        "predicted_per_second": 32.953,
+        "cache_n": 0,
+        "disk_restore_n": 0,
+        "disk_restore_ms": 0.0,
+        "draft_n": 0,
+        "draft_n_accepted": 0
+      },
+      "usage": {
+        "prompt_tokens": 261107,
+        "completion_tokens": 24,
+        "total_tokens": 261131,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "records": 959,
+      "correct_codes": 3,
+      "passed": true,
+      "output": "delta-57034,delta-97930,delta-38826",
+      "expected": "delta-57034,delta-97930,delta-38826",
+      "wall_seconds": 35.348919932999706,
+      "messages_sha256": "acfc166777ce7365a515105a020c6ab72fe5094965c998599455642eaa2ec429",
+      "timings": {
+        "prompt_n": 31724,
+        "predicted_n": 24,
+        "prompt_ms": 34555.7,
+        "predicted_ms": 743.2,
+        "prompt_per_second": 918.054,
+        "predicted_per_second": 32.293,
+        "cache_n": 0,
+        "disk_restore_n": 0,
+        "disk_restore_ms": 0.0,
+        "draft_n": 0,
+        "draft_n_accepted": 0
+      },
+      "usage": {
+        "prompt_tokens": 31724,
+        "completion_tokens": 24,
+        "total_tokens": 31748,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    }
+  ]
+}

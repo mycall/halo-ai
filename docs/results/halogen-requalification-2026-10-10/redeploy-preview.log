@@ -1,0 +1,14 @@
+halo-ai host install plan
+  Source:       /home/michael/Projects/source/github/halo-ai
+  Release:      /opt/halo-ai/releases/0.1.0-67f11398eb30aade
+  Run user:     michael (UID 1000)
+  Configuration: /etc/opt/halo-ai
+  Models:       PRESERVED (/srv/halo-ai/models)
+  Resume journal: /var/lib/halo-ai-installer/install-state.env
+  Snapper:      pre/post
+  stage: directories
+  stage: release
+  stage: config
+  stage: links
+  stage: verify
+Dry run complete; no changes were made.

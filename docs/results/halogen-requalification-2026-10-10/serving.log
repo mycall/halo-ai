@@ -1,0 +1,14 @@
+streaming-role-and-content True
+streaming-tools-and-split-assistant-replay True
+structured-json True
+structured-tools-with-thinking-after-result True
+nullable-string-tool-argument-type-list True
+nullable-string-tool-argument-anyof True
+nullable-string-tool-argument-oneof True
+late-system-message True
+late-system-between-tool-and-result True
+late-developer-message True
+late-developer-between-tool-and-result True
+multiple-tool-stream-content-parity True
+anthropic-messages-and-token-count True
+responses-image-in-tool-result True
