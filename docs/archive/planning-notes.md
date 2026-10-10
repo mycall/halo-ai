@@ -1,5 +1,8 @@
 # Qwen3.8 ROCmFPX, XDNA2 NPU Drafting, and Vision
 
+> Archived evidence. Settings and host state describe the original trials.
+> Use the [reference manual](../README.md) for supported operations.
+
 This document tracks the integration of the
 [`q38rocm`](https://github.com/julianmb/q38rocm) Qwen3.8 27B ROCmFP4 runtime
 into Halo AI, an optional GPU-only ROCmFP8 quality track, the experimental use

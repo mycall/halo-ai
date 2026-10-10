@@ -13,7 +13,7 @@ most value for the least downloading and engineering work.
   baseline's 9/13 bounded quality score, but strict output identity is not
   proven. The two aggressive FP4 policies and FP8 MTP remain gated.
 - External NPU and cross-version drafting are deferred; their research notes
-  remain in `docs/TODO backup.md`.
+  remain in `docs/archive/planning-notes.md`.
 - The already-present ROCmFP8 artifact is optional and GPU-only. There will be
   no FP8+NPU profile.
 - Vision is optional and separately downloaded. External NPU drafting remains
@@ -774,7 +774,7 @@ matrix, so only a live same-host trial can pass this stage.
 External NPU drafting, cross-version Qwen3.6 drafting, generalized multi-service
 runtime plumbing, and vision/video qualification are outside the active PP/TPS
 loop. Preserve their constraints and possible future work in
-[`docs/TODO backup.md`](docs/TODO%20backup.md). Do not download another language
+[`docs/archive/planning-notes.md`](docs/archive/planning-notes.md). Do not download another language
 model or install host packages for these tracks without an explicit new gate.
 Stages 3B and 5 are the approved exceptions. Stage 3B permits only its one Q6
 target plus the exact DFlash2 and vision support artifacts listed there; Stage

@@ -1,5 +1,8 @@
 # Halogen upstream review, 2026-10-09
 
+> Archived evidence. Settings and host state describe the original trials.
+> Use the [reference manual](../README.md) for supported operations.
+
 The [0.17.2 Reddit report](https://www.reddit.com/r/LocalLLaMA/comments/1x0o2yy/halogen_qwen_flash_next_keeps_getting_better/)
 prompted a review through
 [tagged 0.17.3](https://github.com/peonist-ai/halogen-flash-server/blob/v0.17.3/CHANGELOG.md).
@@ -36,8 +39,8 @@ and archive-prefixed code prompts. Thinking is disabled for this speed screen;
 the separate schema/tool check exercises medium reasoning. These are bounded
 integration and throughput screens, not coding-quality or long-context
 retrieval qualification. Current results are recorded in
-[the runbook](halogen-flash.md) and
-[the upgrade evidence directory](results/halogen-0173-upgrade-2026-10-09).
+[the runbook](../halogen-flash.md) and
+[the upgrade evidence directory](../results/halogen-0173-upgrade-2026-10-09).
 
 ---
 
@@ -84,7 +87,7 @@ performance must be remeasured after the host-profile change.
 
 The previous near-262K retrieval finding remains evidence about the old test
 conditions, not a general explanation of model quality. Updated measurements
-and exact limitations belong in [the current runbook](halogen-flash.md).
+and exact limitations belong in [the current runbook](../halogen-flash.md).
 
 Sources: [release changes](https://github.com/peonist-ai/halogen-flash-server/compare/v0.12.2...v0.16.2),
 [pinned changelog](https://github.com/peonist-ai/halogen-flash-server/blob/7f31bbd4021f217a1be9776bdb7304bcf8eca62d/CHANGELOG.md),
@@ -185,5 +188,5 @@ for other workloads, with a measurable cost and no local accuracy gain here.
 The more informative next control is the existing UD GGUF inside Halogen,
 holding runtime and request policy fixed while changing model representation.
 
-[Full attention-budget results](results/halogen-attention-budget-2026-09-20.json)
+[Full attention-budget results](../results/halogen-attention-budget-2026-09-20.json)
 record the effective health settings, requests, output and timing counters.

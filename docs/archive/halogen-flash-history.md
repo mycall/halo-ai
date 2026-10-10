@@ -1,7 +1,10 @@
 # Halogen test and setup history
 
+> Archived evidence. Settings and host state describe the original trials.
+> Use the [reference manual](../README.md) for supported operations.
+
 > Historical record through 2026-10-05. For the current conclusion, profile
-> selection, and test limitations, read [the current runbook](halogen-flash.md).
+> selection, and test limitations, read [the current runbook](../halogen-flash.md).
 > Statements such as “pending reboot” describe their dated stage of setup;
 > they are not instructions to repeat those changes on the current host.
 
@@ -66,11 +69,11 @@ passed streaming role/text, streamed tool calls, split assistant/tool replay,
 structured JSON, Anthropic Messages/token counts, and an image in a Responses
 tool result. The normal red-image CLI smoke also passed.
 
-- [MTP results](results/halogen-0162-mtp-2026-10-04.json)
-- [Serving regression results](results/halogen-0162-serving-2026-10-04.json)
+- [MTP results](../results/halogen-0162-mtp-2026-10-04.json)
+- [Serving regression results](../results/halogen-0162-serving-2026-10-04.json)
 - [Release review](halogen-upstream-review.md)
-- [Serial retrieval retest](results/halogen-0162-retrieval-2026-10-04.json)
-- [NPU host preparation](results/halogen-0162-host-preparation-2026-10-04.json)
+- [Serial retrieval retest](../results/halogen-0162-retrieval-2026-10-04.json)
+- [NPU host preparation](../results/halogen-0162-host-preparation-2026-10-04.json)
 
 The exact September retrieval prompts were repeated: 261,107 tokens returned
 2/3 codes again (wrong first code `delta-90571`), while the 31,724-token control
@@ -178,11 +181,11 @@ vision smoke, NPU embeddings, and reranking passed. No GPU/NPU/IOMMU/OOM or
 hung-task kernel messages matched during this bounded run. The ordinary
 `qwen3.8-fn` alias still points to W4B; this comparison did not change aliases.
 
-Evidence: [comparison and effective profiles](results/halogen-0162-checkpoint-comparison-2026-10-05/comparison.json),
-[W4B correctness](results/halogen-0162-checkpoint-comparison-2026-10-05/w4b-quality.json),
-[v2 correctness](results/halogen-0162-checkpoint-comparison-2026-10-05/v2-quality.json),
-[W4B retrieval](results/halogen-0162-checkpoint-comparison-2026-10-05/w4b-retrieval.json),
-[v2 retrieval](results/halogen-0162-checkpoint-comparison-2026-10-05/v2-retrieval.json).
+Evidence: [comparison and effective profiles](../results/halogen-0162-checkpoint-comparison-2026-10-05/comparison.json),
+[W4B correctness](../results/halogen-0162-checkpoint-comparison-2026-10-05/w4b-quality.json),
+[v2 correctness](../results/halogen-0162-checkpoint-comparison-2026-10-05/v2-quality.json),
+[W4B retrieval](../results/halogen-0162-checkpoint-comparison-2026-10-05/w4b-retrieval.json),
+[v2 retrieval](../results/halogen-0162-checkpoint-comparison-2026-10-05/v2-retrieval.json).
 The evidence directory also includes startup memory logs and restored-service
 checks. Reproduce from this checkout (temporarily switches the running model):
 
@@ -319,11 +322,11 @@ python3 /opt/halo-ai/current/tools/halogen_npu_validate.py --output /tmp/halogen
 python3 /opt/halo-ai/current/tools/halogen_npu_bench.py --output /tmp/halogen-npu-bench.json
 ```
 
-Evidence: [host and memlock](results/halogen-0162-npu-host-2026-10-04.json),
-[API and paired load](results/halogen-0162-npu-2026-10-04.json),
-[concurrent reference values](results/halogen-0162-npu-reference-2026-10-04.json),
-[isolated throughput](results/halogen-0162-npu-throughput-2026-10-04.json),
-[GPU serving with NPU loaded](results/halogen-0162-serving-npu-2026-10-04.json).
+Evidence: [host and memlock](../results/halogen-0162-npu-host-2026-10-04.json),
+[API and paired load](../results/halogen-0162-npu-2026-10-04.json),
+[concurrent reference values](../results/halogen-0162-npu-reference-2026-10-04.json),
+[isolated throughput](../results/halogen-0162-npu-throughput-2026-10-04.json),
+[GPU serving with NPU loaded](../results/halogen-0162-serving-npu-2026-10-04.json).
 
 ## Run from this checkout
 
@@ -391,7 +394,7 @@ working memory (87.4 GiB total), leaving 21.6 GiB for the host at startup.
 The subsequent near-limit retrieval checks below exercised the loaded 262K
 profile and found an accuracy limitation.
 
-See [the recorded results](results/halogen-flash-mtp-integration-2026-09-20.json).
+See [the recorded results](../results/halogen-flash-mtp-integration-2026-09-20.json).
 
 ## Post-reload serving and retrieval checks
 
@@ -431,7 +434,7 @@ establish that UD-Q4_K_XL is more accurate at the same length; the matched
 serial comparison below addresses that question. The smaller-context
 successes are bounded smoke checks, not a broad quality qualification.
 
-[Full serving results and retry records](results/halogen-flash-native-serving-2026-09-20.json)
+[Full serving results and retry records](../results/halogen-flash-native-serving-2026-09-20.json)
 include the request policies, prompt hashes, timing/cache counters, and outputs.
 
 ## Serial retest against UD-Q4_K_XL
@@ -477,7 +480,7 @@ profiles remain diagnostics. Neither pair is qualified for reliable retrieval
 near 262K. The recommendation does not establish broad model-quality
 superiority, and selecting the alias does not change the tested runtime settings.
 
-[Full serial retest results](results/qwen3.8-flash-next-serial-retest-2026-09-20.json)
+[Full serial retest results](../results/qwen3.8-flash-next-serial-retest-2026-09-20.json)
 include both effective diagnostic profiles, image pins, model artifacts,
 request options, prompt hashes, outputs, timings, and speculation evidence.
 
