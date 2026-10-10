@@ -1,0 +1,132 @@
+{
+  "baseline_release": "0.16.2",
+  "candidate_release": "0.17.3",
+  "requests_per_runtime": 16,
+  "all_requests_completed_512_tokens": true,
+  "identical_inputs_and_options": true,
+  "benchmarks": [
+    {
+      "records": 0,
+      "mode": "greedy",
+      "requests_per_runtime": 4,
+      "baseline_median_decode_tps": 48.367999999999995,
+      "baseline_decode_tps_range": [
+        45.24,
+        54.503
+      ],
+      "baseline_median_first_pass_prefill_seconds": 0.31225,
+      "candidate_median_decode_tps": 52.564499999999995,
+      "candidate_decode_tps_range": [
+        51.222,
+        56.816
+      ],
+      "candidate_median_first_pass_prefill_seconds": 0.3351,
+      "decode_change_percent": 8.676190869996692
+    },
+    {
+      "records": 0,
+      "mode": "sampled",
+      "requests_per_runtime": 4,
+      "baseline_median_decode_tps": 47.828,
+      "baseline_decode_tps_range": [
+        45.294,
+        49.267
+      ],
+      "baseline_median_first_pass_prefill_seconds": 0.29645,
+      "candidate_median_decode_tps": 53.44,
+      "candidate_decode_tps_range": [
+        49.681,
+        59.992
+      ],
+      "candidate_median_first_pass_prefill_seconds": 0.30974999999999997,
+      "decode_change_percent": 11.733712469683022
+    },
+    {
+      "records": 959,
+      "mode": "greedy",
+      "requests_per_runtime": 4,
+      "baseline_median_decode_tps": 43.5895,
+      "baseline_decode_tps_range": [
+        42.156,
+        44.019
+      ],
+      "baseline_median_first_pass_prefill_seconds": 34.069599999999994,
+      "candidate_median_decode_tps": 48.8935,
+      "candidate_decode_tps_range": [
+        48.653,
+        49.272
+      ],
+      "candidate_median_first_pass_prefill_seconds": 33.354150000000004,
+      "decode_change_percent": 12.168067998027055
+    },
+    {
+      "records": 959,
+      "mode": "sampled",
+      "requests_per_runtime": 4,
+      "baseline_median_decode_tps": 41.033,
+      "baseline_decode_tps_range": [
+        38.628,
+        41.837
+      ],
+      "baseline_median_first_pass_prefill_seconds": 33.602450000000005,
+      "candidate_median_decode_tps": 49.7265,
+      "candidate_decode_tps_range": [
+        48.696,
+        51.76
+      ],
+      "candidate_median_first_pass_prefill_seconds": 34.129099999999994,
+      "decode_change_percent": 21.186605902566225
+    }
+  ],
+  "greedy_outputs_identical_across_releases": true,
+  "serving": {
+    "baseline": {
+      "passed": 9,
+      "total": 14,
+      "failures": [
+        "late-system-message",
+        "late-system-between-tool-and-result",
+        "late-developer-message",
+        "late-developer-between-tool-and-result",
+        "multiple-tool-stream-content-parity"
+      ]
+    },
+    "candidate": {
+      "passed": 14,
+      "total": 14,
+      "failures": []
+    }
+  },
+  "candidate-npu": {
+    "all_checks_passed": true
+  },
+  "candidate-mtp": {
+    "cases": 13,
+    "serial_passed": 11,
+    "mtp_passed": 11,
+    "identical_cases": 13,
+    "probe_identical_text": true,
+    "speculative_totals": {
+      "serial": {
+        "draft_n": 0,
+        "draft_n_accepted": 0
+      },
+      "mtp": {
+        "draft_n": 487,
+        "draft_n_accepted": 424
+      }
+    },
+    "mtp_working": true
+  },
+  "limitations": "One synthetic code task at two prompt lengths; two rounds with first/repeat passes. Baseline tested first, disk page cache not reset, no statistical confidence interval. Thinking off. Sampled outputs may differ across releases. No new near-262K retrieval or broad coding-quality evaluation.",
+  "repository_validation": {
+    "unit_tests_passed": 177,
+    "smoke_suite_passed": true,
+    "git_diff_check_passed": true
+  },
+  "final_running_containers": [],
+  "system_installation_updated": false,
+  "system_installation_pending": "Run ./reload.sh from the checkout; the root-owned installation requires a sudo password.",
+  "new_model_downloads": false,
+  "host_power_settings_changed": false
+}

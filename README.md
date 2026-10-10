@@ -219,11 +219,13 @@ for long generation after shallower prompts, and Q8 remains a verified diagnosti
 
 ## Recommended Flash-Next: Halogen
 
-`qwen3.8-fn` selects `qwen3.8-flash-next-halogen-262k-vision`, using the native
-Halogen Flash checkpoint with its quality overlay, MTP, and vision at 262K
+`qwen3.8-fn` selects `qwen3.8-flash-next-halogen-v2-262k-vision`, using the native
+Halogen v2 checkpoint with its external n-gram table, MTP, and vision at 262K
 context. The existing `qwen3.8-halogen` alias selects the same profile.
-Halogen 0.16.2 is digest-pinned and exposes its API on localhost:8731.
-Local MTP checks passed, and the matched serial comparison showed faster
+Halogen 0.17.3 is digest-pinned and exposes its API on localhost:8731.
+`qwen3.8-halogen-npu` adds the existing NPU embedder and reranker to v2.
+The explicit W4B profile IDs remain available for reference comparisons.
+Local MTP checks passed, and the earlier matched serial comparison showed faster
 long-prompt processing with no accuracy advantage for UD-Q4_K_XL in these
 checks. Near-262K retrieval still returned only two of three requested codes
 in both runtimes with MTP off, so the profile retains its experimental risk

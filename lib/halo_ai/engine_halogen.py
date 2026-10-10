@@ -9,8 +9,8 @@ from errors import fail
 import halogen_npu
 
 
-RELEASE = "0.16.2"
-IMAGE_DIGEST = "sha256:0c61bf84ac22308a53f5d1ca6b86806702d7039e5ebc51cae4c66621b92fe04a"
+RELEASE = "0.17.3"
+IMAGE_DIGEST = "sha256:3bca0132db3c859c997d52d148e6ea4b7b497b8a695c5ccab97135193fde592a"
 IMAGE = f"ghcr.io/peonist-ai/halogen-flash-server@{IMAGE_DIGEST}"
 
 

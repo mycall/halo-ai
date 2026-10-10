@@ -1,0 +1,954 @@
+{
+  "recorded_at": "2026-10-09T16:00:12.587208+00:00",
+  "health": {
+    "status": "ok",
+    "model": "halogen-qwen3.8-flash-next-v2",
+    "endpoints": [
+      "/v1/chat/completions",
+      "/v1/completions",
+      "/v1/embeddings",
+      "/v1/messages",
+      "/v1/messages/count_tokens",
+      "/v1/models",
+      "/v1/moderations",
+      "/v1/rerank",
+      "/v1/responses"
+    ],
+    "cache_counters": "/cache",
+    "metrics": "/metrics",
+    "context": 262144,
+    "capability_probe": "ok",
+    "rope_scaling": null,
+    "indexer_budget": 2048,
+    "vision": {
+      "enabled": true,
+      "endpoints": [
+        "/v1/chat/completions",
+        "/v1/messages",
+        "/v1/responses"
+      ],
+      "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+      "max_pixels": 3686400,
+      "size_multiple": 32
+    },
+    "version": {
+      "api": "0.16.2",
+      "engine": "0.16.2",
+      "match": true
+    },
+    "modes": [
+      "all",
+      "engine",
+      "api",
+      "bench",
+      "sweep",
+      "convert",
+      "inspect",
+      "verify",
+      "ppl",
+      "niah"
+    ],
+    "checkpoint_format": "hgn",
+    "chat_template": {
+      "path": "/models/tokenizer/chat_template.jinja",
+      "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+      "probe": "passed",
+      "thinking_control": true
+    },
+    "engine": {
+      "responds": true,
+      "probe_s": 1.001
+    },
+    "busy": false,
+    "slots": 1,
+    "slot_ctx": 262144,
+    "kv_pool_positions": 262144,
+    "in_flight": 0,
+    "busy_for_s": 0,
+    "queued": 0,
+    "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+    "drafters_available": [
+      "serial",
+      "mtp"
+    ],
+    "drafter_default": "mtp",
+    "prompt_lookup": {
+      "ngram": 3,
+      "chain": 3,
+      "applies_to": "greedy requests with the mtp drafter"
+    },
+    "shortlist_draft_head": false,
+    "drafter_weights_loaded": true,
+    "prompt_cache": {
+      "enabled": true,
+      "cap_mb": 110,
+      "mode": 2,
+      "snapshot_align": 64,
+      "bitwise_identical_to_cold": false
+    },
+    "composable_context": {
+      "enabled": false
+    },
+    "tool_calls": {
+      "wire_format": "qwen-xml (<function=>/<parameter=>)",
+      "streaming": true,
+      "tool_choice": [
+        "auto",
+        "none",
+        "required",
+        "{type: function, function: {name}}"
+      ],
+      "forced_call_is_a_prefill": true,
+      "required_is_exact": "named tool_choice, or one tool",
+      "parallel_tool_calls": true,
+      "constrained_decoding": false,
+      "forced_call_disables_thinking": true,
+      "argument_types_need_schema": true
+    },
+    "supported": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking",
+      "max_thinking_tokens",
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning",
+      "thinking",
+      "tools",
+      "tool_choice",
+      "parallel_tool_calls",
+      "stop",
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens",
+      "stream",
+      "stream_options"
+    ],
+    "token_budget_aliases": [
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens"
+    ],
+    "max_tokens_default": 8192,
+    "reasoning_effort_default": "medium",
+    "reasoning_effort_values": [
+      "high",
+      "low",
+      "max",
+      "medium",
+      "minimal",
+      "none",
+      "xhigh"
+    ],
+    "token_budget_covers_reasoning": true,
+    "max_thinking_tokens_default": null,
+    "thinking_answer_room": "max(1024, 15% of max_tokens)",
+    "end_of_turn_guard": true,
+    "thinking_control_aliases": [
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning.{enabled,effort,max_tokens}",
+      "thinking.{type,budget_tokens}"
+    ],
+    "server_defaults": {
+      "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+      "HALOGEN_TEMPERATURE": 1.0,
+      "HALOGEN_TOP_P": 0.95,
+      "HALOGEN_TOP_K": 20,
+      "HALOGEN_REASONING_EFFORT": "medium"
+    },
+    "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+    "chat_template_kwargs": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking"
+    ],
+    "error_format": "openai",
+    "accepted_but_ignored": [
+      "n"
+    ],
+    "not_implemented": [],
+    "structured_output": {
+      "enabled": true,
+      "reason": null,
+      "response_format": [
+        "json_schema",
+        "json_object"
+      ],
+      "text.format": [
+        "json_schema",
+        "json_object"
+      ],
+      "routes": [
+        "/v1/chat/completions",
+        "/v1/completions",
+        "/v1/responses",
+        "/v1/messages"
+      ],
+      "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+      "images": "a schema with images is a 400",
+      "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+      "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+      "keys": "object keys are emitted in schema order",
+      "enforced": [
+        "type",
+        "properties",
+        "required",
+        "additionalProperties",
+        "items",
+        "minItems",
+        "maxItems",
+        "minLength",
+        "maxLength",
+        "enum",
+        "const",
+        "anyOf",
+        "oneOf (as anyOf)",
+        "type: [..., \"null\"]",
+        "$ref",
+        "$defs"
+      ],
+      "accepted_not_enforced": [
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "title",
+        "description",
+        "default",
+        "examples"
+      ],
+      "refused": [
+        "pattern",
+        "format",
+        "allOf",
+        "not",
+        "if",
+        "then",
+        "else",
+        "patternProperties",
+        "dependentRequired",
+        "dependentSchemas",
+        "uniqueItems",
+        "contains",
+        "propertyNames",
+        "unevaluatedProperties",
+        "unevaluatedItems",
+        "minProperties",
+        "maxProperties",
+        "prefixItems"
+      ]
+    },
+    "sampling": {
+      "implemented": [
+        "temperature",
+        "top_p",
+        "top_k",
+        "min_p",
+        "seed",
+        "presence_penalty",
+        "frequency_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ],
+      "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+      "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter. A sampled request that omits top_k or top_p takes the operator's default, else the model's (filter_defaults)",
+      "filter_defaults": {
+        "top_k": 20,
+        "top_p": 0.95,
+        "source": "generation_config.json"
+      },
+      "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+      "penalties": "presence and frequency count GENERATED tokens only; repetition_penalty scales every id in the prompt or the output (vLLM's rule); applied on both drafters",
+      "logprobs": "a sampled request carries the chosen token's logprob on every token; at temperature 0, and with top_logprobs (up to 20) at any temperature, the first generated token only, so those need max_tokens 1",
+      "not_implemented": [
+        "logprobs with stream=true",
+        "logprobs past the first token at temperature 0",
+        "n > 1"
+      ]
+    },
+    "max_tokens_cap": 65536,
+    "max_tokens_over_cap": "400",
+    "npu": {
+      "status": "ok",
+      "models": [
+        "qwen3-embedding-0.6b",
+        "qwen3-reranker-0.6b"
+      ],
+      "loaded": [],
+      "queued": 0,
+      "passes": 0,
+      "contexts": 4
+    }
+  },
+  "checks": [
+    {
+      "name": "streaming-role-and-content",
+      "passed": true,
+      "response": [
+        {
+          "id": "chatcmpl-6e13d12507fa4f6faf2052a1",
+          "created": 1791561612,
+          "model": "halogen-qwen3.8-flash-next-v2",
+          "object": "chat.completion.chunk",
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": null,
+              "delta": {
+                "role": "assistant",
+                "content": ""
+              }
+            }
+          ]
+        },
+        {
+          "id": "chatcmpl-6e13d12507fa4f6faf2052a1",
+          "created": 1791561612,
+          "model": "halogen-qwen3.8-flash-next-v2",
+          "object": "chat.completion.chunk",
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": null,
+              "delta": {
+                "content": "stream"
+              }
+            }
+          ]
+        },
+        {
+          "id": "chatcmpl-6e13d12507fa4f6faf2052a1",
+          "created": 1791561612,
+          "model": "halogen-qwen3.8-flash-next-v2",
+          "object": "chat.completion.chunk",
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": null,
+              "delta": {
+                "content": "ing"
+              }
+            }
+          ]
+        },
+        {
+          "id": "chatcmpl-6e13d12507fa4f6faf2052a1",
+          "created": 1791561612,
+          "model": "halogen-qwen3.8-flash-next-v2",
+          "object": "chat.completion.chunk",
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": null,
+              "delta": {
+                "content": "-ready"
+              }
+            }
+          ]
+        },
+        {
+          "id": "chatcmpl-6e13d12507fa4f6faf2052a1",
+          "created": 1791561612,
+          "model": "halogen-qwen3.8-flash-next-v2",
+          "object": "chat.completion.chunk",
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop",
+              "delta": {}
+            }
+          ],
+          "timings": {
+            "prompt_n": 18,
+            "predicted_n": 4,
+            "prompt_ms": 635.8,
+            "predicted_ms": 118.2,
+            "prompt_per_second": 28.311,
+            "predicted_per_second": 33.841,
+            "cache_n": 0,
+            "disk_restore_n": 0,
+            "disk_restore_ms": 0.0,
+            "draft_n": 2,
+            "draft_n_accepted": 2
+          }
+        }
+      ]
+    },
+    {
+      "name": "streaming-tools-and-split-assistant-replay",
+      "passed": true,
+      "response": {
+        "stream": [
+          {
+            "id": "chatcmpl-bf57c7705d4446eba80638a1",
+            "created": 1791561613,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion.chunk",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": null,
+                "delta": {
+                  "role": "assistant",
+                  "content": ""
+                }
+              }
+            ]
+          },
+          {
+            "id": "chatcmpl-bf57c7705d4446eba80638a1",
+            "created": 1791561613,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion.chunk",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": null,
+                "delta": {
+                  "tool_calls": [
+                    {
+                      "index": 0,
+                      "id": "call_c097ec279fb3467b9467b8d3",
+                      "type": "function",
+                      "function": {
+                        "name": "lookup_city",
+                        "arguments": ""
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "chatcmpl-bf57c7705d4446eba80638a1",
+            "created": 1791561613,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion.chunk",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": null,
+                "delta": {
+                  "tool_calls": [
+                    {
+                      "index": 0,
+                      "function": {
+                        "arguments": "{\"city\": \""
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "chatcmpl-bf57c7705d4446eba80638a1",
+            "created": 1791561613,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion.chunk",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": null,
+                "delta": {
+                  "tool_calls": [
+                    {
+                      "index": 0,
+                      "function": {
+                        "arguments": "Paris"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "chatcmpl-bf57c7705d4446eba80638a1",
+            "created": 1791561613,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion.chunk",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": null,
+                "delta": {
+                  "tool_calls": [
+                    {
+                      "index": 0,
+                      "function": {
+                        "arguments": "\""
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "chatcmpl-bf57c7705d4446eba80638a1",
+            "created": 1791561613,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion.chunk",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": null,
+                "delta": {
+                  "tool_calls": [
+                    {
+                      "index": 0,
+                      "function": {
+                        "arguments": "}"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "chatcmpl-bf57c7705d4446eba80638a1",
+            "created": 1791561613,
+            "model": "halogen-qwen3.8-flash-next-v2",
+            "object": "chat.completion.chunk",
+            "choices": [
+              {
+                "index": 0,
+                "finish_reason": "tool_calls",
+                "delta": {}
+              }
+            ],
+            "timings": {
+              "prompt_n": 285,
+              "predicted_n": 27,
+              "prompt_ms": 1055.9,
+              "predicted_ms": 662.1,
+              "prompt_per_second": 269.912,
+              "predicted_per_second": 40.779,
+              "cache_n": 0,
+              "disk_restore_n": 0,
+              "disk_restore_ms": 0.0,
+              "prefix_n": 1,
+              "draft_n": 21,
+              "draft_n_accepted": 17
+            }
+          }
+        ],
+        "round_trip": {
+          "id": "chatcmpl-bc3ef226d9094456999ac37e",
+          "created": 1791561615,
+          "model": "halogen-qwen3.8-flash-next-v2",
+          "object": "chat.completion",
+          "choices": [
+            {
+              "index": 0,
+              "finish_reason": "stop",
+              "message": {
+                "role": "assistant",
+                "content": "France"
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 341,
+            "completion_tokens": 2,
+            "total_tokens": 343,
+            "prompt_tokens_details": {
+              "cached_tokens": 285
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0
+            }
+          },
+          "timings": {
+            "prompt_n": 56,
+            "predicted_n": 2,
+            "prompt_ms": 517.2,
+            "predicted_ms": 87.6,
+            "prompt_per_second": 108.275,
+            "predicted_per_second": 22.831,
+            "cache_n": 285,
+            "disk_restore_n": 0,
+            "disk_restore_ms": 0.0,
+            "prefix_n": 285,
+            "draft_n": 2,
+            "draft_n_accepted": 2
+          }
+        }
+      }
+    },
+    {
+      "name": "structured-json",
+      "passed": true,
+      "response": {
+        "id": "chatcmpl-e7e00b0d116a4c588911fe65",
+        "created": 1791561615,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "{\n  \"ok\": true\n}"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 22,
+          "completion_tokens": 10,
+          "total_tokens": 32,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 22,
+          "predicted_n": 10,
+          "prompt_ms": 370.4,
+          "predicted_ms": 342.7,
+          "prompt_per_second": 59.395,
+          "predicted_per_second": 29.18,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 3,
+          "draft_n": 5,
+          "draft_n_accepted": 5
+        }
+      }
+    },
+    {
+      "name": "structured-tools-with-thinking-after-result",
+      "passed": true,
+      "response": {
+        "id": "chatcmpl-1da06f7444ef4f52b9cf3e5e",
+        "created": 1791561616,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+              "role": "assistant",
+              "content": "{\"country\": \"France\"}",
+              "reasoning_content": "The user wants me to return the country in the \"requested JSON\" format. They didn't specify a particular JSON format beyond that, so I'll return the country in a simple JSON format."
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 349,
+          "completion_tokens": 49,
+          "total_tokens": 398,
+          "prompt_tokens_details": {
+            "cached_tokens": 256
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 41
+          }
+        },
+        "timings": {
+          "prompt_n": 93,
+          "predicted_n": 49,
+          "prompt_ms": 711.5,
+          "predicted_ms": 1456.7,
+          "prompt_per_second": 130.71,
+          "predicted_per_second": 33.638,
+          "cache_n": 256,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 259,
+          "draft_n": 26,
+          "draft_n_accepted": 23
+        }
+      }
+    },
+    {
+      "name": "nullable-string-tool-argument-type-list",
+      "passed": true,
+      "response": {
+        "id": "chatcmpl-db64535ea0204cafa288d16c",
+        "created": 1791561618,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_c2458ec4e5d14333a6a9ce99",
+                  "type": "function",
+                  "function": {
+                    "name": "lookup_postcode",
+                    "arguments": "{\"postcode\": \"00123\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 307,
+          "completion_tokens": 22,
+          "total_tokens": 329,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 307,
+          "predicted_n": 22,
+          "prompt_ms": 885.5,
+          "predicted_ms": 459.2,
+          "prompt_per_second": 346.697,
+          "predicted_per_second": 47.909,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 33,
+          "draft_n": 18,
+          "draft_n_accepted": 14
+        }
+      }
+    },
+    {
+      "name": "nullable-string-tool-argument-anyof",
+      "passed": true,
+      "response": {
+        "id": "chatcmpl-cc4a2229980a442d8f3deac7",
+        "created": 1791561619,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_f5cb2d0f44214b419ecd2927",
+                  "type": "function",
+                  "function": {
+                    "name": "lookup_postcode",
+                    "arguments": "{\"postcode\": \"00123\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 315,
+          "completion_tokens": 22,
+          "total_tokens": 337,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 315,
+          "predicted_n": 22,
+          "prompt_ms": 862.5,
+          "predicted_ms": 435.6,
+          "prompt_per_second": 365.217,
+          "predicted_per_second": 50.505,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 67,
+          "draft_n": 18,
+          "draft_n_accepted": 14
+        }
+      }
+    },
+    {
+      "name": "nullable-string-tool-argument-oneof",
+      "passed": true,
+      "response": {
+        "id": "chatcmpl-2c53316ab2d34a369901ff36",
+        "created": 1791561621,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "tool_calls",
+            "message": {
+              "role": "assistant",
+              "content": null,
+              "tool_calls": [
+                {
+                  "id": "call_db6fbf013ed94cfbb42f49dd",
+                  "type": "function",
+                  "function": {
+                    "name": "lookup_postcode",
+                    "arguments": "{\"postcode\": \"00123\"}"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 315,
+          "completion_tokens": 22,
+          "total_tokens": 337,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 315,
+          "predicted_n": 22,
+          "prompt_ms": 838.0,
+          "predicted_ms": 437.1,
+          "prompt_per_second": 375.895,
+          "predicted_per_second": 50.332,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 67,
+          "draft_n": 18,
+          "draft_n_accepted": 14
+        }
+      }
+    },
+    {
+      "name": "late-system-message",
+      "passed": false,
+      "error": "HTTP Error 400: Bad Request",
+      "body": "{\"error\":{\"message\":\"message 2 has role 'system' after a non-system turn; this model's chat template accepts a system message only at the start of the conversation (merge it into the first message or send it as a user turn)\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":null}}"
+    },
+    {
+      "name": "late-system-between-tool-and-result",
+      "passed": false,
+      "error": "HTTP Error 400: Bad Request",
+      "body": "{\"error\":{\"message\":\"message 3 has role 'system' after a non-system turn; this model's chat template accepts a system message only at the start of the conversation (merge it into the first message or send it as a user turn)\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":null}}"
+    },
+    {
+      "name": "late-developer-message",
+      "passed": false,
+      "error": "HTTP Error 400: Bad Request",
+      "body": "{\"error\":{\"message\":\"message 2 has role 'system' after a non-system turn; this model's chat template accepts a system message only at the start of the conversation (merge it into the first message or send it as a user turn)\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":null}}"
+    },
+    {
+      "name": "late-developer-between-tool-and-result",
+      "passed": false,
+      "error": "HTTP Error 400: Bad Request",
+      "body": "{\"error\":{\"message\":\"message 3 has role 'system' after a non-system turn; this model's chat template accepts a system message only at the start of the conversation (merge it into the first message or send it as a user turn)\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":null}}"
+    },
+    {
+      "name": "multiple-tool-stream-content-parity",
+      "passed": false,
+      "error": "{'plain': {'id': 'chatcmpl-9553b5211a4c4f0a872f9391', 'created': 1791561622, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion', 'choices': [{'index': 0, 'finish_reason': 'tool_calls', 'message': {'role': 'assistant', 'content': None, 'tool_calls': [{'id': 'call_cdcdee7cbfe64a32bb509dd8', 'type': 'function', 'function': {'name': 'lookup_city', 'arguments': '{\"city\": \"Paris\"}'}}, {'id': 'call_bf503c4ce3504e30a5c977e7', 'type': 'function', 'function': {'name': 'lookup_city', 'arguments': '{\"city\": \"Tokyo\"}'}}]}}], 'usage': {'prompt_tokens': 297, 'completion_tokens': 55, 'total_tokens': 352, 'completion_tokens_details': {'reasoning_tokens': 0}}, 'timings': {'prompt_n': 297, 'predicted_n': 55, 'prompt_ms': 879.4, 'predicted_ms': 1121.0, 'prompt_per_second': 337.73, 'predicted_per_second': 49.063, 'cache_n': 0, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'prefix_n': 41, 'draft_n': 42, 'draft_n_accepted': 37}}, 'stream': [{'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'role': 'assistant', 'content': ''}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'tool_calls': [{'index': 0, 'id': 'call_49c14221c9a24e0481e26351', 'type': 'function', 'function': {'name': 'lookup_city', 'arguments': ''}}]}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'tool_calls': [{'index': 0, 'function': {'arguments': '{\"city\": \"'}}]}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'tool_calls': [{'index': 0, 'function': {'arguments': 'Paris'}}]}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'tool_calls': [{'index': 0, 'function': {'arguments': '\"'}}]}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'tool_calls': [{'index': 0, 'function': {'arguments': '}'}}]}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'content': '\\n'}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'tool_calls': [{'index': 1, 'id': 'call_5e2de241a60b4fb286fe2034', 'type': 'function', 'function': {'name': 'lookup_city', 'arguments': ''}}]}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'tool_calls': [{'index': 1, 'function': {'arguments': '{\"city\": \"'}}]}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'tool_calls': [{'index': 1, 'function': {'arguments': 'Tok'}}]}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'tool_calls': [{'index': 1, 'function': {'arguments': 'yo'}}]}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'tool_calls': [{'index': 1, 'function': {'arguments': '\"'}}]}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': None, 'delta': {'tool_calls': [{'index': 1, 'function': {'arguments': '}'}}]}}]}, {'id': 'chatcmpl-d4c6e8df5c7b473296d77547', 'created': 1791561624, 'model': 'halogen-qwen3.8-flash-next-v2', 'object': 'chat.completion.chunk', 'choices': [{'index': 0, 'finish_reason': 'tool_calls', 'delta': {}}], 'timings': {'prompt_n': 0, 'predicted_n': 55, 'prompt_ms': 0.2, 'predicted_ms': 1064.8, 'prompt_per_second': 0.0, 'predicted_per_second': 51.653, 'cache_n': 297, 'disk_restore_n': 0, 'disk_restore_ms': 0.0, 'prefix_n': 297, 'draft_n': 42, 'draft_n_accepted': 37}}]}"
+    },
+    {
+      "name": "anthropic-messages-and-token-count",
+      "passed": true,
+      "response": {
+        "message": {
+          "id": "msg_a4d2e7c2705c4772af0bcd2a",
+          "type": "message",
+          "role": "assistant",
+          "model": "halogen-qwen3.8-flash-next-v2",
+          "content": [
+            {
+              "type": "text",
+              "text": "messages-ready"
+            }
+          ],
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 18,
+            "output_tokens": 3,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 0
+          },
+          "timings": {
+            "prompt_n": 18,
+            "predicted_n": 3,
+            "prompt_ms": 207.0,
+            "predicted_ms": 79.4,
+            "prompt_per_second": 86.957,
+            "predicted_per_second": 37.783,
+            "cache_n": 0,
+            "disk_restore_n": 0,
+            "disk_restore_ms": 0.0,
+            "prefix_n": 7,
+            "draft_n": 2,
+            "draft_n_accepted": 2
+          }
+        },
+        "count": {
+          "input_tokens": 11
+        }
+      }
+    },
+    {
+      "name": "responses-image-in-tool-result",
+      "passed": true,
+      "response": {
+        "id": "resp_d2dc953c263f481daf90cdfd",
+        "object": "response",
+        "created_at": 1791561625,
+        "status": "completed",
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "output": [
+          {
+            "id": "msg_d2dc953c263f481daf90cdfd",
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "text": "Red",
+                "annotations": []
+              }
+            ]
+          }
+        ],
+        "parallel_tool_calls": true,
+        "max_output_tokens": 128,
+        "usage": {
+          "input_tokens": 123,
+          "output_tokens": 2,
+          "total_tokens": 125,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 123,
+          "predicted_n": 2,
+          "prompt_ms": 665.6,
+          "predicted_ms": 78.4,
+          "prompt_per_second": 184.796,
+          "predicted_per_second": 25.51,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "draft_n": 2,
+          "draft_n_accepted": 2
+        }
+      }
+    }
+  ]
+}

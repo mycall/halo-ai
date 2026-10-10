@@ -75,7 +75,8 @@ def resolve(root: Path, models: dict[str, dict[str, Any]], profile: dict[str, An
     auxiliary_root = None
     auxiliary: tuple[Artifact, ...] = ()
     if profile["engine"] == "halogen" and "npu" in features:
-        auxiliary_root = root.resolve() / "halogen-npu" / halogen_npu.MANIFEST["release"]
+        # Compatible engine upgrades reuse the same verified NPU files.
+        auxiliary_root = root.resolve() / "halogen-npu" / halogen_npu.MANIFEST["artifact_release"]
         try:
             auxiliary_root.resolve().relative_to(root.resolve())
         except ValueError:

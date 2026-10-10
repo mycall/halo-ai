@@ -1,6 +1,7 @@
 {
-  "release": "0.16.2",
-  "image_digest": "sha256:0c61bf84ac22308a53f5d1ca6b86806702d7039e5ebc51cae4c66621b92fe04a",
+  "release": "0.17.3",
+  "artifact_release": "0.16.2",
+  "image_digest": "sha256:3bca0132db3c859c997d52d148e6ea4b7b497b8a695c5ccab97135193fde592a",
   "models": {
     "decider-0.8b": {
       "repo": "peonist-ai/halogen-npu-decider-0.8b",

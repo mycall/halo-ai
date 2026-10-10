@@ -1,0 +1,50 @@
+{
+  "kernel": "7.2.9-1-cachyos-deckify",
+  "platform_profile": "performance",
+  "gpu_fabric_clock": [
+    "0: 400Mhz ",
+    "1: 1000Mhz ",
+    "2: 1200Mhz ",
+    "3: 1400Mhz ",
+    "4: 1600Mhz ",
+    "5: 1700Mhz ",
+    "6: 1850Mhz ",
+    "7: 2000Mhz *"
+  ],
+  "gpu_performance_level": "manual",
+  "initial_running_containers": [],
+  "host_settings_changed": false,
+  "new_model_downloads": false,
+  "images": {
+    "0.16.2": {
+      "digest": "sha256:0c61bf84ac22308a53f5d1ca6b86806702d7039e5ebc51cae4c66621b92fe04a",
+      "labels": {
+        "ai.peonist.halogen.modes": "all engine api bench sweep convert inspect verify ppl niah",
+        "io.buildah.version": "1.43.2",
+        "org.opencontainers.image.description": "Qwen3.8-Flash-Next inference server for AMD Strix Halo (gfx1151)",
+        "org.opencontainers.image.documentation": "https://github.com/peonist-ai/halogen-flash-server",
+        "org.opencontainers.image.licenses": "LicenseRef-Peonist-EULA",
+        "org.opencontainers.image.revision": "420c2e2d1336",
+        "org.opencontainers.image.source": "https://github.com/peonist-ai/halogen-flash-server",
+        "org.opencontainers.image.title": "halogen-flash-server",
+        "org.opencontainers.image.vendor": "Peonist",
+        "org.opencontainers.image.version": "0.16.2"
+      }
+    },
+    "0.17.3": {
+      "digest": "sha256:3bca0132db3c859c997d52d148e6ea4b7b497b8a695c5ccab97135193fde592a",
+      "labels": {
+        "ai.peonist.halogen.modes": "all engine api bench sweep convert inspect verify ppl niah",
+        "io.buildah.version": "1.43.2",
+        "org.opencontainers.image.description": "Qwen3.8-Flash-Next inference server for AMD Strix Halo (gfx1151)",
+        "org.opencontainers.image.documentation": "https://github.com/peonist-ai/halogen-flash-server",
+        "org.opencontainers.image.licenses": "LicenseRef-Peonist-EULA",
+        "org.opencontainers.image.revision": "d1e50853b278",
+        "org.opencontainers.image.source": "https://github.com/peonist-ai/halogen-flash-server",
+        "org.opencontainers.image.title": "halogen-flash-server",
+        "org.opencontainers.image.vendor": "Peonist",
+        "org.opencontainers.image.version": "0.17.3"
+      }
+    }
+  }
+}

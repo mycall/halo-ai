@@ -1,6 +1,78 @@
 # Halogen Flash-Next: current decision and runbook
 
-## Conclusion — 2026-10-05
+## Runtime upgrade — 2026-10-09
+
+**Use pinned Halogen 0.17.3 with the existing v2 weights.** The local upgrade
+screen fixed five reproduced serving failures and improved decode speed. No
+model files were downloaded or changed; only the server image was downloaded.
+The recommended aliases now select v2. W4B remains available by explicit
+profile ID, but is deprecated and no longer release-tested upstream.
+
+The same v2/vision/NPU profile was used for both runtime versions: one slot,
+262K pool, 16K prefill chunks, cache mode 2, MTP and prompt lookup enabled.
+NPU services were idle during timing. Each cell below is the median of four
+requests: two distinct prompt variants, each requested first and then repeated
+from cache. All 32 measured responses generated exactly 512 tokens. Sampling
+used temperature 1.0, top-p 0.95 and top-k 20; both modes disabled thinking.
+
+| Prompt / decode mode | 0.16.2 | 0.17.3 | Change |
+| --- | ---: | ---: | ---: |
+| Short code prompt, greedy | 48.37 tok/s | 52.56 tok/s | +8.7% |
+| Short code prompt, sampled | 47.83 tok/s | 53.44 tok/s | +11.7% |
+| 31.7K archive + code prompt, greedy | 43.59 tok/s | 48.89 tok/s | +12.2% |
+| 31.7K archive + code prompt, sampled | 41.03 tok/s | 49.73 tok/s | +21.2% |
+
+All eight paired greedy outputs were identical across releases. Sampled text
+is not expected to match. The serving checks improved from **9/14 to 14/14**:
+late system/developer messages, including between a tool call and its result,
+no longer returned 400, and multi-tool streaming no longer leaked whitespace.
+Late instructions are accepted as user text, not as privileged system messages.
+The schema-plus-tools/thinking and nullable-string cases passed both versions.
+All eight NPU checks passed, including reference-value comparisons during GPU
+generation and post-load repeats.
+
+The separate 32K diagnostic profile, with cache and prompt lookup off, returned
+identical serial/MTP text on all 13 fixed cases and the 512-token generation
+probe. Both modes scored 11/13, retaining the two known code-question failures.
+MTP counters confirmed actual speculation. The repository smoke suite passed
+177 unit tests. Validation restored the initially stopped service state; the
+system installation still needs the explicit reload described below.
+
+**Limits:** one synthetic coding task, two prompt lengths, two rounds,
+0.16.2 tested first, and no reset of the host's disk page cache. This establishes
+bounded throughput and compatibility gains, not general coding quality or
+performance at 262K. Near-limit retrieval was not rerun; the known miss below
+remains unresolved. Host power and clock settings were unchanged.
+
+[Summary](results/halogen-0173-upgrade-2026-10-09/summary.json) ·
+[Baseline timings](results/halogen-0173-upgrade-2026-10-09/baseline-performance.json) ·
+[Candidate timings](results/halogen-0173-upgrade-2026-10-09/candidate-performance.json) ·
+[Serving checks](results/halogen-0173-upgrade-2026-10-09/candidate-serving.json) ·
+[NPU checks](results/halogen-0173-upgrade-2026-10-09/candidate-npu.json) ·
+[MTP checks](results/halogen-0173-upgrade-2026-10-09/candidate-mtp.json) ·
+[Artifact compatibility](results/halogen-0173-upgrade-2026-10-09/npu-artifact-compatibility.json)
+
+The NPU manifest records runtime 0.17.3 separately from artifact release
+0.16.2. All existing artifact sizes and hashes match the new image's manifest,
+so the original storage directory is reused. No new NPU model is selected.
+
+To deploy this checkout to the system installation, run `./reload.sh` (sudo
+required); it migrates the known old image pin while preserving custom pins.
+Then start `halo-ai start qwen3.8-halogen-v2-npu`. With the verified files and
+image already installed, neither command acquires model weights. The checkout
+can also run directly with
+`bin/halo-ai --config .halo-ai-workspace.env start qwen3.8-halogen-v2-npu`.
+
+Reproduce the HTTP-only serving and speed screens against an otherwise idle
+instance:
+
+```bash
+python tools/halogen_serving_validate.py --output /tmp/halogen-serving.json
+python tools/halogen_performance_validate.py --rounds 2 --output /tmp/halogen-performance.json
+python tools/halogen_npu_validate.py --rounds 0 --output /tmp/halogen-npu.json
+```
+
+## Checkpoint decision — 2026-10-05
 
 **Keep v2 as the current serving checkpoint for its lower memory use. Our local
 comparison found no meaningful generation-speed gain. Overall model quality
@@ -98,15 +170,16 @@ alone is not that measurement.
 
 ## Run and select a profile
 
-**Use the explicit v2 alias.** `qwen3.8-fn` still selects W4B; switching the
-running server did not change aliases.
+**The recommended aliases select v2 as of 2026-10-09.** Explicit W4B profile
+IDs remain available for reference comparisons. Existing model files are
+reused; selecting a profile does not download missing weights.
 
 | Alias | Checkpoint | Context | Vision | NPU services |
 | --- | --- | ---: | --- | --- |
-| `qwen3.8-halogen-v2-npu` | V2 | 262,144 | Yes | Embeddings + reranking |
-| `qwen3.8-halogen-v2` | V2 | 262,144 | Yes | Off |
-| `qwen3.8-halogen-npu` | W4B + quality overlay | 262,144 | Yes | Embeddings + reranking |
-| `qwen3.8-fn` / `qwen3.8-halogen` | W4B + quality overlay | 262,144 | Yes | Off |
+| `qwen3.8-halogen-v2-npu` / `qwen3.8-halogen-npu` | V2 | 262,144 | Yes | Embeddings + reranking |
+| `qwen3.8-halogen-v2` / `qwen3.8-fn` / `qwen3.8-halogen` | V2 | 262,144 | Yes | Off |
+| `qwen3.8-flash-next-halogen-262k-vision-npu` | W4B + quality overlay | 262,144 | Yes | Embeddings + reranking |
+| `qwen3.8-flash-next-halogen-262k-vision` | W4B + quality overlay | 262,144 | Yes | Off |
 
 ```bash
 # Preview the full checkpoint, vision, and NPU dependency selection.

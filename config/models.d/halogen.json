@@ -404,10 +404,10 @@
     }
   ],
   "profile_aliases": {
-    "qwen3.8-fn": "qwen3.8-flash-next-halogen-262k-vision",
-    "qwen3.8-halogen": "qwen3.8-flash-next-halogen-262k-vision",
+    "qwen3.8-fn": "qwen3.8-flash-next-halogen-v2-262k-vision",
+    "qwen3.8-halogen": "qwen3.8-flash-next-halogen-v2-262k-vision",
     "qwen3.8-halogen-v2": "qwen3.8-flash-next-halogen-v2-262k-vision",
-    "qwen3.8-halogen-npu": "qwen3.8-flash-next-halogen-262k-vision-npu",
+    "qwen3.8-halogen-npu": "qwen3.8-flash-next-halogen-v2-262k-vision-npu",
     "qwen3.8-halogen-v2-npu": "qwen3.8-flash-next-halogen-v2-262k-vision-npu"
   }
 }

@@ -14,10 +14,14 @@ import math
 from pathlib import Path
 import re
 import statistics
+import sys
 import time
 import urllib.error
 import urllib.request
 import zipfile
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/halo_ai'))
+from engine_halogen import RELEASE
 
 DATASET_URL = 'https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip'
 DATASET_SHA256 = '536e14446a0ba56ed1398ab1055f39fe852686ecad24a6306c80c490fa8e0165'
@@ -231,8 +235,8 @@ def main():
     args = parser.parse_args()
     corpus, queries, qrels = dataset(args.dataset)
     health = request(args.base_url, '/health')
-    if health.get('model') != 'halogen-qwen3.8-flash-next-v2' or health.get('npu', {}).get('status') != 'ok' or health.get('version', {}).get('api') != '0.16.2':
-        parser.error('requires healthy Halogen 0.16.2 v2 with NPU services')
+    if health.get('model') != 'halogen-qwen3.8-flash-next-v2' or health.get('npu', {}).get('status') != 'ok' or health.get('version') != {'api': RELEASE, 'engine': RELEASE, 'match': True}:
+        parser.error(f'requires healthy Halogen {RELEASE} v2 with NPU services')
     record = {'schema_version': 1, 'mode': args.mode, 'recorded_at': dt.datetime.now(dt.timezone.utc).isoformat(),
               'dataset_url': DATASET_URL, 'dataset_sha256': DATASET_SHA256, 'health_before': health, 'completed': False,
               'request_timeout_seconds': 180, 'client_retries': 0}

@@ -1,0 +1,1669 @@
+{
+  "recorded_at": "2026-10-09T16:04:08.617092+00:00",
+  "health_before": {
+    "status": "ok",
+    "model": "halogen-qwen3.8-flash-next-v2",
+    "endpoints": [
+      "/v1/chat/completions",
+      "/v1/completions",
+      "/v1/embeddings",
+      "/v1/messages",
+      "/v1/messages/count_tokens",
+      "/v1/models",
+      "/v1/moderations",
+      "/v1/rerank",
+      "/v1/responses"
+    ],
+    "cache_counters": "/cache",
+    "metrics": "/metrics",
+    "context": 262144,
+    "capability_probe": "ok",
+    "rope_scaling": null,
+    "indexer_budget": 2048,
+    "vision": {
+      "enabled": true,
+      "endpoints": [
+        "/v1/chat/completions",
+        "/v1/messages",
+        "/v1/responses"
+      ],
+      "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+      "max_pixels": 3686400,
+      "size_multiple": 32
+    },
+    "version": {
+      "api": "0.16.2",
+      "engine": "0.16.2",
+      "match": true
+    },
+    "modes": [
+      "all",
+      "engine",
+      "api",
+      "bench",
+      "sweep",
+      "convert",
+      "inspect",
+      "verify",
+      "ppl",
+      "niah"
+    ],
+    "checkpoint_format": "hgn",
+    "chat_template": {
+      "path": "/models/tokenizer/chat_template.jinja",
+      "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+      "probe": "passed",
+      "thinking_control": true
+    },
+    "engine": {
+      "responds": true,
+      "probe_s": 0.938
+    },
+    "busy": true,
+    "slots": 1,
+    "slot_ctx": 262144,
+    "kv_pool_positions": 262144,
+    "in_flight": 1,
+    "busy_for_s": 18.8,
+    "queued": 0,
+    "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+    "drafters_available": [
+      "serial",
+      "mtp"
+    ],
+    "drafter_default": "mtp",
+    "prompt_lookup": {
+      "ngram": 3,
+      "chain": 3,
+      "applies_to": "greedy requests with the mtp drafter"
+    },
+    "shortlist_draft_head": false,
+    "drafter_weights_loaded": true,
+    "prompt_cache": {
+      "enabled": true,
+      "cap_mb": 110,
+      "mode": 2,
+      "snapshot_align": 64,
+      "bitwise_identical_to_cold": false
+    },
+    "composable_context": {
+      "enabled": false
+    },
+    "tool_calls": {
+      "wire_format": "qwen-xml (<function=>/<parameter=>)",
+      "streaming": true,
+      "tool_choice": [
+        "auto",
+        "none",
+        "required",
+        "{type: function, function: {name}}"
+      ],
+      "forced_call_is_a_prefill": true,
+      "required_is_exact": "named tool_choice, or one tool",
+      "parallel_tool_calls": true,
+      "constrained_decoding": false,
+      "forced_call_disables_thinking": true,
+      "argument_types_need_schema": true
+    },
+    "supported": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking",
+      "max_thinking_tokens",
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning",
+      "thinking",
+      "tools",
+      "tool_choice",
+      "parallel_tool_calls",
+      "stop",
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens",
+      "stream",
+      "stream_options"
+    ],
+    "token_budget_aliases": [
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens"
+    ],
+    "max_tokens_default": 8192,
+    "reasoning_effort_default": "medium",
+    "reasoning_effort_values": [
+      "high",
+      "low",
+      "max",
+      "medium",
+      "minimal",
+      "none",
+      "xhigh"
+    ],
+    "token_budget_covers_reasoning": true,
+    "max_thinking_tokens_default": null,
+    "thinking_answer_room": "max(1024, 15% of max_tokens)",
+    "end_of_turn_guard": true,
+    "thinking_control_aliases": [
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning.{enabled,effort,max_tokens}",
+      "thinking.{type,budget_tokens}"
+    ],
+    "server_defaults": {
+      "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+      "HALOGEN_TEMPERATURE": 1.0,
+      "HALOGEN_TOP_P": 0.95,
+      "HALOGEN_TOP_K": 20,
+      "HALOGEN_REASONING_EFFORT": "medium"
+    },
+    "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+    "chat_template_kwargs": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking"
+    ],
+    "error_format": "openai",
+    "accepted_but_ignored": [
+      "n"
+    ],
+    "not_implemented": [],
+    "structured_output": {
+      "enabled": true,
+      "reason": null,
+      "response_format": [
+        "json_schema",
+        "json_object"
+      ],
+      "text.format": [
+        "json_schema",
+        "json_object"
+      ],
+      "routes": [
+        "/v1/chat/completions",
+        "/v1/completions",
+        "/v1/responses",
+        "/v1/messages"
+      ],
+      "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+      "images": "a schema with images is a 400",
+      "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+      "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+      "keys": "object keys are emitted in schema order",
+      "enforced": [
+        "type",
+        "properties",
+        "required",
+        "additionalProperties",
+        "items",
+        "minItems",
+        "maxItems",
+        "minLength",
+        "maxLength",
+        "enum",
+        "const",
+        "anyOf",
+        "oneOf (as anyOf)",
+        "type: [..., \"null\"]",
+        "$ref",
+        "$defs"
+      ],
+      "accepted_not_enforced": [
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "title",
+        "description",
+        "default",
+        "examples"
+      ],
+      "refused": [
+        "pattern",
+        "format",
+        "allOf",
+        "not",
+        "if",
+        "then",
+        "else",
+        "patternProperties",
+        "dependentRequired",
+        "dependentSchemas",
+        "uniqueItems",
+        "contains",
+        "propertyNames",
+        "unevaluatedProperties",
+        "unevaluatedItems",
+        "minProperties",
+        "maxProperties",
+        "prefixItems"
+      ]
+    },
+    "sampling": {
+      "implemented": [
+        "temperature",
+        "top_p",
+        "top_k",
+        "min_p",
+        "seed",
+        "presence_penalty",
+        "frequency_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ],
+      "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+      "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter. A sampled request that omits top_k or top_p takes the operator's default, else the model's (filter_defaults)",
+      "filter_defaults": {
+        "top_k": 20,
+        "top_p": 0.95,
+        "source": "generation_config.json"
+      },
+      "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+      "penalties": "presence and frequency count GENERATED tokens only; repetition_penalty scales every id in the prompt or the output (vLLM's rule); applied on both drafters",
+      "logprobs": "a sampled request carries the chosen token's logprob on every token; at temperature 0, and with top_logprobs (up to 20) at any temperature, the first generated token only, so those need max_tokens 1",
+      "not_implemented": [
+        "logprobs with stream=true",
+        "logprobs past the first token at temperature 0",
+        "n > 1"
+      ]
+    },
+    "max_tokens_cap": 65536,
+    "max_tokens_over_cap": "400",
+    "npu": {
+      "status": "ok",
+      "models": [
+        "qwen3-embedding-0.6b",
+        "qwen3-reranker-0.6b"
+      ],
+      "loaded": [],
+      "queued": 0,
+      "passes": 0,
+      "contexts": 4
+    }
+  },
+  "completed": true,
+  "runs": [
+    {
+      "records": 0,
+      "round": 1,
+      "mode": "greedy",
+      "cache_pass": "first",
+      "messages_sha256": "5bafa4f7ad659408f739b689c977ec5925c85af5310f08d8a083c4fa4a1ac13a",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 1,
+        "temperature": 0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp"
+      },
+      "wall_seconds": 11.66178315000002,
+      "response": {
+        "id": "chatcmpl-5c10a0e7b8084818b795ca05",
+        "created": 1791561848,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\n\"\"\"\nArchive Index Module\n\nThis module provides a complete archive index class with parsing, lookup by record number,\nlookup by owner, and update operations. It includes type hints, docstrings, validation,\nand usage examples.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport re\nfrom dataclasses import dataclass, field\nfrom typing import Optional, Dict, List, Tuple\n\n\n@dataclass\nclass ArchiveRecord:\n    \"\"\"Represents a single archive record.\n    \n    Attributes:\n        record_number: Unique identifier for the record.\n        owner: Name of the record owner.\n        title: Title or description of the record.\n        metadata: Additional key-value metadata associated with the record.\n    \"\"\"\n    record_number: int\n    owner: str\n    title: str\n    metadata: Dict[str, str] = field(default_factory=dict)\n\n    def __post_init__(self) -> None:\n        \"\"\"Validate the record after initialization.\"\"\"\n        if not isinstance(self.record_number, int) or self.record_number < 0:\n            raise ValueError(\"record_number must be a non-negative integer\")\n        if not isinstance(self.owner, str) or not self.owner.strip():\n            raise ValueError(\"owner must be a non-empty string\")\n        if not isinstance(self.title, str):\n            raise ValueError(\"title must be a string\")\n        if not isinstance(self.metadata, dict):\n            raise ValueError(\"metadata must be a dictionary\")\n        # Ensure all metadata keys and values are strings\n        for key, value in self.metadata.items():\n            if not isinstance(key, str) or not isinstance(value, str):\n                raise ValueError(\"All metadata keys and values must be strings\")\n\n    def to_string(self) -> str:\n        \"\"\"Convert the record to a string representation.\n        \n        Returns:\n            A string representation of the record in the format:\n            \"record_number|owner|title|key1=value1;key2=value2\"\n        \"\"\"\n        metadata_str = \";\".join(f\"{k}={v}\" for k, v in sorted(self.metadata.items()))\n        return f\"{self.record_number}|{self.owner}|{self.title}|{metadata_str}\"\n\n    @classmethod\n    def from_string(cls, line: str) -> ArchiveRecord:\n        \"\"\"Parse a string line into an ArchiveRecord.\n        \n        Args:\n            line: A string in the"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 62,
+          "completion_tokens": 512,
+          "total_tokens": 574,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 62,
+          "predicted_n": 512,
+          "prompt_ms": 338.8,
+          "predicted_ms": 11317.3,
+          "prompt_per_second": 182.999,
+          "predicted_per_second": 45.24,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 3,
+          "draft_n": 387,
+          "draft_n_accepted": 325
+        }
+      }
+    },
+    {
+      "records": 0,
+      "round": 1,
+      "mode": "greedy",
+      "cache_pass": "repeat",
+      "messages_sha256": "5bafa4f7ad659408f739b689c977ec5925c85af5310f08d8a083c4fa4a1ac13a",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 1,
+        "temperature": 0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp"
+      },
+      "wall_seconds": 9.401221451999959,
+      "response": {
+        "id": "chatcmpl-832f6727bf364d1d8e02b7e9",
+        "created": 1791561860,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\n\"\"\"\nArchive Index Module\n\nThis module provides a complete archive index class with parsing, lookup by record number,\nlookup by owner, and update operations. It includes type hints, docstrings, validation,\nand usage examples.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport re\nfrom dataclasses import dataclass, field\nfrom typing import Optional, Dict, List, Tuple\n\n\n@dataclass\nclass ArchiveRecord:\n    \"\"\"Represents a single archive record.\n    \n    Attributes:\n        record_number: Unique identifier for the record.\n        owner: Name of the record owner.\n        title: Title or description of the record.\n        metadata: Additional key-value metadata associated with the record.\n    \"\"\"\n    record_number: int\n    owner: str\n    title: str\n    metadata: Dict[str, str] = field(default_factory=dict)\n\n    def __post_init__(self) -> None:\n        \"\"\"Validate the record after initialization.\"\"\"\n        if not isinstance(self.record_number, int) or self.record_number < 0:\n            raise ValueError(\"record_number must be a non-negative integer\")\n        if not isinstance(self.owner, str) or not self.owner.strip():\n            raise ValueError(\"owner must be a non-empty string\")\n        if not isinstance(self.title, str):\n            raise ValueError(\"title must be a string\")\n        if not isinstance(self.metadata, dict):\n            raise ValueError(\"metadata must be a dictionary\")\n        # Ensure all metadata keys and values are strings\n        for key, value in self.metadata.items():\n            if not isinstance(key, str) or not isinstance(value, str):\n                raise ValueError(\"All metadata keys and values must be strings\")\n\n    def to_string(self) -> str:\n        \"\"\"Convert the record to a string representation.\n        \n        Returns:\n            A string representation of the record in the format:\n            \"record_number|owner|title|key1=value1;key2=value2\"\n        \"\"\"\n        metadata_str = \";\".join(f\"{k}={v}\" for k, v in sorted(self.metadata.items()))\n        return f\"{self.record_number}|{self.owner}|{self.title}|{metadata_str}\"\n\n    @classmethod\n    def from_string(cls, line: str) -> ArchiveRecord:\n        \"\"\"Parse a string line into an ArchiveRecord.\n        \n        Args:\n            line: A string in the"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 62,
+          "completion_tokens": 512,
+          "total_tokens": 574,
+          "prompt_tokens_details": {
+            "cached_tokens": 62
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 0,
+          "predicted_n": 512,
+          "prompt_ms": 0.2,
+          "predicted_ms": 9393.9,
+          "prompt_per_second": 0.0,
+          "predicted_per_second": 54.503,
+          "cache_n": 62,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 62,
+          "draft_n": 387,
+          "draft_n_accepted": 325
+        }
+      }
+    },
+    {
+      "records": 0,
+      "round": 1,
+      "mode": "sampled",
+      "cache_pass": "first",
+      "messages_sha256": "5dcb1f285409044c998a93cbb89d5b764414aee70a5f52961ac76e983d0106ed",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 1,
+        "temperature": 1.0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp",
+        "top_p": 0.95,
+        "top_k": 20
+      },
+      "wall_seconds": 11.616781817999993,
+      "response": {
+        "id": "chatcmpl-2e89725d4ba147718fc5dd57",
+        "created": 1791561869,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "# Archive Index Implementation\n\nBelow is a complete, well-documented Python implementation of an `ArchiveIndex` class that supports parsing binary archive data, lookup by record number, lookup by owner, and update operations. The archive format used is a simple structured binary format with a header and fixed-size records, followed by usage examples and tests.\n\n```python\n\"\"\"\nArchive Index Module\n\nThis module provides an ArchiveIndex class for managing a simple binary archive\nwith fixed-size records. Each record contains:\n- record_number (4 bytes, unsigned int)\n- owner (20 bytes, fixed-length string, null-padded)\n- data (100 bytes, raw payload)\n\nThe archive has a header:\n- magic (4 bytes): b'ARCH'\n- version (1 byte): unsigned int\n- record_count (4 bytes): unsigned int (number of records)\n- reserved (3 bytes): padding to make header 12 bytes total\n\nHeader size = 12 bytes\nRecord size = 4 + 20 + 100 = 124 bytes\n\nUsage:\n    index = ArchiveIndex(\"data.bin\")\n    index.load()\n    record = index.lookup_by_record_number(42)\n    records = index.lookup_by_owner(\"Alice\")\n    index.update_record(42, owner=\"Bob\", data=b\"new payload\")\n    index.save()\n\"\"\"\n\nimport struct\nimport os\nimport logging\nfrom typing import Optional, List, Dict, Tuple, BinaryIO, Iterator\n\n# Configure logging\nlogging.basicConfig(level=logging.INFO, format=\"%(asctime)s - %(levelname)s - %(message)s\")\nlogger = logging.getLogger(__name__)\n\n\nclass ArchiveRecord:\n    \"\"\"\n    Represents a single record in the archive.\n\n    Attributes:\n        record_number (int): Unique identifier for the record.\n        owner (str): Owner name, up to 20 characters.\n        data (bytes): Payload data, up to 100 bytes.\n\n    Example:\n        >>> rec = ArchiveRecord(1, \"Alice\", b\"payload\")\n        >>> print(rec)\n        ArchiveRecord(record_number=1, owner='Alice', data_len=7)\n    \"\"\"\n\n    OWNER_MAX_LEN = 20\n    DATA_MAX_LEN = 100\n    RECORD_SIZE = 4 + OWNER_MAX_LEN + DATA_MAX_LEN  # 124 bytes\n\n    def"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 61,
+          "completion_tokens": 512,
+          "total_tokens": 573,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 61,
+          "predicted_n": 512,
+          "prompt_ms": 306.3,
+          "predicted_ms": 11303.9,
+          "prompt_per_second": 199.151,
+          "predicted_per_second": 45.294,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 12,
+          "draft_n": 274,
+          "draft_n_accepted": 236
+        }
+      }
+    },
+    {
+      "records": 0,
+      "round": 1,
+      "mode": "sampled",
+      "cache_pass": "repeat",
+      "messages_sha256": "5dcb1f285409044c998a93cbb89d5b764414aee70a5f52961ac76e983d0106ed",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 1,
+        "temperature": 1.0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp",
+        "top_p": 0.95,
+        "top_k": 20
+      },
+      "wall_seconds": 10.721551540000007,
+      "response": {
+        "id": "chatcmpl-6520a65d30454dbab0995f88",
+        "created": 1791561881,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "# Archive Index Implementation\n\nBelow is a complete, well-documented Python implementation of an `ArchiveIndex` class that supports parsing binary archive data, lookup by record number, lookup by owner, and update operations. The archive format used is a simple structured binary format with a header and fixed-size records, followed by usage examples and tests.\n\n```python\n\"\"\"\nArchive Index Module\n\nThis module provides an ArchiveIndex class for managing a simple binary archive\nwith fixed-size records. Each record contains:\n- record_number (4 bytes, unsigned int)\n- owner (20 bytes, fixed-length string, null-padded)\n- data (100 bytes, raw payload)\n\nThe archive has a header:\n- magic (4 bytes): b'ARCH'\n- version (1 byte): unsigned int\n- record_count (4 bytes): unsigned int (number of records)\n- reserved (3 bytes): padding to make header 12 bytes total\n\nHeader size = 12 bytes\nRecord size = 4 + 20 + 100 = 124 bytes\n\nUsage:\n    index = ArchiveIndex(\"data.bin\")\n    index.load()\n    record = index.lookup_by_record_number(42)\n    records = index.lookup_by_owner(\"Alice\")\n    index.update_record(42, owner=\"Bob\", data=b\"new payload\")\n    index.save()\n\"\"\"\n\nimport struct\nimport os\nimport logging\nfrom typing import Optional, List, Dict, Tuple, BinaryIO, Iterator\n\n# Configure logging\nlogging.basicConfig(level=logging.INFO, format=\"%(asctime)s - %(levelname)s - %(message)s\")\nlogger = logging.getLogger(__name__)\n\n\nclass ArchiveRecord:\n    \"\"\"\n    Represents a single record in the archive.\n\n    Attributes:\n        record_number (int): Unique identifier for the record.\n        owner (str): Owner name, up to 20 characters.\n        data (bytes): Payload data, up to 100 bytes.\n\n    Example:\n        >>> rec = ArchiveRecord(1, \"Alice\", b\"payload\")\n        >>> print(rec)\n        ArchiveRecord(record_number=1, owner='Alice', data_len=7)\n    \"\"\"\n\n    OWNER_MAX_LEN = 20\n    DATA_MAX_LEN = 100\n    RECORD_SIZE = 4 + OWNER_MAX_LEN + DATA_MAX_LEN  # 124 bytes\n\n    def"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 61,
+          "completion_tokens": 512,
+          "total_tokens": 573,
+          "prompt_tokens_details": {
+            "cached_tokens": 61
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 0,
+          "predicted_n": 512,
+          "prompt_ms": 0.2,
+          "predicted_ms": 10714.2,
+          "prompt_per_second": 0.0,
+          "predicted_per_second": 47.787,
+          "cache_n": 61,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 61,
+          "draft_n": 274,
+          "draft_n_accepted": 236
+        }
+      }
+    },
+    {
+      "records": 0,
+      "round": 2,
+      "mode": "sampled",
+      "cache_pass": "first",
+      "messages_sha256": "8d49221202b94af894575d223fc688076d8fcd671fbdaa73ffa1f182f89187e1",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 2,
+        "temperature": 1.0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp",
+        "top_p": 0.95,
+        "top_k": 20
+      },
+      "wall_seconds": 10.989037547999999,
+      "response": {
+        "id": "chatcmpl-c6680fcab942487588d5fb2b",
+        "created": 1791561892,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "# Python Archive Index\n\nA complete, well-documented `ArchiveIndex` class that manages indexed records with support for parsing serialized data, lookup by record number and owner, update operations, and validation.\n\n```python\n\"\"\"\nArchive Index Module\n\nProvides an ArchiveIndex class for managing indexed archive records with\nsupport for parsing serialized input, lookup by record number or owner,\nand update operations. All operations are validated and type-hinted.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport json\nimport logging\nfrom dataclasses import dataclass, field, asdict\nfrom typing import Any, Dict, List, Optional, Set\n\n# Configure logging for the module\nlogger = logging.getLogger(__name__)\n\n\n@dataclass(frozen=False)\nclass ArchiveRecord:\n    \"\"\"\n    Represents a single record in the archive index.\n\n    Attributes:\n        record_number (int): A unique positive integer identifying the record.\n        owner (str): The owner name associated with the record. Must be non-empty.\n        data (Dict[str, Any]): Arbitrary key-value pairs stored with the record.\n        created_at (str): ISO 8601 timestamp when the record was created.\n        updated_at (str): ISO 8601 timestamp when the record was last updated.\n\n    Raises:\n        ValueError: If validation fails during initialization.\n    \"\"\"\n\n    record_number: int\n    owner: str\n    data: Dict[str, Any] = field(default_factory=dict)\n    created_at: str = \"\"\n    updated_at: str = \"\"\n\n    def __post_init__(self) -> None:\n        \"\"\"\n        Validate the archive record after initialization.\n\n        Raises:\n            ValueError: If record_number is not a positive integer or owner is empty.\n            TypeError: If data is not a dictionary.\n        \"\"\"\n        if not isinstance(self.record_number, int):\n            raise TypeError(\n                f\"record_number must be an int, got {type(self.record_number).__name__}\"\n            )\n        if self.record_number <= 0:\n            raise ValueError(\n                f\"record_number must be a positive integer, got {self.record_number}\"\n            )\n        if not isinstance(self.owner, str):\n            raise TypeError(\n                f\"owner must be a str, got {type(self.owner).__name__}\"\n            )\n        if not self.owner.strip():\n            raise ValueError"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 61,
+          "completion_tokens": 512,
+          "total_tokens": 573,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 61,
+          "predicted_n": 512,
+          "prompt_ms": 286.6,
+          "predicted_ms": 10695.9,
+          "prompt_per_second": 212.84,
+          "predicted_per_second": 47.869,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 11,
+          "draft_n": 266,
+          "draft_n_accepted": 244
+        }
+      }
+    },
+    {
+      "records": 0,
+      "round": 2,
+      "mode": "sampled",
+      "cache_pass": "repeat",
+      "messages_sha256": "8d49221202b94af894575d223fc688076d8fcd671fbdaa73ffa1f182f89187e1",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 2,
+        "temperature": 1.0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp",
+        "top_p": 0.95,
+        "top_k": 20
+      },
+      "wall_seconds": 10.400308326000072,
+      "response": {
+        "id": "chatcmpl-ec03299474d54bf8a21b900c",
+        "created": 1791561903,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "# Python Archive Index\n\nA complete, well-documented `ArchiveIndex` class that manages indexed records with support for parsing serialized data, lookup by record number and owner, update operations, and validation.\n\n```python\n\"\"\"\nArchive Index Module\n\nProvides an ArchiveIndex class for managing indexed archive records with\nsupport for parsing serialized input, lookup by record number or owner,\nand update operations. All operations are validated and type-hinted.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport json\nimport logging\nfrom dataclasses import dataclass, field, asdict\nfrom typing import Any, Dict, List, Optional, Set\n\n# Configure logging for the module\nlogger = logging.getLogger(__name__)\n\n\n@dataclass(frozen=False)\nclass ArchiveRecord:\n    \"\"\"\n    Represents a single record in the archive index.\n\n    Attributes:\n        record_number (int): A unique positive integer identifying the record.\n        owner (str): The owner name associated with the record. Must be non-empty.\n        data (Dict[str, Any]): Arbitrary key-value pairs stored with the record.\n        created_at (str): ISO 8601 timestamp when the record was created.\n        updated_at (str): ISO 8601 timestamp when the record was last updated.\n\n    Raises:\n        ValueError: If validation fails during initialization.\n    \"\"\"\n\n    record_number: int\n    owner: str\n    data: Dict[str, Any] = field(default_factory=dict)\n    created_at: str = \"\"\n    updated_at: str = \"\"\n\n    def __post_init__(self) -> None:\n        \"\"\"\n        Validate the archive record after initialization.\n\n        Raises:\n            ValueError: If record_number is not a positive integer or owner is empty.\n            TypeError: If data is not a dictionary.\n        \"\"\"\n        if not isinstance(self.record_number, int):\n            raise TypeError(\n                f\"record_number must be an int, got {type(self.record_number).__name__}\"\n            )\n        if self.record_number <= 0:\n            raise ValueError(\n                f\"record_number must be a positive integer, got {self.record_number}\"\n            )\n        if not isinstance(self.owner, str):\n            raise TypeError(\n                f\"owner must be a str, got {type(self.owner).__name__}\"\n            )\n        if not self.owner.strip():\n            raise ValueError"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 61,
+          "completion_tokens": 512,
+          "total_tokens": 573,
+          "prompt_tokens_details": {
+            "cached_tokens": 61
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 0,
+          "predicted_n": 512,
+          "prompt_ms": 0.2,
+          "predicted_ms": 10392.3,
+          "prompt_per_second": 0.0,
+          "predicted_per_second": 49.267,
+          "cache_n": 61,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 61,
+          "draft_n": 266,
+          "draft_n_accepted": 244
+        }
+      }
+    },
+    {
+      "records": 0,
+      "round": 2,
+      "mode": "greedy",
+      "cache_pass": "first",
+      "messages_sha256": "e13bc789af7cf902a30032f47f476c50045532577d62f99d3b8486f4ecad42fd",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 2,
+        "temperature": 0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp"
+      },
+      "wall_seconds": 10.510439909999945,
+      "response": {
+        "id": "chatcmpl-2e31bfd57191463885cd4714",
+        "created": 1791561913,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\n\"\"\"\nArchive Index Module\n\nThis module provides a complete archive index class with parsing, lookup by record number,\nlookup by owner, and update operations. It includes type hints, docstrings, validation,\nand usage examples.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport re\nfrom dataclasses import dataclass, field\nfrom typing import Optional, Dict, List, Tuple\n\n\n@dataclass\nclass ArchiveRecord:\n    \"\"\"Represents a single archive record.\n    \n    Attributes:\n        record_number: Unique identifier for the record.\n        owner: Name of the record owner.\n        title: Title or description of the record.\n        date: Date string associated with the record.\n    \"\"\"\n    record_number: int\n    owner: str\n    title: str\n    date: str\n\n    def __post_init__(self) -> None:\n        \"\"\"Validate the record after initialization.\"\"\"\n        if not isinstance(self.record_number, int) or self.record_number < 0:\n            raise ValueError(\"record_number must be a non-negative integer\")\n        if not isinstance(self.owner, str) or not self.owner.strip():\n            raise ValueError(\"owner must be a non-empty string\")\n        if not isinstance(self.title, str):\n            raise ValueError(\"title must be a string\")\n        if not isinstance(self.date, str):\n            raise ValueError(\"date must be a string\")\n\n    def to_string(self) -> str:\n        \"\"\"Convert the record to a formatted string.\n        \n        Returns:\n            A string representation of the record in the format:\n            \"record_number|owner|title|date\"\n        \"\"\"\n        return f\"{self.record_number}|{self.owner}|{self.title}|{self.date}\"\n\n    @classmethod\n    def from_string(cls, line: str) -> ArchiveRecord:\n        \"\"\"Parse a single line into an ArchiveRecord.\n        \n        Args:\n            line: A string in the format \"record_number|owner|title|date\"\n            \n        Returns:\n            An ArchiveRecord instance.\n            \n        Raises:\n            ValueError: If the line format is invalid.\n        \"\"\"\n        parts = line.strip().split('|')\n        if len(parts) != 4:\n            raise ValueError(f\"Invalid record format: expected 4 fields, got {len(parts)}\")\n        try:\n            record_number = int(parts[0])"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 62,
+          "completion_tokens": 512,
+          "total_tokens": 574,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 62,
+          "predicted_n": 512,
+          "prompt_ms": 285.7,
+          "predicted_ms": 10219.2,
+          "prompt_per_second": 217.011,
+          "predicted_per_second": 50.102,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 12,
+          "draft_n": 394,
+          "draft_n_accepted": 324
+        }
+      }
+    },
+    {
+      "records": 0,
+      "round": 2,
+      "mode": "greedy",
+      "cache_pass": "repeat",
+      "messages_sha256": "e13bc789af7cf902a30032f47f476c50045532577d62f99d3b8486f4ecad42fd",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 2,
+        "temperature": 0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp"
+      },
+      "wall_seconds": 10.986766128,
+      "response": {
+        "id": "chatcmpl-8a33c2c192ff4e02a053afc8",
+        "created": 1791561923,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\n\"\"\"\nArchive Index Module\n\nThis module provides a complete archive index class with parsing, lookup by record number,\nlookup by owner, and update operations. It includes type hints, docstrings, validation,\nand usage examples.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport re\nfrom dataclasses import dataclass, field\nfrom typing import Optional, Dict, List, Tuple\n\n\n@dataclass\nclass ArchiveRecord:\n    \"\"\"Represents a single archive record.\n    \n    Attributes:\n        record_number: Unique identifier for the record.\n        owner: Name of the record owner.\n        title: Title or description of the record.\n        date: Date string associated with the record.\n    \"\"\"\n    record_number: int\n    owner: str\n    title: str\n    date: str\n\n    def __post_init__(self) -> None:\n        \"\"\"Validate the record after initialization.\"\"\"\n        if not isinstance(self.record_number, int) or self.record_number < 0:\n            raise ValueError(\"record_number must be a non-negative integer\")\n        if not isinstance(self.owner, str) or not self.owner.strip():\n            raise ValueError(\"owner must be a non-empty string\")\n        if not isinstance(self.title, str):\n            raise ValueError(\"title must be a string\")\n        if not isinstance(self.date, str):\n            raise ValueError(\"date must be a string\")\n\n    def to_string(self) -> str:\n        \"\"\"Convert the record to a formatted string.\n        \n        Returns:\n            A string representation of the record in the format:\n            \"record_number|owner|title|date\"\n        \"\"\"\n        return f\"{self.record_number}|{self.owner}|{self.title}|{self.date}\"\n\n    @classmethod\n    def from_string(cls, line: str) -> ArchiveRecord:\n        \"\"\"Parse a single line into an ArchiveRecord.\n        \n        Args:\n            line: A string in the format \"record_number|owner|title|date\"\n            \n        Returns:\n            An ArchiveRecord instance.\n            \n        Raises:\n            ValueError: If the line format is invalid.\n        \"\"\"\n        parts = line.strip().split('|')\n        if len(parts) != 4:\n            raise ValueError(f\"Invalid record format: expected 4 fields, got {len(parts)}\")\n        try:\n            record_number = int(parts[0])"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 62,
+          "completion_tokens": 512,
+          "total_tokens": 574,
+          "prompt_tokens_details": {
+            "cached_tokens": 62
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 0,
+          "predicted_n": 512,
+          "prompt_ms": 0.2,
+          "predicted_ms": 10979.1,
+          "prompt_per_second": 0.0,
+          "predicted_per_second": 46.634,
+          "cache_n": 62,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 62,
+          "draft_n": 394,
+          "draft_n_accepted": 324
+        }
+      }
+    },
+    {
+      "records": 959,
+      "round": 1,
+      "mode": "greedy",
+      "cache_pass": "first",
+      "messages_sha256": "aa53c9e0c3e07aa19f0464bc48d8db16151ab2e887bb1e0670d20573cdcaa8a5",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 1,
+        "temperature": 0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp"
+      },
+      "wall_seconds": 47.00742031899995,
+      "response": {
+        "id": "chatcmpl-607723ecca484d65863ebd4f",
+        "created": 1791561934,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\n\"\"\"\nArchive Index Module\n\nThis module provides a class to parse, index, and manage archive records\nbased on a specific text format. It supports parsing raw text, looking up\nrecords by ID or owner, and updating record states.\n\"\"\"\n\nfrom typing import Dict, List, Optional, Tuple, Union\nimport re\n\n\nclass ArchiveRecord:\n    \"\"\"\n    Represents a single archive record.\n    \n    Attributes:\n        record_id (int): The unique numeric identifier of the record.\n        owner (str): The team or entity owning the record.\n        state (str): The current state of the record (e.g., 'closed', 'open').\n        retrieval_code (str): The unique retrieval code associated with the record.\n    \"\"\"\n    \n    def __init__(self, record_id: int, owner: str, state: str, retrieval_code: str):\n        self.record_id = record_id\n        self.owner = owner\n        self.state = state\n        self.retrieval_code = retrieval_code\n\n    def __repr__(self) -> str:\n        return (f\"ArchiveRecord(id={self.record_id}, owner='{self.owner}', \"\n                f\"state='{self.state}', code='{self.retrieval_code}')\")\n\n    def to_dict(self) -> Dict[str, Union[int, str]]:\n        \"\"\"Converts the record to a dictionary representation.\"\"\"\n        return {\n            \"record_id\": self.record_id,\n            \"owner\": self.owner,\n            \"state\": self.state,\n            \"retrieval_code\": self.retrieval_code\n        }\n\n\nclass ArchiveIndex:\n    \"\"\"\n    A class to manage an index of archive records.\n    \n    This class parses raw text data containing archive records, builds\n    internal indices for fast lookup by record number and owner, and\n    provides methods to update record states.\n    \n    Example:\n        >>> raw_data = '''\n        ... Archive record 000000: owner=team-00; state=closed; retrieval_code=delta-04729.\n        ... Archive record 000001: owner=team-01; state=closed; retrieval_code=delta-12648.\n        ... '''\n        >>> index = ArchiveIndex()\n        >>> index.parse(raw_data)\n        >>> record = index.get_by_id(0)"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 31711,
+          "completion_tokens": 512,
+          "total_tokens": 32223,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 31711,
+          "predicted_n": 512,
+          "prompt_ms": 34818.2,
+          "predicted_ms": 12145.4,
+          "prompt_per_second": 910.759,
+          "predicted_per_second": 42.156,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 9,
+          "draft_n": 402,
+          "draft_n_accepted": 317
+        }
+      }
+    },
+    {
+      "records": 959,
+      "round": 1,
+      "mode": "greedy",
+      "cache_pass": "repeat",
+      "messages_sha256": "aa53c9e0c3e07aa19f0464bc48d8db16151ab2e887bb1e0670d20573cdcaa8a5",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 1,
+        "temperature": 0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp"
+      },
+      "wall_seconds": 11.803112170000077,
+      "response": {
+        "id": "chatcmpl-b8eef7a65f834ae1bacbfc91",
+        "created": 1791561981,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\n\"\"\"\nArchive Index Module\n\nThis module provides a class to parse, index, and manage archive records\nbased on a specific text format. It supports parsing raw text, looking up\nrecords by ID or owner, and updating record states.\n\"\"\"\n\nfrom typing import Dict, List, Optional, Tuple, Union\nimport re\n\n\nclass ArchiveRecord:\n    \"\"\"\n    Represents a single archive record.\n    \n    Attributes:\n        record_id (int): The unique numeric identifier of the record.\n        owner (str): The team or entity owning the record.\n        state (str): The current state of the record (e.g., 'closed', 'open').\n        retrieval_code (str): The unique retrieval code associated with the record.\n    \"\"\"\n    \n    def __init__(self, record_id: int, owner: str, state: str, retrieval_code: str):\n        self.record_id = record_id\n        self.owner = owner\n        self.state = state\n        self.retrieval_code = retrieval_code\n\n    def __repr__(self) -> str:\n        return (f\"ArchiveRecord(id={self.record_id}, owner='{self.owner}', \"\n                f\"state='{self.state}', code='{self.retrieval_code}')\")\n\n    def to_dict(self) -> Dict[str, Union[int, str]]:\n        \"\"\"Converts the record to a dictionary representation.\"\"\"\n        return {\n            \"record_id\": self.record_id,\n            \"owner\": self.owner,\n            \"state\": self.state,\n            \"retrieval_code\": self.retrieval_code\n        }\n\n\nclass ArchiveIndex:\n    \"\"\"\n    A class to manage an index of archive records.\n    \n    This class parses raw text data containing archive records, builds\n    internal indices for fast lookup by record number and owner, and\n    provides methods to update record states.\n    \n    Example:\n        >>> raw_data = '''\n        ... Archive record 000000: owner=team-00; state=closed; retrieval_code=delta-04729.\n        ... Archive record 000001: owner=team-01; state=closed; retrieval_code=delta-12648.\n        ... '''\n        >>> index = ArchiveIndex()\n        >>> index.parse(raw_data)\n        >>> record = index.get_by_id(0)"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 31711,
+          "completion_tokens": 512,
+          "total_tokens": 32223,
+          "prompt_tokens_details": {
+            "cached_tokens": 31711
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 0,
+          "predicted_n": 512,
+          "prompt_ms": 0.2,
+          "predicted_ms": 11757.7,
+          "prompt_per_second": 0.0,
+          "predicted_per_second": 43.546,
+          "cache_n": 31711,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 31711,
+          "draft_n": 402,
+          "draft_n_accepted": 317
+        }
+      }
+    },
+    {
+      "records": 959,
+      "round": 1,
+      "mode": "sampled",
+      "cache_pass": "first",
+      "messages_sha256": "2def945f7b4ed66b770ee758633495e54bcee2ee224722a436af75432d5dafea",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 1,
+        "temperature": 1.0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp",
+        "top_p": 0.95,
+        "top_k": 20
+      },
+      "wall_seconds": 45.874274163999985,
+      "response": {
+        "id": "chatcmpl-9838f5a693f64184b6e5f8ec",
+        "created": 1791561993,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\n\"\"\"\nArchive Index Module\n\nThis module provides a robust class for managing the decode benchmark archive data,\nincluding parsing, indexing, lookup, and update operations.\n\"\"\"\n\nfrom dataclasses import dataclass\nfrom typing import Dict, List, Optional, Set\n\n\n@dataclass(frozen=True)\nclass ArchiveRecord:\n    \"\"\"\n    Represents a single record in the archive.\n\n    Attributes:\n        record_id: The unique integer identifier of the record.\n        owner: The team owner of the record (e.g., 'team-00').\n        state: The state of the record (e.g., 'closed').\n        retrieval_code: The unique retrieval code (e.g., 'delta-04729').\n    \"\"\"\n    record_id: int\n    owner: str\n    state: str\n    retrieval_code: str\n\n    def __str__(self) -> str:\n        return (f\"Record {self.record_id:06d}: owner={self.owner}; \"\n                f\"state={self.state}; retrieval_code={self.retrieval_code}\")\n\n\nclass ArchiveIndex:\n    \"\"\"\n    Manages the archive records, providing efficient lookups and updates.\n    \"\"\"\n\n    def __init__(self, raw_data: Optional[str] = None):\n        \"\"\"\n        Initializes the ArchiveIndex.\n\n        Args:\n            raw_data: Optional raw string containing archive records.\n        \"\"\"\n        self.records: Dict[int, ArchiveRecord] = {}\n        self.owner_index: Dict[str, Set[int]] = {}\n        \n        if raw_data:\n            self.parse(raw_data)\n\n    def parse(self, raw_data: str) -> None:\n        \"\"\"\n        Parses the raw data string and populates the index.\n\n        Args:\n            raw_data: A string containing lines in the format:\n                \"Archive record <id>: owner=<owner>; state=<state>; retrieval_code=<code>\"\n\n        Raises:\n            ValueError: If a line is malformed.\n        \"\"\"\n        self.records.clear()\n        self.owner_index.clear()\n\n        lines = raw_data.strip().split('\\n')\n        for line in lines:\n            line = line.strip()\n            if not line:\n                continue\n            \n            try:\n                # Expected format: \"Archive record 000000: owner=team-00; state=closed; retrieval_code"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 31710,
+          "completion_tokens": 512,
+          "total_tokens": 32222,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 31710,
+          "predicted_n": 512,
+          "prompt_ms": 33514.5,
+          "predicted_ms": 12315.0,
+          "prompt_per_second": 946.158,
+          "predicted_per_second": 41.575,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 14,
+          "draft_n": 264,
+          "draft_n_accepted": 247
+        }
+      }
+    },
+    {
+      "records": 959,
+      "round": 1,
+      "mode": "sampled",
+      "cache_pass": "repeat",
+      "messages_sha256": "2def945f7b4ed66b770ee758633495e54bcee2ee224722a436af75432d5dafea",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 1,
+        "temperature": 1.0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp",
+        "top_p": 0.95,
+        "top_k": 20
+      },
+      "wall_seconds": 12.28141159900008,
+      "response": {
+        "id": "chatcmpl-373e0518280e4fb78745d4d4",
+        "created": 1791562039,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\n\"\"\"\nArchive Index Module\n\nThis module provides a robust class for managing the decode benchmark archive data,\nincluding parsing, indexing, lookup, and update operations.\n\"\"\"\n\nfrom dataclasses import dataclass\nfrom typing import Dict, List, Optional, Set\n\n\n@dataclass(frozen=True)\nclass ArchiveRecord:\n    \"\"\"\n    Represents a single record in the archive.\n\n    Attributes:\n        record_id: The unique integer identifier of the record.\n        owner: The team owner of the record (e.g., 'team-00').\n        state: The state of the record (e.g., 'closed').\n        retrieval_code: The unique retrieval code (e.g., 'delta-04729').\n    \"\"\"\n    record_id: int\n    owner: str\n    state: str\n    retrieval_code: str\n\n    def __str__(self) -> str:\n        return (f\"Record {self.record_id:06d}: owner={self.owner}; \"\n                f\"state={self.state}; retrieval_code={self.retrieval_code}\")\n\n\nclass ArchiveIndex:\n    \"\"\"\n    Manages the archive records, providing efficient lookups and updates.\n    \"\"\"\n\n    def __init__(self, raw_data: Optional[str] = None):\n        \"\"\"\n        Initializes the ArchiveIndex.\n\n        Args:\n            raw_data: Optional raw string containing archive records.\n        \"\"\"\n        self.records: Dict[int, ArchiveRecord] = {}\n        self.owner_index: Dict[str, Set[int]] = {}\n        \n        if raw_data:\n            self.parse(raw_data)\n\n    def parse(self, raw_data: str) -> None:\n        \"\"\"\n        Parses the raw data string and populates the index.\n\n        Args:\n            raw_data: A string containing lines in the format:\n                \"Archive record <id>: owner=<owner>; state=<state>; retrieval_code=<code>\"\n\n        Raises:\n            ValueError: If a line is malformed.\n        \"\"\"\n        self.records.clear()\n        self.owner_index.clear()\n\n        lines = raw_data.strip().split('\\n')\n        for line in lines:\n            line = line.strip()\n            if not line:\n                continue\n            \n            try:\n                # Expected format: \"Archive record 000000: owner=team-00; state=closed; retrieval_code"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 31710,
+          "completion_tokens": 512,
+          "total_tokens": 32222,
+          "prompt_tokens_details": {
+            "cached_tokens": 31710
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 0,
+          "predicted_n": 512,
+          "prompt_ms": 0.2,
+          "predicted_ms": 12237.9,
+          "prompt_per_second": 0.0,
+          "predicted_per_second": 41.837,
+          "cache_n": 31710,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 31710,
+          "draft_n": 264,
+          "draft_n_accepted": 247
+        }
+      }
+    },
+    {
+      "records": 959,
+      "round": 2,
+      "mode": "sampled",
+      "cache_pass": "first",
+      "messages_sha256": "85fac99a6987efb0589b3eae61e15fc86f4e8742f4cf2b482f2596f45809d934",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 2,
+        "temperature": 1.0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp",
+        "top_p": 0.95,
+        "top_k": 20
+      },
+      "wall_seconds": 46.990421871999956,
+      "response": {
+        "id": "chatcmpl-e90646f75bcc44dea73fe4d9",
+        "created": 1791562051,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\n\"\"\"\nArchive Index Module\n\nThis module provides a class to manage an archive index based on provided log data.\nIt supports parsing archive records, looking up records by ID or owner, and updating records.\n\"\"\"\n\nfrom dataclasses import dataclass, field\nfrom typing import Optional, List, Dict, Set, Iterator\nimport re\n\n\n@dataclass(frozen=True)\nclass ArchiveRecord:\n    \"\"\"\n    Represents a single archive record.\n\n    Attributes:\n        record_id (int): The unique identifier of the record (0-indexed from logs).\n        owner (str): The team/owner string (e.g., \"team-00\").\n        state (str): The current state of the record (e.g., \"closed\").\n        retrieval_code (str): The unique retrieval code associated with the record.\n    \"\"\"\n    record_id: int\n    owner: str\n    state: str\n    retrieval_code: str\n\n\nclass ArchiveIndex:\n    \"\"\"\n    A class to index and manage archive records.\n\n    This class parses raw log lines, stores them in memory, and provides\n    O(1) lookup by record ID and O(N) lookup by owner. It supports\n    basic CRUD-like operations.\n\n    Example:\n        >>> logs = [\n        ...     \"Archive record 000000: owner=team-00; state=closed; retrieval_code=delta-04729.\",\n        ...     \"Archive record 000001: owner=team-01; state=closed; retrieval_code=delta-12648.\"\n        ... ]\n        >>> index = ArchiveIndex()\n        >>> index.parse_logs(logs)\n        >>> record = index.get_by_id(0)\n        >>> print(record.owner)\n        team-00\n        >>> owners = index.get_owners(\"team-00\")\n        >>> print(owners)\n        [ArchiveRecord(record_id=0, owner='team-00', state='closed', retrieval_code='delta-04729')]\n    \"\"\"\n\n    # Regex to parse the archive record lines\n    # Format: Archive record 000000: owner=team-00; state=closed; retrieval_code=delta-04729.\n    LOG_PATTERN = re.compile(\n        r\"^Archive record (\\d"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 31710,
+          "completion_tokens": 512,
+          "total_tokens": 32222,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 31710,
+          "predicted_n": 512,
+          "prompt_ms": 33690.4,
+          "predicted_ms": 13254.5,
+          "prompt_per_second": 941.218,
+          "predicted_per_second": 38.628,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 13,
+          "draft_n": 271,
+          "draft_n_accepted": 240
+        }
+      }
+    },
+    {
+      "records": 959,
+      "round": 2,
+      "mode": "sampled",
+      "cache_pass": "repeat",
+      "messages_sha256": "85fac99a6987efb0589b3eae61e15fc86f4e8742f4cf2b482f2596f45809d934",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 2,
+        "temperature": 1.0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp",
+        "top_p": 0.95,
+        "top_k": 20
+      },
+      "wall_seconds": 12.689116690999981,
+      "response": {
+        "id": "chatcmpl-1375587d963c4dff9b1d3830",
+        "created": 1791562098,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\n\"\"\"\nArchive Index Module\n\nThis module provides a class to manage an archive index based on provided log data.\nIt supports parsing archive records, looking up records by ID or owner, and updating records.\n\"\"\"\n\nfrom dataclasses import dataclass, field\nfrom typing import Optional, List, Dict, Set, Iterator\nimport re\n\n\n@dataclass(frozen=True)\nclass ArchiveRecord:\n    \"\"\"\n    Represents a single archive record.\n\n    Attributes:\n        record_id (int): The unique identifier of the record (0-indexed from logs).\n        owner (str): The team/owner string (e.g., \"team-00\").\n        state (str): The current state of the record (e.g., \"closed\").\n        retrieval_code (str): The unique retrieval code associated with the record.\n    \"\"\"\n    record_id: int\n    owner: str\n    state: str\n    retrieval_code: str\n\n\nclass ArchiveIndex:\n    \"\"\"\n    A class to index and manage archive records.\n\n    This class parses raw log lines, stores them in memory, and provides\n    O(1) lookup by record ID and O(N) lookup by owner. It supports\n    basic CRUD-like operations.\n\n    Example:\n        >>> logs = [\n        ...     \"Archive record 000000: owner=team-00; state=closed; retrieval_code=delta-04729.\",\n        ...     \"Archive record 000001: owner=team-01; state=closed; retrieval_code=delta-12648.\"\n        ... ]\n        >>> index = ArchiveIndex()\n        >>> index.parse_logs(logs)\n        >>> record = index.get_by_id(0)\n        >>> print(record.owner)\n        team-00\n        >>> owners = index.get_owners(\"team-00\")\n        >>> print(owners)\n        [ArchiveRecord(record_id=0, owner='team-00', state='closed', retrieval_code='delta-04729')]\n    \"\"\"\n\n    # Regex to parse the archive record lines\n    # Format: Archive record 000000: owner=team-00; state=closed; retrieval_code=delta-04729.\n    LOG_PATTERN = re.compile(\n        r\"^Archive record (\\d"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 31710,
+          "completion_tokens": 512,
+          "total_tokens": 32222,
+          "prompt_tokens_details": {
+            "cached_tokens": 31710
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 0,
+          "predicted_n": 512,
+          "prompt_ms": 0.2,
+          "predicted_ms": 12644.7,
+          "prompt_per_second": 0.0,
+          "predicted_per_second": 40.491,
+          "cache_n": 31710,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 31710,
+          "draft_n": 271,
+          "draft_n_accepted": 240
+        }
+      }
+    },
+    {
+      "records": 959,
+      "round": 2,
+      "mode": "greedy",
+      "cache_pass": "first",
+      "messages_sha256": "8a65f985785bfdc8ea2ace4d1778ea8bce58887cb90d6ea699e816377c0bf2a2",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 2,
+        "temperature": 0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp"
+      },
+      "wall_seconds": 44.997389972000065,
+      "response": {
+        "id": "chatcmpl-f5d3820b413c42c2bb07889a",
+        "created": 1791562111,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\n\"\"\"\nArchive Index Module\n\nThis module provides a class to parse, index, and manage archive records\nbased on the provided benchmark data format.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport re\nfrom dataclasses import dataclass, field\nfrom typing import Dict, List, Optional, Tuple\n\n\n@dataclass\nclass ArchiveRecord:\n    \"\"\"Represents a single archive record.\n\n    Attributes:\n        record_id (int): The unique integer identifier of the record.\n        owner (str): The owner identifier (e.g., 'team-00').\n        state (str): The state of the record (e.g., 'closed').\n        retrieval_code (str): The retrieval code string (e.g., 'delta-04729').\n    \"\"\"\n    record_id: int\n    owner: str\n    state: str\n    retrieval_code: str\n\n    def __str__(self) -> str:\n        return (f\"Record {self.record_id:06d}: owner={self.owner}; \"\n                f\"state={self.state}; retrieval_code={self.retrieval_code}\")\n\n\nclass ArchiveIndex:\n    \"\"\"A class to parse, index, and query archive records.\n\n    This class parses raw text lines containing archive record information,\n    builds indices for fast lookup by record number and owner, and supports\n    updating record details.\n\n    Attributes:\n        _records (Dict[int, ArchiveRecord]): Internal storage mapping record IDs to record objects.\n        _owner_index (Dict[str, List[int]]): Index mapping owners to lists of record IDs.\n    \"\"\"\n\n    # Regex to parse the archive record line\n    # Example: Archive record 000000: owner=team-00; state=closed; retrieval_code=delta-04729.\n    _LINE_PATTERN = re.compile(\n        r\"Archive record (\\d+): owner=([^;]+); state=([^;]+); retrieval_code=([^\\.]+)\\.\"\n    )\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty ArchiveIndex.\"\"\"\n        self._records: Dict[int, ArchiveRecord] = {}\n        self._owner_index: Dict[str, List[int]] = {}\n\n    def parse_line(self, line: str) -> Optional[ArchiveRecord]:\n        \"\"\"Parse a single line of archive data.\n\n        Args:"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 31711,
+          "completion_tokens": 512,
+          "total_tokens": 32223,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 31711,
+          "predicted_n": 512,
+          "prompt_ms": 33321.0,
+          "predicted_ms": 11631.4,
+          "prompt_per_second": 951.682,
+          "predicted_per_second": 44.019,
+          "cache_n": 0,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 14,
+          "draft_n": 405,
+          "draft_n_accepted": 316
+        }
+      }
+    },
+    {
+      "records": 959,
+      "round": 2,
+      "mode": "greedy",
+      "cache_pass": "repeat",
+      "messages_sha256": "8a65f985785bfdc8ea2ace4d1778ea8bce58887cb90d6ea699e816377c0bf2a2",
+      "request_options": {
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "seed": 2,
+        "temperature": 0,
+        "reasoning_effort": "none",
+        "max_tokens": 512,
+        "stream": false,
+        "drafter": "mtp"
+      },
+      "wall_seconds": 11.77925803300002,
+      "response": {
+        "id": "chatcmpl-6ab165805f0c40e1a8a6d84b",
+        "created": 1791562156,
+        "model": "halogen-qwen3.8-flash-next-v2",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "length",
+            "message": {
+              "role": "assistant",
+              "content": "```python\n\"\"\"\nArchive Index Module\n\nThis module provides a class to parse, index, and manage archive records\nbased on the provided benchmark data format.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport re\nfrom dataclasses import dataclass, field\nfrom typing import Dict, List, Optional, Tuple\n\n\n@dataclass\nclass ArchiveRecord:\n    \"\"\"Represents a single archive record.\n\n    Attributes:\n        record_id (int): The unique integer identifier of the record.\n        owner (str): The owner identifier (e.g., 'team-00').\n        state (str): The state of the record (e.g., 'closed').\n        retrieval_code (str): The retrieval code string (e.g., 'delta-04729').\n    \"\"\"\n    record_id: int\n    owner: str\n    state: str\n    retrieval_code: str\n\n    def __str__(self) -> str:\n        return (f\"Record {self.record_id:06d}: owner={self.owner}; \"\n                f\"state={self.state}; retrieval_code={self.retrieval_code}\")\n\n\nclass ArchiveIndex:\n    \"\"\"A class to parse, index, and query archive records.\n\n    This class parses raw text lines containing archive record information,\n    builds indices for fast lookup by record number and owner, and supports\n    updating record details.\n\n    Attributes:\n        _records (Dict[int, ArchiveRecord]): Internal storage mapping record IDs to record objects.\n        _owner_index (Dict[str, List[int]]): Index mapping owners to lists of record IDs.\n    \"\"\"\n\n    # Regex to parse the archive record line\n    # Example: Archive record 000000: owner=team-00; state=closed; retrieval_code=delta-04729.\n    _LINE_PATTERN = re.compile(\n        r\"Archive record (\\d+): owner=([^;]+); state=([^;]+); retrieval_code=([^\\.]+)\\.\"\n    )\n\n    def __init__(self) -> None:\n        \"\"\"Initialize an empty ArchiveIndex.\"\"\"\n        self._records: Dict[int, ArchiveRecord] = {}\n        self._owner_index: Dict[str, List[int]] = {}\n\n    def parse_line(self, line: str) -> Optional[ArchiveRecord]:\n        \"\"\"Parse a single line of archive data.\n\n        Args:"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 31711,
+          "completion_tokens": 512,
+          "total_tokens": 32223,
+          "prompt_tokens_details": {
+            "cached_tokens": 31711
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "timings": {
+          "prompt_n": 0,
+          "predicted_n": 512,
+          "prompt_ms": 0.2,
+          "predicted_ms": 11734.2,
+          "prompt_per_second": 0.0,
+          "predicted_per_second": 43.633,
+          "cache_n": 31711,
+          "disk_restore_n": 0,
+          "disk_restore_ms": 0.0,
+          "prefix_n": 31711,
+          "draft_n": 405,
+          "draft_n_accepted": 316
+        }
+      }
+    }
+  ],
+  "method": "Sequential requests; NPU loaded if selected but idle. Each distinct prompt is requested twice, recording actual cached tokens. First use need not be fully cold: shared prefixes may hit. Synthetic archive plus code generation; greedy and sampled with thinking off to isolate decoding under a fixed output cap. Not a task-quality score or a test of the full serving reasoning policy. Sampled text is not expected to match across releases. Runtime order and disk page cache are not controlled by this script.",
+  "options": {
+    "rounds": 2,
+    "records": [
+      0,
+      959
+    ],
+    "max_tokens": 512
+  },
+  "summary": [
+    {
+      "records": 0,
+      "mode": "greedy",
+      "cache_pass": "first",
+      "runs": 2,
+      "median_decode_tps": 47.671,
+      "median_wall_seconds": 11.086111529999982,
+      "prompt_tokens": [
+        62,
+        62
+      ],
+      "cached_tokens": [
+        0,
+        0
+      ],
+      "completion_tokens": [
+        512,
+        512
+      ]
+    },
+    {
+      "records": 0,
+      "mode": "greedy",
+      "cache_pass": "repeat",
+      "runs": 2,
+      "median_decode_tps": 50.5685,
+      "median_wall_seconds": 10.193993789999979,
+      "prompt_tokens": [
+        62,
+        62
+      ],
+      "cached_tokens": [
+        62,
+        62
+      ],
+      "completion_tokens": [
+        512,
+        512
+      ]
+    },
+    {
+      "records": 0,
+      "mode": "sampled",
+      "cache_pass": "first",
+      "runs": 2,
+      "median_decode_tps": 46.5815,
+      "median_wall_seconds": 11.302909682999996,
+      "prompt_tokens": [
+        61,
+        61
+      ],
+      "cached_tokens": [
+        0,
+        0
+      ],
+      "completion_tokens": [
+        512,
+        512
+      ]
+    },
+    {
+      "records": 0,
+      "mode": "sampled",
+      "cache_pass": "repeat",
+      "runs": 2,
+      "median_decode_tps": 48.527,
+      "median_wall_seconds": 10.56092993300004,
+      "prompt_tokens": [
+        61,
+        61
+      ],
+      "cached_tokens": [
+        61,
+        61
+      ],
+      "completion_tokens": [
+        512,
+        512
+      ]
+    },
+    {
+      "records": 959,
+      "mode": "greedy",
+      "cache_pass": "first",
+      "runs": 2,
+      "median_decode_tps": 43.0875,
+      "median_wall_seconds": 46.002405145500006,
+      "prompt_tokens": [
+        31711,
+        31711
+      ],
+      "cached_tokens": [
+        0,
+        0
+      ],
+      "completion_tokens": [
+        512,
+        512
+      ]
+    },
+    {
+      "records": 959,
+      "mode": "greedy",
+      "cache_pass": "repeat",
+      "runs": 2,
+      "median_decode_tps": 43.5895,
+      "median_wall_seconds": 11.791185101500048,
+      "prompt_tokens": [
+        31711,
+        31711
+      ],
+      "cached_tokens": [
+        31711,
+        31711
+      ],
+      "completion_tokens": [
+        512,
+        512
+      ]
+    },
+    {
+      "records": 959,
+      "mode": "sampled",
+      "cache_pass": "first",
+      "runs": 2,
+      "median_decode_tps": 40.1015,
+      "median_wall_seconds": 46.43234801799997,
+      "prompt_tokens": [
+        31710,
+        31710
+      ],
+      "cached_tokens": [
+        0,
+        0
+      ],
+      "completion_tokens": [
+        512,
+        512
+      ]
+    },
+    {
+      "records": 959,
+      "mode": "sampled",
+      "cache_pass": "repeat",
+      "runs": 2,
+      "median_decode_tps": 41.164,
+      "median_wall_seconds": 12.48526414500003,
+      "prompt_tokens": [
+        31710,
+        31710
+      ],
+      "cached_tokens": [
+        31710,
+        31710
+      ],
+      "completion_tokens": [
+        512,
+        512
+      ]
+    }
+  ],
+  "health_after": {
+    "status": "ok",
+    "model": "halogen-qwen3.8-flash-next-v2",
+    "endpoints": [
+      "/v1/chat/completions",
+      "/v1/completions",
+      "/v1/embeddings",
+      "/v1/messages",
+      "/v1/messages/count_tokens",
+      "/v1/models",
+      "/v1/moderations",
+      "/v1/rerank",
+      "/v1/responses"
+    ],
+    "cache_counters": "/cache",
+    "metrics": "/metrics",
+    "context": 262144,
+    "capability_probe": "ok",
+    "rope_scaling": null,
+    "indexer_budget": 2048,
+    "vision": {
+      "enabled": true,
+      "endpoints": [
+        "/v1/chat/completions",
+        "/v1/messages",
+        "/v1/responses"
+      ],
+      "input": "data: URL or bare base64 in an image content part; http(s) URLs are refused",
+      "max_pixels": 3686400,
+      "size_multiple": 32
+    },
+    "version": {
+      "api": "0.16.2",
+      "engine": "0.16.2",
+      "match": true
+    },
+    "modes": [
+      "all",
+      "engine",
+      "api",
+      "bench",
+      "sweep",
+      "convert",
+      "inspect",
+      "verify",
+      "ppl",
+      "niah"
+    ],
+    "checkpoint_format": "hgn",
+    "chat_template": {
+      "path": "/models/tokenizer/chat_template.jinja",
+      "sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+      "probe": "passed",
+      "thinking_control": true
+    },
+    "engine": {
+      "responds": true,
+      "probe_s": 1.001
+    },
+    "busy": false,
+    "slots": 1,
+    "slot_ctx": 262144,
+    "kv_pool_positions": 262144,
+    "in_flight": 0,
+    "busy_for_s": 0,
+    "queued": 0,
+    "decode": "greedy at temperature 0 (the default); sampled at temperature > 0",
+    "drafters_available": [
+      "serial",
+      "mtp"
+    ],
+    "drafter_default": "mtp",
+    "prompt_lookup": {
+      "ngram": 3,
+      "chain": 3,
+      "applies_to": "greedy requests with the mtp drafter"
+    },
+    "shortlist_draft_head": false,
+    "drafter_weights_loaded": true,
+    "prompt_cache": {
+      "enabled": true,
+      "cap_mb": 110,
+      "mode": 2,
+      "snapshot_align": 64,
+      "bitwise_identical_to_cold": false
+    },
+    "composable_context": {
+      "enabled": false
+    },
+    "tool_calls": {
+      "wire_format": "qwen-xml (<function=>/<parameter=>)",
+      "streaming": true,
+      "tool_choice": [
+        "auto",
+        "none",
+        "required",
+        "{type: function, function: {name}}"
+      ],
+      "forced_call_is_a_prefill": true,
+      "required_is_exact": "named tool_choice, or one tool",
+      "parallel_tool_calls": true,
+      "constrained_decoding": false,
+      "forced_call_disables_thinking": true,
+      "argument_types_need_schema": true
+    },
+    "supported": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking",
+      "max_thinking_tokens",
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning",
+      "thinking",
+      "tools",
+      "tool_choice",
+      "parallel_tool_calls",
+      "stop",
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens",
+      "stream",
+      "stream_options"
+    ],
+    "token_budget_aliases": [
+      "max_tokens",
+      "max_completion_tokens",
+      "max_output_tokens"
+    ],
+    "max_tokens_default": 8192,
+    "reasoning_effort_default": "medium",
+    "reasoning_effort_values": [
+      "high",
+      "low",
+      "max",
+      "medium",
+      "minimal",
+      "none",
+      "xhigh"
+    ],
+    "token_budget_covers_reasoning": true,
+    "max_thinking_tokens_default": null,
+    "thinking_answer_room": "max(1024, 15% of max_tokens)",
+    "end_of_turn_guard": true,
+    "thinking_control_aliases": [
+      "thinking_budget_tokens",
+      "thinking_budget",
+      "thinking_token_budget",
+      "reasoning.{enabled,effort,max_tokens}",
+      "thinking.{type,budget_tokens}"
+    ],
+    "server_defaults": {
+      "HALOGEN_MAX_TOKENS_DEFAULT": 8192,
+      "HALOGEN_TEMPERATURE": 1.0,
+      "HALOGEN_TOP_P": 0.95,
+      "HALOGEN_TOP_K": 20,
+      "HALOGEN_REASONING_EFFORT": "medium"
+    },
+    "server_defaults_rule": "a field the request sends always wins; a default fills only a field the request omits. A request that sends temperature 0 decodes greedy and takes no sampling default",
+    "chat_template_kwargs": [
+      "reasoning_effort",
+      "enable_thinking",
+      "preserve_thinking"
+    ],
+    "error_format": "openai",
+    "accepted_but_ignored": [
+      "n"
+    ],
+    "not_implemented": [],
+    "structured_output": {
+      "enabled": true,
+      "reason": null,
+      "response_format": [
+        "json_schema",
+        "json_object"
+      ],
+      "text.format": [
+        "json_schema",
+        "json_object"
+      ],
+      "routes": [
+        "/v1/chat/completions",
+        "/v1/completions",
+        "/v1/responses",
+        "/v1/messages"
+      ],
+      "sampling": "greedy only (temperature 0); sampled + schema is a 400",
+      "images": "a schema with images is a 400",
+      "thinking": "the reasoning block is unconstrained; the final text is constrained after </think>",
+      "tools": "a request with tools may open a <tool_call> instead of the JSON (the schema binds the final text, not a call)",
+      "keys": "object keys are emitted in schema order",
+      "enforced": [
+        "type",
+        "properties",
+        "required",
+        "additionalProperties",
+        "items",
+        "minItems",
+        "maxItems",
+        "minLength",
+        "maxLength",
+        "enum",
+        "const",
+        "anyOf",
+        "oneOf (as anyOf)",
+        "type: [..., \"null\"]",
+        "$ref",
+        "$defs"
+      ],
+      "accepted_not_enforced": [
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "title",
+        "description",
+        "default",
+        "examples"
+      ],
+      "refused": [
+        "pattern",
+        "format",
+        "allOf",
+        "not",
+        "if",
+        "then",
+        "else",
+        "patternProperties",
+        "dependentRequired",
+        "dependentSchemas",
+        "uniqueItems",
+        "contains",
+        "propertyNames",
+        "unevaluatedProperties",
+        "unevaluatedItems",
+        "minProperties",
+        "maxProperties",
+        "prefixItems"
+      ]
+    },
+    "sampling": {
+      "implemented": [
+        "temperature",
+        "top_p",
+        "top_k",
+        "min_p",
+        "seed",
+        "presence_penalty",
+        "frequency_penalty",
+        "repetition_penalty",
+        "logit_bias",
+        "logprobs",
+        "top_logprobs"
+      ],
+      "decode": "temperature absent samples at the server's default of 1 (HALOGEN_TEMPERATURE); temperature 0 is greedy: a forward pass and an argmax, byte-identical to serial greedy decode. temperature > 0 samples from the filtered target on the same drafter the request would otherwise get; with the MTP drafter the speculative accept/reject rule emits exactly the target distribution",
+      "filters": "top_k, top_p and min_p compose as an intersection (the HF/vLLM convention); top_p >= 1 and top_k = 0 disable a filter. A sampled request that omits top_k or top_p takes the operator's default, else the model's (filter_defaults)",
+      "filter_defaults": {
+        "top_k": 20,
+        "top_p": 0.95,
+        "source": "generation_config.json"
+      },
+      "seed": "reproduces a request on the same drafter; a sampled MTP run and a sampled serial run agree in distribution, not token for token",
+      "penalties": "presence and frequency count GENERATED tokens only; repetition_penalty scales every id in the prompt or the output (vLLM's rule); applied on both drafters",
+      "logprobs": "a sampled request carries the chosen token's logprob on every token; at temperature 0, and with top_logprobs (up to 20) at any temperature, the first generated token only, so those need max_tokens 1",
+      "not_implemented": [
+        "logprobs with stream=true",
+        "logprobs past the first token at temperature 0",
+        "n > 1"
+      ]
+    },
+    "max_tokens_cap": 65536,
+    "max_tokens_over_cap": "400",
+    "npu": {
+      "status": "ok",
+      "models": [
+        "qwen3-embedding-0.6b",
+        "qwen3-reranker-0.6b"
+      ],
+      "loaded": [],
+      "queued": 0,
+      "passes": 0,
+      "contexts": 4
+    }
+  }
+}

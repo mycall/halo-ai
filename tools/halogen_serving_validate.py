@@ -80,6 +80,78 @@ def main():
         return r
     check('structured-json', structured)
 
+    def structured_tools_thinking():
+        definition = [{'type': 'function', 'function': {'name': 'lookup_city', 'description': 'Look up a city', 'parameters': {'type': 'object', 'properties': {'city': {'type': 'string'}}, 'required': ['city']}}}]
+        messages = [
+            {'role': 'user', 'content': 'Look up Paris, then return its country in the requested JSON. Once the tool supplies the country, do not call it again.'},
+            {'role': 'assistant', 'content': None, 'tool_calls': [{'id': 'city_result', 'type': 'function', 'function': {'name': 'lookup_city', 'arguments': '{"city":"Paris"}'}}]},
+            {'role': 'tool', 'tool_call_id': 'city_result', 'content': '{"city":"Paris","country":"France","status":"complete"}'},
+        ]
+        r = call('/v1/chat/completions', chat(messages, tools=definition,
+            reasoning_effort='medium', max_tokens=2048,
+            response_format={'type': 'json_schema', 'json_schema': {'name': 'country', 'strict': True, 'schema': {'type': 'object', 'properties': {'country': {'type': 'string'}}, 'required': ['country'], 'additionalProperties': False}}}))
+        message = r['choices'][0]['message']
+        assert r['usage'].get('completion_tokens_details', {}).get('reasoning_tokens', 0) > 0, r
+        assert not message.get('tool_calls'), r
+        assert json.loads(message['content']) == {'country': 'France'}, r
+        assert r['choices'][0]['finish_reason'] != 'length', r
+        return r
+    check('structured-tools-with-thinking-after-result', structured_tools_thinking)
+
+    def nullable_arguments(schema):
+        definition = [{'type': 'function', 'function': {'name': 'lookup_postcode', 'description': 'Look up the exact postal code, preserving leading zeros.', 'parameters': {'type': 'object', 'properties': {'postcode': schema}, 'required': ['postcode']}}}]
+        r = call('/v1/chat/completions', chat(
+            [{'role': 'user', 'content': 'Call lookup_postcode with postcode exactly "00123". Preserve the leading zeros.'}],
+            tools=definition, tool_choice={'type': 'function', 'function': {'name': 'lookup_postcode'}}))
+        calls = r['choices'][0]['message'].get('tool_calls', [])
+        assert len(calls) == 1 and calls[0]['function']['name'] == 'lookup_postcode', r
+        assert json.loads(calls[0]['function']['arguments']) == {'postcode': '00123'}, r
+        return r
+    for name, schema in [
+        ('type-list', {'type': ['string', 'null']}),
+        ('anyof', {'anyOf': [{'type': 'string'}, {'type': 'null'}]}),
+        ('oneof', {'oneOf': [{'type': 'string'}, {'type': 'null'}]}),
+    ]:
+        check('nullable-string-tool-argument-' + name, lambda schema=schema: nullable_arguments(schema))
+
+    def late_instruction(role, between_tool_results=False):
+        messages = [{'role': 'user', 'content': 'Say hello.'}, {'role': 'assistant', 'content': 'Hello.'}]
+        if between_tool_results:
+            messages.append({'role': 'assistant', 'content': None, 'tool_calls': [{'id': 'late_city', 'type': 'function', 'function': {'name': 'lookup_city', 'arguments': '{"city":"Paris"}'}}]})
+        messages.append({'role': role, 'content': 'Continue answering concisely.'})
+        if between_tool_results:
+            messages.append({'role': 'tool', 'tool_call_id': 'late_city', 'content': '{"country":"France"}'})
+        messages.append({'role': 'user', 'content': 'Reply with exactly: late-instruction-ready'})
+        r = call('/v1/chat/completions', chat(messages))
+        assert r['choices'][0]['message']['content'].strip() == 'late-instruction-ready', r
+        return r
+    for role in ['system', 'developer']:
+        check('late-' + role + '-message', lambda role=role: late_instruction(role))
+        check('late-' + role + '-between-tool-and-result', lambda role=role: late_instruction(role, True))
+
+    def multiple_streamed_tools():
+        definition = [{'type': 'function', 'function': {'name': 'lookup_city', 'description': 'Look up one city per call.', 'parameters': {'type': 'object', 'properties': {'city': {'type': 'string'}}, 'required': ['city']}}}]
+        payload = chat([{'role': 'user', 'content': 'Call lookup_city twice in this reply: once for Paris and once for Tokyo. Make both calls now. Do not write any text.'}], tools=definition)
+        plain = call('/v1/chat/completions', payload)
+        chunks = call('/v1/chat/completions', {**payload, 'stream': True}, True)
+        content, streamed_calls = '', {}
+        for chunk in chunks:
+            for choice in chunk.get('choices', []):
+                delta = choice['delta']
+                content += delta.get('content') or ''
+                for part in delta.get('tool_calls', []) or []:
+                    entry = streamed_calls.setdefault(part['index'], {'name': '', 'arguments': ''})
+                    for key in entry:
+                        entry[key] += part.get('function', {}).get(key) or ''
+        message = plain['choices'][0]['message']
+        expected = [(c['function']['name'], json.loads(c['function']['arguments'])) for c in message.get('tool_calls', [])]
+        actual = [(c['name'], json.loads(c['arguments'])) for _, c in sorted(streamed_calls.items())]
+        assert len(actual) == len(expected) == 2, {'plain': plain, 'stream': chunks}
+        assert actual == expected, {'plain': plain, 'stream': chunks}
+        assert content == (message.get('content') or '') == '', {'plain': plain, 'stream': chunks}
+        return {'plain': plain, 'stream': chunks}
+    check('multiple-tool-stream-content-parity', multiple_streamed_tools)
+
     def anthropic():
         r = call('/v1/messages', {'model': model, 'max_tokens': 128, 'temperature': 0, 'thinking': {'type': 'disabled'}, 'messages': [{'role': 'user', 'content': 'Reply with exactly: messages-ready'}]})
         assert ''.join(c.get('text', '') for c in r['content'] if c['type'] == 'text').strip() == 'messages-ready', r

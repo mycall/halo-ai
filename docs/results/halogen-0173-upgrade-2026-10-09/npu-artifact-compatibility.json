@@ -1,0 +1,37 @@
+{
+  "runtime": "0.17.3",
+  "image_digest": "sha256:3bca0132db3c859c997d52d148e6ea4b7b497b8a695c5ccab97135193fde592a",
+  "checks": [
+    {
+      "model": "decider-0.8b",
+      "unchanged_from_0162": true,
+      "matches_0173_image_manifest": true,
+      "files": 10
+    },
+    {
+      "model": "qwen3-embedding-0.6b",
+      "unchanged_from_0162": true,
+      "matches_0173_image_manifest": true,
+      "files": 15
+    },
+    {
+      "model": "qwen3-reranker-0.6b",
+      "unchanged_from_0162": true,
+      "matches_0173_image_manifest": true,
+      "files": 2
+    },
+    {
+      "model": "qwen3guard-gen-0.6b",
+      "unchanged_from_0162": true,
+      "matches_0173_image_manifest": true,
+      "files": 2
+    },
+    {
+      "model": "qwen3.5-2b",
+      "unchanged_from_0162": true,
+      "matches_0173_image_manifest": true,
+      "files": 9
+    }
+  ],
+  "model_downloads": false
+}

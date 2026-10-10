@@ -1,3 +1,46 @@
+# Halogen upstream review, 2026-10-09
+
+The [0.17.2 Reddit report](https://www.reddit.com/r/LocalLLaMA/comments/1x0o2yy/halogen_qwen_flash_next_keeps_getting_better/)
+prompted a review through
+[tagged 0.17.3](https://github.com/peonist-ai/halogen-flash-server/blob/v0.17.3/CHANGELOG.md).
+The new runtime is pinned to image digest
+`sha256:3bca0132db3c859c997d52d148e6ea4b7b497b8a695c5ccab97135193fde592a`.
+The public repository describes deployment and releases; its engine remains
+closed source.
+
+Upstream reports faster decoding and long-prompt processing in 0.17.2, plus
+faster single-request sampled decoding in 0.17.3. The latter changes seeded
+sampled text, so cross-version output equality is not a sampling requirement.
+Tool/schema loops, nullable arguments, streamed tool-call whitespace, and late
+system/developer-message rejection received fixes since our 0.16.2 pin. Late
+instructions become user text, not privileged system messages. W4B still loads
+but is deprecated and outside upstream release testing. Two simultaneous
+conversations can now use MTP; that feature needs a separate concurrency trial.
+
+Our integration keeps one slot, the 262K pool, 16K prefill chunks, RAM cache
+mode 2, and adaptive MTP depth unset. No host power, BIOS, kernel or clock
+settings are changed. The generic Flash-Next/Halogen aliases now select v2,
+matching the prior local memory decision; explicit W4B profile IDs remain.
+
+The existing NPU artifact entries match the 0.17.3 image's embedded
+`/opt/halogen/npu/models.txt` byte sizes and SHA-256 values. Only the manifest's
+runtime metadata changes; repository revisions, files and the existing
+`halogen-npu/0.16.2` storage directory remain unchanged. No model acquisition
+was performed. Container model mounts remain read-only and `HALOGEN_DOWNLOAD`
+is absent.
+
+The serving validator adds nine checks covering the new failure modes. The
+performance validator makes HTTP requests only and records greedy/sampled
+decoding, actual cache hits, output lengths and request durations for short
+and archive-prefixed code prompts. Thinking is disabled for this speed screen;
+the separate schema/tool check exercises medium reasoning. These are bounded
+integration and throughput screens, not coding-quality or long-context
+retrieval qualification. Current results are recorded in
+[the runbook](halogen-flash.md) and
+[the upgrade evidence directory](results/halogen-0173-upgrade-2026-10-09).
+
+---
+
 # Halogen upstream review, 2026-10-04
 
 Reviewed the public deployment changes from `v0.12.2` through `v0.16.2`,

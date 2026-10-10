@@ -360,10 +360,10 @@ class CatalogTests(unittest.TestCase):
             self.catalog.profile_aliases,
             {
                 "ds4": "ds4-deepseek-v4-flash-hybrid-dspark-384k-think-max",
-                "qwen3.8-fn": "qwen3.8-flash-next-halogen-262k-vision",
-                "qwen3.8-halogen": "qwen3.8-flash-next-halogen-262k-vision",
+                "qwen3.8-fn": "qwen3.8-flash-next-halogen-v2-262k-vision",
+                "qwen3.8-halogen": "qwen3.8-flash-next-halogen-v2-262k-vision",
                 "qwen3.8-halogen-v2": "qwen3.8-flash-next-halogen-v2-262k-vision",
-                "qwen3.8-halogen-npu": "qwen3.8-flash-next-halogen-262k-vision-npu",
+                "qwen3.8-halogen-npu": "qwen3.8-flash-next-halogen-v2-262k-vision-npu",
                 "qwen3.8-halogen-v2-npu": "qwen3.8-flash-next-halogen-v2-262k-vision-npu",
                 "qwen3.8-27b": "qwen3.8-27b-q6xl-strix075-65k-vision-dflash2-q8",
                 "qwen3.8df2": "qwen3.8-27b-q6xl-strix-vision-dflash2",

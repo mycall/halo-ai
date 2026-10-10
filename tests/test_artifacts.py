@@ -51,7 +51,8 @@ class ArtifactContractTests(unittest.TestCase):
 
     def test_halogen_variants_preview_and_mount_exactly_the_same_files(self):
         with self.installed_images(), mock.patch.object(cli.halogen_npu, 'xrt_mounts', return_value=[]):
-            for alias in ('qwen3.8-fn', 'qwen3.8-halogen-v2', 'qwen3.8-halogen-npu', 'qwen3.8-halogen-v2-npu'):
+            for alias in ('qwen3.8-fn', 'qwen3.8-halogen-v2', 'qwen3.8-halogen-npu', 'qwen3.8-halogen-v2-npu',
+                          'qwen3.8-flash-next-halogen-262k-vision', 'qwen3.8-flash-next-halogen-262k-vision-npu'):
                 with self.subTest(alias=alias):
                     profile = cli.resolve_profile(self.catalog, alias)
                     closure = cli.resolve_artifacts(self.config, self.catalog, profile)
@@ -173,3 +174,10 @@ class ArtifactContractTests(unittest.TestCase):
 
     def test_runtime_and_auxiliary_manifest_releases_match(self):
         self.assertEqual(engine_halogen.RELEASE, cli.halogen_npu.MANIFEST['release'])
+        self.assertEqual(engine_halogen.IMAGE_DIGEST, cli.halogen_npu.MANIFEST['image_digest'])
+
+    def test_runtime_upgrade_reuses_existing_npu_artifact_directory(self):
+        profile = cli.resolve_profile(self.catalog, 'qwen3.8-halogen-v2-npu')
+        closure = cli.resolve_artifacts(self.config, self.catalog, profile)
+        self.assertEqual(closure.auxiliary_root, self.root / 'halogen-npu' / '0.16.2')
+        self.assertTrue(all(a.destination.is_relative_to(closure.auxiliary_root) for a in closure.auxiliary))

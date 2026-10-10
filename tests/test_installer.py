@@ -38,7 +38,10 @@ class HalogenMigrationTests(unittest.TestCase):
         source = (ROOT / 'install.sh').read_text()
         function = re.search(r'^migrate_halogen_image\(\) \{\n.*?^\}', source, re.M | re.S).group()
         expected = re.search(r'^HALOGEN_IMAGE=(.*)$', (ROOT / 'config/halo-ai.env.example').read_text(), re.M).group(1)
-        for original in ['', 'ghcr.io/peonist-ai/halogen-flash-server:0.12.2', 'custom-image:local']:
+        for original in ['', 'ghcr.io/peonist-ai/halogen-flash-server:0.12.2',
+                         'ghcr.io/peonist-ai/halogen-flash-server:0.16.2',
+                         'ghcr.io/peonist-ai/halogen-flash-server@sha256:0c61bf84ac22308a53f5d1ca6b86806702d7039e5ebc51cae4c66621b92fe04a',
+                         'custom-image:local']:
             with self.subTest(original=original), tempfile.TemporaryDirectory() as temporary:
                 config = Path(temporary) / 'config.env'
                 config.write_text('KEEP=this\n' + (f'HALOGEN_IMAGE={original}\n' if original else ''))

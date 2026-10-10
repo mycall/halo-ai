@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download/verify the NPU files pinned by Halogen 0.16.2; report host readiness."""
+"""Download/verify the pinned Halogen NPU files; report host readiness."""
 import argparse
 import json
 from pathlib import Path
@@ -11,7 +11,7 @@ import halogen_npu
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--root', type=Path, default=Path('/srv/halo-ai/models/halogen-npu') / halogen_npu.MANIFEST['release'])
+    parser.add_argument('--root', type=Path, default=Path('/srv/halo-ai/models/halogen-npu') / halogen_npu.MANIFEST['artifact_release'])
     parser.add_argument('--models', nargs='+', choices=sorted(halogen_npu.MODEL_IDS), default=['qwen3-embedding-0.6b', 'qwen3-reranker-0.6b'])
     parser.add_argument('--xrt-lib-dir', type=Path, default=Path('/usr/lib'))
     parser.add_argument('--download', action='store_true')

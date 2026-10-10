@@ -15,7 +15,16 @@ class HalogenTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.config = make_config(Path(self.tmp.name))
         self.catalog = cli.load_catalog(self.config)
-        self.profile = cli.resolve_profile(self.catalog, 'qwen3.8-fn')
+        self.profile = self.catalog.profiles['qwen3.8-flash-next-halogen-262k-vision']
+
+    def test_recommended_aliases_use_v2_without_enabling_downloads(self):
+        for alias in ['qwen3.8-fn', 'qwen3.8-halogen', 'qwen3.8-halogen-npu']:
+            with self.subTest(alias=alias), mock.patch.object(cli.halogen_npu, 'xrt_mounts', return_value=[]):
+                profile = cli.resolve_profile(self.catalog, alias)
+                self.assertEqual(profile['model'], 'halogen-qwen3.8-flash-next-v2')
+                command = cli.render_container(self.config, self.catalog, profile)
+                self.assertIn('HALOGEN_NGRAM_TABLE=/models/qwen38-flash-next-ngram.hgn', command)
+                self.assertFalse(any('HALOGEN_DOWNLOAD' in value or 'HALOGEN_MTP_DEPTH' in value for value in command))
 
     def test_native_checkpoint_closure_excludes_external_head_and_speed_overlay(self):
         roles = cli.required_roles(self.profile)
